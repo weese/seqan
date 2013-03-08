@@ -225,7 +225,7 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
     TReads              reads(store);
     TReadsLoader        readsLoader(reads);
     TWriter             writer(genome, options.noDump);
-//    TMapper             mapper(writer, options.noVerify);
+    TMapper             mapper(writer, options.noVerify);
 
     double start, finish;
 
@@ -266,6 +266,9 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
         return 1;
     }
 
+    // Configure mapper.
+    setSeedLength(mapper, options.seedLength);
+
     // Configure writer.
     writeAlignments(writer, options.outputCigar);
 
@@ -289,13 +292,11 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
         std::cout << finish - start << " sec" << std::endl;
         std::cout << "Reads count:\t\t\t" << reads.readsCount << std::endl;
 
+        // Pass reads to mapper.
+        setReads(mapper, reads);
+
         // Pass reads to writer.
         setReads(writer, reads);
-
-        // Configure mapper.
-        TMapper mapper(reads, writer, options.noVerify);
-        setSeedLength(mapper, options.seedLength);
-        setReads(mapper, reads);
 
         // Map reads.
         start = sysTime();
@@ -320,7 +321,7 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
 template <typename TIndex, typename TFormat, typename TDistance, typename TStrategy, typename TBacktracking>
 int runMapper(Options & options)
 {
-    typedef ReadMapperConfig<TDistance, TStrategy, MultipleBacktracking>    TMapperConfig;
+    typedef ReadMapperConfig<TDistance, TStrategy, TBacktracking>           TMapperConfig;
 
     typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadStore;
     typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadNameStore;

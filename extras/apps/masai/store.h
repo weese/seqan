@@ -137,7 +137,6 @@ typedef Value<TAlignQualityStore>::Type                 TAlignQualityStoreElemen
 typedef TFragmentStore::TAlignedReadTagStore            TAlignedReadTagStore;
 typedef Value<TAlignedReadTagStore>::Type               TAlignedReadTagStoreElement;
 
-
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -149,8 +148,13 @@ typedef Value<TAlignedReadTagStore>::Type               TAlignedReadTagStoreElem
 template <typename TSpec = void>
 struct Genome
 {
-    TFragmentStore          & _store;
+    Holder<TFragmentStore>  _store;
     TContigs                contigs;
+    String<TContigSeqSize>  contigsLength;
+
+    Genome() :
+        _store()
+    {}
 
     Genome(TFragmentStore & store) :
         _store(store)
@@ -228,8 +232,82 @@ struct ReadsLoader
 };
 
 // ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction GenomeHost<T>::Type                                   [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+struct GenomeHost
+{};
+
+// ----------------------------------------------------------------------------
+// Metafunction ReadsHost<T>::Type                                    [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+struct ReadsHost
+{};
+
+// ----------------------------------------------------------------------------
+// Metafunction ReadsHost<T>::Type                                [ReadsLoader]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TConfig>
+struct ReadsHost<ReadsLoader<TSpec, TConfig> >
+{
+    typedef Reads<TSpec, TConfig>   Type;
+};
+
+// ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function setGenome()                                               [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename TSpec>
+inline void
+setGenome(TObject & object, Genome<TSpec> const & genome)
+{
+    setValue(object.genome, genome);
+}
+
+// ----------------------------------------------------------------------------
+// Function getGenome()                                               [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+inline typename GenomeHost<TObject>::Type &
+getGenome(TObject const & object)
+{
+    return value(object.genome);
+}
+
+// ----------------------------------------------------------------------------
+// Function setReads()                                                [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename TReads>
+inline void
+setReads(TObject & object, TReads const & reads)
+{
+    setValue(object.reads, reads);
+}
+
+// ----------------------------------------------------------------------------
+// Function getReads()                                                [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+inline typename ReadsHost<TObject>::Type &
+getReads(TObject const & object)
+{
+    return value(object.reads);
+}
 
 // ----------------------------------------------------------------------------
 // Function load()                                                     [Genome]
@@ -239,17 +317,45 @@ template <typename TSpec, typename TString>
 bool load(Genome<TSpec> & genome, TString const & genomeFile)
 {
     // TODO(esiragusa): Use record reader instead of loadContigs() from FragmentStore.
-    if (!loadContigs(genome._store, genomeFile))
+    if (!loadContigs(value(genome._store), genomeFile))
         return false;
 
-    reserve(genome.contigs, length(genome._store.contigStore));
-    for (unsigned contigId = 0; contigId < length(genome._store.contigStore); ++contigId)
-    {
-        shrinkToFit(genome._store.contigStore[contigId].seq);
-        appendValue(genome.contigs, genome._store.contigStore[contigId].seq);
-    }
+    // Shrink contigs.
+    for (unsigned contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+        shrinkToFit(value(genome._store).contigStore[contigId].seq);
+
+    _updateContigs(genome);
+    _updateContigsLength(genome);
 
     return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function _updateContigs()                                           [Genome]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+void _updateContigs(Genome<TSpec> & genome)
+{
+    clear(genome.contigs);
+    reserve(genome.contigs, length(value(genome._store).contigStore));
+
+    for (TContigStoreSize contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+        appendValue(genome.contigs, value(genome._store).contigStore[contigId].seq);
+}
+
+// ----------------------------------------------------------------------------
+// Function _updateContigsLength()                                     [Genome]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+void _updateContigsLength(Genome<TSpec> & genome)
+{
+    clear(genome.contigsLength);
+    reserve(genome.contigsLength, length(genome.contigs), Exact());
+
+    for (TContigStoreSize contigId = 0; contigId < length(genome.contigs); ++contigId)
+        appendValue(genome.contigsLength, length(genome.contigs[contigId]));
 }
 
 // ----------------------------------------------------------------------------
@@ -259,8 +365,30 @@ bool load(Genome<TSpec> & genome, TString const & genomeFile)
 template <typename TSpec>
 void reverse(Genome<TSpec> & genome)
 {
-    for (unsigned contigId = 0; contigId < length(genome._store.contigStore); ++contigId)
-        reverse(genome._store.contigStore[contigId].seq);
+    for (TContigStoreSize contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+        reverse(value(genome._store).contigStore[contigId].seq);
+}
+
+// ----------------------------------------------------------------------------
+// Function getContigs()                                               [Genome]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+inline TContigs &
+getContigs(Genome<TSpec> & genome)
+{
+    return genome.contigs;
+}
+
+// ----------------------------------------------------------------------------
+// Function contigLength()                                             [Genome]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TContigId>
+inline TContigSeqSize
+contigLength(Genome<TSpec> const & genome, TContigId contigId)
+{
+    return genome.contigsLength[contigId];
 }
 
 // ----------------------------------------------------------------------------
@@ -271,7 +399,7 @@ template <typename TSpec>
 void clear(Genome<TSpec> & genome)
 {
     clear(genome.contigs);
-    clearContigs(genome._store);
+    clearContigs(value(genome._store));
 }
 
 // ----------------------------------------------------------------------------
@@ -420,14 +548,31 @@ getIds(Reads<TSpec, TConfig> const & reads)
 // Function getReadId()                                                 [Reads]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec, typename TConfig, typename TReadId>
-inline TReadId getReadId(Reads<TSpec, TConfig> const & reads, TReadId readId)
+template <typename TSpec, typename TConfig, typename TSeqId>
+inline TSeqId getReadId(Reads<TSpec, TConfig> const & reads, TSeqId seqId)
 {
     // Deal with reverse complemented reads.
-    if (readId >= reads.readsCount)
-        return readId - reads.readsCount;
+    return isForward(reads, seqId) ? seqId : seqId - reads.readsCount;
+}
 
-    return readId;
+// ----------------------------------------------------------------------------
+// Function isForward()                                                 [Reads]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TConfig, typename TSeqId>
+inline bool isForward(Reads<TSpec, TConfig> const & reads, TSeqId seqId)
+{
+    return seqId < reads.readsCount;
+}
+
+// ----------------------------------------------------------------------------
+// Function isReverse()                                                 [Reads]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TConfig, typename TSeqId>
+inline bool isReverse(Reads<TSpec, TConfig> const & reads, TSeqId seqId)
+{
+    return seqId >= reads.readsCount;
 }
 
 // ----------------------------------------------------------------------------
@@ -448,14 +593,14 @@ template <typename TSpec, typename TConfig>
 unsigned long _estimateRecordSize(ReadsLoader<TSpec, TConfig> const & loader, Fastq const & /* tag */)
 {
     // 6 stands for: @, +, and four \n.
-    return value(loader.reads)._avgNameLengthEstimate + 2 * value(loader.reads)._avgSeqLengthEstimate + 6;
+    return getReads(loader)._avgNameLengthEstimate + 2 * getReads(loader)._avgSeqLengthEstimate + 6;
 }
 
 template <typename TSpec, typename TConfig>
 unsigned long _estimateRecordSize(ReadsLoader<TSpec, TConfig> const & loader, Fasta const & /* tag */)
 {
     // 3 stands for: >, and two \n.
-    return value(loader.reads)._avgNameLengthEstimate + value(loader.reads)._avgSeqLengthEstimate + 3;
+    return getReads(loader)._avgNameLengthEstimate + getReads(loader)._avgSeqLengthEstimate + 3;
 }
 
 // ----------------------------------------------------------------------------
@@ -473,8 +618,8 @@ void _estimateReadsStatistics(ReadsLoader<TSpec, TConfig> & loader)
         return;
 
     // Estimate read seqs and names length.
-    value(loader.reads)._avgSeqLengthEstimate = length(seq);
-    value(loader.reads)._avgNameLengthEstimate = length(seqName);
+    getReads(loader)._avgSeqLengthEstimate = length(seq);
+    getReads(loader)._avgNameLengthEstimate = length(seqName);
 
     // Estimate record size.
     unsigned long recordSize;
@@ -493,9 +638,9 @@ void _estimateReadsStatistics(ReadsLoader<TSpec, TConfig> & loader)
 
     // Estimate number of reads in file.
     if (recordSize > 0)
-        value(loader.reads)._countEstimate = loader._fileSize / recordSize;
+        getReads(loader)._countEstimate = loader._fileSize / recordSize;
     else
-        value(loader.reads)._countEstimate = 0;
+        getReads(loader)._countEstimate = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -539,10 +684,10 @@ bool open(ReadsLoader<TSpec, TConfig> & loader, TString const & readsFile)
 template <typename TConfig, typename TString>
 bool open(ReadsLoader<PairedEnd, TConfig> & loader, TString const & readsLeftFile, TString const & readsRightFile)
 {
-    if (!loadReads(value(value(loader.reads)._store), readsLeftFile, readsRightFile))
+    if (!loadReads(value(getReads(loader)._store), readsLeftFile, readsRightFile))
         return false;
 
-    value(loader.reads).readsCount = length(getSeqs(value(loader.reads)));
+    getReads(loader).readsCount = length(getSeqs(getReads(loader)));
 
     _loadReverseComplement(loader);
 
@@ -612,12 +757,12 @@ bool load(ReadsLoader<TSpec, TConfig> & loader, TSize count, TFormat const & /* 
         if (readRecord(seqName, seq, *(loader._reader), TFormat()) != 0)
             return false;
 
-        appendSeq(value(loader.reads), seq);
-        appendName(value(loader.reads), seqName, typename TConfig::TUseReadNameStore());
-        appendId(value(loader.reads), TReadStoreElement::INVALID_ID, typename TConfig::TUseReadStore());
+        appendSeq(getReads(loader), seq);
+        appendName(getReads(loader), seqName, typename TConfig::TUseReadNameStore());
+        appendId(getReads(loader), TReadStoreElement::INVALID_ID, typename TConfig::TUseReadStore());
     }
 
-    value(loader.reads).readsCount = length(getSeqs(value(loader.reads)));
+    getReads(loader).readsCount = length(getSeqs(getReads(loader)));
 
     // Append reverse complemented reads.
     _loadReverseComplement(loader);
@@ -632,11 +777,11 @@ bool load(ReadsLoader<TSpec, TConfig> & loader, TSize count, TFormat const & /* 
 template <typename TSpec, typename TConfig>
 void _loadReverseComplement(ReadsLoader<TSpec, TConfig> & loader)
 {
-    for (TReadSeqStoreSize readId = 0; readId < value(loader.reads).readsCount; ++readId)
+    for (TReadSeqStoreSize readId = 0; readId < getReads(loader).readsCount; ++readId)
     {
-        TReadSeq & read = getSeqs(value(loader.reads))[readId];
-        appendSeq(value(loader.reads), read);
-        reverseComplement(back(getSeqs(value(loader.reads))));
+        TReadSeq & read = getSeqs(getReads(loader))[readId];
+        appendSeq(getReads(loader), read);
+        reverseComplement(back(getSeqs(getReads(loader))));
     }
 }
 

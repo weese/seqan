@@ -78,7 +78,7 @@ struct Writer<TGenome, TReads, Raw, TDistance, TSpec>
     Writer(TGenome & genome, bool disabled = false) :
         genome(genome),
         reads(),
-        _store(genome._store),
+        _store(value(genome._store)),
         disabled(disabled)
     {}
 };
@@ -103,7 +103,7 @@ struct Writer<TGenome, TReads, Sam, TDistance, TSpec>
     Writer(TGenome & genome, bool disabled = false) :
         genome(genome),
         reads(),
-        _store(genome._store),
+        _store(value(genome._store)),
         _context(_store.contigNameStore, _store.contigNameStoreCache),
         disabled(disabled),
         _writeCigar(true),

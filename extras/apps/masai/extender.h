@@ -46,10 +46,6 @@
 using namespace seqan;
 
 // ============================================================================
-// Forwards
-// ============================================================================
-
-// ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
 
@@ -57,13 +53,12 @@ using namespace seqan;
 // Class Extender
 // ----------------------------------------------------------------------------
 
-template <typename TMatchesDelegate, typename TDistance = HammingDistance, typename TSpec = void>
+template <typename TGenome, typename TReads, typename TDelegate, typename TDistance = HammingDistance, typename TSpec = void>
 struct Extender
 {
-    TFragmentStore &        store;
-    TMatchesDelegate &      matchesDelegate;
-    String<TContigSeqSize>  contigSizes;
-    TReadSeqStoreSize       readsCount;
+    Holder<TGenome>         genome;
+    Holder<TReads>          reads;
+    TDelegate               & delegate;
 
     TReadSeqSize            minErrorsPerRead;
     TReadSeqSize            maxErrorsPerRead;
@@ -71,28 +66,24 @@ struct Extender
 
     bool                    disabled;
 
-    Extender(TFragmentStore & store,
-             TMatchesDelegate & matchesDelegate,
-             TReadSeqStoreSize readsCount,
-             bool disabled = false) :
-        store(store),
-        matchesDelegate(matchesDelegate),
-        readsCount(readsCount),
+    Extender(TDelegate & delegate, bool disabled = false) :
+        delegate(delegate),
         minErrorsPerRead(0),
         maxErrorsPerRead(0),
         seedLength(0),
         disabled(disabled)
-    {
-        _init(*this);
-    }
-
+    {}
 };
 
-template <typename TMatchesDelegate, typename TSpec>
-struct Extender<TMatchesDelegate, EditDistance, TSpec>:
-    public Extender<TMatchesDelegate>
+// ----------------------------------------------------------------------------
+// Class Extender<EditDistance>
+// ----------------------------------------------------------------------------
+
+template <typename TGenome, typename TReads, typename TDelegate, typename TSpec>
+struct Extender<TGenome, TReads, TDelegate, EditDistance, TSpec>:
+    public Extender<TGenome, TReads, TDelegate>
 {
-    typedef Extender<TMatchesDelegate>                      TBase;
+    typedef Extender<TGenome, TReads, TDelegate>            TBase;
     typedef Myers<AlignTextBanded<FindPrefix, NMatchesNone_, NMatchesNone_>, True, void> TAlgorithmSpec;
 
     typedef Segment<TReadSeq, InfixSegment>                 TReadInfix;
@@ -101,14 +92,11 @@ struct Extender<TMatchesDelegate, EditDistance, TSpec>:
     typedef PatternState_<TReadInfix, TAlgorithmSpec>       TPatternState;
     typedef PatternState_<TReadInfixRev, TAlgorithmSpec>    TPatternStateRev;
 
-    TPatternState patternState;
-    TPatternStateRev patternStateRev;
+    TPatternState       _patternState;
+    TPatternStateRev    _patternStateRev;
 
-    Extender(TFragmentStore & store,
-             TMatchesDelegate & matchesDelegate,
-             TReadSeqStoreSize readsCount,
-             bool disabled = false) :
-        TBase(store, matchesDelegate, readsCount, disabled)
+    Extender(TDelegate & delegate, bool disabled = false) :
+        TBase(delegate, disabled)
     {}
 };
 
@@ -116,42 +104,39 @@ struct Extender<TMatchesDelegate, EditDistance, TSpec>:
 // Metafunctions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Metafunction GenomeHost<T>::Type                                  [Extender]
+// ----------------------------------------------------------------------------
+
+template <typename TGenome, typename TReads, typename TDelegate, typename TDistance, typename TSpec>
+struct GenomeHost<Extender<TGenome, TReads, TDelegate, TDistance, TSpec> >
+{
+    typedef TGenome Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction ReadsHost<T>::Type                                   [Extender]
+// ----------------------------------------------------------------------------
+
+template <typename TGenome, typename TReads, typename TDelegate, typename TDistance, typename TSpec>
+struct ReadsHost<Extender<TGenome, TReads, TDelegate, TDistance, TSpec> >
+{
+    typedef TReads  Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
-
-// TODO(esiragusa): Move this into Genome class.
-template <typename TMatchesDelegate, typename TDistance, typename TSpec>
-inline void _init(Extender<TMatchesDelegate, TDistance, TSpec> & extender)
-{
-    reserve(extender.contigSizes, length(extender.store.contigStore), Exact());
-    for (TContigStoreSize contigId = 0; contigId < length(extender.store.contigStore); ++contigId)
-        appendValue(extender.contigSizes, length(extender.store.contigStore[contigId].seq));
-}
-
-// TODO(esiragusa): Remove this.
-template <typename TMatchesDelegate, typename TDistance, typename TSpec>
-inline bool _fixReverseComplemented(Extender<TMatchesDelegate, TDistance, TSpec> & extender, TReadSeqStoreSize & readId)
-{
-    // Deal with reverse complemented reads.
-    if (readId >= extender.readsCount)
-    {
-        readId -= extender.readsCount;
-        return true;
-    }
-
-    return false;
-}
 
 // ----------------------------------------------------------------------------
 // Function onSeedHit()                                              [Extender]
 // ----------------------------------------------------------------------------
 
-template <typename TMatchesDelegate, typename TSpec>
-inline bool onSeedHit(Extender<TMatchesDelegate, HammingDistance, TSpec> & extender,
+template <typename TGenome, typename TReads, typename TDelegate, typename TSpec>
+inline bool onSeedHit(Extender<TGenome, TReads, TDelegate, HammingDistance, TSpec> & extender,
                       TContigStoreSize contigId,
                       TContigSeqSize contigBegin,
-                      TReadSeqStoreSize readId,
+                      TReadSeqStoreSize seqId,
                       TContigSeqSize seedBegin,
                       TReadSeqSize seedErrors)
 {
@@ -162,8 +147,8 @@ inline bool onSeedHit(Extender<TMatchesDelegate, HammingDistance, TSpec> & exten
 
     TReadSeqSize errors = seedErrors;
 
-    TContigSeq & contig = extender.store.contigStore[contigId].seq;
-    TReadSeq & read = extender.store.readSeqStore[readId];
+    TContigSeq & contig = getContigs(getGenome(extender))[contigId];
+    TReadSeq & read = getSeqs(getReads(extender))[seqId];
     TReadSeqSize readLength = length(read);
 
     // Extend left.
@@ -193,7 +178,7 @@ inline bool onSeedHit(Extender<TMatchesDelegate, HammingDistance, TSpec> & exten
 
     if (seedBegin + extender.seedLength < readLength)
     {
-        TContigSeqSize contigRightEnd = extender.contigSizes[contigId];
+        TContigSeqSize contigRightEnd = contigLength(getGenome(extender), contigId);
         if (contigRightEnd > contigBegin + readLength - seedBegin)
             contigRightEnd = contigBegin + readLength - seedBegin;
 
@@ -210,14 +195,16 @@ inline bool onSeedHit(Extender<TMatchesDelegate, HammingDistance, TSpec> & exten
     if (errors < extender.minErrorsPerRead)
         return false;
 
-    bool reverseComplemented = _fixReverseComplemented(extender, readId);
-    onMatch(extender.matchesDelegate, contigId, matchBegin, matchEnd, readId, errors, reverseComplemented);
+    bool isReverseComplemented = isReverse(getReads(extender), seqId);
+    TReadSeqStoreSize readId = getReadId(getReads(extender), seqId);
+
+    onMatch(extender.delegate, contigId, matchBegin, matchEnd, readId, errors, isReverseComplemented);
 
     return true;
 }
 
-template <typename TMatchesDelegate, typename TSpec, typename TContigInfix, typename TReadInfix>
-inline bool _extend(Extender<TMatchesDelegate, HammingDistance, TSpec> & extender,
+template <typename TGenome, typename TReads, typename TDelegate, typename TSpec, typename TContigInfix, typename TReadInfix>
+inline bool _extend(Extender<TGenome, TReads, TDelegate, HammingDistance, TSpec> & extender,
                     TContigInfix & contigInfix,
                     TReadInfix & readInfix,
                     TReadSeqSize & errors)
@@ -241,14 +228,14 @@ inline bool _extend(Extender<TMatchesDelegate, HammingDistance, TSpec> & extende
 }
 
 // ----------------------------------------------------------------------------
-// Function onSeedHit()                                              [Extender]
+// Function onSeedHit()                                [Extender<EditDistance>]
 // ----------------------------------------------------------------------------
 
-template <typename TMatchesDelegate, typename TSpec>
-inline bool onSeedHit(Extender<TMatchesDelegate, EditDistance, TSpec> & extender,
+template <typename TGenome, typename TReads, typename TDelegate, typename TSpec>
+inline bool onSeedHit(Extender<TGenome, TReads, TDelegate, EditDistance, TSpec> & extender,
                       TContigStoreSize contigId,
                       TContigSeqSize contigBegin,
-                      TReadSeqStoreSize readId,
+                      TReadSeqStoreSize seqId,
                       TContigSeqSize seedBegin,
                       TReadSeqSize seedErrors)
 {
@@ -259,8 +246,8 @@ inline bool onSeedHit(Extender<TMatchesDelegate, EditDistance, TSpec> & extender
 
     TReadSeqSize errors = seedErrors;
 
-    TContigSeq & contig = extender.store.contigStore[contigId].seq;
-    TReadSeq & read = extender.store.readSeqStore[readId];
+    TContigSeq & contig = getContigs(getGenome(extender))[contigId];
+    TReadSeq & read = getSeqs(getReads(extender))[seqId];
     TReadSeqSize readLength = length(read);
 
     // Extend left.
@@ -275,7 +262,7 @@ inline bool onSeedHit(Extender<TMatchesDelegate, EditDistance, TSpec> & extender
         TContigInfix contigLeft(contig, contigLeftBegin, contigBegin);
         TReadInfix readLeft(read, 0, seedBegin);
 
-        if (!_extendLeft(extender, extender.patternStateRev, contigLeft, readLeft, errors, matchBegin))
+        if (!_extendLeft(extender, extender._patternStateRev, contigLeft, readLeft, errors, matchBegin))
             return false;
     }
 
@@ -288,7 +275,7 @@ inline bool onSeedHit(Extender<TMatchesDelegate, EditDistance, TSpec> & extender
 
     if (seedBegin + extender.seedLength < readLength)
     {
-        TContigSeqSize contigRightEnd = extender.contigSizes[contigId];
+        TContigSeqSize contigRightEnd = contigLength(getGenome(extender), contigId);
         if (contigRightEnd > contigBegin + readLength - seedBegin + extender.maxErrorsPerRead - errors)
             contigRightEnd = contigBegin + readLength - seedBegin + extender.maxErrorsPerRead - errors;
 
@@ -298,7 +285,7 @@ inline bool onSeedHit(Extender<TMatchesDelegate, EditDistance, TSpec> & extender
         TContigInfix contigRight(contig, contigBegin + extender.seedLength, contigRightEnd);
         TReadInfix readRight(read, seedBegin + extender.seedLength, readLength);
 
-        if (!_extendRight(extender, extender.patternState, contigRight, readRight, errors, matchEnd))
+        if (!_extendRight(extender, extender._patternState, contigRight, readRight, errors, matchEnd))
             return false;
     }
 
@@ -306,15 +293,17 @@ inline bool onSeedHit(Extender<TMatchesDelegate, EditDistance, TSpec> & extender
     if (errors < extender.minErrorsPerRead)
         return false;
 
-    bool reverseComplemented = _fixReverseComplemented(extender, readId);
-    onMatch(extender.matchesDelegate, contigId, matchBegin, matchEnd, readId, errors, reverseComplemented);
+    bool isReverseComplemented = isReverse(getReads(extender), seqId);
+    TReadSeqStoreSize readId = getReadId(getReads(extender), seqId);
+
+    onMatch(extender.delegate, contigId, matchBegin, matchEnd, readId, errors, isReverseComplemented);
 
     return true;
 }
 
-template <typename TMatchesDelegate, typename TSpec, typename TPatternState, typename TContigInfix, typename TReadInfix>
-inline bool _extendLeft(Extender<TMatchesDelegate, EditDistance, TSpec> & extender,
-                        TPatternState & patternState,
+template <typename TGenome, typename TReads, typename TDelegate, typename TSpec, typename TPatternState, typename TContigInfix, typename TReadInfix>
+inline bool _extendLeft(Extender<TGenome, TReads, TDelegate, EditDistance, TSpec> & extender,
+                        TPatternState & _patternState,
                         TContigInfix & contigInfix,
                         TReadInfix & readInfix,
                         TReadSeqSize & errors,
@@ -351,12 +340,12 @@ inline bool _extendLeft(Extender<TMatchesDelegate, EditDistance, TSpec> & extend
     TReadInfixRev readInfixRev(readInfix);
     TContigInfixRev contigInfixRev(contigInfix);
     TFinder finder(contigInfixRev);
-    patternState.leftClip = remainingErrors;
+    _patternState.leftClip = remainingErrors;
 
     // TODO(esiragusa): Use a generic type for errors.
-    while (find(finder, readInfixRev, patternState, -static_cast<int>(remainingErrors)))
+    while (find(finder, readInfixRev, _patternState, -static_cast<int>(remainingErrors)))
     {
-        TReadSeqSize currentErrors = -getScore(patternState);
+        TReadSeqSize currentErrors = -getScore(_patternState);
 
         if (currentErrors <= minErrors)
         {
@@ -371,9 +360,9 @@ inline bool _extendLeft(Extender<TMatchesDelegate, EditDistance, TSpec> & extend
     return errors <= extender.maxErrorsPerRead;
 }
 
-template <typename TMatchesDelegate, typename TSpec, typename TPatternState, typename TContigInfix, typename TReadInfix>
-inline bool _extendRight(Extender<TMatchesDelegate, EditDistance, TSpec> & extender,
-                         TPatternState & patternState,
+template <typename TGenome, typename TReads, typename TDelegate, typename TSpec, typename TPatternState, typename TContigInfix, typename TReadInfix>
+inline bool _extendRight(Extender<TGenome, TReads, TDelegate, EditDistance, TSpec> & extender,
+                         TPatternState & _patternState,
                          TContigInfix & contigInfix,
                          TReadInfix & readInfix,
                          TReadSeqSize & errors,
@@ -417,13 +406,13 @@ inline bool _extendRight(Extender<TMatchesDelegate, EditDistance, TSpec> & exten
 
     // Align.
     TFinder finder(contigPrefix);
-    patternState.leftClip = remainingErrors;
+    _patternState.leftClip = remainingErrors;
 
     // TODO(esiragusa): Use a generic type for errors.
-    while (find(finder, readPrefix, patternState, -static_cast<int>(remainingErrors)))
+    while (find(finder, readPrefix, _patternState, -static_cast<int>(remainingErrors)))
     {
         TContigSeqSize currentEnd = position(finder) + 1;
-        TReadSeqSize currentErrors = -getScore(patternState);
+        TReadSeqSize currentErrors = -getScore(_patternState);
 
         // Compare last base.
         if (contigInfix[currentEnd] != back(readInfix))

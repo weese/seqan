@@ -79,7 +79,7 @@ struct SAValue<TContigs>
 // Contigs Enhanced Suffix Array Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, IndexEsa<> >                     TGenomeEsa;
+typedef Index<TContigs, IndexEsa<> >                    TGenomeEsa;
 
 #if defined(SEQAN_EXTRAS_MASAI_DISABLE_MMAP)
 typedef DefaultIndexStringSpec<TGenomeEsa>::Type        TGenomeEsaStringSpec;
@@ -91,19 +91,19 @@ namespace seqan {
 template <>
 struct Fibre<TGenomeEsa, FibreSA>
 {
-    typedef String<SAValue<TContigs>::Type, TGenomeEsaStringSpec>    Type;
+    typedef String<SAValue<TContigs>::Type, TGenomeEsaStringSpec>   Type;
 };
 
 template <>
 struct Fibre<TGenomeEsa, FibreLcp>
 {
-    typedef String<unsigned int, TGenomeEsaStringSpec>   Type;
+    typedef String<unsigned int, TGenomeEsaStringSpec>              Type;
 };
 
 template <>
 struct Fibre<TGenomeEsa, FibreChildtab>
 {
-    typedef String<unsigned int, TGenomeEsaStringSpec>   Type;
+    typedef String<unsigned int, TGenomeEsaStringSpec>              Type;
 };
 }
 
@@ -111,7 +111,7 @@ struct Fibre<TGenomeEsa, FibreChildtab>
 // Contigs Suffix Array Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, IndexSa<> >                      TGenomeSa;
+typedef Index<TContigs, IndexSa<> >                     TGenomeSa;
 
 #if defined(SEQAN_EXTRAS_MASAI_DISABLE_MMAP)
 typedef DefaultIndexStringSpec<TGenomeSa>::Type         TGenomeSaStringSpec;
@@ -134,9 +134,9 @@ struct Fibre<TGenomeSa, FibreSA>
 typedef IndexQGram<TShape>                              TQGramBaseIndex;
 typedef IndexQGram<TShape, BucketRefinement>            TQGramBucketRefinementIndex;
 
-typedef Index<TContigs, TQGramBaseIndex>                 TGenomeBaseQGram;
-typedef Index<TContigs, IndexSa<InfixSegment> >          TGenomeInfixSa;
-typedef Index<TContigs, TQGramBucketRefinementIndex>     TGenomeQGram;
+typedef Index<TContigs, TQGramBaseIndex>                TGenomeBaseQGram;
+typedef Index<TContigs, IndexSa<InfixSegment> >         TGenomeInfixSa;
+typedef Index<TContigs, TQGramBucketRefinementIndex>    TGenomeQGram;
 
 #if defined(SEQAN_EXTRAS_MASAI_DISABLE_MMAP)
 typedef DefaultIndexStringSpec<TGenomeBaseQGram>::Type  TGenomeQGramStringSpec;
@@ -148,7 +148,7 @@ namespace seqan {
 template <>
 struct Fibre<TGenomeBaseQGram, FibreDir>
 {
-    typedef String<unsigned int, TGenomeQGramStringSpec>   Type;
+    typedef String<unsigned int, TGenomeQGramStringSpec>    Type;
 };
 }
 
@@ -156,8 +156,8 @@ struct Fibre<TGenomeBaseQGram, FibreDir>
 // Contigs FM Index Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, FMIndex<WT<>, CompressText> >    TGenomeFM;
-//typedef Index<TContigs, FMIndex<BMS<>, CompressText> >    TGenomeFM;
+typedef Index<TContigs, FMIndex<WT<>, CompressText> >   TGenomeFM;
+//typedef Index<TContigs, FMIndex<BMS<>, CompressText> >  TGenomeFM;
 
 // ----------------------------------------------------------------------------
 // Contigs Uncompressed FM Index Fibres
@@ -196,7 +196,7 @@ struct SAValue<TReadSeqStore>
 // Reads Wotd Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TReadSeqStore, IndexWotd<> >              TReadsWotd;
+typedef Index<TReadSeqStore, IndexWotd<> >                  TReadsWotd;
 
 //namespace seqan {
 //template <>
@@ -236,21 +236,6 @@ struct Fibre<TReadsQGram, FibreDir>
 };
 }
 
-// ----------------------------------------------------------------------------
-// Reads QGram Index with Wotd Subtree Fibres
-// ----------------------------------------------------------------------------
-
-//typedef Index<TReadSeqStore, IndexWotd< Subtree<> > >   TReadsWotdSubtree;
-//
-//namespace seqan
-//{
-//    template <>
-//    struct Fibre<TReadsWotdSubtree, FibreSA>
-//    {
-//        typedef Segment< Fibre<TReadsQGram, FibreSA>::Type, InfixSegment>  Type;
-//    };
-//}
-
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -262,8 +247,10 @@ struct Fibre<TReadsQGram, FibreDir>
 template <typename TGenome, typename TIndex, typename TSpec = void>
 struct GenomeIndex
 {
-    TGenome             & genome;
+    Holder<TGenome>     genome;
     TIndex              index;
+
+    GenomeIndex() {}
 
     GenomeIndex(TGenome & genome) :
         genome(genome)
@@ -277,12 +264,38 @@ struct GenomeIndex
 template <typename TReads, typename TIndex, typename TSpec = void>
 struct ReadsIndex
 {
-    TReads              const & reads;
+    Holder<TReads>      reads;
     TIndex              index;
+
+    ReadsIndex() {}
 
     ReadsIndex(TReads const & reads) :
         reads(reads)
     {}
+};
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction GenomeHost<T>::Type                               [GenomeIndex]
+// ----------------------------------------------------------------------------
+
+template <typename TGenome, typename TIndex, typename TSpec>
+struct GenomeHost<GenomeIndex<TGenome, TIndex, TSpec> >
+{
+    typedef TGenome Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction ReadsHost<T>::Type                                 [ReadsIndex]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TIndex, typename TSpec>
+struct ReadsHost<ReadsIndex<TReads, TIndex, TSpec> >
+{
+    typedef TReads  Type;
 };
 
 // ============================================================================
@@ -346,41 +359,41 @@ struct ReadsIndex
 // ----------------------------------------------------------------------------
 
 namespace seqan {
-    template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-    inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > const & it,
-                               typename VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type const & vDesc,
-                               Pair<typename Size<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type> & _range,
-                               Dna5Q c)
+template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
+inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > const & it,
+                           typename VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type const & vDesc,
+                           Pair<typename Size<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type> & _range,
+                           Dna5Q c)
+{
+    typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
+    typedef typename Value<TIndex>::Type                        TAlphabet;
+    typedef typename ValueSize<TAlphabet>::Type                 TAlphabetSize;
+    typedef typename Size<TIndex>::Type                         TSize;
+
+    typedef typename Fibre<TIndex, FibreLfTable>::Type          TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+
+    if (__MASK_DNA5Q_LT[ordValue(c)] >= ValueSize<TAlphabet>::VALUE) return false;
+
+    TIndex const & _index = container(it);
+    TPrefixSumTable const & pst = getFibre(getFibre(_index, FibreLfTable()), FibrePrefixSumTable());
+
+    TAlphabetSize cPosition = getCharacterPosition(pst, c);
+
+    if (_isRoot(vDesc))
     {
-        typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
-        typedef typename Value<TIndex>::Type                        TAlphabet;
-        typedef typename ValueSize<TAlphabet>::Type                 TAlphabetSize;
-        typedef typename Size<TIndex>::Type                         TSize;
-
-        typedef typename Fibre<TIndex, FibreLfTable>::Type          TLfTable;
-        typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
-
-        if (__MASK_DNA5Q_LT[ordValue(c)] >= ValueSize<TAlphabet>::VALUE) return false;
-
-        TIndex const & _index = container(it);
-        TPrefixSumTable const & pst = getFibre(getFibre(_index, FibreLfTable()), FibrePrefixSumTable());
-
-        TAlphabetSize cPosition = getCharacterPosition(pst, c);
-
-        if (_isRoot(vDesc))
-        {
-            _range.i1 = getPrefixSum(pst, cPosition);
-            _range.i2 = getPrefixSum(pst, cPosition + 1);
-        }
-        else
-        {
-            TSize prefixSum = getPrefixSum(pst, cPosition);
-            _range.i1 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i1 - 1);
-            _range.i2 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i2 - 1);
-        }
-
-        return _range.i1 + 1 <= _range.i2;
+        _range.i1 = getPrefixSum(pst, cPosition);
+        _range.i2 = getPrefixSum(pst, cPosition + 1);
     }
+    else
+    {
+        TSize prefixSum = getPrefixSum(pst, cPosition);
+        _range.i1 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i1 - 1);
+        _range.i2 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i2 - 1);
+    }
+
+    return _range.i1 + 1 <= _range.i2;
+}
 }
 
 // ----------------------------------------------------------------------------
@@ -412,7 +425,7 @@ namespace seqan {
 template <typename TGenome, typename TIndex, typename TSpec, typename TString>
 bool load(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & genomeIndexFile)
 {
-    genomeIndex.index = TIndex(genomeIndex.genome.contigs);
+    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
 
     return open(genomeIndex.index, toCString(genomeIndexFile));
 }
@@ -424,7 +437,7 @@ bool load(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & gen
 template <typename TGenome, typename TIndex, typename TSpec>
 void build(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex)
 {
-    genomeIndex.index = TIndex(genomeIndex.genome.contigs);
+    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
 
     // Iterator instantiation calls automatic index construction.
     typename Iterator<TIndex, TopDown<> >::Type it(genomeIndex.index);
@@ -434,17 +447,17 @@ template <typename TGenome, typename TSpec>
 void build(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
 {
     // IndexFM is built on the reversed genome.
-    reverse(genomeIndex.genome);
+    reverse(getGenome(genomeIndex));
 
-    genomeIndex.index = TGenomeFM(genomeIndex.genome.contigs);
+    genomeIndex.index = TGenomeFM(getContigs(getGenome(genomeIndex)));
 
     // Iterator instantiation calls automatic index construction.
     typename Iterator<TGenomeFM, TopDown<> >::Type it(genomeIndex.index);
 
-    // NOTE(esiragusa): This only disables a warning.
+    // NOTE(esiragusa): This removes a warning.
     goRoot(it);
 
-    reverse(genomeIndex.genome);
+    reverse(getGenome(genomeIndex));
 }
 
 // ----------------------------------------------------------------------------
@@ -466,13 +479,151 @@ void clear(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
 {
     clear(genomeIndex.index);
 }
+
 // ----------------------------------------------------------------------------
 // Function build()                                                [ReadsIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TIndex, typename TSpec>
-void build(ReadsIndex<TReads, TIndex, TSpec> & /* readsIndex */)
+template <typename TReads, typename TSpec, typename TManager>
+void build(ReadsIndex<TReads, TReadsQGram, TSpec> & readsIndex,
+           TManager & manager,
+           TReadSeqSize seedsLength,
+           TReadSeqSize firstSeed,
+           TReadSeqSize lastSeed)
 {
+    typedef typename Fibre<TReadsQGram, QGramSA>::Type          TReadsIndexSAFibre;
+    typedef typename Fibre<TReadsQGram, QGramDir>::Type         TReadsIndexDirFibre;
+    typedef typename Fibre<TReadsQGram, QGramShape>::Type       TReadsIndexShape;
+    typedef typename Fibre<TReadsQGram, QGramBucketMap>::Type   TReadsIndexBucketMap;
+
+    typedef typename Value<TReadsIndexDirFibre>::Type           TSize;
+    typedef Iterator<TReadSeq, Standard>::Type                  TReadSeqIterator;
+
+    TReadSeqStoreSize seqsCount = length(getSeqs(getReads(readsIndex)));
+
+    readsIndex.index = TReadsQGram(getSeqs(getReads(readsIndex)));
+
+    setStepSize(readsIndex.index, seedsLength);
+
+    TReadsIndexSAFibre & sa = indexSA(readsIndex.index);
+    TReadsIndexDirFibre & dir = indexDir(readsIndex.index);
+    TReadsIndexShape & shape = indexShape(readsIndex.index);
+    TReadsIndexBucketMap & bucketMap = indexBucketMap(readsIndex.index);
+
+    // Resize suffix array and directory.
+    resize(sa, (lastSeed - firstSeed) * seqsCount, Exact());
+    resize(dir, _fullDirLength(readsIndex.index), Exact());
+
+    // Clear directory.
+    _qgramClearDir(dir, bucketMap);
+
+    // Count qgrams.
+    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
+    {
+        // Skip disabled reads.
+        if (isDisabled(manager, getReadId(getReads(readsIndex), seqId)))
+            continue;
+
+        TReadSeq & read = getSeqs(getReads(readsIndex))[seqId];
+        TReadSeqIterator itText = begin(read, Standard());
+
+        itText += seedsLength * firstSeed;
+        for (TSize i = firstSeed; i < lastSeed; ++i)
+        {
+            ++dir[requestBucket(bucketMap, hash(shape, itText))];
+            itText += seedsLength;
+        }
+    }
+
+    // Compute cumulative sum.
+    _qgramCummulativeSum(dir, False());
+
+    // Fill suffix array.
+    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
+    {
+        // Skip disabled reads.
+        if (isDisabled(manager, getReadId(getReads(readsIndex), seqId)))
+            continue;
+
+        TReadSeq & read = getSeqs(getReads(readsIndex))[seqId];
+        TReadSeqIterator itText = begin(read, Standard());
+
+        typename Value<TReadsIndexSAFibre>::Type localPos;
+        assignValueI1(localPos, seqId);
+        assignValueI2(localPos, 0);
+
+        itText += seedsLength * firstSeed;
+        for (TSize i = firstSeed; i < lastSeed; ++i)
+        {
+            assignValueI2(localPos, seedsLength * i);
+
+            sa[dir[getBucket(bucketMap, hash(shape, itText)) + 1]++] = localPos;
+
+            itText += seedsLength;
+        }
+    }
+
+    // Refine buckets.
+//    _refineQGramIndex(sa, dir, indexText(readsIndex.index), weight(shape), seedsLength);
+//    _setHost(readsIndex.index);
+}
+
+// ----------------------------------------------------------------------------
+// Function build()                                                [ReadsIndex]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TSpec, typename TManager>
+void build(ReadsIndex<TReads, TReadsWotd, TSpec> & readsIndex,
+           TManager & manager,
+           TReadSeqSize seedsLength,
+           TReadSeqSize firstSeed,
+           TReadSeqSize lastSeed)
+{
+    typedef typename Fibre<TReadsWotd, FibreSA>::Type           TReadsIndexSAFibre;
+    typedef typename Value<TReadsIndexSAFibre>::Type            TReadsIndexSAPos;
+
+//    clear(readsIndex.index);
+    readsIndex.index = TReadsWotd(getSeqs(getReads(readsIndex)));
+    TReadSeqStoreSize seqsCount = length(getSeqs(getReads(readsIndex)));
+
+    TReadsIndexSAFibre & sa = indexSA(readsIndex.index);
+
+    reserve(sa, (lastSeed - firstSeed) * seqsCount, Exact());
+
+    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
+    {
+        // Skip disabled reads.
+        if (isDisabled(manager, getReadId(getReads(readsIndex), seqId)))
+            continue;
+
+        for (TReadSeqSize seed = firstSeed; seed < lastSeed; ++seed)
+        {
+            TReadsIndexSAPos localPos;
+            assignValueI1(localPos, seqId);
+            assignValueI2(localPos, seed * seedsLength);
+            appendValue(sa, localPos, Exact());
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function visit()                                                [ReadsIndex]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TIndex, typename TSpec, typename TDepth>
+void visit(ReadsIndex<TReads, TIndex, TSpec> & readsIndex, TDepth depth)
+{
+    typedef typename Iterator<TIndex, TopDown<ParentLinks<> > >::Type  TReadsIndexIterator;
+    TReadsIndexIterator readsIt(readsIndex.index);
+
+    do
+    {
+        std::cout << representative(readsIt) << std::endl;
+        if (repLength(readsIt) >= depth || !goDown(readsIt))
+            if (!goRight(readsIt))
+                while (goUp(readsIt) && !goRight(readsIt)) ;
+    }
+    while (!isRoot(readsIt));
 }
 
 // ----------------------------------------------------------------------------
@@ -480,8 +631,9 @@ void build(ReadsIndex<TReads, TIndex, TSpec> & /* readsIndex */)
 // ----------------------------------------------------------------------------
 
 template <typename TReads, typename TIndex, typename TSpec>
-void clear(ReadsIndex<TReads, TIndex, TSpec> & /* readsIndex */)
+void clear(ReadsIndex<TReads, TIndex, TSpec> & readsIndex)
 {
+    clear(readsIndex.index);
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_MASAI_INDEX_H_
