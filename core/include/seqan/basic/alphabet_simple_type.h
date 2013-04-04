@@ -98,17 +98,20 @@ public:
     // ------------------------------------------------------------------------
 
     // TODO(holtgrew): Do we want default initialization?
-    SimpleType() : value(0)
+    SEQAN_FUNC
+	SimpleType() : value(0)
     {}
 
-    SimpleType(SimpleType const & other)
+    SEQAN_FUNC
+ 	SimpleType(SimpleType const & other)
     {
         assign(*this, other);
     }
 
     // TODO(holtgrew): Do we want an explicit here?
     template <typename T>
-    SimpleType(T const & other) 
+	SEQAN_FUNC
+	SimpleType(T const & other) 
     {
         assign(*this, other);
     }
@@ -117,15 +120,15 @@ public:
     // Assignment Operator;  Have to be defined in class.
     // ------------------------------------------------------------------------
 
-    inline SimpleType &
-    operator=(SimpleType const & other) 
+	SEQAN_FUNC
+    SimpleType & operator=(SimpleType const & other) 
     { 
         assign(*this, other);
         return *this;
     }
 
     template <typename T>
-    inline SimpleType &
+	SEQAN_FUNC SimpleType &
     operator=(T const & other) 
     { 
         assign(*this, other);
@@ -143,13 +146,15 @@ public:
     // This cannot be a template since it would conflict to the template
     // constructor.
 
-    operator __int64() const
+    SEQAN_FUNC
+	operator __int64() const
     {
         __int64 c;
         assign(c, *this);
         return c;
     }
 
+    SEQAN_FUNC
     operator __uint64() const
     {
         __uint64 c;
@@ -157,6 +162,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator int() const
     {
         int c;
@@ -164,6 +170,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator unsigned int() const
     {
         unsigned int c;
@@ -171,6 +178,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator short() const
     {
         short c;
@@ -178,6 +186,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator unsigned short() const
     {
         unsigned short c;
@@ -185,6 +194,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator char() const
     {
         char c;
@@ -192,6 +202,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator signed char() const
     {
         signed char c;
@@ -199,6 +210,7 @@ public:
         return c;
     }
 
+    SEQAN_FUNC
     operator unsigned char() const
     {
         unsigned char c;
@@ -264,7 +276,7 @@ template <typename TValue, typename TSpec>
 const SimpleType<TValue, TSpec> MinValue<SimpleType<TValue, TSpec> >::VALUE = SimpleType<TValue, TSpec>(0);
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> const &
+SEQAN_FUNC SimpleType<TValue, TSpec> const &
 infimumValueImpl(SimpleType<TValue, TSpec> *)
 {
     return MinValue<SimpleType<TValue, TSpec> >::VALUE;
@@ -284,7 +296,7 @@ template <typename TValue, typename TSpec>
 const SimpleType<TValue, TSpec> MaxValue<SimpleType<TValue, TSpec> >::VALUE = SimpleType<TValue, TSpec>(((TValue)ValueSize<SimpleType<TValue, TSpec> >::VALUE - 1));
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> const &
+SEQAN_FUNC SimpleType<TValue, TSpec> const &
 supremumValueImpl(SimpleType<TValue, TSpec> *)
 {
     return MaxValue<SimpleType<TValue, TSpec> >::VALUE;
@@ -336,7 +348,7 @@ struct CompareType<SimpleType<TValue, TSpec>, TRight>
 // TODO(holtgrew): Document
 
 template <typename TTarget, typename T, typename TSourceValue, typename TSourceSpec>
-inline typename RemoveConst_<TTarget>::Type
+SEQAN_FUNC typename RemoveConst_<TTarget>::Type
 convertImpl(Convert<TTarget, T> const,
             SimpleType<TSourceValue, TSourceSpec> const & source_)
 {
@@ -350,7 +362,7 @@ convertImpl(Convert<TTarget, T> const,
 // ----------------------------------------------------------------------------
 
 template <typename TStream, typename TValue, typename TSpec>
-inline TStream &
+SEQAN_FUNC TStream &
 operator<<(TStream & stream, 
            SimpleType<TValue, TSpec> const & data)
 {
@@ -363,7 +375,7 @@ operator<<(TStream & stream,
 // ----------------------------------------------------------------------------
 
 template <typename TStream, typename TValue, typename TSpec>
-inline TStream &
+SEQAN_FUNC TStream &
 operator>>(TStream & stream, 
            SimpleType<TValue, TSpec> & data)
 {
@@ -382,7 +394,7 @@ operator>>(TStream & stream,
 ///.Function.assign.class:Class.SimpleType
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TSourceSpec>
-inline void 
+void SEQAN_FUNC
 assign(SimpleType<TTargetValue, TTargetSpec> & target, 
        SimpleType<TSourceValue, TSourceSpec> & source)
 {
@@ -390,7 +402,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 }
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TSourceSpec>
-inline void 
+void SEQAN_FUNC
 assign(SimpleType<TTargetValue, TTargetSpec> & target, 
        SimpleType<TSourceValue, TSourceSpec> const & source)
 {
@@ -398,7 +410,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 }
 
 template <typename TTargetValue, typename TTargetSpec, typename TSource>
-inline void 
+void SEQAN_FUNC 
 assign(SimpleType<TTargetValue, TTargetSpec> & target, 
        TSource & source)
 {
@@ -406,7 +418,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 }
 
 template <typename TTargetValue, typename TTargetSpec, typename TSource>
-inline void 
+void SEQAN_FUNC
 assign(SimpleType<TTargetValue, TTargetSpec> & target, 
        TSource const & source)
 {
@@ -418,7 +430,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 // TODO(holtgrew): Still necessary with dropped 2003 support?
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceSpec>
-inline void 
+void SEQAN_FUNC 
 assign(SimpleType<TTargetValue, TTargetSpec> & target, 
        Proxy<TSourceSpec> & source)
 {
@@ -426,7 +438,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 }
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceSpec>
-inline void 
+void SEQAN_FUNC 
 assign(SimpleType<TTargetValue, TTargetSpec> & target, 
        Proxy<TSourceSpec> const & source)
 {
@@ -437,7 +449,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 // NOTE(doering): It is not possible to write a single function here since "assign" must be specialized for the first argument at the first place
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(__int64 & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -445,7 +457,7 @@ assign(__int64 & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(__int64 & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -453,7 +465,7 @@ assign(__int64 & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(__uint64 & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -461,7 +473,7 @@ assign(__uint64 & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(__uint64 & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -469,7 +481,7 @@ assign(__uint64 & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(int & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -477,7 +489,7 @@ assign(int & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(int & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -485,7 +497,7 @@ assign(int & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(unsigned int & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -493,7 +505,7 @@ assign(unsigned int & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(unsigned int & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -501,7 +513,7 @@ assign(unsigned int & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(short & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -509,7 +521,7 @@ assign(short & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(short & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -517,7 +529,7 @@ assign(short & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(unsigned short & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -525,7 +537,7 @@ assign(unsigned short & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(unsigned short & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -533,7 +545,7 @@ assign(unsigned short & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(char & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -541,7 +553,7 @@ assign(char & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(char & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -549,7 +561,7 @@ assign(char & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(signed char & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -557,7 +569,7 @@ assign(signed char & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(signed char & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -565,7 +577,7 @@ assign(signed char & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(unsigned char & c_target, 
        SimpleType<TValue, TSpec> & source)
 {
@@ -573,7 +585,7 @@ assign(unsigned char & c_target,
 }
 
 template <typename TValue, typename TSpec>
-inline void 
+void SEQAN_FUNC 
 assign(unsigned char & c_target, 
        SimpleType<TValue, TSpec> const & source)
 {
@@ -585,7 +597,7 @@ assign(unsigned char & c_target,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TRight>
-inline bool
+SEQAN_FUNC bool
 operator==(SimpleType<TValue, TSpec> const & left_, 
            TRight const & right_)
 {
@@ -595,7 +607,7 @@ operator==(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TLeft, typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator==(TLeft const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -605,7 +617,7 @@ operator==(TLeft const & left_,
 }
 
 template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
+SEQAN_FUNC bool
 operator==(SimpleType<TLeftValue, TLeftSpec> const & left_, 
            SimpleType<TRightValue, TRightSpec> const & right_)
 {
@@ -616,7 +628,7 @@ operator==(SimpleType<TLeftValue, TLeftSpec> const & left_,
 }
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator==(SimpleType<TValue, TSpec> const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -624,7 +636,7 @@ operator==(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator==(Proxy<TSpec> const & left_, 
            SimpleType<TValue, TSpec2> const & right_)
 {
@@ -635,7 +647,7 @@ operator==(Proxy<TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator==(SimpleType<TValue, TSpec2> const & left_,
            Proxy<TSpec> const & right_)
 {
@@ -650,7 +662,7 @@ operator==(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TRight>
-inline bool
+SEQAN_FUNC bool
 operator!=(SimpleType<TValue, TSpec> const & left_, 
            TRight const & right_)
 {
@@ -660,7 +672,7 @@ operator!=(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TLeft, typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator!=(TLeft const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -670,7 +682,7 @@ operator!=(TLeft const & left_,
 }
 
 template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
+SEQAN_FUNC bool
 operator!=(SimpleType<TLeftValue, TLeftSpec> const & left_, 
            SimpleType<TRightValue, TRightSpec> const & right_)
 {
@@ -681,7 +693,7 @@ operator!=(SimpleType<TLeftValue, TLeftSpec> const & left_,
 }
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator!=(SimpleType<TValue, TSpec> const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -689,7 +701,7 @@ operator!=(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator!=(Proxy<TSpec> const & left_, 
            SimpleType<TValue, TSpec2> const & right_)
 {
@@ -699,7 +711,7 @@ operator!=(Proxy<TSpec> const & left_,
     return convert<TCompareType>(left_) != convert<TCompareType>(right_);
 }
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator!=(SimpleType<TValue, TSpec2> const & left_,
            Proxy<TSpec> const & right_)
 {
@@ -714,7 +726,7 @@ operator!=(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TRight>
-inline bool
+SEQAN_FUNC bool
 operator<(SimpleType<TValue, TSpec> const & left_, 
           TRight const & right_)
 {
@@ -724,7 +736,7 @@ operator<(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TLeft, typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator<(TLeft const & left_, 
           SimpleType<TValue, TSpec> const & right_)
 {
@@ -734,7 +746,7 @@ operator<(TLeft const & left_,
 }
 
 template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
+SEQAN_FUNC bool
 operator<(SimpleType<TLeftValue, TLeftSpec> const & left_, 
           SimpleType<TRightValue, TRightSpec> const & right_)
 {
@@ -745,7 +757,7 @@ operator<(SimpleType<TLeftValue, TLeftSpec> const & left_,
 }
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator<(SimpleType<TValue, TSpec> const & left_, 
           SimpleType<TValue, TSpec> const & right_)
 {
@@ -753,7 +765,7 @@ operator<(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator<(Proxy<TSpec> const & left_, 
           SimpleType<TValue, TSpec2> const & right_)
 {
@@ -764,7 +776,7 @@ operator<(Proxy<TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator<(SimpleType<TValue, TSpec2> const & left_,
           Proxy<TSpec> const & right_)
 {
@@ -779,7 +791,7 @@ operator<(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TRight>
-inline bool
+SEQAN_FUNC bool
 operator<=(SimpleType<TValue, TSpec> const & left_, 
            TRight const & right_)
 {
@@ -789,7 +801,7 @@ operator<=(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TLeft, typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator<=(TLeft const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -799,7 +811,7 @@ operator<=(TLeft const & left_,
 }
 
 template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
+SEQAN_FUNC bool
 operator<=(SimpleType<TLeftValue, TLeftSpec> const & left_, 
            SimpleType<TRightValue, TRightSpec> const & right_)
 {
@@ -810,7 +822,7 @@ operator<=(SimpleType<TLeftValue, TLeftSpec> const & left_,
 }
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator<=(SimpleType<TValue, TSpec> const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -818,7 +830,7 @@ operator<=(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator<=(Proxy<TSpec> const & left_, 
            SimpleType<TValue, TSpec2> const & right_)
 {
@@ -828,7 +840,7 @@ operator<=(Proxy<TSpec> const & left_,
     return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
 }
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator<=(SimpleType<TValue, TSpec2> const & left_,
            Proxy<TSpec> const & right_)
 {
@@ -843,7 +855,7 @@ operator<=(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TRight>
-inline bool
+SEQAN_FUNC bool
 operator>(SimpleType<TValue, TSpec> const & left_, 
           TRight const & right_)
 {
@@ -853,7 +865,7 @@ operator>(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TLeft, typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator>(TLeft const & left_, 
           SimpleType<TValue, TSpec> const & right_)
 {
@@ -863,7 +875,7 @@ operator>(TLeft const & left_,
 }
 
 template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
+SEQAN_FUNC bool
 operator>(SimpleType<TLeftValue, TLeftSpec> const & left_, 
           SimpleType<TRightValue, TRightSpec> const & right_)
 {
@@ -874,7 +886,7 @@ operator>(SimpleType<TLeftValue, TLeftSpec> const & left_,
 }
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator>(SimpleType<TValue, TSpec> const & left_, 
           SimpleType<TValue, TSpec> const & right_)
 {
@@ -882,7 +894,7 @@ operator>(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator>(Proxy<TSpec> const & left_, 
           SimpleType<TValue, TSpec2> const & right_)
 {
@@ -893,7 +905,7 @@ operator>(Proxy<TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator>(SimpleType<TValue, TSpec2> const & left_,
           Proxy<TSpec> const & right_)
 {
@@ -908,7 +920,7 @@ operator>(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TRight>
-inline bool
+SEQAN_FUNC bool
 operator>=(SimpleType<TValue, TSpec> const & left_, 
            TRight const & right_)
 {
@@ -918,7 +930,7 @@ operator>=(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TLeft, typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator>=(TLeft const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -928,7 +940,7 @@ operator>=(TLeft const & left_,
 }
 
 template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
+SEQAN_FUNC bool
 operator>=(SimpleType<TLeftValue, TLeftSpec> const & left_, 
            SimpleType<TRightValue, TRightSpec> const & right_)
 {
@@ -939,7 +951,7 @@ operator>=(SimpleType<TLeftValue, TLeftSpec> const & left_,
 }
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 operator>=(SimpleType<TValue, TSpec> const & left_, 
            SimpleType<TValue, TSpec> const & right_)
 {
@@ -947,7 +959,7 @@ operator>=(SimpleType<TValue, TSpec> const & left_,
 }
 
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator>=(Proxy<TSpec> const & left_, 
            SimpleType<TValue, TSpec2> const & right_)
 {
@@ -957,7 +969,7 @@ operator>=(Proxy<TSpec> const & left_,
     return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
 }
 template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
+SEQAN_FUNC bool
 operator>=(SimpleType<TValue, TSpec2> const & left_,
            Proxy<TSpec> const & right_)
 {
@@ -972,7 +984,7 @@ operator>=(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> &
+SEQAN_FUNC SimpleType<TValue, TSpec> &
 operator++(SimpleType<TValue, TSpec> & me)
 {
     ++me.value;
@@ -980,7 +992,7 @@ operator++(SimpleType<TValue, TSpec> & me)
 }
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
+SEQAN_FUNC SimpleType<TValue, TSpec>
 operator++(SimpleType<TValue, TSpec> & me, int)
 {
     SimpleType<TValue, TSpec> dummy = me;
@@ -993,7 +1005,7 @@ operator++(SimpleType<TValue, TSpec> & me, int)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> &
+SEQAN_FUNC SimpleType<TValue, TSpec> &
 operator--(SimpleType<TValue, TSpec> & me)
 {
     --me.value;
@@ -1001,7 +1013,7 @@ operator--(SimpleType<TValue, TSpec> & me)
 }
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
+SEQAN_FUNC SimpleType<TValue, TSpec>
 operator--(SimpleType<TValue, TSpec> & me, int)
 {
     SimpleType<TValue, TSpec> dummy = me;
@@ -1014,21 +1026,21 @@ operator--(SimpleType<TValue, TSpec> & me, int)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
+SEQAN_FUNC SimpleType<TValue, TSpec>
 operator+(SimpleType<TValue, TSpec> const & v)
 {
     return v;
 }
 
 template <typename TValue, typename TSpec>
-inline typename ValueSize<SimpleType<TValue, TSpec> >::Type
+SEQAN_FUNC typename ValueSize<SimpleType<TValue, TSpec> >::Type
 _internalOrdValue(SimpleType<TValue, TSpec> const & c)
 {
 	return c.value;
 }
 
 template <typename TValue, typename TSpec>
-inline typename ValueSize<SimpleType<TValue, TSpec> >::Type
+SEQAN_FUNC typename ValueSize<SimpleType<TValue, TSpec> >::Type
 ordValue(SimpleType<TValue, TSpec> const & c)
 {
 	return convert<unsigned>(c);

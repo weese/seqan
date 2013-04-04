@@ -45,9 +45,9 @@ namespace seqan {
 
 // Forwards for Metafunctions and Functions.
 template <typename T> struct ValueSize;
-template <typename T> typename ValueSize<T>::Type valueSize();
+template <typename T> SEQAN_FUNC typename ValueSize<T>::Type valueSize();
 // Forwards for Metafunctions and Functions.
-template <typename TValue> typename ValueSize<TValue>::Type ordValue(TValue const & c);
+template <typename TValue> SEQAN_FUNC typename ValueSize<TValue>::Type ordValue(TValue const & c);
 
 // ============================================================================
 // Tags, Classes, Enums
@@ -117,19 +117,19 @@ struct CompareType
 // that is imposed by ordValue
 
 template <typename TValue1, typename TValue2>
-inline bool ordLess(TValue1 const & left, TValue2 const & right)
+SEQAN_FUNC bool ordLess(TValue1 const & left, TValue2 const & right)
 {
     return ordValue(left) < ordValue(static_cast<TValue1>(right));
 }
 
 template <typename TValue1, typename TValue2>
-inline bool ordEqual(TValue1 const & left, TValue2 const & right)
+SEQAN_FUNC bool ordEqual(TValue1 const & left, TValue2 const & right)
 {
     return ordValue(left) == ordValue(static_cast<TValue1>(right));
 }
 
 template <typename TValue1, typename TValue2>
-inline bool ordGreater(TValue1 const & left, TValue2 const & right)
+SEQAN_FUNC bool ordGreater(TValue1 const & left, TValue2 const & right)
 {
     return ordValue(left) > ordValue(static_cast<TValue1>(right));
 }

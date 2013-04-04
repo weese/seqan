@@ -106,7 +106,7 @@ It is recommended to use @Function.convert@ rather than $convertImpl$.
 // NOTE(doering): Can copy or reinterpret, depending on Convert::Type
 
 template <typename TTarget, typename T, typename TSource>
-inline typename Convert<TTarget, TSource>::Type
+SEQAN_FUNC typename Convert<TTarget, TSource>::Type
 convertImpl(Convert<TTarget, T> const,
             TSource const & source)
 {
@@ -135,7 +135,7 @@ Do not specialize $convert$, specialize @Function.convertImpl@ instead.
 */
 
 template <typename TTarget, typename TSource>
-inline typename Convert<TTarget, TSource>::Type
+SEQAN_FUNC typename Convert<TTarget, TSource>::Type
 convert(TSource const & source)
 {
     return convertImpl(Convert<TTarget, TSource>(), source);
