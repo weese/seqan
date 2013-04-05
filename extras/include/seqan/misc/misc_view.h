@@ -342,28 +342,28 @@ toRawView(TContainer &container)
 // pipe interface
 // ----------------------------------------------------------------------------
 
-//template < typename TObject,
-//           typename TSpec,
-//           typename TInput,
-//           typename TPipeSpec >
-//inline void assign(View<TObject, TSpec> &dest, Pipe<TInput, TPipeSpec> &src)
-//{
-//    typedef typename Iterator<View<TObject, TSpec>, Standard>::Type TDestIter;
-//    resize(dest, length(src));
-//    beginRead(src);
-//    for (TDestIter _cur = begin(dest, Standard()), _end = end(dest, Standard()); _cur != _end; ++_cur, ++src)
-//        *_cur = *src;
-//    endRead(src);
-//}
-//
-//template < typename TObject,
-//           typename TSpec,
-//           typename TInput,
-//           typename TPipeSpec >
-//inline void operator << (View<TObject, TSpec> &dest, Pipe<TInput, TPipeSpec> &src)
-//{
-//    assign(dest, src);
-//}
+template < typename TObject,
+           typename TSpec,
+           typename TInput,
+           typename TPipeSpec >
+inline void assign(View<TObject, TSpec> &dest, Pipe<TInput, TPipeSpec> &src)
+{
+    typedef typename Iterator<View<TObject, TSpec>, Standard>::Type TDestIter;
+    resize(dest, length(src));
+    beginRead(src);
+    for (TDestIter _cur = begin(dest, Standard()), _end = end(dest, Standard()); _cur != _end; ++_cur, ++src)
+        *_cur = *src;
+    endRead(src);
+}
+
+template < typename TObject,
+           typename TSpec,
+           typename TInput,
+           typename TPipeSpec >
+inline void operator << (View<TObject, TSpec> &dest, Pipe<TInput, TPipeSpec> &src)
+{
+    assign(dest, src);
+}
 
 
 
