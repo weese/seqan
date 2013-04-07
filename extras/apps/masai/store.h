@@ -83,18 +83,18 @@ typedef StringSet<FragStoreConfig::TContigSeq, Dependent<> >                TCon
 
 namespace seqan
 {
-    template <>
-    struct Size<FragStoreConfig::TContigSeq>
-    {
-        typedef unsigned int            Type;
-    };
+template <>
+struct Size<FragStoreConfig::TContigSeq>
+{
+    typedef unsigned int            Type;
+};
 
-    // NOTE(esiragusa): Genome can be at most 2^32 bp in total
-    template <>
-    struct StringSetLimits<TContigs>
-    {
-        typedef String<unsigned int>    Type;
-    };
+// NOTE(esiragusa): Genome can be at most 2^32 bp in total
+template <>
+struct StringSetLimits<TContigs>
+{
+    typedef String<unsigned int>    Type;
+};
 }
 
 // ----------------------------------------------------------------------------
