@@ -674,8 +674,9 @@ bool open(ReadsLoader<TSpec, TConfig> & loader, TString const & readsFile)
     // Estimate statistics for reads in file.
     _estimateReadsStatistics(loader);
 
-    // Reinitialize record reader.
-    loader._file.seekg(0, std::ios::beg);
+    // Reopen file and reinitialize record reader, the ugly way...
+    loader._file.close();
+    loader._file.open(toCString(readsFile), std::ios::binary | std::ios::in);
     loader._reader.reset(new TRecordReader(loader._file));
 
     return true;
