@@ -47,6 +47,49 @@ using namespace seqan;
 // Functions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Function compareTreeIterators()
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): Copied from test_stree_iterators.h
+
+template <typename TIndex1, typename TIndex2>
+void compareTreeIterators(TIndex1 &index1, TIndex2 &index2)
+{
+	Iter<TIndex1, VSTree< TopDown< ParentLinks<Preorder> > > > it1(index1);
+	Iter<TIndex2, VSTree< TopDown< ParentLinks<Preorder> > > > it2(index2);
+
+	while (!atEnd(it1) && !atEnd(it2)) 
+	{
+		SEQAN_ASSERT_EQ(representative(it1), representative(it2));
+		SEQAN_ASSERT_EQ(parentEdgeLabel(it1), parentEdgeLabel(it2));
+		SEQAN_ASSERT_EQ(countOccurrences(it1), countOccurrences(it2));
+		SEQAN_ASSERT_EQ(isRoot(it1), isRoot(it2));
+		SEQAN_ASSERT_EQ(isLeaf(it1), isLeaf(it2));
+		goNext(it1);
+		goNext(it2);
+	}
+
+	SEQAN_ASSERT_EQ(atEnd(it1), atEnd(it1));
+}
+
+// ----------------------------------------------------------------------------
+// Function compareIndexFibres()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex1, typename TIndex2, typename TFibre>
+void compareIndexFibres(TIndex1 &index1, TIndex2 &index2, TFibre const fibre)
+{
+    typedef typename Fibre<TIndex1, TFibre const>::Type   TFibre1;
+    typedef typename Fibre<TIndex2, TFibre const>::Type   TFibre2;
+
+    TFibre1 & fibre1 = getFibre(index1, fibre);
+    TFibre2 & fibre2 = getFibre(index2, fibre);
+
+    SEQAN_ASSERT_EQ(length(fibre1), length(fibre2));
+    for (unsigned i = 0; i < length(fibre1); ++i)
+        SEQAN_ASSERT_EQ(fibre1[i], fibre2[i]);
+}
+
 // ============================================================================
 // Tests
 // ============================================================================
@@ -61,23 +104,12 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
     typedef View<CharString>                            TTextView;
     typedef Index<TText, IndexSa<> >                    TIndex;
     typedef Index<TTextView, IndexSa<> >                TIndexView;
-    typedef typename Fibre<TIndex, FibreText>::Type     TIndexTextFibre;
-    typedef typename Fibre<TIndexView, FibreText>::Type TIndexViewTextFibre;
-    typedef typename Fibre<TIndex, FibreSA>::Type       TIndexSAFibre;
-    typedef typename Fibre<TIndexView, FibreSA>::Type   TIndexViewSAFibre;
 
     // ----------------------------------------------------------------------
 
     // Construct a text and its view.
     TText text("text");
     TTextView textView(text);
-
-    // ----------------------------------------------------------------------
-
-    // Assert that text and its view behave equally.
-    SEQAN_ASSERT_EQ(length(text), length(textView));
-    for (unsigned i = 0; i < length(text); ++i)
-        SEQAN_ASSERT_EQ(text[i], textView[i]);
 
     // ----------------------------------------------------------------------
 
@@ -97,22 +129,17 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
     // ----------------------------------------------------------------------
 
     // Assert that the Text fibre and its view behave equally.
-    TIndexTextFibre & textFibre = indexText(index);
-    TIndexViewTextFibre & textFibreView = indexText(indexView);
-
-    SEQAN_ASSERT_EQ(length(textFibre), length(textFibreView));
-    for (unsigned i = 0; i < length(textFibre); ++i)
-        SEQAN_ASSERT_EQ(textFibre[i], textFibreView[i]);
+    compareIndexFibres(index, indexView, FibreText());
 
     // ----------------------------------------------------------------------
 
     // Assert that the SA fibre and its view behave equally.
-    TIndexSAFibre & saFibre = indexSA(index);
-    TIndexViewSAFibre & saFibreView = indexSA(indexView);
+    compareIndexFibres(index, indexView, FibreSA());
 
-    SEQAN_ASSERT_EQ(length(saFibre), length(saFibreView));
-    for (unsigned i = 0; i < length(saFibre); ++i)
-        SEQAN_ASSERT_EQ(saFibre[i], saFibreView[i]);
+    // ----------------------------------------------------------------------
+
+    // Assert that the index iterator and its view behave equally.
+    compareTreeIterators(index, indexView);
 }
 
 #endif  // EXTRAS_TESTS_INDEX_VIEW_H_
