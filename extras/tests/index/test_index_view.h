@@ -81,20 +81,13 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
     TIndex index(text);
     indexCreate(index, FibreSA());
 
-    TIndexView indexView;
-    indexText(indexView) = TIndexViewTextFibre(indexText(index));
-    indexSA(indexView) = TIndexViewSAFibre(indexSA(index));
+    TIndexView indexView = toView(index);
 
-//    TIndexView indexView2 = toView(index);
+    // NOTE(esiragusa): The index view constructor must not be called with the text view.
+//    TIndexView indexView2(textView);
 
-    // NOTE(esiragusa): Index view constructor must not take the text view, but the original index!
-//    TIndexView indexView(textView);
-
-    // NOTE(esiragusa): Calling the index view constructor with the original index calls the generic TText constructor.
+    // NOTE(esiragusa): The index view constructor interprets the original index as the text.
 //    TIndexView indexView3(index);
-
-    // NOTE(esiragusa): indexCreate() doesn't work on views, it should never be called.
-//    indexCreate(indexView, FibreSA());
 
     // ----------------------------------------------------------------------
 

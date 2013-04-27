@@ -31,7 +31,7 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// This file contains the base Index for Views.
+// This file contains Index class specializations for Views.
 // ==========================================================================
 
 #ifndef SEQAN_EXTRAS_INDEX_VIEW_H_
@@ -51,8 +51,12 @@ namespace seqan {
 // Metafunctions
 // ============================================================================
 
-template <typename TText, typename TSpec, typename TViewSpec>
-struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreSA>
+// ----------------------------------------------------------------------------
+// Metafunction Fibre
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct Fibre<Index<View<TText, ContainerView>, TSpec>, FibreSA>
 {
     typedef View<typename Fibre<Index<TText, TSpec>, FibreSA>::Type>    Type;
 };
@@ -61,24 +65,38 @@ struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreSA>
 // Functions
 // ============================================================================
 
-//template <typename TText, typename TSpec, typename TFibre>
-//inline bool indexRequire(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
-//    bool supplied = indexSupplied(index, fibre);
-//    SEQAN_ASSERT_MSG(supplied, "Fibres cannot be created on a view.");
-//    return supplied;
-//}
-//
-//template <typename TText, typename TSpec, typename TFibre>
-//inline bool indexCreate(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
-//    SEQAN_ASSERT_MSG(supplied, "Fibres cannot be created on a view.");
-//    return false;
-//}
+// ----------------------------------------------------------------------------
+// Function indexRequire()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TFibre>
+inline bool indexRequire(Index<View<TText, ContainerView>, TSpec> & index, Tag<TFibre> const fibre)
+{
+    bool supplied = indexSupplied(index, fibre);
+    SEQAN_ASSERT_MSG(supplied, "Fibres cannot be created on a view.");
+    return supplied;
+}
+
+// ----------------------------------------------------------------------------
+// Function indexCreate()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TFibre>
+inline bool indexCreate(Index<View<TText, ContainerView>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
+{
+    SEQAN_ASSERT_MSG(false, "Fibres cannot be created on a view.");
+    return false;
+}
+
+// ----------------------------------------------------------------------------
+// Function toView()
+// ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
-View<Index<TText, TSpec> >
+Index<View<TText, ContainerView>, TSpec>
 toView(Index<TText, TSpec> & index)
 {
-    View<Index<TText, TSpec> > indexView;
+    Index<View<TText, ContainerView>, TSpec> indexView;
 
     indexText(indexView) = toView(indexText(index));
     indexSA(indexView) = toView(indexSA(index));
