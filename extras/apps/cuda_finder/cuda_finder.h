@@ -34,8 +34,10 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-
 #include <seqan/misc/cuda.h>
+#include <seqan/index_extras.h>
+#include <seqan/misc/misc_view.h>
+#include <seqan/index/index_view.h>
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
@@ -43,6 +45,7 @@
 #include <thrust/reduce.h>
 #include <thrust/functional.h>
 
+using namespace seqan;
 
 // ==========================================================================
 // Classes
@@ -63,24 +66,34 @@ test()
 // Function main()
 // --------------------------------------------------------------------------
 
-// Program entry point.
-
 int main(int argc, char const ** argv)
 {
-    // generate random data serially
-    thrust::host_vector<int> h_vec(100);
-    std::generate(h_vec.begin(), h_vec.end(), rand);
-    int x = thrust::reduce(h_vec.begin(), h_vec.end(), 0, thrust::plus<int>());
-    std::cout << x << std::endl;
+    typedef CharString                                  TText;
+    typedef thrust::host_vector<char>                   THostText;
+    typedef thrust::device_vector<char>                 TDeviceText;
+    typedef View<TDeviceText>                           TDeviceTextView;
 
-    int block_size = 1;
-    int n_blocks = 1;
+    typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
+    typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
 
-    cudaPrintfInit();
-    test<<< n_blocks, block_size >>>();
-    cudaDeviceSynchronize();
-    cudaPrintfDisplay(stdout, true);
-    cudaPrintfEnd();
+    TText text("text");
+    THostText hostText(length(text));
+    thrust::copy(begin(text, Standard()), end(text, Standard()), hostText.begin());
+    TDeviceText deviceText(hostText);
+
+    begin(deviceText);
+
+    TDeviceIndex deviceIndex(deviceText);
+//    TDeviceIndexView deviceIndexView = toView(deviceIndex);
+
+//    int block_size = 1;
+//    int n_blocks = 1;
+//
+//    cudaPrintfInit();
+//    test<<< n_blocks, block_size >>>();
+//    cudaDeviceSynchronize();
+//    cudaPrintfDisplay(stdout, true);
+//    cudaPrintfEnd();
 
     return 0;
 }
