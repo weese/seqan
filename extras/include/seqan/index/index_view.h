@@ -55,6 +55,14 @@ namespace seqan {
 // Metafunction Fibre
 // ----------------------------------------------------------------------------
 
+#ifdef __CUDACC__
+template <typename TText, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TText>, TSpec>, FibreSA>
+{
+    typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TText>, TSpec> >::Type>    Type;
+};
+#endif
+
 template <typename TText, typename TSpec>
 struct Fibre<Index<View<TText, ContainerView>, TSpec>, FibreSA>
 {
@@ -73,7 +81,7 @@ template <typename TText, typename TSpec, typename TFibre>
 inline bool indexRequire(Index<View<TText, ContainerView>, TSpec> & index, Tag<TFibre> const fibre)
 {
     bool supplied = indexSupplied(index, fibre);
-    SEQAN_ASSERT_MSG(supplied, "Fibres cannot be created on a view.");
+    SEQAN_ASSERT_MSG(supplied, "Fibres must be supplied on a view.");
     return supplied;
 }
 
