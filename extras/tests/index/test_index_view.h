@@ -38,7 +38,6 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/index_extras.h>
-
 #include <seqan/misc/misc_view.h>
 #include <seqan/index/index_view.h>
 
@@ -69,19 +68,25 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
 
     // ----------------------------------------------------------------------
 
+    // Construct a text and its view.
     TText text("text");
     TTextView textView(text);
 
+    // ----------------------------------------------------------------------
+
+    // Assert that text and its view behave equally.
     SEQAN_ASSERT_EQ(length(text), length(textView));
     for (unsigned i = 0; i < length(text); ++i)
         SEQAN_ASSERT_EQ(text[i], textView[i]);
 
     // ----------------------------------------------------------------------
 
+    // Construct an index and its view.
     TIndex index(text);
     indexCreate(index, FibreSA());
-
     TIndexView indexView = toView(index);
+
+    // ----------------------------------------------------------------------
 
     // NOTE(esiragusa): The index view constructor must not be called with the text view.
 //    TIndexView indexView2(textView);
@@ -91,6 +96,7 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
 
     // ----------------------------------------------------------------------
 
+    // Assert that the Text fibre and its view behave equally.
     TIndexTextFibre & textFibre = indexText(index);
     TIndexViewTextFibre & textFibreView = indexText(indexView);
 
@@ -100,6 +106,7 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
 
     // ----------------------------------------------------------------------
 
+    // Assert that the SA fibre and its view behave equally.
     TIndexSAFibre & saFibre = indexSA(index);
     TIndexViewSAFibre & saFibreView = indexSA(indexView);
 
