@@ -71,7 +71,7 @@ int main(int argc, char const ** argv)
     typedef CharString                                  TText;
     typedef thrust::host_vector<char>                   THostText;
     typedef thrust::device_vector<char>                 TDeviceText;
-    typedef View<TDeviceText>                           TDeviceTextView;
+    typedef View<TDeviceText, ContainerView>            TDeviceTextView;
 
     typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
     typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
@@ -81,10 +81,8 @@ int main(int argc, char const ** argv)
     thrust::copy(begin(text, Standard()), end(text, Standard()), hostText.begin());
     TDeviceText deviceText(hostText);
 
-    begin(deviceText);
-
     TDeviceIndex deviceIndex(deviceText);
-//    TDeviceIndexView deviceIndexView = toView(deviceIndex);
+    TDeviceIndexView deviceIndexView = toView(deviceIndex);
 
 //    int block_size = 1;
 //    int n_blocks = 1;
