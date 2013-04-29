@@ -55,11 +55,18 @@ using namespace seqan;
 // Functions
 // ==========================================================================
 
+// --------------------------------------------------------------------------
+// Function findOnGPU()
+// --------------------------------------------------------------------------
+
+template <typename TIndex>
 __global__ void
-test()
+findOnGPU(View<TIndex, IteratorView> index)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	cuPrintf("index=%i", idx);
+
+    
 }
 
 // --------------------------------------------------------------------------
@@ -84,14 +91,15 @@ int main(int argc, char const ** argv)
     TDeviceIndex deviceIndex(deviceText);
     TDeviceIndexView deviceIndexView = toView(deviceIndex);
 
-//    int block_size = 1;
-//    int n_blocks = 1;
-//
-//    cudaPrintfInit();
-//    test<<< n_blocks, block_size >>>();
-//    cudaDeviceSynchronize();
-//    cudaPrintfDisplay(stdout, true);
-//    cudaPrintfEnd();
+    int block_size = 1;
+    int n_blocks = 1;
+
+    cudaPrintfInit();
+//    toRawView(deviceIndex);
+//    findOnGPU<<< n_blocks, block_size >>>(toRawView(deviceIndex));
+    cudaDeviceSynchronize();
+    cudaPrintfDisplay(stdout, true);
+    cudaPrintfEnd();
 
     return 0;
 }
