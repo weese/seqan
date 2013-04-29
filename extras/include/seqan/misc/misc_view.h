@@ -281,7 +281,7 @@ resize(
 
 template <typename TObject, typename TSpec, typename TContainer>
 void
-assign(View<TObject, TSpec> &view, TContainer &cont)
+assign(View<TObject, TSpec> &view, TContainer const & cont)
 {
 	view._begin = begin(cont, Standard());
 	view._end = end(cont, Standard());
