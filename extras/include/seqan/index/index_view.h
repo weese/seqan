@@ -56,10 +56,10 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
-template <typename TText, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TText>, TSpec>, FibreSA>
+template <typename TText, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TText, TAlloc>, TSpec>, FibreSA>
 {
-    typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TText>, TSpec> >::Type>    Type;
+    typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TText, TAlloc>, TSpec> >::Type>  Type;
 };
 #endif
 
