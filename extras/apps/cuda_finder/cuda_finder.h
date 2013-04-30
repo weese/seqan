@@ -80,19 +80,33 @@ int main(int argc, char const ** argv)
     typedef CharString                                  TText;
     typedef thrust::host_vector<char>                   THostText;
     typedef thrust::device_vector<char>                 TDeviceText;
+
+    typedef Index<TText, IndexSa<> >                    TIndex;
+    typedef Index<THostText, IndexSa<> >                THostIndex;
     typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
 
     TText text("text");
     THostText hostText(length(text));
     thrust::copy(begin(text, Standard()), end(text, Standard()), hostText.begin());
     TDeviceText deviceText(hostText);
+
+    TIndex index(text);
     TDeviceIndex deviceIndex(deviceText);
+    indexCreate(index, FibreSA());
+    std::cout << length(indexSA(index)) << std::endl;
+
+    indexSA(deviceIndex).resize(length(indexSA(index)));
+    thrust::copy(begin(indexSA(index), Standard()), end(indexSA(index), Standard()), indexSA(deviceIndex).begin());
+
+    std::cout << indexSA(deviceIndex).capacity() << std::endl;
+    std::cout << indexSA(deviceIndex).size() << std::endl;
+    std::cout << length(indexSA(deviceIndex)) << std::endl;
 
     int block_size = 1;
     int n_blocks = 1;
 
     cudaPrintfInit();
-    findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
+//    findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
     cudaDeviceSynchronize();
     cudaPrintfDisplay(stdout, true);
     cudaPrintfEnd();
