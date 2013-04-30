@@ -66,9 +66,18 @@ template <typename TText, typename TViewSpec, typename TSpec>
 __global__ void
 findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
 {
+    typedef Index<View<TText, TViewSpec>, TSpec>        TIndex;
+    typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
+
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     cuPrintf("index=%i\n", idx);
+
     cuPrintf("lengthSA=%i\n", length(indexSA(index)));
+
+    TIterator it(index);
+    cuPrintf("isRoot=%i\n", isRoot(it));
+    cuPrintf("isLeaf=%i\n", isLeaf(it));
+    cuPrintf("repLength=%i\n", repLength(it));
 }
 #endif
 
