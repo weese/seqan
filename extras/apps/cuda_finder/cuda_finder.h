@@ -82,33 +82,17 @@ int main(int argc, char const ** argv)
     typedef thrust::device_vector<char>                 TDeviceText;
     typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
 
-    typedef View<TDeviceText>                           TDeviceTextView;
-    typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
-
-    typedef typename Iterator<TDeviceTextView, Standard>::Type  TDeviceTextViewIter;
-
     TText text("text");
     THostText hostText(length(text));
     thrust::copy(begin(text, Standard()), end(text, Standard()), hostText.begin());
     TDeviceText deviceText(hostText);
-
-//    TDeviceTextViewIter deviceTextViewIt = thrust::raw_pointer_cast(deviceText.begin());
-
-//    View<TDeviceText> deviceTextView2(
-//            thrust::raw_pointer_cast(deviceText.begin()),
-//            thrust::raw_pointer_cast(deviceText.end())
-//    );
-
-//    TDeviceTextView deviceTextView = toView(deviceText);
-
-//    TDeviceIndex deviceIndex(deviceText);
-//    TDeviceIndexView deviceIndexView = toView(deviceIndex);
+    TDeviceIndex deviceIndex(deviceText);
 
     int block_size = 1;
     int n_blocks = 1;
 
     cudaPrintfInit();
-//    findOnGPU<<< n_blocks, block_size >>>(toRawView(deviceIndex));
+    findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
     cudaDeviceSynchronize();
     cudaPrintfDisplay(stdout, true);
     cudaPrintfEnd();
