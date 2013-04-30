@@ -32,6 +32,12 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <thrust/generate.h>
+#include <thrust/reduce.h>
+#include <thrust/functional.h>
+
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/misc/cuda.h>
@@ -39,11 +45,7 @@
 #include <seqan/misc/misc_view.h>
 #include <seqan/index/index_view.h>
 
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-#include <thrust/generate.h>
-#include <thrust/reduce.h>
-#include <thrust/functional.h>
+#include <seqan/sequence/adapt_thrust_vector.h>
 
 using namespace seqan;
 
@@ -65,9 +67,8 @@ __global__ void
 findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    cuPrintf("index=%i", idx);
-
-    cuPrintf("lengthSA=%i", length(indexSA(index)));
+    cuPrintf("index=%i\n", idx);
+    cuPrintf("lengthSA=%i\n", length(indexSA(index)));
 }
 #endif
 
@@ -78,35 +79,30 @@ findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
 int main(int argc, char const ** argv)
 {
     typedef CharString                                  TText;
-    typedef thrust::host_vector<char>                   THostText;
     typedef thrust::device_vector<char>                 TDeviceText;
 
     typedef Index<TText, IndexSa<> >                    TIndex;
-    typedef Index<THostText, IndexSa<> >                THostIndex;
     typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
 
+    // Create text and copy it to device.
     TText text("text");
-    THostText hostText(length(text));
-    thrust::copy(begin(text, Standard()), end(text, Standard()), hostText.begin());
-    TDeviceText deviceText(hostText);
+    TDeviceText deviceText(length(text));
+    thrust::copy(begin(text, Standard()), end(text, Standard()), deviceText.begin());
 
+    // Create index.
     TIndex index(text);
-    TDeviceIndex deviceIndex(deviceText);
     indexCreate(index, FibreSA());
-    std::cout << length(indexSA(index)) << std::endl;
-
+    
+    // Copy index to device.
+    TDeviceIndex deviceIndex(deviceText);
     indexSA(deviceIndex).resize(length(indexSA(index)));
     thrust::copy(begin(indexSA(index), Standard()), end(indexSA(index), Standard()), indexSA(deviceIndex).begin());
-
-    std::cout << indexSA(deviceIndex).capacity() << std::endl;
-    std::cout << indexSA(deviceIndex).size() << std::endl;
-    std::cout << length(indexSA(deviceIndex)) << std::endl;
 
     int block_size = 1;
     int n_blocks = 1;
 
     cudaPrintfInit();
-//    findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
+    findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
     cudaDeviceSynchronize();
     cudaPrintfDisplay(stdout, true);
     cudaPrintfEnd();
