@@ -144,7 +144,7 @@ struct Iterator<View<TObject, TSpec> const, Standard>:
 template <typename TObject, typename TAlloc, typename TSpec>
 struct Iterator<View<thrust::device_vector<TObject, TAlloc>, TSpec>, Standard>
 {
-    typedef typename thrust::device_vector<TObject, TAlloc>::iterator           TIterator_;
+    typedef typename thrust::device_vector<TObject, TAlloc>::pointer            TIterator_;
     typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
 };
 #endif
@@ -303,8 +303,8 @@ toView(thrust::device_vector<TObject, TAlloc> & container)
 {
     typedef thrust::device_vector<TObject, TAlloc>    TContainer;
     return View<TContainer>(
-            thrust::raw_pointer_cast(container.begin()),
-            thrust::raw_pointer_cast(container.end())
+            thrust::raw_pointer_cast(container.data()),
+            thrust::raw_pointer_cast(&container[container.size()])
     );
 }
 #endif
