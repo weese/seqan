@@ -125,21 +125,25 @@ The iterator starts in the root node by default.
 
 //____________________________________________________________________________
 
+        SEQAN_FUNC
         Iter() : index() {}
-        
+
+        SEQAN_FUNC
 		Iter(TIndex &_index):
 			index(&_index)
 		{
 			_indexRequireTopDownIteration(_index);
 			goRoot(*this);
 		}
-
+        
+        SEQAN_FUNC
 		Iter(TIndex &_index, MinimalCtor):
 			index(&_index),
 			vDesc(MinimalCtor()),
             _parentDesc(MinimalCtor()) {}
 
         // NOTE(esiragusa): _parentDesc is unitialized
+        SEQAN_FUNC
 		Iter(TIndex &_index, TVertexDesc const &_vDesc):
 			index(&_index),
 			vDesc(_vDesc)
@@ -148,6 +152,7 @@ The iterator starts in the root node by default.
 		}
 
         template <typename TSpec2>
+        SEQAN_FUNC
 		Iter(Iter<TIndex, VSTree<TopDown<TSpec2> > > const &_origin):
 			index(&container(_origin)),
 			vDesc(value(_origin)),
@@ -156,7 +161,7 @@ The iterator starts in the root node by default.
 //____________________________________________________________________________
 
         template <typename TSpec2>
-		inline Iter const &
+		SEQAN_FUNC Iter const &
 		operator = (Iter<TIndex, VSTree<TopDown<TSpec2> > > const &_origin)
 		{
 			index = &container(_origin);
@@ -538,7 +543,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	}
 
 	template < typename TIndex, typename TSpec >
-	inline typename Size<TIndex>::Type
+	SEQAN_FUNC typename Size<TIndex>::Type
 	repLength(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) 
 	{
 		return repLength(container(it), value(it));
@@ -581,7 +586,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 */
 
 	template < typename TIndex, typename TSpec >
-	inline typename Size<TIndex>::Type
+	SEQAN_FUNC typename Size<TIndex>::Type
 	parentRepLength(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) 
 	{
 		return repLength(container(it), nodeUp(it));
@@ -603,7 +608,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 */
 
 	template < typename TIndex, typename TSpec >
-	inline bool
+	SEQAN_FUNC bool
 	emptyParentEdge(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) 
 	{
 		// the following is more efficient than 
@@ -736,13 +741,13 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ///.Function.container.param.iterator.type:Spec.VSTree Iterator
 
 	template < typename TIndex, class TSpec >
-	inline TIndex const & 
+	SEQAN_FUNC TIndex const & 
 	container(Iter< TIndex, VSTree<TSpec> > const &it) { 
 		return *it.index; 
 	}
 
 	template < typename TIndex, class TSpec >
-	inline TIndex & 
+	SEQAN_FUNC TIndex & 
 	container(Iter< TIndex, VSTree<TSpec> > &it) { 
 		return *const_cast<TIndex*>(it.index); 
 	}
@@ -752,13 +757,13 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ///.Function.value.param.object.type:Spec.VSTree Iterator
 
 	template < typename TIndex, class TSpec >
-	inline typename VertexDescriptor<TIndex>::Type & 
+	SEQAN_FUNC typename VertexDescriptor<TIndex>::Type & 
 	value(Iter< TIndex, VSTree<TSpec> > &it) { 
 		return it.vDesc;
 	}
 
 	template < typename TIndex, class TSpec >
-	inline typename VertexDescriptor<TIndex>::Type const & 
+	SEQAN_FUNC typename VertexDescriptor<TIndex>::Type const & 
 	value(Iter< TIndex, VSTree<TSpec> > const &it) { 
 		return it.vDesc;
 	}
@@ -831,7 +836,7 @@ If $iterator$'s container type is $TIndex$ the return type is $SAValue<TIndex>::
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename SAValue<TIndex>::Type 
+	SEQAN_FUNC typename SAValue<TIndex>::Type 
 	getOccurrence(Iter< TIndex, VSTree<TSpec> > const &it)
 	{
 		return saAt(value(it).range.i1, container(it));
@@ -853,7 +858,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Size<TIndex>::Type 
+	SEQAN_FUNC typename Size<TIndex>::Type 
 	countOccurrences(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
 		if (_isSizeInval(value(it).range.i2))
@@ -880,7 +885,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Pair<Size<TIndex>
 */
 
 	template < typename TText, typename TSpec, typename TDesc >
-	inline Pair<typename Size<Index<TText, TSpec> >::Type>
+	SEQAN_FUNC Pair<typename Size<Index<TText, TSpec> >::Type>
 	range(Index<TText, TSpec> const &index, TDesc const &desc)
 	{
 		if (_isSizeInval(desc.range.i2))
@@ -890,7 +895,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Pair<Size<TIndex>
 	}
 
 	template < typename TIndex, typename TSpec >
-	inline Pair<typename Size<TIndex>::Type>
+	SEQAN_FUNC Pair<typename Size<TIndex>::Type>
 	range(Iter<TIndex, VSTree<TSpec> > const &it)
 	{
 		if (_isSizeInval(value(it).range.i2))
@@ -914,7 +919,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, FibreSA>::Type const >::Type 
+	SEQAN_FUNC typename Infix< typename Fibre<TIndex, FibreSA>::Type const >::Type 
 	getOccurrences(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
 		if (_isSizeInval(value(it).range.i2))
@@ -1045,7 +1050,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, FibreText>::Type const >::Type 
+	SEQAN_FUNC typename Infix< typename Fibre<TIndex, FibreText>::Type const >::Type 
 	representative(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
 		return infixWithLength(indexText(container(it)), getOccurrence(it), repLength(it));
@@ -1264,7 +1269,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 */
 
 	template < typename TText, typename TIndexSpec, class TSpec >
-	inline void goRoot(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
+	SEQAN_FUNC void goRoot(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
 	{
 		_historyClear(it);
 		clear(it);							// start in root node with range (0,infty)
@@ -1852,7 +1857,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Size< TIndex >::Type
+	SEQAN_FUNC typename Size< TIndex >::Type
 	parentEdgeLength(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it) 
 	{
 		return repLength(it) - parentRepLength(it);
@@ -1872,7 +1877,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-    inline typename EdgeLabel< Iter< TIndex, VSTree<TSpec> > >::Type
+    SEQAN_FUNC typename EdgeLabel< Iter< TIndex, VSTree<TSpec> > >::Type
 	parentEdgeLabel(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it)
 	{
 		return infixWithLength(
@@ -2050,19 +2055,19 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline bool isRoot(Iter<TIndex, VSTree< BottomUp<TSpec> > > const &it) 
+	SEQAN_FUNC bool isRoot(Iter<TIndex, VSTree< BottomUp<TSpec> > > const &it)
 	{
 		return empty(it.history);
 	}
 
 	template < typename TIndex, class TSpec >
-	inline bool isRoot(Iter<TIndex, VSTree<TSpec> > const &it) 
+	SEQAN_FUNC bool isRoot(Iter<TIndex, VSTree<TSpec> > const &it)
 	{
 		return _isRoot(value(it));
 	}
 
 	template < typename TSize >
-	inline bool _isRoot(VertexEsa<TSize> const &value) 
+	SEQAN_FUNC bool _isRoot(VertexEsa<TSize> const &value)
 	{
 //IOREV _notio_
 		return _isSizeInval(value.range.i2);
@@ -2330,7 +2335,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TSize >
-	inline bool _isLeaf(VertexEsa<TSize> const &vDesc)
+	SEQAN_FUNC bool _isLeaf(VertexEsa<TSize> const &vDesc)
 	{
 //IOREV _notio_
 		// is this a leaf?
@@ -2339,7 +2344,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	// is this a leaf? (including empty $-edges)
 	template < typename TIndex, class TSpec, typename TDfsOrder >
-	inline bool _isLeaf(
+	SEQAN_FUNC bool _isLeaf(
 		Iter<TIndex, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
@@ -2366,7 +2371,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	// is this a leaf? (hide empty $-edges)
 	template < typename TIndex, class TSpec, typename TDfsOrder >
-	inline bool _isLeaf(Iter<TIndex, VSTree<TSpec> > const &it, VSTreeIteratorTraits<TDfsOrder, True> const)
+	SEQAN_FUNC bool _isLeaf(Iter<TIndex, VSTree<TSpec> > const &it, VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
         typedef typename SAValue<TIndex>::Type  TOcc;
 
@@ -2384,7 +2389,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TIndex, class TSpec >
-	inline bool isLeaf(Iter<TIndex, VSTree<TSpec> > const &it)
+	SEQAN_FUNC bool isLeaf(Iter<TIndex, VSTree<TSpec> > const &it)
 	{
 		return _isLeaf(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree<TSpec> > >::Type());
 	}
