@@ -636,12 +636,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreSA>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreSA>::Type &
 	getFibre(Index<TText, TSpec> &index, FibreSA) {
 		return index.sa;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreSA>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreSA>::Type &
 	getFibre(Index<TText, TSpec> const &index, FibreSA) {
 		return index.sa;
 	}
@@ -1156,9 +1156,9 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreSA>::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, FibreSA()); }
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreSA>::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, FibreSA()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreSA>::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, FibreSA()); }
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreSA>::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, FibreSA()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
