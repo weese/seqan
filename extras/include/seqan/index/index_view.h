@@ -100,11 +100,11 @@ inline bool indexCreate(Index<View<TText, TViewSpec>, TSpec> & /* index */, Tag<
 // Function toView()
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TViewSpec, typename TSpec>
-Index<View<TText, TViewSpec>, TSpec>
+template <typename TText, typename TSpec>
+Index<View<TText>, TSpec>
 toView(Index<TText, TSpec> & index)
 {
-    Index<View<TText, TViewSpec>, TSpec> indexView;
+    Index<View<TText>, TSpec> indexView;
 
     indexText(indexView) = toView(indexText(index));
     indexSA(indexView) = toView(indexSA(index));
