@@ -59,14 +59,14 @@ using namespace seqan;
 // Function findOnGPU()
 // --------------------------------------------------------------------------
 
-template <typename TIndex>
+template <typename TRawPtr, typename TSpec>
 __global__ void
-findOnGPU(View<TIndex, IteratorView> index)
+findOnGPU(Index<View<TRawPtr, IteratorView>, TSpec> index)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	cuPrintf("index=%i", idx);
 
-    
+	cuPrintf("lengthSA=%i", length(indexSA(index)));
 }
 
 // --------------------------------------------------------------------------
@@ -78,10 +78,10 @@ int main(int argc, char const ** argv)
     typedef CharString                                  TText;
     typedef thrust::host_vector<char>                   THostText;
     typedef thrust::device_vector<char>                 TDeviceText;
-    typedef View<TDeviceText, ContainerView>            TDeviceTextView;
-
     typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
-    typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
+
+//    typedef View<TDeviceText, ContainerView>            TDeviceTextView;
+//    typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
 
     TText text("text");
     THostText hostText(length(text));
@@ -89,13 +89,14 @@ int main(int argc, char const ** argv)
     TDeviceText deviceText(hostText);
 
     TDeviceIndex deviceIndex(deviceText);
-    TDeviceIndexView deviceIndexView = toView(deviceIndex);
+//    TDeviceIndexView deviceIndexView = toView(deviceIndex);
 
     int block_size = 1;
     int n_blocks = 1;
 
+    Index<View<typename thrust::detail::pointer_traits<typename TDeviceText::pointer>::raw_pointer, IteratorView>, IndexSa<> > indexRawView = toRawView(deviceIndex);
+
     cudaPrintfInit();
-//    toRawView(deviceIndex);
 //    findOnGPU<<< n_blocks, block_size >>>(toRawView(deviceIndex));
     cudaDeviceSynchronize();
     cudaPrintfDisplay(stdout, true);
