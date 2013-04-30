@@ -59,15 +59,17 @@ using namespace seqan;
 // Function findOnGPU()
 // --------------------------------------------------------------------------
 
-template <typename TRawPtr, typename TSpec>
+#ifdef __CUDACC__
+template <typename TText, typename TViewSpec, typename TSpec>
 __global__ void
-findOnGPU(Index<View<TRawPtr, IteratorView>, TSpec> index)
+findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	cuPrintf("index=%i", idx);
+    cuPrintf("index=%i", idx);
 
-	cuPrintf("lengthSA=%i", length(indexSA(index)));
+    cuPrintf("lengthSA=%i", length(indexSA(index)));
 }
+#endif
 
 // --------------------------------------------------------------------------
 // Function main()
@@ -80,21 +82,30 @@ int main(int argc, char const ** argv)
     typedef thrust::device_vector<char>                 TDeviceText;
     typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
 
-//    typedef View<TDeviceText, ContainerView>            TDeviceTextView;
-//    typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
+    typedef View<TDeviceText>                           TDeviceTextView;
+    typedef Index<TDeviceTextView, IndexSa<> >          TDeviceIndexView;
+
+    typedef typename Iterator<TDeviceTextView, Standard>::Type  TDeviceTextViewIter;
 
     TText text("text");
     THostText hostText(length(text));
     thrust::copy(begin(text, Standard()), end(text, Standard()), hostText.begin());
     TDeviceText deviceText(hostText);
 
-    TDeviceIndex deviceIndex(deviceText);
+//    TDeviceTextViewIter deviceTextViewIt = thrust::raw_pointer_cast(deviceText.begin());
+
+//    View<TDeviceText> deviceTextView2(
+//            thrust::raw_pointer_cast(deviceText.begin()),
+//            thrust::raw_pointer_cast(deviceText.end())
+//    );
+
+//    TDeviceTextView deviceTextView = toView(deviceText);
+
+//    TDeviceIndex deviceIndex(deviceText);
 //    TDeviceIndexView deviceIndexView = toView(deviceIndex);
 
     int block_size = 1;
     int n_blocks = 1;
-
-    Index<View<typename thrust::detail::pointer_traits<typename TDeviceText::pointer>::raw_pointer, IteratorView>, IndexSa<> > indexRawView = toRawView(deviceIndex);
 
     cudaPrintfInit();
 //    findOnGPU<<< n_blocks, block_size >>>(toRawView(deviceIndex));

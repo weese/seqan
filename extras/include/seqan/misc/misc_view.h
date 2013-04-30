@@ -56,20 +56,10 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// TSpec tags
-// ----------------------------------------------------------------------------
-
-struct IteratorView_;
-typedef Tag<IteratorView_> IteratorView;
-
-struct ContainerView_;
-typedef Tag<ContainerView_> ContainerView;
-
-// ----------------------------------------------------------------------------
 // class View
 // ----------------------------------------------------------------------------
 
-template <typename TObject, typename TSpec = ContainerView>
+template <typename TObject, typename TSpec = void>
 class View
 {
 public:
@@ -80,37 +70,37 @@ public:
     TIterator _begin;
     TIterator _end;
 
-	SEQAN_FUNC
-	View() {}
+    SEQAN_FUNC
+    View() {}
 
     template <typename TContainer>
-	SEQAN_FUNC
-	View(TContainer &cont):
+    SEQAN_FUNC
+    View(TContainer &cont):
         _begin(begin(cont, Standard())),
         _end(end(cont, Standard())) {}
 
     template <typename TContainer>
-    SEQAN_FUNC 
-	View(TContainer const &cont):
+    SEQAN_FUNC
+    View(TContainer const &cont):
         _begin(begin(cont, Standard())),
         _end(end(cont, Standard())) {}
 
-    SEQAN_FUNC 
-	View(TIterator const &begin, TIterator const &end):
+    SEQAN_FUNC
+    View(TIterator const &begin, TIterator const &end):
         _begin(begin),
         _end(end) {}
 
     template <typename TContainer>
-    SEQAN_FUNC 
-	View & 
+    SEQAN_FUNC
+    View &
     operator= (TContainer &other)
     {
         assign(*this, other);
         return *this;
     }
-    
+
     template <typename TPos>
-	SEQAN_FUNC 
+    SEQAN_FUNC
     TReference
     operator[] (TPos pos)
     {
@@ -123,7 +113,7 @@ public:
     {
         return getValue(_begin + pos);
     }
-    
+
 };
 
 // ============================================================================
@@ -144,26 +134,20 @@ struct Value<View<TObject, TSpec> const>
 
 template <typename TObject, typename TSpec>
 struct Iterator<View<TObject, TSpec>, Standard>:
-	public Iterator<TObject, Standard> {};
+    public Iterator<TObject, Standard> {};
 
 template <typename TObject, typename TSpec>
 struct Iterator<View<TObject, TSpec> const, Standard>:
-	public Iterator<TObject const, Standard> {};
+    public Iterator<TObject const, Standard> {};
 
-template <typename TIterator>
-struct Iterator<View<TIterator, IteratorView>, Standard>
+#ifdef __CUDACC__
+template <typename TObject, typename TAlloc, typename TSpec>
+struct Iterator<View<thrust::device_vector<TObject, TAlloc>, TSpec>, Standard>
 {
-    typedef TIterator Type;
+    typedef typename thrust::device_vector<TObject, TAlloc>::iterator           TIterator_;
+    typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
 };
-
-template <typename TIterator>
-struct Iterator<View<TIterator, IteratorView> const, Standard>
-{
-    typedef TIterator Type;
-};
-
-//template <typename TObject, typename TSpec>
-//struct Iterator<View<TObject, TSpec> const>: public Iterator<View<TObject, TSpec> > {};
+#endif
 
 template <typename TObject, typename TSpec>
 struct Difference<View<TObject, TSpec> >
@@ -264,7 +248,7 @@ length(View<TObject, TSpec> const & view)
 
 template <typename TObject, typename TSpec, typename TSize, typename TExpand>
 inline typename Size< View<TObject, TSpec> >::Type
-resize(                                                                                                                                                                                                                                                                
+resize(
     View<TObject, TSpec> & me,
     TSize new_length,
     Tag<TExpand>)
@@ -283,8 +267,8 @@ template <typename TObject, typename TSpec, typename TContainer>
 void
 assign(View<TObject, TSpec> &view, TContainer const & cont)
 {
-	view._begin = begin(cont, Standard());
-	view._end = end(cont, Standard());
+    view._begin = begin(cont, Standard());
+    view._end = end(cont, Standard());
 }
 
 // ----------------------------------------------------------------------------
@@ -305,38 +289,25 @@ SEQAN_CHECKPOINT
 // toView()
 // ----------------------------------------------------------------------------
 
-template <typename TIterator>
-SEQAN_FUNC View<TIterator, IteratorView>
-toView(TIterator const &begin, TIterator const &end)
+template <typename TContainer, typename TSpec>
+View<TContainer, TSpec>
+toView(TContainer & container)
 {
-    return View<TIterator, IteratorView>(begin, end);
+    return View<TContainer, TSpec>(container);
 }
-
-template <typename TContainer>
-View<TContainer>
-toView(TContainer &container)
-{
-    return View<TContainer>(container);
-}
-
-// ----------------------------------------------------------------------------
-// toRawView()
-// ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
-template <typename TContainer>
-View<typename thrust::detail::pointer_traits<typename TContainer::pointer>::raw_pointer, IteratorView>
-toRawView(TContainer &container)
+template <typename TObject, typename TAlloc>
+View<thrust::device_vector<TObject, TAlloc> >
+toView(thrust::device_vector<TObject, TAlloc> & container)
 {
-	typedef typename TContainer::pointer TIterator;
-	typedef typename thrust::detail::pointer_traits<TIterator>::raw_pointer TRawPointer;
-	
-    return View<TRawPointer, IteratorView>(
-		thrust::raw_pointer_cast(container.data()),
-		thrust::raw_pointer_cast(&container[container.size()]));
+    typedef thrust::device_vector<TObject, TAlloc>    TContainer;
+    return View<TContainer>(
+            thrust::raw_pointer_cast(container.begin()),
+            thrust::raw_pointer_cast(container.end())
+    );
 }
 #endif
-
 
 // ----------------------------------------------------------------------------
 // pipe interface

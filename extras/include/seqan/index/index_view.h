@@ -77,8 +77,8 @@ struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreSA>
 // Function indexRequire()
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec, typename TFibre>
-inline bool indexRequire(Index<View<TText, ContainerView>, TSpec> & index, Tag<TFibre> const fibre)
+template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
+inline bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<TFibre> const fibre)
 {
     bool supplied = indexSupplied(index, fibre);
     SEQAN_ASSERT_MSG(supplied, "Fibre must be supplied on a view.");
@@ -89,8 +89,8 @@ inline bool indexRequire(Index<View<TText, ContainerView>, TSpec> & index, Tag<T
 // Function indexCreate()
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec, typename TFibre>
-inline bool indexCreate(Index<View<TText, ContainerView>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
+template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
+inline bool indexCreate(Index<View<TText, TViewSpec>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
 {
     SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
     return false;
@@ -100,37 +100,17 @@ inline bool indexCreate(Index<View<TText, ContainerView>, TSpec> & /* index */, 
 // Function toView()
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec>
-Index<View<TText, ContainerView>, TSpec>
+template <typename TText, typename TViewSpec, typename TSpec>
+Index<View<TText, TViewSpec>, TSpec>
 toView(Index<TText, TSpec> & index)
 {
-    Index<View<TText, ContainerView>, TSpec> indexView;
+    Index<View<TText, TViewSpec>, TSpec> indexView;
 
     indexText(indexView) = toView(indexText(index));
     indexSA(indexView) = toView(indexSA(index));
 
     return indexView;
 }
-
-// ----------------------------------------------------------------------------
-// toRawView()
-// ----------------------------------------------------------------------------
-
-#ifdef __CUDACC__
-template <typename TText, typename TSpec>
-Index<View<typename thrust::detail::pointer_traits<typename TText::pointer>::raw_pointer, IteratorView>, TSpec>
-toRawView(Index<TText, TSpec> & index)
-{
-	typedef typename TText::pointer TIterator;
-	typedef typename thrust::detail::pointer_traits<TIterator>::raw_pointer TRawPointer;
-
-    Index<View<TRawPointer, IteratorView>, TSpec> indexRawView;
-    indexText(indexRawView) = toRawView(indexText(index));
-    indexSA(indexRawView) = toRawView(indexSA(index));
-
-    return indexRawView;
-}
-#endif
 
 }
 
