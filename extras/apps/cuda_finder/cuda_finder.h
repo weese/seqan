@@ -70,14 +70,21 @@ findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    cuPrintf("index=%i\n", idx);
+    printf("index=%i\n", idx);
 
-    cuPrintf("lengthSA=%i\n", length(indexSA(index)));
+    printf("lengthSA=%u\n", length(indexSA(index)));
+    for (unsigned i = 0; i < length(indexSA(index)); ++i)
+        printf("%u\n", indexSA(index)[i]);
 
     TIterator it(index);
-    cuPrintf("isRoot=%i\n", isRoot(it));
-    cuPrintf("isLeaf=%i\n", isLeaf(it));
-    cuPrintf("repLength=%i\n", repLength(it));
+
+    printf("l=%u\n", it.vDesc.range.i1);
+    printf("r=%u\n", it.vDesc.range.i2);
+
+//    printf("isRoot=%i\n", isRoot(it));
+//    printf("countOccurrences=%i\n", countOccurrences(it));
+//    printf("isLeaf=%i\n", isLeaf(it));
+//    printf("repLength=%i\n", repLength(it));
 }
 #endif
 
@@ -101,7 +108,7 @@ int main(int argc, char const ** argv)
     // Create index.
     TIndex index(text);
     indexCreate(index, FibreSA());
-    
+
     // Copy index to device.
     TDeviceIndex deviceIndex(deviceText);
     indexSA(deviceIndex).resize(length(indexSA(index)));
@@ -110,11 +117,8 @@ int main(int argc, char const ** argv)
     int block_size = 1;
     int n_blocks = 1;
 
-    cudaPrintfInit();
     findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
     cudaDeviceSynchronize();
-    cudaPrintfDisplay(stdout, true);
-    cudaPrintfEnd();
 
     return 0;
 }
