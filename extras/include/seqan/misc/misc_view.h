@@ -289,11 +289,11 @@ SEQAN_CHECKPOINT
 // toView()
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-View<TContainer, TSpec>
+template <typename TContainer>
+View<TContainer>
 toView(TContainer & container)
 {
-    return View<TContainer, TSpec>(container);
+    return View<TContainer>(container);
 }
 
 #ifdef __CUDACC__
