@@ -1070,7 +1070,7 @@ String<char> & text = getFibre(indexEsa, EsaText());
 // interface for infinity/invalid values
 
 	template <typename TValue>
-	inline void _setSizeInval(TValue &v) {
+	SEQAN_FUNC void _setSizeInval(TValue &v) {
 		v = MaxValue<TValue>::VALUE;
 	}
 

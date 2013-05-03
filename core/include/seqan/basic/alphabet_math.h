@@ -62,7 +62,7 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 template <typename T>
-struct MaximumValueUnsigned_ { static const T VALUE; };
+struct MaximumValueUnsigned_ { static const T VALUE = ~(T)0; };
 template <typename T>
 struct MaximumValueSigned_ { static const T VALUE; };
 
@@ -71,8 +71,8 @@ struct MaximumValueFloat_ { static const float VALUE; };
 template <typename T = void>
 struct MaximumValueDouble_ { static const double VALUE; };
 
-template <typename T>
-const T MaximumValueUnsigned_<T>::VALUE = ~(T)0;
+//template <typename T>
+//const T MaximumValueUnsigned_<T>::VALUE = ~(T)0;
 template <typename T>
 const T MaximumValueSigned_<T>::VALUE = ( (((T)1 <<(BitsPerValue<T>::VALUE - 2)) - 1) <<1) + 1;
 template <typename T>

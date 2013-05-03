@@ -980,7 +980,7 @@ but can be significantly faster in some cases.
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline bool
+SEQAN_FUNC bool
 empty(T const & me)
 {
     SEQAN_CHECKPOINT;

@@ -287,7 +287,7 @@ parentEdgeFirstChar(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TopDown<TSpe
 }
 
 template <typename TText, typename TIndexSpec, typename TSpec>
-inline void goRoot(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > & it)
+SEQAN_FUNC void goRoot(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > & it)
 {
     _historyClear(it);
     clear(it);

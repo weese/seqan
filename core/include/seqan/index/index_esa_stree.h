@@ -1426,19 +1426,19 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// unified history stack access for goDown(..)
 
 	template < typename TIndex, class TSpec >
-	inline void 
+	SEQAN_FUNC void
 	_historyClear(Iter< TIndex, VSTree<TSpec> > &) {}
 
 
     template < typename TIndex, class TSpec >
-    inline void
+    SEQAN_FUNC void
     _historyClear(Iter< TIndex, VSTree< TopDown<TSpec> > > &it)
     {
         it._parentDesc = value(it);
     }
 
     template < typename TIndex, class TSpec >
-    inline void
+    SEQAN_FUNC void
     _historyClear(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it)
     {
         clear(it.history);
@@ -1909,13 +1909,13 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
     template < typename TIndex, class TSpec >
-	inline void _clear(Iter<TIndex, VSTree<TSpec> > &it) 
+    SEQAN_FUNC void _clear(Iter<TIndex, VSTree<TSpec> > &it)
 	{
 		value(it) = typename VertexDescriptor<TIndex>::Type(MinimalCtor());
     }
 
 	template < typename TIndex, class TSpec >
-	inline void clear(Iter<TIndex, VSTree<TSpec> > &it) 
+	SEQAN_FUNC void clear(Iter<TIndex, VSTree<TSpec> > &it)
 	{
 		_clear(it);
     }

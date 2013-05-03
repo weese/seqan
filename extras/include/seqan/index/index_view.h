@@ -78,7 +78,7 @@ struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreSA>
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
-inline bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<TFibre> const fibre)
+SEQAN_FUNC bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<TFibre> const fibre)
 {
     bool supplied = indexSupplied(index, fibre);
     SEQAN_ASSERT_MSG(supplied, "Fibre must be supplied on a view.");
@@ -90,7 +90,7 @@ inline bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<TFibr
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
-inline bool indexCreate(Index<View<TText, TViewSpec>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
+SEQAN_FUNC bool indexCreate(Index<View<TText, TViewSpec>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
 {
     SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
     return false;
