@@ -94,6 +94,12 @@ target_link_libraries (masai_output_pe ${SEQAN_LIBRARIES})
 # Add CXX flags found by find_package (SeqAn).
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SEQAN_CXX_FLAGS}")
 
+# Add popcnt flag to CXX flags.
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mpopcnt")
+
+# Remove tree-vectorize flag from CXX flags.
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-tree-vectorize")
+
 # ----------------------------------------------------------------------------
 # Installation
 # ----------------------------------------------------------------------------
