@@ -81,7 +81,7 @@ template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
 SEQAN_FUNC bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<TFibre> const fibre)
 {
     bool supplied = indexSupplied(index, fibre);
-    SEQAN_ASSERT_MSG(supplied, "Fibre must be supplied on a view.");
+//    SEQAN_ASSERT_MSG(supplied, "Fibre must be supplied on a view.");
     return supplied;
 }
 
@@ -92,7 +92,7 @@ SEQAN_FUNC bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<T
 template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
 SEQAN_FUNC bool indexCreate(Index<View<TText, TViewSpec>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
 {
-    SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
+//    SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
     return false;
 }
 
