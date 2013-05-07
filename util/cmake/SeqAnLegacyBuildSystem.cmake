@@ -268,6 +268,15 @@ macro (seqan_add_cuda_executable TARGET_NAME)
     string (REGEX REPLACE "\\-pedantic" ""
             CUDA_CXX_FLAGS ${CUDA_NVCC_FLAGS} ${CMAKE_CXX_FLAGS})
 
+    # Manually activate debug symbols in compiler
+    list (APPEND CUDA_NVCC_FLAGS -g -G -O0)
+
+    # Compile for a specific architecture
+    list (APPEND CUDA_NVCC_FLAGS -arch sm_20)
+
+    # Produce an error on illegal calls, eg __host__ __device__ --> __host__.
+    list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
+
     # Enable .cu as a CXX source file extension for linking.
     list (APPEND CMAKE_CXX_SOURCE_FILE_EXTENSIONS "cu")
     # Add CUT include directories for CUDA.
