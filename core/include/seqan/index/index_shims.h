@@ -634,7 +634,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 */
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSupplied(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
+	SEQAN_FUNC bool indexSupplied(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
 	SEQAN_CHECKPOINT
 		return !empty(getFibre(index, fibre));
 	}

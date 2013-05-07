@@ -127,33 +127,38 @@ In case of $PreorderEmptyEdges$ and $PostorderEmptyEdges$, the empty edges are a
 		Pair<TSize> range;			// current SA interval of hits (unique node identifier)
 		TSize		parentRight;	// right boundary of parent node's range (allows to go right)
 
+        SEQAN_FUNC
 		VertexEsa() : range(0, 0), parentRight(0) {}
 
+        SEQAN_FUNC
 		VertexEsa(MinimalCtor):
 			range(0,0),
 			parentRight(0) {}
 
+        SEQAN_FUNC
 		VertexEsa(TSize otherRangeLeft, TSize otherRangeRight, TSize otherParentRight):
 			range(Pair<TSize>(otherRangeLeft, otherRangeRight)),
 			parentRight(otherParentRight) {}
 
+        SEQAN_FUNC
 		VertexEsa(Pair<TSize> const &otherRange, TSize otherParentRight):
 			range(otherRange),
 			parentRight(otherParentRight) {}
 
+        SEQAN_FUNC
 		VertexEsa(VertexEsa const &other):
 			range(other.range),
 			parentRight(other.parentRight) {}
 	};
 	
 	template <typename TSize>
-	inline bool operator==(VertexEsa<TSize> const &a, VertexEsa<TSize> const &b)
+    SEQAN_FUNC bool operator==(VertexEsa<TSize> const &a, VertexEsa<TSize> const &b)
 	{
 		return a.range == b.range;
 	}
 
 	template <typename TSize>
-	inline bool operator!=(VertexEsa<TSize> const &a, VertexEsa<TSize> const &b)
+	SEQAN_FUNC bool operator!=(VertexEsa<TSize> const &a, VertexEsa<TSize> const &b)
 	{
 		return a.range != b.range;
 	}

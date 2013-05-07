@@ -107,18 +107,21 @@ struct VertexSA : public VertexEsa<TSize>
     TSize       repLen;
     TAlphabet   lastChar;
 
+    SEQAN_FUNC
     VertexSA() :
         TBase(),
         repLen(0),
         lastChar(0)
     {}
 
+    SEQAN_FUNC
     VertexSA(MinimalCtor) :
         TBase(MinimalCtor()),
         repLen(0),
         lastChar(0)
     {}
 
+    SEQAN_FUNC
     VertexSA(VertexSA const & other) :
         TBase(other),
         repLen(other.repLen),
@@ -172,7 +175,7 @@ struct EdgeLabel<Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > >
 // ============================================================================
 
 template <typename TText, typename TIndexSpec>
-void _indexRequireTopDownIteration(Index<TText, IndexSa<TIndexSpec> > & index)
+SEQAN_FUNC void _indexRequireTopDownIteration(Index<TText, IndexSa<TIndexSpec> > & index)
 {
     indexRequire(index, EsaSA());
 }
