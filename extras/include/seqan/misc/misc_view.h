@@ -95,7 +95,9 @@ public:
     View &
     operator= (TContainer &other)
     {
-        assign(*this, other);
+//        assign(*this, other);
+        _begin = begin(other, Standard());
+        _end = end(other, Standard());
         return *this;
     }
 
@@ -248,10 +250,7 @@ length(View<TObject, TSpec> const & view)
 
 template <typename TObject, typename TSpec, typename TSize, typename TExpand>
 inline typename Size< View<TObject, TSpec> >::Type
-resize(
-    View<TObject, TSpec> & me,
-    TSize new_length,
-    Tag<TExpand>)
+resize(View<TObject, TSpec> & me, TSize new_length, Tag<TExpand>)
 {
     ignoreUnusedVariableWarning(new_length);
 
@@ -263,13 +262,13 @@ resize(
 // assign()
 // ----------------------------------------------------------------------------
 
-template <typename TObject, typename TSpec, typename TContainer>
-void
-assign(View<TObject, TSpec> &view, TContainer const & cont)
-{
-    view._begin = begin(cont, Standard());
-    view._end = end(cont, Standard());
-}
+//template <typename TObject, typename TSpec, typename TContainer>
+//SEQAN_FUNC void
+//assign(View<TObject, TSpec> & view, TContainer const & cont)
+//{
+//    view._begin = begin(cont, Standard());
+//    view._end = end(cont, Standard());
+//}
 
 // ----------------------------------------------------------------------------
 // operator<<
@@ -277,10 +276,8 @@ assign(View<TObject, TSpec> &view, TContainer const & cont)
 
 template <typename TStream, typename TObject, typename TSpec>
 inline TStream &
-operator<<(TStream & target,
-           View<TObject, TSpec> const & source)
+operator<<(TStream & target, View<TObject, TSpec> const & source)
 {
-SEQAN_CHECKPOINT
     write(target, source);
     return target;
 }
