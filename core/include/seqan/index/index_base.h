@@ -610,12 +610,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreText>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreText>::Type & 
 	getFibre(Index<TText, TSpec> &index, FibreText) {
 		return value(index.text);
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreText>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreText>::Type & 
 	getFibre(Index<TText, TSpec> const &index, FibreText) {
 		return value(index.text);
 	}
@@ -809,7 +809,7 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSeqNo, typename TText, typename TSpec>
-	inline typename Size<Index<TText, TSpec> >::Type 
+	SEQAN_FUNC typename Size<Index<TText, TSpec> >::Type 
 	sequenceLength(TSeqNo seqNo, Index<TText, TSpec> const &index) {
 		return sequenceLength(seqNo, indexText(index));
 	}
@@ -935,11 +935,11 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, FibreSA>::Type>::Type saAt(TPos i, TIndex &index) {
+	SEQAN_FUNC typename Reference<typename Fibre<TIndex, FibreSA>::Type>::Type saAt(TPos i, TIndex &index) {
 		return value(getFibre(index, FibreSA()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, FibreSA>::Type>::Type saAt(TPos i, TIndex const &index) {
+	SEQAN_FUNC typename Reference<typename Fibre<TIndex const, FibreSA>::Type>::Type saAt(TPos i, TIndex const &index) {
 		return value(getFibre(index, FibreSA()), i);
 	}
 
@@ -1075,7 +1075,7 @@ String<char> & text = getFibre(indexEsa, EsaText());
 	}
 
 	template <typename TValue>
-	inline bool _isSizeInval(TValue const &v) {
+	SEQAN_FUNC bool _isSizeInval(TValue const &v) {
 //IOREV _notio_
 		return v == MaxValue<TValue>::VALUE;
 	}
@@ -1094,32 +1094,32 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreText>::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, FibreText()); }
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreText>::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, FibreText()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreText>::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, FibreText()); }
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreText>::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, FibreText()); }
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename StringSetLimits<TText const>::Type
+	SEQAN_FUNC typename StringSetLimits<TText const>::Type
 	stringSetLimits(Index<TText, TSpec> &) { 
 		return Nothing(); 
 	}
 
 	template <typename TText, typename TSpec>
-	inline typename StringSetLimits<TText const>::Type
+	SEQAN_FUNC typename StringSetLimits<TText const>::Type
 	stringSetLimits(Index<TText, TSpec> const &) { 
 		return Nothing(); 
 	}
 
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename StringSetLimits< StringSet<TString, TSSetSpec> const >::Type & 
+	SEQAN_FUNC typename StringSetLimits< StringSet<TString, TSSetSpec> const >::Type & 
 	stringSetLimits(Index<StringSet<TString, TSSetSpec>, TSpec> &index) {
 		return stringSetLimits(indexText(index)); 
 	}
 
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename StringSetLimits< StringSet<TString, TSSetSpec> const >::Type & 
+	SEQAN_FUNC typename StringSetLimits< StringSet<TString, TSSetSpec> const >::Type & 
 	stringSetLimits(Index<StringSet<TString, TSSetSpec>, TSpec> const &index) {
 		return stringSetLimits(indexText(index)); 
 	}

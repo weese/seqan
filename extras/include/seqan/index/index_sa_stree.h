@@ -187,7 +187,7 @@ void _indexRequireTopDownIteration(Index<TText, IndexSa<InfixSegment> > &)
 }
 
 template <typename TText, typename TIndexSpec, typename TSpec>
-inline typename SAValue<Index<TText, IndexSa<TIndexSpec> > >::Type
+SEQAN_FUNC typename SAValue<Index<TText, IndexSa<TIndexSpec> > >::Type
 _lastOccurrence(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > const &it)
 {
     if (_isSizeInval(value(it).range.i2))
@@ -250,8 +250,9 @@ goDownSkipSingletons(Iter<TIndex, VSTree< TopDown<TSpec> > > &it)
 
 // is this a leaf? (hide empty $-edges)
 template <typename TText, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _isLeaf(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > const & it,
-                    VSTreeIteratorTraits<TDfsOrder, True> const)
+SEQAN_FUNC bool
+_isLeaf(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > const & it,
+        VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     typedef Index<TText, IndexSa<TIndexSpec> >                      TIndex;
     typedef typename SAValue<TIndex>::Type                          TOcc;
@@ -269,7 +270,7 @@ inline bool _isLeaf(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TSpec> > con
 }
 
 template <typename TIndex, typename TSize, typename TAlphabet>
-inline typename Size<TIndex>::Type
+SEQAN_FUNC typename Size<TIndex>::Type
 repLength(TIndex const &, VertexSA<TSize, TAlphabet> const & vDesc)
 {
     return vDesc.repLen;
