@@ -34,7 +34,9 @@
 // This file contains the masai_indexer application.
 // ==========================================================================
 
+#ifndef SEQAN_EXTRAS_MASAI_DISABLE_MMAP
 #define SEQAN_EXTRAS_MASAI_DISABLE_MMAP
+#endif
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
