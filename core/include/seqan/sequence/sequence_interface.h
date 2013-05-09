@@ -635,7 +635,7 @@ endPosition(T const & me)
 */
 //* ???Anti Default Sequences
 template <typename T, typename TPos>
-inline typename Reference<T>::Type
+SEQAN_FUNC typename Reference<T>::Type
 value(T & me,
       TPos /*pos*/)
 {
@@ -644,7 +644,7 @@ value(T & me,
 }
 
 template <typename T, typename TPos>
-inline typename Reference<T const>::Type
+SEQAN_FUNC typename Reference<T const>::Type
 value(T const & me,
       TPos /*pos*/)
 {
@@ -753,7 +753,7 @@ front(T const & me)
 */
 
 template <typename T>
-inline typename Reference<T const>::Type
+SEQAN_FUNC typename Reference<T const>::Type
 back(T const & me)
 {
     SEQAN_CHECKPOINT;
@@ -761,7 +761,7 @@ back(T const & me)
 }
 
 template <typename T>
-inline typename Reference<T>::Type
+SEQAN_FUNC typename Reference<T>::Type
 back(T & me)
 {
     SEQAN_CHECKPOINT;

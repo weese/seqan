@@ -388,7 +388,7 @@ stringSetLimits(StringSet<TString, TSpec> const & stringSet)
 
 // TODO(holtgrew): Auto-sequences should go away!
 template <typename TPosition>
-inline TPosition
+SEQAN_FUNC TPosition
 getSeqNo(TPosition const &, Nothing const &)
 {
     return 0;
@@ -396,7 +396,7 @@ getSeqNo(TPosition const &, Nothing const &)
 
 // TODO(holtgrew): Auto-sequences should go away!
 template <typename TPosition>
-inline TPosition
+SEQAN_FUNC TPosition
 getSeqNo(TPosition const &)
 {
     return 0;
@@ -404,14 +404,14 @@ getSeqNo(TPosition const &)
 
 // n sequences (position type is Pair)
 template <typename T1, typename T2, typename TPack, typename TLimitsString>
-inline T1 getSeqNo(Pair<T1, T2, TPack> const & pos, TLimitsString const &)
+SEQAN_FUNC T1 getSeqNo(Pair<T1, T2, TPack> const & pos, TLimitsString const &)
 {
     return getValueI1(pos);
 }
 
 // n sequences (position type is Pair)
 template <typename T1, typename T2, typename TPack>
-inline T1 getSeqNo(Pair<T1, T2, TPack> const & pos)
+SEQAN_FUNC T1 getSeqNo(Pair<T1, T2, TPack> const & pos)
 {
     return getValueI1(pos);
 }
@@ -448,7 +448,7 @@ inline TPos getSeqNo(TPos const & pos, TLimitsString const & limits)
 
 // TODO(holtgrew): Auto-sequences should go away!
 template <typename TPosition>
-inline TPosition
+SEQAN_FUNC TPosition
 getSeqOffset(TPosition const & pos, Nothing const &)
 {
     return pos;
@@ -456,7 +456,7 @@ getSeqOffset(TPosition const & pos, Nothing const &)
 
 // TODO(holtgrew): Auto-sequences should go away!
 template <typename TPosition>
-inline TPosition
+SEQAN_FUNC TPosition
 getSeqOffset(TPosition const & pos)
 {
     return pos;
@@ -464,13 +464,13 @@ getSeqOffset(TPosition const & pos)
 
 // n sequences (position type is Pair)
 template <typename T1, typename T2, typename TPack, typename TLimitsString>
-inline T2 getSeqOffset(Pair<T1, T2, TPack> const & pos, TLimitsString const &) {
+SEQAN_FUNC T2 getSeqOffset(Pair<T1, T2, TPack> const & pos, TLimitsString const &) {
     return getValueI2(pos);
 }
 
 // n sequences (position type is Pair)
 template <typename T1, typename T2, typename TPack>
-inline T2 getSeqOffset(Pair<T1, T2, TPack> const & pos) {
+SEQAN_FUNC T2 getSeqOffset(Pair<T1, T2, TPack> const & pos) {
     return getValueI2(pos);
 }
 
@@ -968,21 +968,21 @@ countSequences(StringSet<TString, TSpec> const & stringSet) {
 // --------------------------------------------------------------------------
 
 template <typename TSeqNo, typename TString>
-inline typename GetSequenceByNo<TString>::Type
+SEQAN_FUNC typename GetSequenceByNo<TString>::Type
 getSequenceByNo(TSeqNo /*seqNo*/, TString & string)
 {
     return string;
 }
 
 template <typename TSeqNo, typename TString, typename TSpec>
-inline typename GetSequenceByNo< StringSet<TString, TSpec> >::Type
+SEQAN_FUNC typename GetSequenceByNo< StringSet<TString, TSpec> >::Type
 getSequenceByNo(TSeqNo seqNo, StringSet<TString, TSpec> & stringSet)
 {
     return stringSet[seqNo];
 }
 
 template <typename TSeqNo, typename TString, typename TSpec>
-inline typename GetSequenceByNo< StringSet<TString, TSpec> const>::Type
+SEQAN_FUNC typename GetSequenceByNo< StringSet<TString, TSpec> const>::Type
 getSequenceByNo(TSeqNo seqNo, StringSet<TString, TSpec> const & stringSet)
 {
     return stringSet[seqNo];
@@ -993,7 +993,7 @@ getSequenceByNo(TSeqNo seqNo, StringSet<TString, TSpec> const & stringSet)
 // --------------------------------------------------------------------------
 
 template <typename TSeqNo, typename TText>
-inline typename Size< typename GetSequenceByNo<TText const>::Type>::Type
+SEQAN_FUNC typename Size< typename GetSequenceByNo<TText const>::Type>::Type
 sequenceLength(TSeqNo seqNo, TText const & text)
 {
     return length(getSequenceByNo(seqNo, text));
