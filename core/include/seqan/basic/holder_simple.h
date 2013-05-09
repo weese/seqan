@@ -155,7 +155,7 @@ struct Holder<TValue, Simple>
 // ----------------------------------------------------------------------------
 
 template <typename TValue>
-inline bool
+SEQAN_FUNC bool
 empty(Holder<TValue, Simple> const & /*me*/)
 {
     SEQAN_CHECKPOINT;
@@ -190,7 +190,7 @@ clear(Holder<TValue, Simple> & /*me*/)
 // ----------------------------------------------------------------------------
 
 template <typename TValue>
-inline void
+SEQAN_FUNC void
 create(Holder<TValue, Simple> & /*me*/)
 {
     SEQAN_CHECKPOINT;
@@ -198,7 +198,7 @@ create(Holder<TValue, Simple> & /*me*/)
 }
 
 template <typename TValue>
-inline void
+SEQAN_FUNC void
 create(Holder<TValue, Simple> & me,
        TValue const & value_)
 {
@@ -207,7 +207,7 @@ create(Holder<TValue, Simple> & me,
 }
 
 template <typename TValue>
-inline void
+SEQAN_FUNC void
 create(Holder<TValue, Simple> & me,
        TValue const & value_,
        Move const &)
