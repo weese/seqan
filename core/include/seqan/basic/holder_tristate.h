@@ -434,14 +434,14 @@ struct Spec<Holder<TValue, Tristate> const>
 // ----------------------------------------------------------------------------
 
 template <typename TValue>
-SEQAN_FUNC typename Reference<Holder<TValue, Tristate> >::Type
+inline typename Reference<Holder<TValue, Tristate> >::Type
 _dataValue(Holder<TValue, Tristate> & me)
 {
     return * me.data_value;
 }
 
 template <typename TValue>
-SEQAN_FUNC typename Reference<Holder<TValue, Tristate> const>::Type
+inline typename Reference<Holder<TValue, Tristate> const>::Type
 _dataValue(Holder<TValue, Tristate> const & me)
 {
     return * me.data_value;
@@ -512,7 +512,7 @@ dependent(Holder<TValue, Tristate> const & me)
 // ----------------------------------------------------------------------------
 
 template <typename THolder, typename TValue>
-SEQAN_FUNC void
+inline void
 _holderDeallocate(THolder & me, TValue const & data)
 {   
     valueDestruct(& data);
@@ -520,7 +520,7 @@ _holderDeallocate(THolder & me, TValue const & data)
 }
 
 template <typename THolder, typename TValue>
-SEQAN_FUNC void
+inline void
 _holderDeallocate(THolder & me, TValue * data, True)                // is a pointer to an *array* of objects
 {
     size_t len = length(data)+1;
@@ -529,13 +529,13 @@ _holderDeallocate(THolder & me, TValue * data, True)                // is a poin
 }
 
 template <typename THolder, typename TValue>
-SEQAN_FUNC void
+inline void
 _holderDeallocate(THolder & /*me*/, TValue * /*data*/, False)               // is a pointer to *one* object
 {
 }
 
 template <typename THolder, typename TValue>
-SEQAN_FUNC void
+inline void
 _holderDeallocate(THolder & me, TValue * data)
 {
     return _holderDeallocate(me, data, IsSimple<TValue>());         // try to distinguish between a pointer to one/array of object(s)
@@ -547,7 +547,7 @@ _holderDeallocate(THolder & me, TValue * data)
 ///the state of this object is set to 'empty'.
 
 template <typename TValue>
-SEQAN_FUNC void
+inline void
 clear(Holder<TValue, Tristate> & me)
 {
     switch (me.data_state) {
@@ -627,7 +627,7 @@ If $object$ is not specified, the action depends on the former state of $holder$
 */
 
 template <typename TValue>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue, Tristate> & me)
 {
     typedef Holder<TValue, Tristate> THolder;
@@ -651,7 +651,7 @@ create(Holder<TValue, Tristate> & me)
 
 #if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue *, Tristate> & me)
 {
     typedef Holder<TValue *, Tristate> THolder;
@@ -671,7 +671,7 @@ create(Holder<TValue *, Tristate> & me)
 }
 
 template <typename TValue>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue * const, Tristate> & me)
 {
     typedef Holder<TValue *, Tristate> THolder;
@@ -692,7 +692,7 @@ create(Holder<TValue * const, Tristate> & me)
 #endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 template <typename TValue, typename TValue2>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue, Tristate> & me,
        TValue2 & value_)
 {
@@ -709,7 +709,7 @@ create(Holder<TValue, Tristate> & me,
 }
 
 template <typename TValue, typename TValue2>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue const, Tristate> & me,
        TValue2 & value_)
 {
@@ -722,7 +722,7 @@ create(Holder<TValue const, Tristate> & me,
 
 #if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue, typename TValue2>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue *, Tristate> & me,
        TValue2 & value_)
 {
@@ -734,7 +734,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TValue, typename TValue2>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue * const, Tristate> & me,
        TValue2 & value_)
 {
@@ -747,7 +747,7 @@ SEQAN_CHECKPOINT
 #endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 template <typename TValue, typename TValue2>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue const, Tristate> & me,
        TValue2 & value_,
        Move const &)
@@ -758,7 +758,7 @@ create(Holder<TValue const, Tristate> & me,
 }
 
 template <typename TValue, typename TValue2>
-SEQAN_FUNC void
+inline void
 create(Holder<TValue, Tristate> & me,
        TValue2 & value_,
        Move const &)
@@ -955,7 +955,7 @@ setValue(Holder<TValue, Tristate> & me,
 ///.Function.value.class:Class.Holder
 
 template <typename TValue>
-SEQAN_FUNC typename Reference<Holder<TValue, Tristate> >::Type
+inline typename Reference<Holder<TValue, Tristate> >::Type
 value(Holder<TValue, Tristate> & me)
 {
     if (empty(me))
@@ -965,11 +965,11 @@ value(Holder<TValue, Tristate> & me)
 }
 
 template <typename TValue>
-SEQAN_FUNC typename Reference<Holder<TValue, Tristate> const>::Type
+inline typename Reference<Holder<TValue, Tristate> const>::Type
 value(Holder<TValue, Tristate> const & me)
 {
     SEQAN_CHECKPOINT;
-//    SEQAN_ASSERT_NOT(empty(me));
+    SEQAN_ASSERT_NOT(empty(me));
 
     return _dataValue(me);
 }
