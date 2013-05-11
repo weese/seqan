@@ -90,8 +90,8 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
     printf("countOccurrences=%i\n", countOccurrences(it));
     printf("isLeaf=%i\n", isLeaf(it));
     printf("repLength=%i\n", repLength(it));
-//    printf("goDown=%i\n", goDown(it));
-//    printf("repLength=%i\n", repLength(it));
+    printf("goDown=%i\n", goDown(it));
+    printf("repLength=%i\n", repLength(it));
 
 //    parentEdgeLabel(it);
 //    representative(it);
