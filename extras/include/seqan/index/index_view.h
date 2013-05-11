@@ -85,6 +85,40 @@ struct FibreTextMember_<Index<View<TText, TViewSpec>, TSpec> >
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function getFibre()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreText>::Type &
+getFibre(Index<View<TText, TViewSpec>, TSpec> &index, FibreText) {
+    return index.text;
+}
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreText>::Type &
+getFibre(Index<View<TText, TViewSpec>, TSpec> const &index, FibreText) {
+    return index.text;
+}
+
+// ----------------------------------------------------------------------------
+// Function indexText()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreText>::Type &
+indexText(Index<View<TText, TViewSpec>, TSpec> & index)
+{
+    return getFibre(index, FibreText());
+}
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreText>::Type &
+indexText(Index<View<TText, TViewSpec>, TSpec> const & index)
+{
+    return getFibre(index, FibreText());
+}
+
+// ----------------------------------------------------------------------------
 // Function indexRequire()
 // ----------------------------------------------------------------------------
 
