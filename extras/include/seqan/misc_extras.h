@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,38 +29,24 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// Facade header for module index.
+// Facade header for module misc.
 // ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_INDEX_H_
-#define EXTRAS_INCLUDE_SEQAN_INDEX_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_MISC_H_
+#define EXTRAS_INCLUDE_SEQAN_MISC_H_
 
 // ===========================================================================
 // Prerequisites.
 // ===========================================================================
 
-#include <seqan/basic.h>
-#include <seqan/file.h>
-#include <seqan/index.h>
+#include <seqan/misc.h>
 
 // ===========================================================================
-// Extra VSTree Iterators.
+// Views.
 // ===========================================================================
 
-#include <seqan/index/index_sa_stree.h>
-#include <seqan/index/index_sa_truncated.h>
+#include <seqan/misc/misc_view.h>
 
-#include <seqan/index/index_qgram_stree.h>
-#include <seqan/index/index_qgram_bucketrefinement.h>
-
-// ===========================================================================
-// Backtracking Finders.
-// ===========================================================================
-
-#include <seqan/index/find_backtracking.h>
-#include <seqan/index/find_backtracking_exp.h>
-
-#endif  // EXTRAS_INCLUDE_SEQAN_INDEX_H_
+#endif  // EXTRAS_INCLUDE_SEQAN_MISC_H_
