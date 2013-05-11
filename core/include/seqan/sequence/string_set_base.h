@@ -1412,7 +1412,7 @@ For all other StringSets a @Class.ConcatenatorManyToOne@ object is returned.
 
 // TODO(holtgrew): Why default concat() for any class?
 template <typename TString>
-inline typename Concatenator<TString>::Type &
+SEQAN_FUNC typename Concatenator<TString>::Type &
 concat(TString & string)
 {
     return string;
@@ -1420,7 +1420,7 @@ concat(TString & string)
 
 // TODO(holtgrew): Why default concat() for any class?
 template <typename TString>
-inline typename Concatenator<TString const>::Type &
+SEQAN_FUNC typename Concatenator<TString const>::Type &
 concat(TString const & string)
 {
     return string;
