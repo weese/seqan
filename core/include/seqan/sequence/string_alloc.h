@@ -249,7 +249,7 @@ swap(String<TValue, Alloc<TSpec> > & a,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
+SEQAN_FUNC typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
 begin(String<TValue, Alloc<TSpec> > & me,
       Standard)
 {
@@ -257,7 +257,7 @@ begin(String<TValue, Alloc<TSpec> > & me,
     return me.data_begin;
 }
 template <typename TValue, typename TSpec>
-inline typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
+SEQAN_FUNC typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
 begin(String<TValue, Alloc<TSpec> > const & me,
       Standard)
 {
@@ -270,7 +270,7 @@ begin(String<TValue, Alloc<TSpec> > const & me,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
+SEQAN_FUNC typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
 end(String<TValue, Alloc<TSpec> > & me,
     Standard const &)
 {
@@ -278,7 +278,7 @@ end(String<TValue, Alloc<TSpec> > & me,
     return me.data_end;
 }
 template <typename TValue, typename TSpec>
-inline typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
+SEQAN_FUNC typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
 end(String<TValue, Alloc<TSpec> > const & me,
     Standard const & )
 {

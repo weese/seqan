@@ -294,7 +294,7 @@ shareResources(T1 const & obj1,
 //* ???Anti Default Sequences
 // TODO(holtgrew): Evil -- each value is a container of length 1.
 template <typename T>
-inline typename Iterator<T, Standard>::Type
+SEQAN_FUNC typename Iterator<T, Standard>::Type
 _beginDefault(T & me,
                Standard)
 {
@@ -303,7 +303,7 @@ _beginDefault(T & me,
 }
 // TODO(holtgrew): Evil -- each value is a container of length 1.
 template <typename T>
-inline typename Iterator<T const, Standard>::Type
+SEQAN_FUNC typename Iterator<T const, Standard>::Type
 _beginDefault(T const & me,
                Standard)
 {
@@ -313,7 +313,7 @@ _beginDefault(T const & me,
 //*/
 
 template <typename T>
-inline typename Iterator<T, Rooted>::Type
+SEQAN_FUNC typename Iterator<T, Rooted>::Type
 _beginDefault(T & me,
                Rooted)
 {
@@ -322,7 +322,7 @@ _beginDefault(T & me,
     return TIterator(me, begin(me, Standard()));
 }
 template <typename T>
-inline typename Iterator<T const, Rooted>::Type
+SEQAN_FUNC typename Iterator<T const, Rooted>::Type
 _beginDefault(T const & me,
                Rooted)
 {
@@ -356,7 +356,7 @@ _beginDefault(T const & me,
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
+SEQAN_FUNC typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
 begin(T & me)
 {
     SEQAN_CHECKPOINT;
@@ -364,7 +364,7 @@ begin(T & me)
 }
 
 template <typename T>
-inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
+SEQAN_FUNC typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
 begin(T const & me)
 {
     SEQAN_CHECKPOINT;
@@ -374,12 +374,12 @@ begin(T const & me)
 //folgende forward Deklaration wurde wegen Phaenomene bei VC++ 2003 hinzugenommen
 //implemented in string_pointer.h
 template <typename TValue>
-inline typename Iterator<TValue const *, Standard>::Type
+SEQAN_FUNC typename Iterator<TValue const *, Standard>::Type
 begin(TValue const * me,
       Standard);
 
 template <typename T, typename TSpec>
-inline typename Iterator<T, Tag<TSpec> const>::Type
+SEQAN_FUNC typename Iterator<T, Tag<TSpec> const>::Type
 begin(T & me,
       Tag<TSpec> const tag_)
 {
@@ -387,7 +387,7 @@ begin(T & me,
     return _beginDefault(me, tag_);
 }
 template <typename T, typename TSpec>
-inline typename Iterator<T const, Tag<TSpec> const>::Type
+SEQAN_FUNC typename Iterator<T const, Tag<TSpec> const>::Type
 begin(T const & me,
       Tag<TSpec> const tag_)
 {
@@ -486,7 +486,7 @@ beginPosition(T const &)
 
 //* ???Anti Default Sequences
 template <typename T>
-inline typename Iterator<T, Standard>::Type
+SEQAN_FUNC typename Iterator<T, Standard>::Type
 _endDefault(T & me,
              Standard)
 {
@@ -494,7 +494,7 @@ _endDefault(T & me,
     return (& me) + 1;
 }
 template <typename T>
-inline typename Iterator<T const, Standard>::Type
+SEQAN_FUNC typename Iterator<T const, Standard>::Type
 _endDefault(T const & me,
              Standard)
 {
@@ -547,7 +547,7 @@ _endDefault(T const & me,
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
+SEQAN_FUNC typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
 end(T & me)
 {
     SEQAN_CHECKPOINT;
@@ -555,7 +555,7 @@ end(T & me)
 }
 
 template <typename T>
-inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
+SEQAN_FUNC typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
 end(T const & me)
 {
     SEQAN_CHECKPOINT;
@@ -563,7 +563,7 @@ end(T const & me)
 }
 
 template <typename T, typename TSpec>
-inline typename Iterator<T, Tag<TSpec> const>::Type
+SEQAN_FUNC typename Iterator<T, Tag<TSpec> const>::Type
 end(T & me,
     Tag<TSpec> const tag_)
 {
@@ -572,7 +572,7 @@ end(T & me,
 }
 
 template <typename T, typename TSpec>
-inline typename Iterator<T const, Tag<TSpec> const>::Type
+SEQAN_FUNC typename Iterator<T const, Tag<TSpec> const>::Type
 end(T const & me,
     Tag<TSpec> const tag_)
 {

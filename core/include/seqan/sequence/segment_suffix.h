@@ -104,6 +104,7 @@ If $begin$ is omitted, the suffix segment corresponding to
 the whole sequence $host$ is constructed.
 This is the same segment that is returned by @Function.goBegin@.
 */
+    SEQAN_FUNC
     Segment():
         data_host(),
         data_begin_position(0)
@@ -154,6 +155,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
     }
 
+    SEQAN_FUNC
     ~ Segment()
     {
 SEQAN_CHECKPOINT
@@ -201,7 +203,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost_>
-inline typename Parameter_<THost_>::Type
+SEQAN_FUNC typename Parameter_<THost_>::Type
 host(Segment<THost_, SuffixSegment> & me)
 {
 SEQAN_CHECKPOINT
@@ -209,7 +211,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THost_>
-inline typename Parameter_<THost_>::Type
+SEQAN_FUNC typename Parameter_<THost_>::Type
 host(Segment<THost_, SuffixSegment> const & me)
 {
 SEQAN_CHECKPOINT
@@ -237,7 +239,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename THost_>
-inline typename Iterator<Segment<THost_, SuffixSegment>, Standard>::Type
+SEQAN_FUNC typename Iterator<Segment<THost_, SuffixSegment>, Standard>::Type
 begin(Segment<THost_, SuffixSegment> & me,
     Standard)
 {
@@ -245,7 +247,7 @@ SEQAN_CHECKPOINT
     return begin(host(me), Standard()) + me.data_begin_position;
 }
 template <typename THost_>
-inline typename Iterator<Segment<THost_, SuffixSegment> const, Standard>::Type
+SEQAN_FUNC typename Iterator<Segment<THost_, SuffixSegment> const, Standard>::Type
 begin(Segment<THost_, SuffixSegment> const & me,
     Standard)
 {

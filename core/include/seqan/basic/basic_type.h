@@ -345,21 +345,21 @@ struct Parameter_<T [I]>
 
 template <typename T>
 typename Parameter_<T>::Type
-inline _toParameter(T * _object)
+SEQAN_FUNC _toParameter(T * _object)
 {
     return * _object;
 }
 
 template <typename T>
 typename Parameter_<T>::Type
-inline _toParameter(T & _object)
+SEQAN_FUNC _toParameter(T & _object)
 {
     return _object;
 }
 
 template <typename T>
 typename Parameter_<T const>::Type
-inline _toParameter(T const & _object)
+SEQAN_FUNC _toParameter(T const & _object)
 {
     return _object;
 }
@@ -481,14 +481,14 @@ struct NonConstPointer_<T * const>
 // TODO(holtgrew): Really required?
 
 template <typename T>
-typename NonConstPointer_<T>::Type
+SEQAN_FUNC typename NonConstPointer_<T>::Type
 _toPointer(T & _object)
 {
 SEQAN_CHECKPOINT
     return & _object;
 }
 template <typename T>
-typename NonConstPointer_<T const>::Type
+SEQAN_FUNC typename NonConstPointer_<T const>::Type
 _toPointer(T const & _object)
 {
 SEQAN_CHECKPOINT
@@ -496,7 +496,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T>
-typename NonConstPointer_<T *>::Type
+SEQAN_FUNC typename NonConstPointer_<T *>::Type
 _toPointer(T * _object)
 {
 SEQAN_CHECKPOINT

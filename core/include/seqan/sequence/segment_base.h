@@ -335,14 +335,14 @@ SEQAN_CHECKPOINT
 // --------------------------------------------------------------------------
 
 template <typename THost, typename TSpec>
-inline typename Pointer_<Segment<THost, TSpec> >::Type
+SEQAN_FUNC typename Pointer_<Segment<THost, TSpec> >::Type
 _toPointer(Segment<THost, TSpec> & me)
 {
     return me;
 }
 
 template <typename THost, typename TSpec>
-inline typename Pointer_<Segment<THost, TSpec> const >::Type
+SEQAN_FUNC typename Pointer_<Segment<THost, TSpec> const >::Type
 _toPointer(Segment<THost, TSpec> const & me)
 {
     return me;

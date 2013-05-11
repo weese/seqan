@@ -90,6 +90,7 @@ public:
     // Constructors
     // ------------------------------------------------------------------------
 
+    SEQAN_FUNC
     Iter() : data_container()
     {
         data_iterator = TIterator();
@@ -106,6 +107,7 @@ public:
     }
     */
 
+    SEQAN_FUNC
     Iter(typename Parameter_<TContainer>::Type container_, TIterator it_)
             : data_container(_toPointer(container_)),
               data_iterator(it_)
@@ -113,6 +115,7 @@ public:
         SEQAN_CHECKPOINT;
     }
 
+    SEQAN_FUNC
     Iter(Iter const & other_)
             : data_container(other_.data_container),
               data_iterator(other_.data_iterator)
@@ -122,6 +125,7 @@ public:
 
     // TODO(holtgrew): Use this technique to the other Iter specializations.
     template <typename TContainer_, typename TIterator2>
+    SEQAN_FUNC
     Iter(Iter<TContainer_, AdaptorIterator<TIterator2, TSpec> > const & other,
          SEQAN_CTOR_ENABLE_IF(IsSameType<TContainer, TContainer_ const>)) :
             data_container(other.data_container), data_iterator(other.data_iterator)
