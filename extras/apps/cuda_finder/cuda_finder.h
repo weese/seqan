@@ -72,26 +72,26 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-    printf("lengthSA=%td\n", length(indexSA(index)));
+    printf("lengthSA=%ld\n", length(indexSA(index)));
     for (unsigned i = 0; i < length(indexSA(index)); ++i)
-        printf("%td\n", indexSA(index)[i]);
+        printf("%ld\n", indexSA(index)[i]);
 
-    printf("lengthLcp=%td\n", length(indexLcp(index)));
+    printf("lengthLcp=%ld\n", length(indexLcp(index)));
     for (unsigned i = 0; i < length(indexLcp(index)); ++i)
-        printf("%td\n", indexLcp(index)[i]);
+        printf("%ld\n", indexLcp(index)[i]);
 
-    printf("lengthChildtab=%td\n", length(indexChildtab(index)));
+    printf("lengthChildtab=%ld\n", length(indexChildtab(index)));
     for (unsigned i = 0; i < length(indexChildtab(index)); ++i)
-        printf("%td\n", indexChildtab(index)[i]);
+        printf("%ld\n", indexChildtab(index)[i]);
 
     TIterator it(index);
 
     printf("isRoot=%d\n", isRoot(it));
-    printf("countOccurrences=%td\n", countOccurrences(it));
+    printf("countOccurrences=%ld\n", countOccurrences(it));
     printf("isLeaf=%d\n", isLeaf(it));
-    printf("repLength=%td\n", repLength(it));
+    printf("repLength=%ld\n", repLength(it));
     printf("goDown=%d\n", goDown(it));
-    printf("repLength=%td\n", repLength(it));
+    printf("repLength=%ld\n", repLength(it));
 
 //    parentEdgeLabel(it);
 //    representative(it);
