@@ -606,11 +606,11 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TText, typename TSpec>
-	inline Holder<TText> & _dataHost(Index<TText, TSpec> &index) {
+	inline Reference<FibreTextMember_<Index<TText, TSpec> > > _dataHost(Index<TText, TSpec> & index) {
 		return index.text;
 	}
 	template <typename TText, typename TSpec>
-	inline Holder<TText> const & _dataHost(Index<TText, TSpec> const &index) {
+	inline Reference<FibreTextMember_<Index<TText, TSpec> > const> & _dataHost(Index<TText, TSpec> const &index) {
 		return index.text;
 	}
 
