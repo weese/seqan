@@ -118,6 +118,8 @@ int main(int argc, char const ** argv)
     // Create index.
     TIndex index(text);
     indexCreate(index, FibreSA());
+    indexCreate(index, FibreLcp());
+    indexCreate(index, FibreChildtab());
 
     // Copy index to device.
     TDeviceIndex deviceIndex(deviceText);
