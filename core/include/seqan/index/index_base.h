@@ -757,7 +757,7 @@ String<char> & text = getFibre(indexEsa, EsaText());
 ///.Function.length.remarks:If $object$ is of type @Class.Index@, the number of characters in the raw underlying text of the index is returned.
 
 	template <typename TText, typename TSpec>
-	inline typename Size<Index<TText, TSpec> >::Type 
+	SEQAN_FUNC typename Size<Index<TText, TSpec> >::Type 
 	length(Index<TText, TSpec> const &index) {
 		return length(indexRawText(index));
 	}

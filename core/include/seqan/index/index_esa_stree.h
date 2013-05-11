@@ -1249,7 +1249,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 */
 
 	template < typename TIndex, class TSpec >
-	inline bool
+	SEQAN_FUNC bool
 	nodeHullPredicate(Iter<TIndex, TSpec> &)
 	{
 		return true;
@@ -1451,7 +1451,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		value(it).parentRight = value(it).range.i2;
 	}
 */	template < typename TText, class TIndexSpec, class TSpec >
-	inline void 
+	SEQAN_FUNC void 
 	_historyPush(Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) 
 	{
 		it._parentDesc = value(it);
@@ -1472,13 +1472,13 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	// standard down/right/up handlers of top-down-traversal
 	template < typename TIndex, typename TSpec >
-	inline void _onGoDown(Iter<TIndex, VSTree< TopDown<TSpec> > > &) {}
+	SEQAN_FUNC void _onGoDown(Iter<TIndex, VSTree< TopDown<TSpec> > > &) {}
 
 	template < typename TIndex, typename TSpec >
-	inline void _onGoRight(Iter<TIndex, VSTree< TopDown<TSpec> > > &) {}
+	SEQAN_FUNC void _onGoRight(Iter<TIndex, VSTree< TopDown<TSpec> > > &) {}
 
 	template < typename TIndex, typename TSpec >
-	inline void _onGoUp(Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &) {}
+	SEQAN_FUNC void _onGoUp(Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &) {}
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -1486,7 +1486,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	// go down the leftmost edge (including empty $-edges)
 	template < typename TText, class TIndexSpec, class TSpec, typename TDfsOrder >
-	inline bool _goDown(
+	SEQAN_FUNC bool _goDown(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
@@ -1512,7 +1512,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
     
     template <typename TIndex, typename TSpec, typename TVertexDesc>
-    inline void
+    SEQAN_FUNC void
     _setParentNodeDescriptor(Iter<TIndex, VSTree< TopDown<TSpec> > > &it,
                              TVertexDesc const &desc)
     {
@@ -1528,7 +1528,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
     
 	// go down the leftmost edge (skip empty $-edges)
 	template < typename TText, class TIndexSpec, class TSpec, typename TDfsOrder >
-	inline bool _goDown(
+	SEQAN_FUNC bool _goDown(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
@@ -1582,7 +1582,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	// go down the leftmost edge
 	template < typename TIndex, class TSpec >
-	inline bool goDown(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) {
+	SEQAN_FUNC bool goDown(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) {
 		if (_goDown(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree< TopDown<TSpec> > > >::Type())) {
 			_onGoDown(it);
 			return true;
@@ -1718,7 +1718,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// go up one edge (returns false if in root node)
 	// can be used at most once, as no history stack is available
 	template < typename TIndex, class TSpec >
-	inline bool 
+	SEQAN_FUNC bool 
 	_goUp(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) 
 	{
 		if (!isRoot(it)) {
@@ -1785,7 +1785,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 	// nodeUp adaption for non-history iterators
 	// ATTENTION: Do not call nodeUp after a goDown that returned false (or after _goUp)!
 	template < typename TIndex, class TSpec >
-	inline typename VertexDescriptor<TIndex>::Type const &
+	SEQAN_FUNC typename VertexDescriptor<TIndex>::Type const &
 	nodeUp(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it) 
 	{
 		return it._parentDesc;
@@ -1806,7 +1806,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 
 	// go right to the lexic. next sibling
 	template < typename TText, class TIndexSpec, class TSpec, typename TDfsOrder, typename THideEmptyEdges >
-	inline bool _goRight(
+	SEQAN_FUNC bool _goRight(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it, 
 		VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges> const) 
 	{
@@ -1836,7 +1836,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 
 	// go down the leftmost edge
 	template < typename TIndex, class TSpec >
-	inline bool goRight(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) {
+	SEQAN_FUNC bool goRight(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) {
 		if (_goRight(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree< TopDown<TSpec> > > >::Type())) {
 			_onGoRight(it);
 			return true;
