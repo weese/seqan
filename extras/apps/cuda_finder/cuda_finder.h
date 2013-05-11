@@ -58,13 +58,13 @@ using namespace seqan;
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// Function findOnGPU()
+// Function findCUDA()
 // --------------------------------------------------------------------------
 
 #ifdef __CUDACC__
 template <typename TText, typename TViewSpec, typename TSpec>
 __global__ void
-findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
+findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
 {
     typedef Index<View<TText, TViewSpec>, TSpec>        TIndex;
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
@@ -78,12 +78,11 @@ findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
 
     TIterator it(index);
 
-    printf("l=%u\n", it.vDesc.range.i1);
-    printf("r=%u\n", it.vDesc.range.i2);
-
     printf("isRoot=%i\n", isRoot(it));
     printf("countOccurrences=%i\n", countOccurrences(it));
     printf("isLeaf=%i\n", isLeaf(it));
+    printf("repLength=%i\n", repLength(it));
+    printf("goDown=%i\n", goDown(it));
     printf("repLength=%i\n", repLength(it));
 }
 #endif
@@ -97,8 +96,8 @@ int main(int argc, char const ** argv)
     typedef CharString                                  TText;
     typedef thrust::device_vector<char>                 TDeviceText;
 
-    typedef Index<TText, IndexSa<> >                    TIndex;
-    typedef Index<TDeviceText, IndexSa<> >              TDeviceIndex;
+    typedef Index<TText, IndexEsa<> >                   TIndex;
+    typedef Index<TDeviceText, IndexEsa<> >             TDeviceIndex;
 
     // Create text and copy it to device.
     TText text("text");
@@ -114,10 +113,8 @@ int main(int argc, char const ** argv)
     indexSA(deviceIndex).resize(length(indexSA(index)));
     thrust::copy(begin(indexSA(index), Standard()), end(indexSA(index), Standard()), indexSA(deviceIndex).begin());
 
-    int block_size = 1;
-    int n_blocks = 1;
-
-    findOnGPU<<< n_blocks, block_size >>>(toView(deviceIndex));
+    // Find on GPU.
+    findCUDA<<< 1,1 >>>(toView(deviceIndex));
     cudaDeviceSynchronize();
 
     return 0;
