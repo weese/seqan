@@ -47,6 +47,15 @@
 #include <seqan/index.h>
 
 // ===========================================================================
+// Prerequisites from extras.
+// ===========================================================================
+
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
+#include <seqan/misc_extras.h>
+#include <seqan/find_extras.h>
+
+// ===========================================================================
 // Extra VSTree Iterators.
 // ===========================================================================
 
@@ -62,5 +71,11 @@
 
 #include <seqan/index/find_backtracking.h>
 #include <seqan/index/find_backtracking_exp.h>
+
+// ===========================================================================
+// Index Views.
+// ===========================================================================
+
+#include <seqan/index/index_view.h>
 
 #endif  // EXTRAS_INCLUDE_SEQAN_INDEX_H_

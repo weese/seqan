@@ -38,10 +38,11 @@
 #define EXTRAS_INCLUDE_SEQAN_MISC_H_
 
 // ===========================================================================
-// Prerequisites.
+// Prerequisites from extras.
 // ===========================================================================
 
-#include <seqan/misc.h>
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
 
 // ===========================================================================
 // Views.
