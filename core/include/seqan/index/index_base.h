@@ -1262,6 +1262,15 @@ String<char> & text = getFibre(indexEsa, EsaText());
 	template <typename TText, typename TSpec>
 	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & indexChildtab(Index<TText, TSpec> const &index) { return getFibre(index, FibreChildtab()); }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+    template <typename TText, typename TSpec, typename TText2, typename TSpec2>
+    inline void
+    assign(Index<TText, TSpec> & index, Index<TText2, TSpec2> & source)
+    {
+        assign(indexText(index), indexText(source));
+    }
 }
 
 #endif

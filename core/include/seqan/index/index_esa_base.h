@@ -327,6 +327,18 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		clear(getFibre(index, EsaBwt()));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+// assign
+
+    template <typename TText, typename TSpec, typename TText2, typename TSpec2>
+    inline void
+    assign(Index<TText, IndexEsa<TSpec> > & index, Index<TText2, IndexEsa<TSpec2> > & source)
+    {
+        assign(indexText(index), indexText(source));
+        assign(indexSA(index), indexSA(source));
+        assign(indexLcp(index), indexLcp(source));
+        assign(indexChildtab(index), indexChildtab(source));
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 // open
