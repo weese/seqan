@@ -504,7 +504,7 @@ _endDefault(T const & me,
 //*/
 
 template <typename T>
-inline typename Iterator<T, Rooted>::Type
+SEQAN_FUNC typename Iterator<T, Rooted>::Type
 _endDefault(T & me,
              Rooted)
 {
@@ -513,7 +513,7 @@ _endDefault(T & me,
     return TIterator(me, end(me, Standard()));
 }
 template <typename T>
-inline typename Iterator<T const, Rooted>::Type
+SEQAN_FUNC typename Iterator<T const, Rooted>::Type
 _endDefault(T const & me,
              Rooted)
 {
