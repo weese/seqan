@@ -216,10 +216,9 @@ struct StdContainerIterator< thrust::device_vector<TChar, TAlloc> const>
 ///.Function.getObjectId.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc>
-SEQAN_FUNC void const *
+inline void const *
 getObjectId(thrust::device_vector<TChar, TAlloc> const & me)
 {
-    SEQAN_CHECKPOINT;
     if (me.empty())
         return NULL;
     else
@@ -230,19 +229,17 @@ getObjectId(thrust::device_vector<TChar, TAlloc> const & me)
 ///.Function.begin.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc>
-SEQAN_FUNC typename Iterator< thrust::device_vector<TChar,  TAlloc>, Standard>::Type
+inline typename Iterator< thrust::device_vector<TChar,  TAlloc>, Standard>::Type
 begin(thrust::device_vector<TChar,  TAlloc> & me,
       Standard)
 {
-    SEQAN_CHECKPOINT;
     return typename Iterator< thrust::device_vector<TChar,  TAlloc>, Standard>::Type(me.begin());
 }
 template <typename TChar,  typename TAlloc>
-SEQAN_FUNC typename Iterator< thrust::device_vector<TChar,  TAlloc> const, Standard>::Type
+inline typename Iterator< thrust::device_vector<TChar,  TAlloc> const, Standard>::Type
 begin(thrust::device_vector<TChar, TAlloc> const & me,
       Standard)
 {
-    SEQAN_CHECKPOINT;
     return typename Iterator< thrust::device_vector<TChar,  TAlloc> const, Standard>::Type(me.begin());
 }
 
@@ -250,19 +247,17 @@ begin(thrust::device_vector<TChar, TAlloc> const & me,
 ///.Function.end.class:Adaption.thrust::device_vector
 
 template <typename TChar, typename TAlloc>
-SEQAN_FUNC typename Iterator< thrust::device_vector<TChar, TAlloc>, Standard>::Type
+inline typename Iterator< thrust::device_vector<TChar, TAlloc>, Standard>::Type
 end(thrust::device_vector<TChar,  TAlloc> & me,
     Standard)
 {
-    SEQAN_CHECKPOINT;
     return typename Iterator< thrust::device_vector<TChar, TAlloc>, Standard>::Type(me.end());
 }
 template <typename TChar,  typename TAlloc>
-SEQAN_FUNC typename Iterator< thrust::device_vector<TChar,  TAlloc> const, Standard>::Type
+inline typename Iterator< thrust::device_vector<TChar,  TAlloc> const, Standard>::Type
 end(thrust::device_vector<TChar,  TAlloc> const & me,
     Standard)
 {
-    SEQAN_CHECKPOINT;
     return typename Iterator< thrust::device_vector<TChar,  TAlloc> const, Standard>::Type(me.end());
 }
 
@@ -270,19 +265,17 @@ end(thrust::device_vector<TChar,  TAlloc> const & me,
 ///.Function.value.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc, typename TPos>
-SEQAN_FUNC typename GetValue< thrust::device_vector<TChar, TAlloc> >::Type
+inline typename GetValue< thrust::device_vector<TChar, TAlloc> >::Type
 value(thrust::device_vector<TChar,  TAlloc> & me,
       TPos pos)
 {
-    SEQAN_CHECKPOINT;
     return me[pos];
 }
 template <typename TChar,  typename TAlloc, typename TPos>
-SEQAN_FUNC typename GetValue< thrust::device_vector<TChar,  TAlloc> const>::Type
+inline typename GetValue< thrust::device_vector<TChar,  TAlloc> const>::Type
 value(thrust::device_vector<TChar, TAlloc> const & me,
       TPos pos)
 {
-    SEQAN_CHECKPOINT;
     return me[pos];
 }
 
@@ -290,10 +283,9 @@ value(thrust::device_vector<TChar, TAlloc> const & me,
 ///.Function.value.class:Adaption.thrust::device_vector
 
 template <typename TChar, typename TAlloc>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar, TAlloc> >::Type
+inline typename Size< thrust::device_vector<TChar, TAlloc> >::Type
 length(thrust::device_vector<TChar, TAlloc> const & me)
 {
-    SEQAN_CHECKPOINT;
     return me.size();
 }
 
@@ -301,10 +293,9 @@ length(thrust::device_vector<TChar, TAlloc> const & me)
 ///.Function.capacity.class:Adaption.thrust::device_vector
 
 template <typename TChar, typename TAlloc>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar, TAlloc> >::Type
+inline typename Size< thrust::device_vector<TChar, TAlloc> >::Type
 capacity(thrust::device_vector<TChar, TAlloc> const & me)
 {
-    SEQAN_CHECKPOINT;
     return me.capacity();
 }
 
@@ -312,10 +303,9 @@ capacity(thrust::device_vector<TChar, TAlloc> const & me)
 ///.Function.empty.class:Adaption.thrust::device_vector
 
 template <typename TChar, typename TAlloc>
-SEQAN_FUNC bool
+inline bool
 empty(thrust::device_vector<TChar, TAlloc> const & me)
 {
-    SEQAN_CHECKPOINT;
     return me.empty();
 }
 
@@ -323,10 +313,9 @@ empty(thrust::device_vector<TChar, TAlloc> const & me)
 ///.Function.clear.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc>
-SEQAN_FUNC void
+inline void
 clear(thrust::device_vector<TChar, TAlloc> & me)
 {
-    SEQAN_CHECKPOINT;
     me.clear();
 }
 
@@ -334,18 +323,16 @@ clear(thrust::device_vector<TChar, TAlloc> & me)
 ///.Function.front.class:Adaption.thrust::device_vector
 
 template <typename TChar>
-SEQAN_FUNC typename Reference<thrust::device_vector<TChar> >::Type
+inline typename Reference<thrust::device_vector<TChar> >::Type
 front(thrust::device_vector<TChar> & list)
 {
-    SEQAN_CHECKPOINT;
     return list.front();
 }
 
 template <typename TChar>
-SEQAN_FUNC typename Reference<thrust::device_vector<TChar> const>::Type
+inline typename Reference<thrust::device_vector<TChar> const>::Type
 front(thrust::device_vector<TChar> const & list)
 {
-    SEQAN_CHECKPOINT;
     return list.front();
 }
 
@@ -353,18 +340,16 @@ front(thrust::device_vector<TChar> const & list)
 ///.Function.back.class:Adaption.thrust::device_vector
 
 template <typename TChar>
-SEQAN_FUNC typename Reference<thrust::device_vector<TChar> >::Type
+inline typename Reference<thrust::device_vector<TChar> >::Type
 back(thrust::device_vector<TChar> & list)
 {
-    SEQAN_CHECKPOINT;
     return list.back();
 }
 
 template <typename TChar>
-SEQAN_FUNC typename Reference<thrust::device_vector<TChar> const>::Type
+inline typename Reference<thrust::device_vector<TChar> const>::Type
 back(thrust::device_vector<TChar> const & list)
 {
-    SEQAN_CHECKPOINT;
     return list.back();
 }
 
@@ -375,70 +360,63 @@ back(thrust::device_vector<TChar> const & list)
 ///.Function.assign.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource & source)
 {
-    SEQAN_CHECKPOINT;
     assign(target, source, Generous());
 }
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource const & source)
 {
-    SEQAN_CHECKPOINT;
     assign(target, source, Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource & source,
        TSize limit)
 {
-    SEQAN_CHECKPOINT;
     assign(target, source, limit, Generous());
 }
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource const & source,
        TSize limit)
 {
-    SEQAN_CHECKPOINT;
     assign(target, source, limit, Generous());
 }
 
 //____________________________________________________________________________
 
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar, TAlloc> & target,
        TSource & source,
        Generous)
 {
-    SEQAN_CHECKPOINT;
     target.assign(begin(source, Standard()), end(source, Standard()));
 }
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar, TAlloc> & target,
        TSource const & source,
        Generous)
 {
-    SEQAN_CHECKPOINT;
     target.assign(begin(source, Standard()), end(source, Standard()));
 }
 
 
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign_std_vector_Generous_impl(thrust::device_vector<TChar,  TAlloc> & target,
                                 TSource & source,
                                 typename Size< thrust::device_vector<TChar,  TAlloc> >::Type limit)
 {
-    SEQAN_CHECKPOINT;
     typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
     typename Size<TSource const>::Type source_length = length(source);
     if (source_length > limit)
@@ -448,55 +426,50 @@ assign_std_vector_Generous_impl(thrust::device_vector<TChar,  TAlloc> & target,
     target.assign(source_begin, source_begin + source_length);
 }
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource & source,
        typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
        Generous)
 {
-    SEQAN_CHECKPOINT;
     assign_std_vector_Generous_impl(target, source, limit);
 }
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar, TAlloc> & target,
        TSource const & source,
        typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
        Generous)
 {
-    SEQAN_CHECKPOINT;
     assign_std_vector_Generous_impl(target, source, limit);
 }
 
 //____________________________________________________________________________
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource & source,
        Limit)
 {
-    SEQAN_CHECKPOINT;
     assign(target, source, target.capacity(), Generous());
 }
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource const & source,
        Limit)
 {
-    SEQAN_CHECKPOINT;
     assign(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar, TAlloc> & target,
        TSource & source,
        typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
        Limit)
 {
-    SEQAN_CHECKPOINT;
     if (limit > target.capacity())
     {
         limit = target.capacity();
@@ -505,13 +478,12 @@ assign(thrust::device_vector<TChar, TAlloc> & target,
     assign(target, source, limit, Generous());
 }
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 assign(thrust::device_vector<TChar,  TAlloc> & target,
        TSource const & source,
        typename Size< thrust::device_vector<TChar,  TAlloc> >::Type limit,
        Limit)
 {
-    SEQAN_CHECKPOINT;
     if (limit > target.capacity())
     {
         limit = target.capacity();
@@ -527,23 +499,21 @@ assign(thrust::device_vector<TChar,  TAlloc> & target,
 ///.Function.append.class:Adaption.thrust::device_vector
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 append(thrust::device_vector<TChar,  TAlloc> & target,
        TSource const & source,
        Generous)
 {
-    SEQAN_CHECKPOINT;
     target.insert(target.end(), begin(source, Standard()), end(source, Standard()));
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 append(thrust::device_vector<TChar, TAlloc> & target,
        TSource const & source,
        typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
        Generous)
 {
-    SEQAN_CHECKPOINT;
     typename Size< thrust::device_vector<TChar, TAlloc> >::Type target_length = target.length();
     if (target_length > limit)
     {
@@ -566,23 +536,21 @@ append(thrust::device_vector<TChar, TAlloc> & target,
 //____________________________________________________________________________
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 append(thrust::device_vector<TChar,  TAlloc> & target,
        TSource const & source,
        Limit)
 {
-    SEQAN_CHECKPOINT;
     append(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 append(thrust::device_vector<TChar, TAlloc> & target,
        TSource const & source,
        typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
        Limit)
 {
-    SEQAN_CHECKPOINT;
     if (limit > target.capacity())
     {
         limit = target.capacity();
@@ -596,22 +564,20 @@ append(thrust::device_vector<TChar, TAlloc> & target,
 ///.Function.appendValue.class:Adaption.thrust::device_vector
 
 template <typename TChar, typename TAlloc, typename TValue, typename TTag>
-SEQAN_FUNC void
+inline void
 appendValue(thrust::device_vector<TChar, TAlloc> & me,
             TValue const & _value,
             TTag)
 {
-    SEQAN_CHECKPOINT;
     me.push_back(_value);
 }
 
 template <typename TChar, typename TAlloc, typename TValue>
-SEQAN_FUNC void
+inline void
 appendValue(thrust::device_vector<TChar,  TAlloc> & me,
             TValue const & _value,
             Limit)
 {
-    SEQAN_CHECKPOINT;
     if (capacity(me) > length(me)) me.push_back(_value);
 }
 
@@ -623,14 +589,13 @@ appendValue(thrust::device_vector<TChar,  TAlloc> & me,
 ///.Function.replace.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Position< thrust::device_vector<TChar, TAlloc> >::Type pos_begin,
         typename Position< thrust::device_vector<TChar, TAlloc> >::Type pos_end,
         TSource const & source,
         Generous)
 {
-    SEQAN_CHECKPOINT;
     typename Size< thrust::device_vector<TChar, TAlloc> >::Type target_size = pos_end-pos_begin;
     typename Size< thrust::device_vector<TChar, TAlloc> >::Type source_size =length(source);
 
@@ -648,7 +613,7 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Position< thrust::device_vector<TChar, TAlloc> >::Type pos_begin,
         typename Position< thrust::device_vector<TChar, TAlloc> >::Type pos_end,
@@ -656,7 +621,6 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
         Generous)
 {
-    SEQAN_CHECKPOINT;
     if (pos_begin >= limit)
     {
         target.resize(limit);
@@ -685,19 +649,18 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 replace(thrust::device_vector<TChar,  TAlloc> & target,
         typename Position< thrust::device_vector<TChar, TAlloc> >::Type pos_begin,
         typename Position< thrust::device_vector<TChar, TAlloc> >::Type pos_end,
         TSource const & source,
         Limit)
 {
-    SEQAN_CHECKPOINT;
     replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-SEQAN_FUNC void
+inline void
 replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Position< thrust::device_vector<TChar,  TAlloc> >::Type pos_begin,
         typename Position< thrust::device_vector<TChar,  TAlloc> >::Type pos_end,
@@ -705,7 +668,6 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Size< thrust::device_vector<TChar, TAlloc> >::Type limit,
         Limit)
 {
-    SEQAN_CHECKPOINT;
     if (limit > target.capacity())
     {
         limit = target.capacity();
@@ -718,7 +680,7 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
 // handling of iterators as begin and end
 
 template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
-SEQAN_FUNC void
+inline void
 replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Iterator< thrust::device_vector<TChar, TAlloc>, Rooted>::Type pos_begin,
         typename Iterator< thrust::device_vector<TChar, TAlloc>, Rooted>::Type pos_end,
@@ -730,7 +692,7 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
 
 /*
 template<typename TChar, typename TAlloc, typename TSource, typename TExpand>
-SEQAN_FUNC void
+inline void
 replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Iterator< thrust::device_vector<TChar, TAlloc>, Rooted>::Type pos_begin,
         typename Iterator< thrust::device_vector<TChar, TAlloc>, Rooted>::Type pos_end,
@@ -748,63 +710,53 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
 ///.Function.reserve.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc, typename TSize, typename TExpand>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar, TAlloc> >::Type
-reserve(
-    thrust::device_vector<TChar, TAlloc> & seq,
-    TSize new_capacity,
-    Tag<TExpand> const & tag)
+inline typename Size< thrust::device_vector<TChar, TAlloc> >::Type
+reserve(thrust::device_vector<TChar, TAlloc> & seq,
+        TSize new_capacity,
+        Tag<TExpand> const & tag)
 {
-    SEQAN_CHECKPOINT;
     seq.reserve(new_capacity);
     return _capacityReturned(seq, new_capacity, tag);
 }
 
 template <typename TChar, typename TAlloc, typename TSize>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar, TAlloc> >::Type
-reserve(
-    thrust::device_vector<TChar, TAlloc> & seq,
-    TSize new_capacity,
-    Insist const &)
+inline typename Size< thrust::device_vector<TChar, TAlloc> >::Type
+reserve(thrust::device_vector<TChar, TAlloc> & seq,
+        TSize new_capacity,
+        Insist const &)
 {
-    SEQAN_CHECKPOINT;
     // do nothing
     return _capacityReturned(seq, new_capacity, Insist());
 }
 
 template <typename TChar,  typename TAlloc, typename TSize>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar, TAlloc> >::Type
-reserve(
-    thrust::device_vector<TChar,  TAlloc> & seq,
-    TSize new_capacity,
-    Limit const &)
+inline typename Size< thrust::device_vector<TChar, TAlloc> >::Type
+reserve(thrust::device_vector<TChar,  TAlloc> & seq,
+        TSize new_capacity,
+        Limit const &)
 {
-    SEQAN_CHECKPOINT;
     // do nothing
     return _capacityReturned(seq, new_capacity, Limit());
 }
 
 ///.Function.resize.param.object.type:Adaption.thrust::device_vector
 template <typename TChar,  typename TAlloc, typename TSize, typename TExpand>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar,  TAlloc> >::Type
-resize(
-    thrust::device_vector<TChar, TAlloc> & me,
-    TSize new_length,
-    Tag<TExpand> const &)
+inline typename Size< thrust::device_vector<TChar,  TAlloc> >::Type
+resize(thrust::device_vector<TChar, TAlloc> & me,
+       TSize new_length,
+       Tag<TExpand> const &)
 {
-    SEQAN_CHECKPOINT;
     me.resize(new_length);
     return me.size();
 }
 
 template <typename TChar, typename TAlloc, typename TSize, typename TExpand>
-SEQAN_FUNC typename Size< thrust::device_vector<TChar,  TAlloc> >::Type
-fill(
-    thrust::device_vector<TChar, TAlloc> & me,
-    TSize new_length,
-    TChar const & val,
-    Tag<TExpand> const &)
+inline typename Size< thrust::device_vector<TChar,  TAlloc> >::Type
+fill(thrust::device_vector<TChar, TAlloc> & me,
+     TSize new_length,
+     TChar const & val,
+     Tag<TExpand> const &)
 {
-    SEQAN_CHECKPOINT;
     me.resize(new_length, val);
     return me.length();
 }
