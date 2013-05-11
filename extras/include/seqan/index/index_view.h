@@ -148,8 +148,20 @@ getFibre(Index<View<TText, TViewSpec>, TSpec> &index, FibreText) {
 
 template <typename TText, typename TViewSpec, typename TSpec>
 SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreText>::Type &
-getFibre(Index<View<TText, TViewSpec>, TSpec> const &index, FibreText) {
+getFibre(Index<View<TText, TViewSpec>, TSpec> const & index, FibreText) {
     return index.text;
+}
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreRawText>::Type &
+getFibre(Index<View<TText, TViewSpec>, TSpec> &index, FibreRawText) {
+    return concat(getFibre(index, FibreText()));
+}
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreRawText>::Type &
+getFibre(Index<View<TText, TViewSpec>, TSpec> const & index, FibreRawText) {
+    return concat(getFibre(index, FibreText()));
 }
 
 // ----------------------------------------------------------------------------
@@ -168,6 +180,24 @@ SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreText>
 indexText(Index<View<TText, TViewSpec>, TSpec> const & index)
 {
     return getFibre(index, FibreText());
+}
+
+// ----------------------------------------------------------------------------
+// Function indexRawText()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreRawText>::Type &
+indexRawText(Index<View<TText, TViewSpec>, TSpec> & index)
+{
+    return getFibre(index, FibreRawText());
+}
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreRawText>::Type &
+indexRawText(Index<View<TText, TViewSpec>, TSpec> const & index)
+{
+    return getFibre(index, FibreRawText());
 }
 
 // ----------------------------------------------------------------------------
