@@ -610,12 +610,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreText>::Type & 
+	inline typename Fibre<Index<TText, TSpec>, FibreText>::Type & 
 	getFibre(Index<TText, TSpec> &index, FibreText) {
 		return value(index.text);
 	}
 	template <typename TText, typename TSpec>
-	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreText>::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, FibreText>::Type & 
 	getFibre(Index<TText, TSpec> const &index, FibreText) {
 		return value(index.text);
 	}
