@@ -461,6 +461,13 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 		typedef TText Type;
 	};
 
+    // helper function that defines the type of the 'text' member in each index
+    template < typename TIndex >
+    struct FibreTextMember_
+    {
+        typedef Holder<typename Fibre<TIndex, FibreText>::Type> Type;
+    };
+
 //////////////////////////////////////////////////////////////////////////////
 // concatenated text
 
