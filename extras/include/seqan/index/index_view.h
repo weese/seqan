@@ -234,7 +234,33 @@ toView(Index<TText, TSpec> & index)
     Index<View<TText>, TSpec> indexView;
 
     indexText(indexView) = toView(indexText(index));
+
+    return indexView;
+}
+
+template <typename TText, typename TSpec>
+Index<View<TText>, IndexSa<TSpec> >
+toView(Index<TText, IndexSa<TSpec> > & index)
+{
+    Index<View<TText>, IndexSa<TSpec> > indexView;
+
+    indexText(indexView) = toView(indexText(index));
     indexSA(indexView) = toView(indexSA(index));
+
+    return indexView;
+}
+
+template <typename TText, typename TSpec>
+Index<View<TText>, IndexEsa<TSpec> >
+toView(Index<TText, IndexEsa<TSpec> > & index)
+{
+    Index<View<TText>, IndexEsa<TSpec> > indexView;
+
+    indexText(indexView) = toView(indexText(index));
+    indexSA(indexView) = toView(indexSA(index));
+    indexLcp(indexView) = toView(indexLcp(index));
+    indexChildtab(indexView) = toView(indexChildtab(index));
+    // TODO(esiragusa): View of cargo?
 
     return indexView;
 }
