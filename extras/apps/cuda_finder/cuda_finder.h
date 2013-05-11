@@ -124,7 +124,11 @@ int main(int argc, char const ** argv)
     // Copy index to device.
     TDeviceIndex deviceIndex(deviceText);
     indexSA(deviceIndex).resize(length(indexSA(index)));
+    indexLcp(deviceIndex).resize(length(indexLcp(index)));
+    indexChildtab(deviceIndex).resize(length(indexChildtab(index)));
     thrust::copy(begin(indexSA(index), Standard()), end(indexSA(index), Standard()), indexSA(deviceIndex).begin());
+    thrust::copy(begin(indexLcp(index), Standard()), end(indexLcp(index), Standard()), indexLcp(deviceIndex).begin());
+    thrust::copy(begin(indexChildtab(index), Standard()), end(indexChildtab(index), Standard()), indexChildtab(deviceIndex).begin());
 
     // Find on GPU.
     findCUDA<<< 1,1 >>>(toView(deviceIndex));
