@@ -95,9 +95,7 @@ public:
     View &
     operator= (TContainer &other)
     {
-//        assign(*this, other);
-        _begin = begin(other, Standard());
-        _end = end(other, Standard());
+        assign(*this, other);
         return *this;
     }
 
@@ -262,13 +260,13 @@ resize(View<TObject, TSpec> & me, TSize new_length, Tag<TExpand>)
 // assign()
 // ----------------------------------------------------------------------------
 
-//template <typename TObject, typename TSpec, typename TContainer>
-//SEQAN_FUNC void
-//assign(View<TObject, TSpec> & view, TContainer const & cont)
-//{
-//    view._begin = begin(cont, Standard());
-//    view._end = end(cont, Standard());
-//}
+template <typename TObject, typename TSpec, typename TContainer>
+void
+assign(View<TObject, TSpec> &view, TContainer const & cont)
+{
+    view._begin = begin(cont, Standard());
+    view._end = end(cont, Standard());
+}
 
 // ----------------------------------------------------------------------------
 // operator<<
