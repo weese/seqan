@@ -632,12 +632,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, FibreRawText>::Type & 
 	getFibre(Index<TText, TSpec> &index, FibreRawText) {
-		return concat(value(index.text));
+		return concat(getFibre(index, FibreText()));
 	}
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec> const, FibreRawText>::Type & 
 	getFibre(Index<TText, TSpec> const &index, FibreRawText) {
-		return concat(value(index.text));
+		return concat(getFibre(index, FibreText()));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
