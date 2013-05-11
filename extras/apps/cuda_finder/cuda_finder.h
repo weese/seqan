@@ -76,14 +76,25 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
     for (unsigned i = 0; i < length(indexSA(index)); ++i)
         printf("%u\n", indexSA(index)[i]);
 
+    printf("lengthLcp=%u\n", length(indexLcp(index)));
+    for (unsigned i = 0; i < length(indexLcp(index)); ++i)
+        printf("%u\n", indexLcp(index)[i]);
+
+    printf("lengthChildtab=%u\n", length(indexChildtab(index)));
+    for (unsigned i = 0; i < length(indexChildtab(index)); ++i)
+        printf("%u\n", indexChildtab(index)[i]);
+
     TIterator it(index);
 
     printf("isRoot=%i\n", isRoot(it));
     printf("countOccurrences=%i\n", countOccurrences(it));
     printf("isLeaf=%i\n", isLeaf(it));
     printf("repLength=%i\n", repLength(it));
-    printf("goDown=%i\n", goDown(it));
-    printf("repLength=%i\n", repLength(it));
+//    printf("goDown=%i\n", goDown(it));
+//    printf("repLength=%i\n", repLength(it));
+
+//    parentEdgeLabel(it);
+//    representative(it);
 }
 #endif
 
