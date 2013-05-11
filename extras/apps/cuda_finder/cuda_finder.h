@@ -72,26 +72,26 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-    printf("lengthSA=%u\n", length(indexSA(index)));
+    printf("lengthSA=%tu\n", length(indexSA(index)));
     for (unsigned i = 0; i < length(indexSA(index)); ++i)
-        printf("%u\n", indexSA(index)[i]);
+        printf("%tu\n", indexSA(index)[i]);
 
-    printf("lengthLcp=%u\n", length(indexLcp(index)));
+    printf("lengthLcp=%tu\n", length(indexLcp(index)));
     for (unsigned i = 0; i < length(indexLcp(index)); ++i)
-        printf("%u\n", indexLcp(index)[i]);
+        printf("%tu\n", indexLcp(index)[i]);
 
-    printf("lengthChildtab=%u\n", length(indexChildtab(index)));
+    printf("lengthChildtab=%tu\n", length(indexChildtab(index)));
     for (unsigned i = 0; i < length(indexChildtab(index)); ++i)
-        printf("%u\n", indexChildtab(index)[i]);
+        printf("%tu\n", indexChildtab(index)[i]);
 
     TIterator it(index);
 
-    printf("isRoot=%i\n", isRoot(it));
-    printf("countOccurrences=%i\n", countOccurrences(it));
-    printf("isLeaf=%i\n", isLeaf(it));
-    printf("repLength=%i\n", repLength(it));
-    printf("goDown=%i\n", goDown(it));
-    printf("repLength=%i\n", repLength(it));
+    printf("isRoot=%d\n", isRoot(it));
+    printf("countOccurrences=%tu\n", countOccurrences(it));
+    printf("isLeaf=%d\n", isLeaf(it));
+    printf("repLength=%tu\n", repLength(it));
+    printf("goDown=%d\n", goDown(it));
+    printf("repLength=%tu\n", repLength(it));
 
 //    parentEdgeLabel(it);
 //    representative(it);
@@ -110,10 +110,8 @@ int main(int argc, char const ** argv)
     typedef Index<TText, IndexEsa<> >                   TIndex;
     typedef Index<TDeviceText, IndexEsa<> >             TDeviceIndex;
 
-    // Create text and copy it to device.
+    // Create text.
     TText text("text");
-    TDeviceText deviceText(length(text));
-    thrust::copy(begin(text, Standard()), end(text, Standard()), deviceText.begin());
 
     // Create index.
     TIndex index(text);
@@ -122,13 +120,8 @@ int main(int argc, char const ** argv)
     indexCreate(index, FibreChildtab());
 
     // Copy index to device.
-    TDeviceIndex deviceIndex(deviceText);
-    indexSA(deviceIndex).resize(length(indexSA(index)));
-    indexLcp(deviceIndex).resize(length(indexLcp(index)));
-    indexChildtab(deviceIndex).resize(length(indexChildtab(index)));
-    thrust::copy(begin(indexSA(index), Standard()), end(indexSA(index), Standard()), indexSA(deviceIndex).begin());
-    thrust::copy(begin(indexLcp(index), Standard()), end(indexLcp(index), Standard()), indexLcp(deviceIndex).begin());
-    thrust::copy(begin(indexChildtab(index), Standard()), end(indexChildtab(index), Standard()), indexChildtab(deviceIndex).begin());
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
 
     // Find on GPU.
     findCUDA<<< 1,1 >>>(toView(deviceIndex));
