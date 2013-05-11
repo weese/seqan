@@ -32,20 +32,9 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-#include <thrust/generate.h>
-#include <thrust/reduce.h>
-#include <thrust/functional.h>
-
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
-#include <seqan/misc/cuda.h>
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
 #include <seqan/index_extras.h>
-#include <seqan/misc/misc_view.h>
-#include <seqan/index/index_view.h>
-
-#include <seqan/sequence/adapt_thrust_vector.h>
 
 using namespace seqan;
 
