@@ -2353,14 +2353,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 
     template <typename TIndex, typename TSpec>
-    inline typename SAValue<TIndex>::Type
+    SEQAN_FUNC typename SAValue<TIndex>::Type
     _lastOccurrence(Iter<TIndex, VSTree<TSpec> > const &it)
     {
 		return back(getOccurrences(it));
     }
 
     template <typename TText, typename TIndexSpec, typename TSpec>
-    inline typename SAValue<Index<TText, IndexEsa<TIndexSpec> > >::Type
+    SEQAN_FUNC typename SAValue<Index<TText, IndexEsa<TIndexSpec> > >::Type
     _lastOccurrence(Iter<Index<TText, IndexEsa<TIndexSpec> >, VSTree<TSpec> > const &it)
     {
         if (_isSizeInval(value(it).range.i2))
