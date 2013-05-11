@@ -301,7 +301,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 //////////////////////////////////////////////////////////////////////////////
 
 	template < typename TText, typename TSpec >
-	void _indexRequireTopDownIteration(Index<TText, IndexEsa<TSpec> > &index) 
+	SEQAN_FUNC void _indexRequireTopDownIteration(Index<TText, IndexEsa<TSpec> > &index) 
 	{
 		indexRequire(index, EsaSA());
 		indexRequire(index, EsaLcp());

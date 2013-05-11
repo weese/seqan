@@ -702,12 +702,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreLcp>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreLcp>::Type &
 	getFibre(Index<TText, TSpec> &index, FibreLcp) {
 		return index.lcp;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreLcp>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreLcp>::Type &
 	getFibre(Index<TText, TSpec> const &index, FibreLcp) {
 		return index.lcp;
 	}
@@ -728,12 +728,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type & 
 	getFibre(Index<TText, TSpec> &index, FibreChildtab) {
 		return index.childtab;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & 
 	getFibre(Index<TText, TSpec> const &index, FibreChildtab) {
 		return index.childtab;
 	}
@@ -741,12 +741,12 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreBwt>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec>, FibreBwt>::Type & 
 	getFibre(Index<TText, TSpec> &index, FibreBwt) {
 		return index.bwt;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreBwt>::Type & 
+	SEQAN_FUNC typename Fibre<Index<TText, TSpec> const, FibreBwt>::Type & 
 	getFibre(Index<TText, TSpec> const &index, FibreBwt) {
 		return index.bwt;
 	}
@@ -800,14 +800,14 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSeqNo, typename TText, typename TSpec>
-	inline typename GetSequenceByNo< Index<TText, TSpec> >::Type
+	SEQAN_FUNC typename GetSequenceByNo< Index<TText, TSpec> >::Type
 	getSequenceByNo(TSeqNo seqNo, Index<TText, TSpec> &index)
 	{
 		return getSequenceByNo(seqNo, indexText(index));
 	}
 
 	template <typename TSeqNo, typename TText, typename TSpec>
-	inline typename GetSequenceByNo< Index<TText, TSpec> const>::Type
+	SEQAN_FUNC typename GetSequenceByNo< Index<TText, TSpec> const>::Type
 	getSequenceByNo(TSeqNo seqNo, Index<TText, TSpec> const &index)
 	{
 		return getSequenceByNo(seqNo, indexText(index));
@@ -824,14 +824,14 @@ String<char> & text = getFibre(indexEsa, EsaText());
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TPos, typename TText, typename TSpec>
-	inline typename Size<Index<TText, TSpec> >::Type 
+	SEQAN_FUNC typename Size<Index<TText, TSpec> >::Type 
 	suffixLength(TPos pos, Index<TText, TSpec> const &index)
     {
 		return length(indexText(index)) - pos;
 	}
 
 	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Size<Index<StringSet<TString, TSSetSpec>, TSpec> >::Type 
+	SEQAN_FUNC typename Size<Index<StringSet<TString, TSSetSpec>, TSpec> >::Type 
 	suffixLength(TPos pos, Index<StringSet<TString, TSSetSpec>, TSpec> const &index)
     {
         typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type const &limits = stringSetLimits(index);
@@ -985,11 +985,11 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, FibreLcp>::Type>::Type lcpAt(TPos i, TIndex &index) {
+	SEQAN_FUNC typename Reference<typename Fibre<TIndex, FibreLcp>::Type>::Type lcpAt(TPos i, TIndex &index) {
 		return value(getFibre(index, FibreLcp()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, FibreLcp>::Type>::Type lcpAt(TPos i, TIndex const &index) {
+	SEQAN_FUNC typename Reference<typename Fibre<TIndex const, FibreLcp>::Type>::Type lcpAt(TPos i, TIndex const &index) {
 		return value(getFibre(index, FibreLcp()), i);
 	}
 
@@ -1031,11 +1031,11 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, FibreChildtab>::Type>::Type childAt(TPos i, TIndex &index) {
+	SEQAN_FUNC typename Reference<typename Fibre<TIndex, FibreChildtab>::Type>::Type childAt(TPos i, TIndex &index) {
 		return value(getFibre(index, FibreChildtab()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, FibreChildtab>::Type>::Type childAt(TPos i, TIndex const &index) {
+	SEQAN_FUNC typename Reference<typename Fibre<TIndex const, FibreChildtab>::Type>::Type childAt(TPos i, TIndex const &index) {
 		return value(getFibre(index, FibreChildtab()), i);
 	}
 

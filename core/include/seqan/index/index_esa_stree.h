@@ -527,7 +527,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 
 	template < typename TIndex, typename TSize >
-	inline typename Size<TIndex>::Type
+	SEQAN_FUNC typename Size<TIndex>::Type
 	repLength(TIndex const &index, VertexEsa<TSize> const &vDesc) 
 	{
 		if (_isLeaf(vDesc)) return suffixLength(saAt(vDesc.range.i1, index), index);
@@ -2398,7 +2398,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	// (more or less) internal functions for accessing the childtab
 
 	template < typename TSize, typename TIndex >
-	inline bool _isNextl(TSize i, TIndex const &index) 
+	SEQAN_FUNC bool _isNextl(TSize i, TIndex const &index)
 	{
 //IOREV _notio_
 		if (i >= length(index)) return false;
@@ -2407,7 +2407,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TSize, typename TIndex >
-	inline bool _isUp(TSize i, TIndex const &index) 
+	SEQAN_FUNC bool _isUp(TSize i, TIndex const &index) 
 	{
 //IOREV _notio_
 		if (i >= length(index)) return false;
@@ -2416,13 +2416,13 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TSize, typename TIndex >
-	inline TSize _getNextl(TSize i, TIndex const &index) 
+	SEQAN_FUNC TSize _getNextl(TSize i, TIndex const &index) 
 	{
 		return childAt(i, index);
 	}
 
 	template < typename TSize, typename TIndex >
-	inline TSize _getUp(TSize i, TIndex const &index) 
+	SEQAN_FUNC TSize _getUp(TSize i, TIndex const &index) 
 	{
 		if (!_isSizeInval(i))
 			return childAt(i - 1, index);
@@ -2431,7 +2431,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TSize, typename TIndex >
-	inline TSize _getDown(TSize i, TIndex const &index) 
+	SEQAN_FUNC TSize _getDown(TSize i, TIndex const &index) 
 	{
 		return childAt(i, index);
 	}
