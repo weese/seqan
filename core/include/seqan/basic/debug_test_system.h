@@ -1597,7 +1597,7 @@ SEQAN_DEFINE_TEST(test_skipped)
 // variadic macros are not supported by VS 2003 and before
 #if !defined(_MSC_VER) || (_MSC_VER >= 1400)
 
-#if SEQAN_ENABLE_DEBUG
+#if defined(SEQAN_ENABLE_DEBUG) && !defined(__CUDA_ARCH__)
 
 /**
 .Macro.SEQAN_ASSERT
@@ -2036,7 +2036,7 @@ SEQAN_ASSERT_IN_DELTA_MSG(1, 0, 0.1, "msg");  // will fail with message
     } while (false)
 
 
-#else  // #if SEQAN_ENABLE_DEBUG
+#else  // #if defined(SEQAN_ENABLE_DEBUG) && !defined(__CUDA_ARCH__)
 
 #define SEQAN_ASSERT_EQ(_arg1, _arg2) do {} while (false)
 #define SEQAN_ASSERT_EQ_MSG(_arg1, _arg2, ...) do {} while (false)
@@ -2056,7 +2056,7 @@ SEQAN_ASSERT_IN_DELTA_MSG(1, 0, 0.1, "msg");  // will fail with message
 #define SEQAN_ASSERT_NOT_MSG(_arg1, ...) do {} while (false)
 #define SEQAN_ASSERT_FAIL(...) do {} while (false)
 
-#endif  // #if SEQAN_ENABLE_DEBUG
+#endif  // #if defined(SEQAN_ENABLE_DEBUG) && !defined(__CUDA_ARCH__)
 
 #else // no variadic macros
 
