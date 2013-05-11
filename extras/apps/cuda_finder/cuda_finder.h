@@ -81,9 +81,9 @@ findOnGPU(Index<View<TText, TViewSpec>, TSpec> index)
     printf("l=%u\n", it.vDesc.range.i1);
     printf("r=%u\n", it.vDesc.range.i2);
 
-//    printf("isRoot=%i\n", isRoot(it));
-//    printf("countOccurrences=%i\n", countOccurrences(it));
-//    printf("isLeaf=%i\n", isLeaf(it));
+    printf("isRoot=%i\n", isRoot(it));
+    printf("countOccurrences=%i\n", countOccurrences(it));
+    printf("isLeaf=%i\n", isLeaf(it));
 //    printf("repLength=%i\n", repLength(it));
 }
 #endif
