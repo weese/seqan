@@ -69,6 +69,17 @@ struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreSA>
     typedef View<typename Fibre<Index<TText, TSpec>, FibreSA>::Type, TViewSpec> Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction FibreTextMember_
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct FibreTextMember_<Index<View<TText, TViewSpec>, TSpec> >
+{
+    typedef Index<View<TText, TViewSpec>, TSpec>        TIndex_;
+    typedef typename Fibre<TIndex_, FibreText>::Type    Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
