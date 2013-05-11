@@ -104,9 +104,9 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
 
 int main(int argc, char const ** argv)
 {
-    typedef CharString                                  TText;
-    typedef thrust::device_vector<char>                 TDeviceText;
-
+    typedef char                                        TAlphabet;
+    typedef String<TAlphabet>                           TText;
+    typedef thrust::device_vector<TAlphabet>            TDeviceText;
     typedef Index<TText, IndexEsa<> >                   TIndex;
     typedef Index<TDeviceText, IndexEsa<> >             TDeviceIndex;
 
