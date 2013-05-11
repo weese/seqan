@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,16 +31,29 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// Facade header for CUDA.
+// Facade header for module sequence.
 // ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_MISC_CUDA_H_
-#define EXTRAS_INCLUDE_SEQAN_MISC_CUDA_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_SEQUENCE_H_
+#define EXTRAS_INCLUDE_SEQAN_SEQUENCE_H_
 
 // ===========================================================================
 // Prerequisites.
 // ===========================================================================
 
-#include <seqan/misc/cuda/printf.cu>
+#include <seqan/sequence.h>
 
-#endif  // EXTRAS_INCLUDE_SEQAN_MISC_CUDA_H_
+#include <seqan/basic_extras.h>
+
+// ===========================================================================
+// Thrust vectors.
+// ===========================================================================
+
+#ifdef __CUDACC__
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <seqan/sequence/adapt_thrust_vector.h>
+#endif
+
+
+#endif  // EXTRAS_INCLUDE_SEQAN_SEQUENCE_H_

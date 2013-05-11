@@ -30,20 +30,11 @@
 //
 // ==========================================================================
 // Author: David Weese <david.weese@fu-berlin.de>
+// Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SEQAN_HEADER_MISC_VIEW_H
 #define SEQAN_HEADER_MISC_VIEW_H
-
-
-// disable CUDA functionality for now...
-//#undef SEQAN_FUNC
-//#define SEQAN_FUNC inline
-
-#ifdef __CUDACC__
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-#endif
 
 namespace seqan {
 

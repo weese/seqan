@@ -29,12 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Knut Reinert <knut.reinert@fu-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
-// Adaptions for STL vectors to SeqAn strings.
+// Adaptions for Thrust device_vectors to SeqAn strings.
 // ==========================================================================
-
-// SEQAN_NO_GENERATED_FORWARDS: No forwards are generated for this file.
 
 #ifndef SEQAN_SEQUENCE_ADAPT_THRUST_VECTOR_H_
 #define SEQAN_SEQUENCE_ADAPT_THRUST_VECTOR_H_
