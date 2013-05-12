@@ -421,7 +421,7 @@ getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTre
 ..include:seqan/index.h
 */
 
-template < typename TValue, typename TCharIn, typename TPos>
+template <typename TValue, typename TCharIn, typename TPos>
 inline typename Size<RankDictionary<WaveletTree<TValue> > >::Type
 countOccurrences(RankDictionary<WaveletTree<TValue> > const & tree, TCharIn const character, TPos const pos)
 {
