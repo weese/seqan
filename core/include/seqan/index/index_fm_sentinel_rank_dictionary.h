@@ -49,6 +49,13 @@ class RankDictionary;
 template<typename TRankDictionarySpec, typename TSpec> 
 class SentinelRankDictionary;
 
+template <typename TLength, typename TTag>
+TTag _getDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/);
+
+template <typename TLength, typename TBitStringSpec>
+RankSupportBitString<TBitStringSpec>
+_getDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/);
+
 // ==========================================================================
 // Tags
 // ==========================================================================
@@ -178,7 +185,7 @@ public:
     TChar sentinelSubstitute;
 
     SentinelRankDictionary() :
-        sentinelPosition(_setDefaultSentinelPosition(0u, TSentinelPosition())),
+        sentinelPosition(_getDefaultSentinelPosition(0u, TSentinelPosition())),
         sentinelSubstitute()
     {}
    
@@ -186,14 +193,14 @@ public:
     template <typename TValue, typename TStringSpec>
     SentinelRankDictionary(String<TValue, TStringSpec> const & text) :
         rankDictionary(text),
-        sentinelPosition(_setDefaultSentinelPosition(length(text), TSentinelPosition())),
+        sentinelPosition(_getDefaultSentinelPosition(length(text), TSentinelPosition())),
         sentinelSubstitute()
     {}
     
     template <typename THost, typename TSegmentSpec>
     SentinelRankDictionary(Segment<THost, TSegmentSpec> const & text) :
         rankDictionary(text),
-        sentinelPosition(_setDefaultSentinelPosition(length(text), TSentinelPosition())),
+        sentinelPosition(_getDefaultSentinelPosition(length(text), TSentinelPosition())),
         sentinelSubstitute()
     {}
 
@@ -239,19 +246,19 @@ public:
 // ==========================================================================
 
 // ----------------------------------------------------------------------------
-// Function _setDefaultSentinelPosition()
+// Function _getDefaultSentinelPosition()
 // ----------------------------------------------------------------------------
 
 template <typename TLength, typename TTag>
 TTag
-_setDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/)
+_getDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/)
 {
     return _length;
 }
 
 template <typename TLength, typename TBitStringSpec>
 RankSupportBitString<TBitStringSpec>
-_setDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/)
+_getDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/)
 {
 
     RankSupportBitString<TBitStringSpec> bitString;
