@@ -835,12 +835,12 @@ posNext(Pair<T1, T2, TPack> const & pos) {
 // --------------------------------------------------------------------------
 
 template <typename TPos, typename TDelta>
-inline TPos posAdd(TPos pos, TDelta delta) {
+SEQAN_FUNC TPos posAdd(TPos pos, TDelta delta) {
     return pos + delta;
 }
 
 template <typename T1, typename T2, typename TPack, typename TDelta>
-inline Pair<T1, T2, TPack>
+SEQAN_FUNC Pair<T1, T2, TPack>
 posAdd(Pair<T1, T2, TPack> const & pos, TDelta delta) {
     return Pair<T1, T2, TPack>(getValueI1(pos), getValueI2(pos) + delta);
 }

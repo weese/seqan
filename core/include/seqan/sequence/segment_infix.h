@@ -77,7 +77,7 @@ public:
 public:
     // Check member variables with assertions.  This is called in the
     // constructors.
-    void _checkMemberVariables() const {
+    SEQAN_FUNC void _checkMemberVariables() const {
         SEQAN_ASSERT_LEQ(data_begin_position, data_end_position);
     }
 
@@ -107,6 +107,8 @@ of the host object.
 ...text:$begin$ and $end$ must be valid positions/iterators in $host$.
 ...text:The predicate $begin <= end$ must be true.
 */
+
+    SEQAN_FUNC
     Segment():
         data_host(),
         data_begin_position(0),
@@ -116,6 +118,7 @@ SEQAN_CHECKPOINT
         _checkMemberVariables();
     }
 
+    SEQAN_FUNC
     Segment(typename Parameter_<THost>::Type _host):
         data_host(_toPointer(_host)),
         data_begin_position(0),
@@ -125,6 +128,7 @@ SEQAN_CHECKPOINT
         _checkMemberVariables();
     }
 
+    SEQAN_FUNC
     Segment(typename Parameter_<THost>::Type _host, typename Position<THost>::Type _begin_index, typename Position<THost>::Type _end_index):
         data_host(_toPointer(_host)),
         data_begin_position(_begin_index),
@@ -142,6 +146,8 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
     }
 */
+
+    SEQAN_FUNC
     Segment(typename Parameter_<THost>::Type _host, typename Iterator<THost, Standard>::Type _begin, typename Iterator<THost, Standard>::Type _end):
         data_host(_toPointer(_host)),
         data_begin_position(position(_begin, _host)),
@@ -150,7 +156,9 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
         _checkMemberVariables();
     }
+
     template <typename THost2, typename TSpec2>
+    SEQAN_FUNC
     Segment(Segment<THost2, TSpec2> const & _other):
         data_host(_toPointer(host(_other))),
         data_begin_position(beginPosition(_other)),
@@ -160,12 +168,13 @@ SEQAN_CHECKPOINT
         _checkMemberVariables();
     }
 
+    SEQAN_FUNC
     ~ Segment()
     {
 SEQAN_CHECKPOINT
     }
 
-    inline Segment &
+    SEQAN_FUNC Segment &
     operator = (Segment const & source)
     {
         assign(*this, source);
@@ -847,7 +856,7 @@ SEQAN_CHECKPOINT
 */
 
 template <typename T, typename TPosBegin, typename TSize>
-inline typename Infix<T>::Type
+SEQAN_FUNC typename Infix<T>::Type
 infixWithLength(T & t, TPosBegin pos_begin, TSize length)
 {
 SEQAN_CHECKPOINT
@@ -855,7 +864,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T, typename TPosBegin, typename TSize>
-inline typename Infix<T *>::Type
+SEQAN_FUNC typename Infix<T *>::Type
 infixWithLength(T * t, TPosBegin pos_begin, TSize length)
 {
 SEQAN_CHECKPOINT
@@ -863,7 +872,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T, typename TSpec, typename TPosBegin, typename TSize>
-inline typename Infix<Segment<T, TSpec> >::Type
+SEQAN_FUNC typename Infix<Segment<T, TSpec> >::Type
 infixWithLength(Segment<T, TSpec> & t, TPosBegin pos_begin, TSize length)
 {
 SEQAN_CHECKPOINT
@@ -874,7 +883,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T, typename TSpec, typename TPosBegin, typename TSize>
-inline typename Infix<Segment<T, TSpec> const>::Type
+SEQAN_FUNC typename Infix<Segment<T, TSpec> const>::Type
 infixWithLength(Segment<T, TSpec> const & t, TPosBegin pos_begin, TSize length)
 {
 SEQAN_CHECKPOINT

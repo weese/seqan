@@ -1161,7 +1161,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
     
 	// get the interval of SA of the subtree under the edge beginning with character c
 	template < typename TText, class TIndexSpec, class TSpec, typename TValue >
-	inline bool 
+	SEQAN_FUNC bool
 	_getNodeByChar(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree<TSpec> > const &it, 
 		TValue c, 
@@ -1596,7 +1596,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	// go down the edge beginning with c (returns false iff this edge doesn't exists)
 	template < typename TIndex, class TSpec, typename TValue >
-	inline bool _goDownChar(Iter< TIndex, VSTree< TopDown<TSpec> > > &it, TValue c) 
+	SEQAN_FUNC bool _goDownChar(Iter< TIndex, VSTree< TopDown<TSpec> > > &it, TValue c) 
 	{
 		typename VertexDescriptor<TIndex>::Type nodeDesc;
 		if (_getNodeByChar(it, c, nodeDesc)) {
@@ -1610,7 +1610,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// go down the path corresponding to pattern
 	// lcp is the longest prefix of pattern and path
 	template < typename TIndex, typename TSpec, typename TString, typename TSize >
-	inline bool
+	SEQAN_FUNC bool
 	_goDownString(
 		Iter< TIndex, VSTree< TopDown<TSpec> > > &node,
 		TString const &pattern, 
@@ -1660,7 +1660,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 	template < typename TIndex, typename TSpec, typename TObject >
-	inline bool 
+	SEQAN_FUNC bool 
 	_goDownObject(
 		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
 		TObject const &obj,
@@ -1670,7 +1670,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 	template < typename TIndex, typename TSpec, typename TObject >
-	inline bool 
+	SEQAN_FUNC bool 
 	_goDownObject(
 		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
 		TObject const &obj,
@@ -1683,7 +1683,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	// public interface for goDown(it, ...)
 	template < typename TIndex, typename TSpec, typename TObject >
-	inline bool
+	SEQAN_FUNC bool
 	goDown(
 		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
 		TObject const &obj) 
@@ -1692,7 +1692,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 	template < typename TIndex, typename TSpec, typename TString, typename TSize >
-	inline bool 
+	SEQAN_FUNC bool 
 	goDown(
 		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
 		TString const &pattern,
