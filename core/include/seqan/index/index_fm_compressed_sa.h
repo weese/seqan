@@ -150,7 +150,9 @@ public:
     TSparseString   sparseString;
     TLfTable *      lfTable;
 
-    CompressedSA(){};
+    CompressedSA() :
+        lfTable()
+    {};
 
     CompressedSA(TLfTable & lfTable) :
         lfTable(&lfTable)
