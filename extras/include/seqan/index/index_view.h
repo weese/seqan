@@ -142,25 +142,29 @@ struct FibreTextMember_<Index<View<TText, TViewSpec>, TSpec> >
 
 template <typename TText, typename TViewSpec, typename TSpec>
 SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreText>::Type &
-getFibre(Index<View<TText, TViewSpec>, TSpec> &index, FibreText) {
+getFibre(Index<View<TText, TViewSpec>, TSpec> & index, FibreText)
+{
     return index.text;
 }
 
 template <typename TText, typename TViewSpec, typename TSpec>
 SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreText>::Type &
-getFibre(Index<View<TText, TViewSpec>, TSpec> const & index, FibreText) {
+getFibre(Index<View<TText, TViewSpec>, TSpec> const & index, FibreText)
+{
     return index.text;
 }
 
 template <typename TText, typename TViewSpec, typename TSpec>
 SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreRawText>::Type &
-getFibre(Index<View<TText, TViewSpec>, TSpec> &index, FibreRawText) {
+getFibre(Index<View<TText, TViewSpec>, TSpec> & index, FibreRawText)
+{
     return concat(getFibre(index, FibreText()));
 }
 
 template <typename TText, typename TViewSpec, typename TSpec>
 SEQAN_FUNC typename Fibre<Index<View<TText, TViewSpec>, TSpec> const, FibreRawText>::Type &
-getFibre(Index<View<TText, TViewSpec>, TSpec> const & index, FibreRawText) {
+getFibre(Index<View<TText, TViewSpec>, TSpec> const & index, FibreRawText)
+{
     return concat(getFibre(index, FibreText()));
 }
 
