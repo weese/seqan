@@ -82,8 +82,9 @@ struct GetValue<PrefixSumTable<TChar, TSpec> const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction clear
+// Metafunction Fibre
 // ----------------------------------------------------------------------------
+
 template <typename TChar, typename TSpec>
 struct Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>
 {
