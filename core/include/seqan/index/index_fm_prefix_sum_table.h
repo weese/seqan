@@ -1,5 +1,5 @@
 // ==========================================================================
-//                 seqan - the library for sequence analysis
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -37,9 +37,9 @@
 
 namespace seqan {
 
-// ==========================================================================
+// ============================================================================
 // Forwards
-// ==========================================================================
+// ============================================================================
 
 template <typename TChar, typename TSpec>
 class PrefixSumTable;
@@ -59,9 +59,9 @@ class PrefixSumTable;
 struct FibreEntries_;
 typedef Tag<FibreEntries_> const FibreEntries;
 
-// ==========================================================================
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Metafunction GetValue
@@ -181,9 +181,9 @@ struct Value<PrefixSumTable<TChar, TSpec> const>
     typedef typename Value<TEntries>::Type const Type;
 };
 
-// ==========================================================================
+// ============================================================================
 // Classes
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Class PrefixSumTable
@@ -242,12 +242,43 @@ public:
     }
 };
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Helper function _getFrequencies()
+// ----------------------------------------------------------------------------
+
+// This function determines the number of the different characters in the text.
+template <typename TText, typename TSetSpec, typename TFreq>
+inline void _getFrequencies(TFreq & freq, StringSet<TText, TSetSpec> const & text)
+{
+	typedef typename Value<TText>::Type TChar;
+    typedef typename Size<TText>::Type  TSize;
+
+	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
+
+	for (TSize i = 0; i < length(text); ++i)
+	    for (TSize j = 0; j < length(text[i]); ++j)
+		    ++freq[getCharacterPosition(freq, text[i][j])];
+}
+
+// This function determines the number of the different characters in the text.
+template <typename TText, typename TFreq>
+inline void _getFrequencies(TFreq & freq, TText const & text)
+{
+	typedef typename Value<TText>::Type TChar;
+    typedef typename Size<TText>::Type  TSize;
+
+	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
+
+	for (TSize i = 0; i < length(text); ++i)
+		++freq[getCharacterPosition(freq, text[i])];
+}
+
+// ----------------------------------------------------------------------------
+// Function clear()
 // ----------------------------------------------------------------------------
 
 /**
@@ -267,7 +298,7 @@ inline void clear(PrefixSumTable<TChar, TSpec> & prefixSumTable)
 }
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function createPrefixSumTable()
 // ----------------------------------------------------------------------------
 /**
 .Function.PrefixSumTable#createPrefixSumTable
@@ -307,7 +338,7 @@ inline void createPrefixSumTable(PrefixSumTable<TChar, TSpec> & prefixSumTable, 
 }
 
 // ----------------------------------------------------------------------------
-// Function getAlphabetSize
+// Function getAlphabetSize()
 // ----------------------------------------------------------------------------
 
 /**
@@ -327,7 +358,7 @@ unsigned getAlphabetSize(PrefixSumTable<TChar, TSpec> const & pst)
 }
 
 // ----------------------------------------------------------------------------
-// Function getCharacterPosition
+// Function getCharacterPosition()
 // ----------------------------------------------------------------------------
 
 /**
@@ -355,7 +386,7 @@ inline unsigned getCharacterPosition(PrefixSumTable<TChar, TSpec> const & /*tag*
 }
 
 // ----------------------------------------------------------------------------
-// Function getCharacter
+// Function getCharacter()
 // ----------------------------------------------------------------------------
 
 /**
@@ -378,7 +409,7 @@ getCharacter(PrefixSumTable<TChar, TSpec> const & /*tag*/, TPos const pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function _getPivotPosition
+// Function _getPivotPosition()
 // ----------------------------------------------------------------------------
 
 // This function returns the position of the character which ensures that the sum of occurrences of the characters from
@@ -417,7 +448,7 @@ unsigned _getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos b
 }
 
 // ----------------------------------------------------------------------------
-// Function getPrefixSum
+// Function getPrefixSum()
 // ----------------------------------------------------------------------------
 
 /**
@@ -440,7 +471,7 @@ getPrefixSum(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function getValue
+// Function getValue()
 // ----------------------------------------------------------------------------
 
 /**
@@ -470,7 +501,7 @@ getValue(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function getFibre
+// Function getFibre()
 // ----------------------------------------------------------------------------
 
 /**
@@ -503,7 +534,7 @@ getFibre(PrefixSumTable<TChar, TSpec> & pst, FibreEntries const /*tag*/)
 }
 
 // ----------------------------------------------------------------------------
-// Function _insertSentinel
+// Function _insertSentinel()
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TSpec, typename TNumSentinel>
@@ -514,7 +545,7 @@ void _insertSentinel(PrefixSumTable<TChar, TSpec> & pst, TNumSentinel const numS
 }
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function length()
 // ----------------------------------------------------------------------------
 
 /**
@@ -539,7 +570,7 @@ length(PrefixSumTable<TChar, TSpec> const & pst)
 }
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function prefixSum()
 // ----------------------------------------------------------------------------
 
 /**
@@ -569,7 +600,7 @@ prefixSum(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function resize
+// Function resize()
 // ----------------------------------------------------------------------------
 
 /**
@@ -604,7 +635,7 @@ resize(PrefixSumTable<TChar, TSpec> & pst, TSize size, TValue value, Tag<TExpand
 }
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function setPrefixSum()
 // ----------------------------------------------------------------------------
 
 /**
@@ -627,7 +658,7 @@ inline void setPrefixSum(PrefixSumTable<TChar, TSpec> & pst, TValue value, TPos 
 }
 
 // ----------------------------------------------------------------------------
-// Function value
+// Function value()
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TSpec, typename TPos>
@@ -645,7 +676,7 @@ value(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function open()
 // ----------------------------------------------------------------------------
 
 /**
@@ -667,10 +698,7 @@ value(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 */
 
 template <typename TChar, typename TSpec>
-inline bool open(
-    PrefixSumTable<TChar, TSpec> & pst,
-    const char * fileName,
-    int openMode)
+inline bool open(PrefixSumTable<TChar, TSpec> & pst, const char * fileName, int openMode)
 {
     String<char> name;
     name = fileName;    append(name, ".pst");
@@ -683,14 +711,13 @@ inline bool open(
 }
 
 template <typename TChar, typename TSpec>
-inline bool open(
-    PrefixSumTable<TChar, TSpec> & pst,
-    const char * fileName)
+inline bool open(PrefixSumTable<TChar, TSpec> & pst, const char * fileName)
 {
     return open(pst, fileName, DefaultOpenMode<PrefixSumTable<TChar, TSpec> >::VALUE);
 }
+
 // ----------------------------------------------------------------------------
-// Function save
+// Function save()
 // ----------------------------------------------------------------------------
 
 /**
@@ -712,10 +739,7 @@ inline bool open(
 */
 
 template <typename TChar, typename TSpec>
-inline bool save(
-    PrefixSumTable<TChar, TSpec> const & pst,
-    const char * fileName,
-    int openMode)
+inline bool save(PrefixSumTable<TChar, TSpec> const & pst, const char * fileName, int openMode)
 {
     String<char> name;
     name = fileName;    append(name, ".pst");
@@ -727,9 +751,7 @@ inline bool save(
 }
 
 template <typename TChar, typename TSpec>
-inline bool save(
-    PrefixSumTable<TChar, TSpec> const & pst,
-    const char * fileName)
+inline bool save(PrefixSumTable<TChar, TSpec> const & pst, const char * fileName)
 {
     return save(pst, fileName, DefaultOpenMode<PrefixSumTable<TChar, TSpec> >::VALUE);
 }
