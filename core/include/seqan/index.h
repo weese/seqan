@@ -43,6 +43,7 @@
 #include <seqan/find.h>
 #include <seqan/misc/misc_set.h>
 #include <seqan/misc/misc_memset.h>
+#include <seqan/misc/misc_bit_twiddling.h>
 
 #include <climits>
 #include <functional>
