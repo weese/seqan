@@ -36,9 +36,24 @@
 #define INDEX_FM_RANK_SUPPORT_BIT_STRING_ITERATOR_H_
 
 namespace seqan {
-// ==========================================================================
+
+// ============================================================================
+// Tags
+// ============================================================================
+
+struct Bit_;
+struct Rank_;
+
+typedef Tag<Bit_>   const Bit;
+typedef Tag<Rank_>  const Rank;
+
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Iterator
+// ----------------------------------------------------------------------------
 
 template <typename TSpec>
 struct Iterator<RankSupportBitString<TSpec> const, Standard>
@@ -60,9 +75,14 @@ template <typename TSpec>
 struct Iterator<RankSupportBitString<TSpec> const, Rooted>:
     Iterator<RankSupportBitString<TSpec> const, Standard>{};
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function begin()
+// ----------------------------------------------------------------------------
+
 template <typename TSpec>
 inline typename Iterator<RankSupportBitString<TSpec>, Standard>::Type
 begin(RankSupportBitString<TSpec> & rsbs, Standard)
@@ -91,7 +111,10 @@ begin(RankSupportBitString<TSpec> const & rsbs, Rooted)
     return typename Iterator<RankSupportBitString<TSpec> const, Rooted>::Type(rsbs, 0u);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function end()
+// ----------------------------------------------------------------------------
+
 template <typename TSpec>
 inline typename Iterator<RankSupportBitString<TSpec>, Standard>::Type
 end(RankSupportBitString<TSpec> & rsbs, Standard)
@@ -120,12 +143,9 @@ end(RankSupportBitString<TSpec> const & rsbs, Rooted)
     return typename Iterator<RankSupportBitString<TSpec> const, Rooted >::Type(rsbs, length(rsbs));
 }
 
-// ==========================================================================
-struct Bit_;
-struct Rank_;
-
-typedef Tag<Bit_>   const Bit;
-typedef Tag<Rank_>  const Rank;
+// ----------------------------------------------------------------------------
+// Function getValue()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec>
 inline bool getValue(Iter<RankSupportBitString<TSpec>, PositionIterator> const & it)
@@ -151,7 +171,6 @@ inline bool getValue(Iter<RankSupportBitString<TSpec>, PositionIterator> & it, B
     return getValue(it);
 }
 
-// ==========================================================================
 template <typename TSpec>
 inline typename Size<RankSupportBitString<TSpec> >::Type
 getValue(Iter<RankSupportBitString<TSpec>, PositionIterator> const & it, Rank)
