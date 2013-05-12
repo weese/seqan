@@ -47,7 +47,7 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// class View
+// Class View
 // ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec = void>
@@ -60,6 +60,10 @@ public:
 
     TIterator _begin;
     TIterator _end;
+
+// ----------------------------------------------------------------------------
+// View Constructors
+// ----------------------------------------------------------------------------
 
     SEQAN_FUNC
     View() {}
@@ -90,6 +94,10 @@ public:
         return *this;
     }
 
+// ----------------------------------------------------------------------------
+// Operator []
+// ----------------------------------------------------------------------------
+
     template <typename TPos>
     SEQAN_FUNC
     TReference
@@ -104,12 +112,15 @@ public:
     {
         return getValue(_begin + pos);
     }
-
 };
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec>
 struct Value<View<TObject, TSpec> >
@@ -122,6 +133,10 @@ struct Value<View<TObject, TSpec> const>
 {
     typedef typename Value<TObject>::Type Type;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction Iterator
+// ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec>
 struct Iterator<View<TObject, TSpec>, Standard>:
@@ -138,7 +153,18 @@ struct Iterator<View<thrust::device_vector<TObject, TAlloc>, TSpec>, Standard>
     typedef typename thrust::device_vector<TObject, TAlloc>::pointer            TIterator_;
     typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
 };
+
+template <typename TObject, typename TAlloc, typename TSpec>
+struct Iterator<View<thrust::device_vector<TObject, TAlloc>, TSpec> const, Standard>
+{
+    typedef typename thrust::device_vector<TObject const, TAlloc>::pointer      TIterator_;
+    typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
+};
 #endif
+
+// ----------------------------------------------------------------------------
+// Metafunction Difference
+// ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec>
 struct Difference<View<TObject, TSpec> >
@@ -146,12 +172,24 @@ struct Difference<View<TObject, TSpec> >
     typedef typename Difference<TObject>::Type Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction Size
+// ----------------------------------------------------------------------------
+
 template <typename TObject, typename TSpec>
 struct Size<View<TObject, TSpec> >
 {
     typedef typename Difference<TObject>::Type          TDifference;
     typedef typename MakeUnsigned<TDifference>::Type    Type;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction IsSequence
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename TSpec>
+struct IsSequence<View<TObject, TSpec> >:
+    public IsSequence<TObject> {};
 
 // ============================================================================
 // Functions
@@ -171,7 +209,7 @@ begin(View<TObject, TSpec> & view, Standard)
 
 template <typename TObject, typename TSpec>
 SEQAN_FUNC
-typename Iterator<View<TObject, TSpec>, Standard>::Type
+typename Iterator<View<TObject, TSpec> const, Standard>::Type
 begin(View<TObject, TSpec> const & view, Standard)
 {
     return view._begin;
@@ -191,7 +229,7 @@ end(View<TObject, TSpec> & view, Standard)
 
 template <typename TObject, typename TSpec>
 SEQAN_FUNC
-typename Iterator<View<TObject, TSpec>, Standard>::Type
+typename Iterator<View<TObject, TSpec> const, Standard>::Type
 end(View<TObject, TSpec> const & view, Standard)
 {
     return view._end;
