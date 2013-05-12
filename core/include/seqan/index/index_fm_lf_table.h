@@ -224,8 +224,7 @@ inline void clear(LfTable<TOccTable, TPrefixSumTable> & lfTable)
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool empty(LfTable<TOccTable, TPrefixSumTable> & lfTable)
 {
-    return empty(lfTable.occTable)
-           && empty(lfTable.prefixSumTable);
+    return empty(lfTable.occTable) && empty(lfTable.prefixSumTable);
 }
 
 // ----------------------------------------------------------------------------
@@ -245,7 +244,9 @@ inline bool empty(LfTable<TOccTable, TPrefixSumTable> & lfTable)
 */
 
 template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText>
-inline bool createLfTable(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable, TText const text)
+inline bool
+createLfTable(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable,
+              TText const text)
 {
     typedef typename SAValue<TText>::Type   TSAValue;
     typedef TValue                          TAlphabet;
@@ -297,7 +298,7 @@ inline bool createLfTable(LfTable<SentinelRankDictionary<RankDictionary<WaveletT
 
 template <typename TOccTable, typename TPrefixSumTable>
 inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type &
-getFibre(LfTable<TOccTable, TPrefixSumTable>&lfTable, FMTablePrefixSumTable)
+getFibre(LfTable<TOccTable, TPrefixSumTable> & lfTable, FMTablePrefixSumTable)
 {
     return lfTable.prefixSumTable;
 }
@@ -311,14 +312,14 @@ getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FMTablePrefixSumTa
 
 template <typename TOccTable, typename TPrefixSumTable>
 inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
-getFibre(LfTable<TOccTable, TPrefixSumTable>&lfTable, FibreOccTable)
+getFibre(LfTable<TOccTable, TPrefixSumTable> & lfTable, FibreOccTable)
 {
     return lfTable.occTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
 inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
-getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable )
+getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable)
 {
     return lfTable.occTable;
 }
@@ -341,13 +342,15 @@ the sorted cyclic rotations of the original text, while F correspond to the firs
 */
 
 template <typename TLfTable, typename TPos>
-inline TPos lfMapping(TLfTable & lfTable,
-                      TPos pos)
+inline TPos lfMapping(TLfTable & lfTable, TPos pos)
 {
     typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
     typedef typename Value<TOccTable>::Type TChar;
+
     TChar c = getValue(lfTable.occTable, pos);
-    return countOccurrences(getFibre(lfTable, FibreOccTable()), c, pos) + getPrefixSum(lfTable.prefixSumTable, getCharacterPosition(lfTable.prefixSumTable, c)) - 1;
+
+    return countOccurrences(getFibre(lfTable, FibreOccTable()), c, pos) +
+           getPrefixSum(lfTable.prefixSumTable, getCharacterPosition(lfTable.prefixSumTable, c)) - 1;
 }
 
 // ----------------------------------------------------------------------------
@@ -373,10 +376,7 @@ inline TPos lfMapping(TLfTable & lfTable,
 */
 
 template <typename TOccTable, typename TPrefixSumTable>
-inline bool open(
-    LfTable<TOccTable, TPrefixSumTable> & lfTable,
-    const char * fileName,
-    int openMode)
+inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fileName, int openMode)
 {
     String<char> name;
     name = fileName; 
@@ -390,9 +390,7 @@ inline bool open(
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-inline bool open(
-    LfTable<TOccTable, TPrefixSumTable> & lfTable,
-    const char * fileName)
+inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fileName)
 {
     return open(lfTable, fileName, DefaultOpenMode<LfTable<TOccTable, TPrefixSumTable> >::VALUE);
 }
@@ -416,10 +414,7 @@ inline bool open(
 */
 
 template <typename TOccTable, typename TPrefixSumTable>
-inline bool save(
-    LfTable<TOccTable, TPrefixSumTable> const & lfTable,
-    const char * fileName,
-    int openMode)
+inline bool save(LfTable<TOccTable, TPrefixSumTable> const & lfTable, const char * fileName, int openMode)
 {
     String<char> name;
 
@@ -433,9 +428,7 @@ inline bool save(
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-inline bool save(
-    LfTable<TOccTable, TPrefixSumTable> const & lfTable,
-    const char * fileName)
+inline bool save(LfTable<TOccTable, TPrefixSumTable> const & lfTable, const char * fileName)
 {
     return save(lfTable, fileName, DefaultOpenMode<LfTable<TOccTable, TPrefixSumTable> >::VALUE);
 }
