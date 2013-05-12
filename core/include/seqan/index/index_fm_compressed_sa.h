@@ -144,6 +144,8 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA
 {
+    typedef typename Value<typename Fibre<TSparseString, FibreValueString>::Type>::Type TCompressedSaValue;
+
 public:
     TSparseString   sparseString;
     TLfTable *      lfTable;
@@ -161,42 +163,23 @@ public:
         return *this;
     }
 
-    typedef typename Value<typename Fibre<TSparseString, FibreValueString>::Type>::Type TCompressedSaValue;
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
-
     template <typename TPos>
     inline TCompressedSaValue const operator[](TPos pos)
     {
-        TIndicatorString const & indicatorString = getFibre(sparseString, FibreIndicatorString());
-        TPos counter = 0;
-
-        while (!isBitSet(indicatorString, pos))
-        {
-            pos = lfMapping(*lfTable, pos);
-            ++counter;
-        }
-        return _addGapDistance(getValue(sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
+        return value(*this, pos);
     }
 
     template <typename TPos>
     inline TCompressedSaValue operator[](TPos pos) const
     {
-        TIndicatorString const & indicatorString = getFibre(sparseString, FibreIndicatorString());
-        TPos counter = 0;
-        while (!isBitSet(indicatorString, pos))
-        {
-            pos = lfMapping(*lfTable, pos);
-            ++counter;
-        }
-        return _addGapDistance(getValue(sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
+        return value(*this, pos);
     }
 
-    inline bool operator==(const CompressedSA & other) const
+    inline bool operator==(CompressedSA const & other) const
     {
         return sparseString == other.sparseString &&
                *lfTable == *(other.lfTable);
     }
-
 };
 
 // ============================================================================
@@ -540,14 +523,35 @@ template <typename TSparseString, typename TLfTable, typename TSpec, typename TP
 inline typename Value<TSparseString>::Type
 value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
 {
-    return compressedSA[pos];
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+
+    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
+    TPos counter = 0;
+    while (!isBitSet(indicatorString, pos))
+    {
+        pos = lfMapping(*compressedSA.lfTable, pos);
+        ++counter;
+    }
+
+    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
 inline typename Value<TSparseString>::Type const
-value(const CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
+value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos pos)
 {
-    return compressedSA[pos];
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+
+    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
+    TPos counter = 0;
+
+    while (!isBitSet(indicatorString, pos))
+    {
+        pos = lfMapping(*compressedSA.lfTable, pos);
+        ++counter;
+    }
+
+    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
 }
 
 }
