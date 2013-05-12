@@ -52,6 +52,16 @@ namespace seqan {
 // Metafunctions
 // ===========================================================================
 
+///.Metafunction.IsSequence.param.T.type:Adaption.thrust::device_vector
+///.Metafunction.IsSequence.class:Adaption.thrust::device_vector
+
+template <typename TChar, typename TAlloc>
+struct IsSequence<thrust::device_vector<TChar, TAlloc> >
+{
+    typedef True Type;
+    enum { VALUE = true };
+};
+
 ///.Metafunction.IsContiguous.param.T.type:Adaption.thrust::device_vector
 ///.Metafunction.IsContiguous.class:Adaption.thrust::device_vector
 
