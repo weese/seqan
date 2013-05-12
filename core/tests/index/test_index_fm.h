@@ -624,35 +624,7 @@ SEQAN_DEFINE_TEST(test_fm_index_search)
         fmIndexSearch(uCharTag);
         fmIndexSearch(sCharTag);
         fmIndexSearch(charTag);
-    }    
-    {
-        Index<DnaString, FMIndex<WT<>, CompressText> > dnaTag;
-        Index<String<Dna5>, FMIndex<WT<>, CompressText > > dna5Tag;
-        Index<String<AminoAcid>, FMIndex<WT<>,CompressText> > asTag;
-        Index<String<signed char>, FMIndex<WT<>, CompressText > > sCharTag;
-        Index<String<unsigned char>, FMIndex<WT<>, CompressText > > uCharTag;
-        Index<String<char>, FMIndex<WT<>, CompressText > > charTag;
-        fmIndexSearch(dnaTag);
-        fmIndexSearch(dna5Tag);
-        fmIndexSearch(asTag);
-        fmIndexSearch(uCharTag);
-        fmIndexSearch(sCharTag);
-        fmIndexSearch(charTag); 
     }
-    {
-        Index<StringSet<DnaString>, FMIndex<WT<>, CompressText> > dnaTag;
-        Index<StringSet<Dna5String>, FMIndex<WT<>, CompressText> > dna5Tag;
-        Index<StringSet<String<AminoAcid> >, FMIndex<WT<>, CompressText> > asTag;
-        Index<StringSet<String<unsigned char> >, FMIndex<WT<>, CompressText> > uCharTag;
-        Index<StringSet<String<signed char> >, FMIndex<WT<>, CompressText> > sCharTag;
-        Index<StringSet<String<char> >, FMIndex<WT<>, CompressText> > charTag;
-        fmIndexSearch(dnaTag);
-        fmIndexSearch(dna5Tag);
-        fmIndexSearch(asTag);
-        fmIndexSearch(uCharTag);
-        fmIndexSearch(sCharTag);
-        fmIndexSearch(charTag);
-    }  
 }
 
 SEQAN_DEFINE_TEST(test_fm_index_open_save)
