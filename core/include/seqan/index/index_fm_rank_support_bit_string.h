@@ -35,17 +35,21 @@
 #ifndef INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
 #define INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
 
-#include <seqan/misc/misc_bit_twiddling.h>
-
 namespace seqan {
 
-//Rank Support Bit String
+// ============================================================================
+// Forwards
+// ============================================================================
+
 template <typename TSpec = void>
 struct RankSupportBitString;
 
-// ==========================================================================
+template <typename TSpec, typename TPos>
+inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool setBit);
+
+// ============================================================================
 // Tags
-// ==========================================================================
+// ============================================================================
 
 // FM index fibres
 
@@ -76,15 +80,23 @@ typedef FibreBits           RankSupportBitStringBits;
 typedef FibreBlocks         RankSupportBitStringBlocks;
 typedef FibreSuperBlocks    RankSupportBitStringSuperBlocks;
 
-// ==========================================================================
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction DefaultOverflowImplicit
+// ----------------------------------------------------------------------------
 
 template <typename TSpec>
 struct DefaultOverflowImplicit<RankSupportBitString<TSpec> >
 {
     typedef Generous Type;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction Size
+// ----------------------------------------------------------------------------
 
 //The limiting factor of the size is the underlying data type of the super block string
 template <typename TSpec>
@@ -93,9 +105,17 @@ struct Size<RankSupportBitString<TSpec> >
     typedef unsigned long long Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction Position
+// ----------------------------------------------------------------------------
+
 template <typename TSpec>
 struct Position<RankSupportBitString<TSpec> > :
 	Size<RankSupportBitString<TSpec> > {};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre
+// ----------------------------------------------------------------------------
 
 template <typename TSpec>
 struct Fibre<RankSupportBitString<TSpec>, FibreBits>
@@ -115,9 +135,13 @@ struct Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>
     typedef String<typename Size<RankSupportBitString<TSpec> >::Type> Type;
 };
 
-// ==========================================================================
+// ============================================================================
 // Classes
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class RankSupportBitString
+// ----------------------------------------------------------------------------
 
 /**
 .Class.RankSupportBitString:
@@ -129,10 +153,6 @@ struct Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>
 ..remarks:The constant rank query time is achieved by evaluating precomputed subsolutions. In order to do so, the bit string is divided into blocks of length l. A super block string stores for each block of l blocks the number of bits set from the beginning. In addition a block string stores the number of bits set in each block from the start of the last super block block. Therefore it is possible to compute the result of a rank query in constant time by adding information from the bit, block and super block string.
 ..include:seqan/index.h
 */
-
-// Forward declaration because setBit is used in constructor
-template <typename TSpec, typename TPos>
-inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool setBit);
 
 template <typename TSpec>
 struct RankSupportBitString
@@ -186,9 +206,13 @@ struct RankSupportBitString
     }
 };
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function appendValue()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.RankSupportBitString#appendValue:
@@ -212,7 +236,10 @@ inline void appendValue(RankSupportBitString<TSpec> & bitString, bool bit)
     _updateLastRank(bitString); 
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.clear
 ..param.object:
@@ -227,7 +254,10 @@ inline void clear(RankSupportBitString<TSpec> & bitString)
     bitString._length = 0;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function _getRankInBlock()
+// ----------------------------------------------------------------------------
+
 // This function returns the number of bits set in a block until a specified position
 template <typename TValue>
 inline unsigned _getRankInBlock(TValue const value, False)
@@ -259,7 +289,10 @@ _getRankInBlock(RankSupportBitString<TSpec> const & bitString, TPos const pos)
     return _getRankInBlock(bitString.bits[_getBlockPos(bitString, pos)] & mask);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function _getSuperBlockPos()
+// ----------------------------------------------------------------------------
+
 // This function returns the number of bits set in a block until a specified position
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
@@ -275,7 +308,10 @@ _getSuperBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const 
     return pos / (_bitsPerValue * _bitsPerValue);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function getRank()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.getRank
 ..summary:Returns the rank (the number of bits set from the start of the bit string) of a specified position.
@@ -296,14 +332,10 @@ getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
          + _getRankInBlock(bitString, pos);
 }
 
+// ----------------------------------------------------------------------------
+// Function isBitSet()
+// ----------------------------------------------------------------------------
 
-/**
-.Function.empty
-..param.object:
-...type:Class.RankSupportBitString
-*/
-
-// ==========================================================================
 /**
 .Function.isSetBit
 ..summary:Returns whether the bit with the given index is set to 1.
@@ -333,7 +365,10 @@ inline bool isBitSet(RankSupportBitString<TSpec> const & bitString, TPos const p
     return isBitSet(bitString.bits[_getBlockPos(bitString, pos)], _getPosInBlock(bitString, pos));
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function _getBlockPos()
+// ----------------------------------------------------------------------------
+
 // This function returns the position in the block string of the corresponding block.
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
@@ -346,7 +381,10 @@ _getBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
     return pos / BitsPerValue<TFibreBitsValue>::VALUE;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function getFibre()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.RankSupportBitString#getFibre:
 ..summary:Returns a specific fibre of a container.
@@ -406,7 +444,10 @@ getFibre(const RankSupportBitString<TSpec>&string, const FibreSuperBlocks)
     return string.superBlocks;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function _getPosInBlock()
+// ----------------------------------------------------------------------------
+
 // This function returns the position of a specified bit within a block.
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreBlocks>::Type>::Type
@@ -419,7 +460,10 @@ _getPosInBlock(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos
     return pos % BitsPerValue<TFibreBitsValue>::VALUE;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function length()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.length
 ..param.object:
@@ -433,26 +477,9 @@ length(RankSupportBitString<TSpec> const & bitString)
 }
 
 
-// ==========================================================================
-/*
-.Function._updateRanks
-..summary:Adds the block and super block information to the bit string.
-..signature:_updateRanks(bitString)
-..param.bitString:The bit string to be completed.
-...type:Class.RankSupportBitString
-..include:seqan/index.h
-..example.code:
-String<Dna5> genome = "ACGTACGT";
-
-RankSupportBitString<> bitString;
-resize(bitString, length(genome));
-
-for (unsigned i = 0; i < length(genome); ++i)
-    if(genome[i] < Dna5('c'))
-        setBitTo(bitString, 1);
-
-_updateRanks(bitString);
-*/
+// ----------------------------------------------------------------------------
+// Function _updateRanksImpl()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TPos>
 inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
@@ -500,6 +527,30 @@ inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
     }
 }
 
+
+// ----------------------------------------------------------------------------
+// Function _updateRanks()
+// ----------------------------------------------------------------------------
+
+/*
+.Function._updateRanks
+..summary:Adds the block and super block information to the bit string.
+..signature:_updateRanks(bitString)
+..param.bitString:The bit string to be completed.
+...type:Class.RankSupportBitString
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
+
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
+
+for (unsigned i = 0; i < length(genome); ++i)
+    if(genome[i] < Dna5('c'))
+        setBitTo(bitString, 1);
+
+_updateRanks(bitString);
+*/
 template <typename TSpec, typename TPos>
 inline void _updateRanks(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
@@ -512,8 +563,11 @@ inline void _updateRanks(RankSupportBitString<TSpec> & bitString)
     _updateRanksImpl(bitString, 0u);
 }
 
+// ----------------------------------------------------------------------------
+// Function _updateLastRank()
+// ----------------------------------------------------------------------------
+
 // This function update the rank information of the last block.
-// ==========================================================================
 template <typename TSpec>
 inline void _updateLastRank(RankSupportBitString<TSpec> & bitString)
 {
@@ -542,8 +596,10 @@ inline void _updateLastRank(RankSupportBitString<TSpec> & bitString)
                 + _getRankInBlock(bitString.bits[blockPos - 1]);
 }
 
+// ----------------------------------------------------------------------------
+// Function reserve()
+// ----------------------------------------------------------------------------
 
-// ==========================================================================
 template <typename TSpec, typename TSize, typename TExpand>
 inline typename Size<RankSupportBitString<TSpec> >::Type
 reserve(RankSupportBitString<TSpec> & bitString, TSize const size, Tag<TExpand> const tag)
@@ -564,7 +620,10 @@ reserve(RankSupportBitString<TSpec> & bitString, TSize const size, Tag<TExpand> 
     return reserve(bitString.bits, _numberOfBlocks, tag) * _bitsPerBlock;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function resize()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.resize
 ..param.object:
@@ -608,7 +667,40 @@ resize(RankSupportBitString<TSpec> & bitString, TLength const _length, Tag<TExpa
     return resize(bitString, _length, 0, tag);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function setBit()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TPos>
+inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos)
+{
+    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
+    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+
+    TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
+    bitString.bits[_getBlockPos(bitString, pos)] |= shiftValue;
+}
+
+// ----------------------------------------------------------------------------
+// Function clearBit()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TPos>
+inline void clearBit(RankSupportBitString<TSpec> & bitString, TPos pos)
+{
+    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
+    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+
+    TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
+    bitString.bits[_getBlockPos(bitString, pos)] &= ~shiftValue;
+}
+
+// ----------------------------------------------------------------------------
+// Function setBitTo()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.setBitTo
 ..signature:setBitTo(bitString, pos, bit)
@@ -631,28 +723,6 @@ for (unsigned i = 0; i < length(genome); ++i)
 updateRanks_(bitString);
 */
 template <typename TSpec, typename TPos>
-inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos)
-{
-    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
-    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
-
-    TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
-    bitString.bits[_getBlockPos(bitString, pos)] |= shiftValue;
-}
-
-template <typename TSpec, typename TPos>
-inline void clearBit(RankSupportBitString<TSpec> & bitString, TPos pos)
-{
-    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
-    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
-
-    TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
-    bitString.bits[_getBlockPos(bitString, pos)] &= ~shiftValue;
-}
-
-template <typename TSpec, typename TPos>
 inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool value)
 {
     if (value)
@@ -661,7 +731,11 @@ inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool val
         clearBit(bitString, pos);
 }
 
-// ==========================================================================
+
+// ----------------------------------------------------------------------------
+// Function open()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.open
 ..signature:open(object, filename[ ,openMode])
@@ -707,7 +781,10 @@ inline bool open(
     return open(strings, fileName, OPEN_RDONLY);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function save()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.RankSupportBitString#save
 ..class:Class.RankSupportBitString
@@ -759,7 +836,10 @@ inline bool save(
     return save(strings, fileName, DefaultOpenMode<RankSupportBitString<TSpec> >::VALUE);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function printBits()
+// ----------------------------------------------------------------------------
+
 template <typename TValue>
 inline void printBits(TValue entrie)
 {
@@ -788,6 +868,10 @@ inline std::ostream & printBits(std::ostream & stream, TValue entrie, TSize bloc
     }
     return stream;
 }
+
+// ----------------------------------------------------------------------------
+// Operator <<
+// ----------------------------------------------------------------------------
 
 template <typename TSpec>
 inline std::ostream & operator<<(std::ostream & stream, const RankSupportBitString<TSpec> & rankSupportBitString)
