@@ -1,5 +1,5 @@
 // ==========================================================================
-//                 seqan - the library for sequence analysis
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -37,9 +37,9 @@
 
 namespace seqan {
 
-// ==========================================================================
-//Forwards
-// ==========================================================================
+// ============================================================================
+// Forwards
+// ============================================================================
 
 struct FibreSparseString_;
 typedef Tag<FibreSparseString_> const FibreSparseString;
@@ -47,9 +47,13 @@ typedef Tag<FibreSparseString_> const FibreSparseString;
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
 
-// ==========================================================================
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Iterator
+// ----------------------------------------------------------------------------
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
 struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>
@@ -71,9 +75,14 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Rooted>:
     Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>{};
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function begin()
+// ----------------------------------------------------------------------------
+
 ///.Function.begin.param.object.type:Class.CompressedSA
 template <typename TSparseString, typename TLfTable, typename TSpec>
 inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, Standard>::Type
@@ -103,7 +112,10 @@ begin(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, Rooted 
     return typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Rooted>::Type(compressedSA, 0);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function end()
+// ----------------------------------------------------------------------------
+
 ///.Function.end.param.object.type:Class.CompressedSA
 template <typename TSparseString, typename TLfTable, typename TSpec>
 inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, Rooted>::Type

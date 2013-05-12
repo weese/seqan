@@ -37,9 +37,15 @@
 
 namespace seqan {
 
-// ==========================================================================
+// ============================================================================
 // Forwards
-// ==========================================================================
+// ============================================================================
+
+template <typename TPos, typename TOffSet>
+TPos _addGapDistance(TPos const & value, TOffSet const & offSet);
+
+template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
+Pair<TSeqId, TPos> _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet);
 
 /**
 .Tag.CompressedSA Fibres
@@ -59,9 +65,9 @@ typedef Tag<FibreSparseString_> const FibreSparseString;
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
 
-// ==========================================================================
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre
@@ -113,16 +119,9 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
     typedef typename Value<TSparseString>::Type const Type;
 };
 
-// ==========================================================================
+// ============================================================================
 // Classes
-// ==========================================================================
-
-// forwards
-template <typename TPos, typename TOffSet>
-TPos _addGapDistance(TPos const & value, TOffSet const & offSet);
-
-template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
-Pair<TSeqId, TPos> _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet);
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Class CompressedSA
@@ -200,9 +199,9 @@ public:
 
 };
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Function _addGapDistance
@@ -220,21 +219,10 @@ Pair<TSeqId, TPos> _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOff
     return Pair<TSeqId, TPos>(value.i1, value.i2 + offSet);
 }
 
-// ==========================================================================
-/*
-.Function.assignValue
-..param.object
-...type:Class.CompressedSA
-..remarks:In the case of the compressed suffix array the new value only influences the sparse string and not the indicator string.
-..include:seqan/index.h
-*/
-// template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos, typename TValue>
-// void assignValue(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos, TValue value)
-// {
-//     assignValue(getFibre(compressedSA, FibreSparseString()), pos, value);
-// }
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
 
-// ==========================================================================
 /**
 .Function.clear.param.object.type:Class.CompressedSA
 */
@@ -244,7 +232,10 @@ inline void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
     clear(getFibre(compressedSA, FibreSparseString()));
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function empty()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.empty.param.object.type:Class.CompressedSA
 */
@@ -254,8 +245,11 @@ inline bool empty(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
     return empty(getFibre(compressedSA, FibreSparseString()));
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function entryStored()
+// ----------------------------------------------------------------------------
 // TODO (singer): How to name this function?
+
 /*
 .Function.entryStored
 ..summary:Determines whether the requested position contains a value different from the default value.
@@ -278,8 +272,11 @@ inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     return entryStored(getFibre(compressedSA, FibreSparseString()), pos);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function createCompressedSa()
+// ----------------------------------------------------------------------------
 // This function creates a compressed suffix array using a normal one.
+
 /**
 .Function.CompressedSA#createCompressedSa
 ..summary:This functions creates a compressed suffix array with a specified compression factor.
@@ -342,7 +339,10 @@ void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     createCompressedSa(compressedSA, completeSA, compressionFactor, 0);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function getFibre()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.CompressedSA#getFibre:
 ..summary:Returns a specific fibre of a container.
@@ -374,7 +374,10 @@ getFibre(CompressedSA<TSparseString, TLfTable, TSpec>&compressedSA, FibreSparseS
     return compressedSA.sparseString;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function _getNextPos()
+// ----------------------------------------------------------------------------
+
 // This functions computes the position in the suffix array of text[sa[pos] - 1]
 // iff the current position is not present in the compressed suffix array.
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
@@ -391,7 +394,10 @@ inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & com
     return false;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function length()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.length.param.object.type:Class.CompressedSA
 */
@@ -402,7 +408,10 @@ length(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA)
     return length(getFibre(compressedSA, FibreSparseString()));
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function resize()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.resize.param.object.type:Class.CompressedSA
 */
@@ -415,13 +424,10 @@ resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
     return resize(getFibre(compressedSA, FibreSparseString()), size, tag);
 }
 
-// template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
-// inline void resize(CompressedSA<String<TSparseString>, TLfTable, TSpec> & compressedSA, TSize size)
-// {
-//     resize(getFibre(compressedSA, FibreSparseString()), size);
-// }
+// ----------------------------------------------------------------------------
+// Function open()
+// ----------------------------------------------------------------------------
 
-// ==========================================================================
 /**
 .Function.open
 ..param.object:
@@ -451,7 +457,10 @@ inline bool open(
     return open(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function save()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.CompressedSA#save
 ..class:Class.CompressedSA
@@ -492,7 +501,10 @@ inline bool save(
     return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function setLfTable()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.setLfTable
 ..summary:Set the LfTable of the compressed suffix array.
@@ -509,7 +521,10 @@ void setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TLf
     compressedSA.lfTable = &lfTable;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function value()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.CompressedSA#value
 ..summary:Returns the value stored at a specified position in the compressed suffix-array.
