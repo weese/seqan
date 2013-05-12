@@ -164,15 +164,15 @@ struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<WT<TWaveletTreeSpec
     typedef SentinelRankDictionary<RankDictionary<WaveletTree<TValue_> >, Sentinels> Type;
 };
 
-template <typename TText, typename TWaveletTreeSpec, typename TSpec>
-struct Fibre<Index<TText, FMIndex<SBM<TWaveletTreeSpec>, TSpec> >, FibreOccTable>
+template <typename TText, typename TSBMSpec, typename TSpec>
+struct Fibre<Index<TText, FMIndex<SBM<TSBMSpec>, TSpec> >, FibreOccTable>
 {
-    typedef typename Value<Index<TText, FMIndex<WT<TWaveletTreeSpec>, TSpec> > >::Type TValue_;
+    typedef typename Value<Index<TText, FMIndex<SBM<TSBMSpec>, TSpec> > >::Type         TValue_;
 	typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinel> Type;
 };
 
-template <typename TText, typename TStringSetSpec, typename TWaveletTreeSpec, typename TSpec>
-struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<SBM<TWaveletTreeSpec>, TSpec > >, FibreOccTable>
+template <typename TText, typename TStringSetSpec, typename TSBMSpec, typename TSpec>
+struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<SBM<TSBMSpec>, TSpec > >, FibreOccTable>
 {
     typedef typename Value<TText>::Type TValue_;
     typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinels> Type;
@@ -246,8 +246,8 @@ struct FmIndexInfo_
     __uint32 compressionFactor;
     // The sizeof(TSAEntry) values for suffix array entries.
     __uint32 sizeOfSAEntry;
-    // The length of the genome.
-    __uint64 genomeLength;
+    // The length of the BWT.
+    __uint64 bwtLength;
 }
 
 #ifndef PLATFORM_WINDOWS
@@ -285,20 +285,20 @@ struct FmIndexInfo_
 template <typename TText, typename TOccSpec, typename TSpec>
 class Index<TText, FMIndex<TOccSpec, TSpec> >
 {
-    public:
+public:
     Holder<typename Fibre<Index, FibreText>::Type>  text;
 	typename Fibre<Index, FibreLfTable>::Type       lfTable;
 	typename Fibre<Index, FibreSA>::Type            compressedSA;
-	typename Size<TText>::Type                      n;
+	typename Size<TText>::Type                      bwtLength;
     unsigned                                        compressionFactor; 
 
 	Index() :
-		n(0)
+		bwtLength(0)
 	{}
 
 	Index(TText & text, unsigned compressionFactor = 10) :
 	    text(text),
-		n(_computeBwtLength(text)),
+		bwtLength(_computeBwtLength(text)),
 		compressionFactor(compressionFactor)
 	{}
 
@@ -306,7 +306,7 @@ class Index<TText, FMIndex<TOccSpec, TSpec> >
     {
         return lfTable == b.lfTable &&
                compressedSA == b.compressedSA &&
-               n == b.n &&
+               bwtLength == b.bwtLength &&
                compressionFactor == b.compressionFactor;
     }
 };
@@ -314,6 +314,7 @@ class Index<TText, FMIndex<TOccSpec, TSpec> >
 // ==========================================================================
 // Functions
 // ==========================================================================
+
 // ----------------------------------------------------------------------------
 // Function clear
 // ----------------------------------------------------------------------------
@@ -332,14 +333,14 @@ inline void clear(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 
 // This function computes the length of the bwt string.
 template <typename TText>
-unsigned _computeBwtLength(TText const & text)
+typename Size<TText>::Type _computeBwtLength(TText const & text)
 {
     return length(text) + 1;
 }
 
 // This function computes the length of the bwt string.
 template <typename TText, typename TSetSpec>
-unsigned _computeBwtLength(StringSet<TText, TSetSpec> const & text)
+typename Size<StringSet<TText, TSetSpec> >::Type _computeBwtLength(StringSet<TText, TSetSpec> const & text)
 {
     return lengthSum(text) + countSequences(text);
 }
@@ -459,27 +460,6 @@ inline bool empty(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const
 {
     return empty(getFibre(index, FibreLfTable()))
             && empty(getFibre(index, FibreSA()));
-}
-
-// ----------------------------------------------------------------------------
-// Function _findFirstIndex
-// ----------------------------------------------------------------------------
-
-// This function is used by the finder interface. It initializes the range of the finder.
-template <typename TText, typename TPattern, typename TIndexSpec, typename TFMISpeedEnhancement>
-inline void
-_findFirstIndex(Finder<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FinderFMIndex> & finder,
-		        TPattern const & pattern, FinderFMIndex const &)
-{
-	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >    TIndex;
-
-	TIndex & index = haystack(finder);
-
-	indexRequire(index, FibreSaLfTable());
-    setContainer(finder.range.i1, getFibre(container(finder), FibreSA()));
-    setContainer(finder.range.i2, getFibre(container(finder), FibreSA()));
-
-	_range(index, pattern, finder.range);
 }
 
 // ----------------------------------------------------------------------------
@@ -641,7 +621,7 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 	_determineSentinelSubstitute(index.lfTable.prefixSumTable, sentinelSub);
 
 	String<TAlphabet> bwt;
-	resize(bwt, index.n, Exact());
+	resize(bwt, index.bwtLength, Exact());
 	TSentinelPosition sentinelPos = _setDefaultSentinelPosition(length(bwt), TSentinelPosition());
 
 	_createBwTable(bwt, sentinelPos, text, sa, sentinelSub);
@@ -665,8 +645,6 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 ...type:Spec.FMIndex
 ..param.fibreTag:The fibre of the index to be computed.
 ...type:Tag.FM Index Fibres.tag.FibreSaLfTable
-..remarks:If you call this function on the compressed text version of the FM index
-you will get an error message: "Logic error. It is not possible to create this index without a text."
 */
 
 // This function creates the index.
@@ -682,10 +660,7 @@ inline bool _indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, TTe
     TTempSA tempSA;
     
 	resize(tempSA, length(text), Exact());
-	createSuffixArray(tempSA,
-			text,
-			Skew7());
-
+	createSuffixArray(tempSA, text, Skew7());
 
 	// create the compressed SA
 	_indexCreateSA(index, tempSA, text);
@@ -695,7 +670,6 @@ inline bool _indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, TTe
 
 	return true;
 }
-
 
 template <typename TText, typename TIndexSpec, typename TSpec>
 inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, FibreSaLfTable const)
@@ -750,7 +724,7 @@ inline void _range(const Index<TText, FMIndex<TOccSpec, TSpec> > & index, const 
     if (empty(pattern))
     {
 	    setPosition(range.i1, countSequences(index));
-	    setPosition(range.i2, index.n);
+	    setPosition(range.i2, index.bwtLength);
     }
 
 	TSize i = length(pattern) - 1;
@@ -774,6 +748,27 @@ inline void _range(const Index<TText, FMIndex<TOccSpec, TSpec> > & index, const 
 
     setPosition(range.i1, sp);
 	setPosition(range.i2, ep + 1);
+}
+
+// ----------------------------------------------------------------------------
+// Function _findFirstIndex
+// ----------------------------------------------------------------------------
+
+// This function is used by the finder interface. It initializes the range of the finder.
+template <typename TText, typename TPattern, typename TIndexSpec, typename TFMISpeedEnhancement>
+inline void
+_findFirstIndex(Finder<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FinderFMIndex> & finder,
+		        TPattern const & pattern, FinderFMIndex const &)
+{
+	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >    TIndex;
+
+	TIndex & index = haystack(finder);
+
+	indexRequire(index, FibreSaLfTable());
+    setContainer(finder.range.i1, getFibre(container(finder), FibreSA()));
+    setContainer(finder.range.i2, getFibre(container(finder), FibreSA()));
+
+	_range(index, pattern, finder.range);
 }
 
 // ----------------------------------------------------------------------------
@@ -829,7 +824,7 @@ inline bool open(Index<TText, FMIndex<TOccSpec, TSpec> > & index, const char * f
 //        return false;
 
     index.compressionFactor = infoString[0].compressionFactor;
-    index.n = infoString[0].genomeLength;
+    index.bwtLength = infoString[0].bwtLength;
     getFibre(index, FibreSA()).lfTable = & getFibre(index, FibreLfTable());
 
     return true;
@@ -874,7 +869,7 @@ inline bool save(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, const ch
     typedef typename Value<TSAFibre>::Type TSAValue;
 
     String<FmIndexInfo_> infoString;
-    FmIndexInfo_ info = { index.compressionFactor, sizeof(TSAValue), index.n };
+    FmIndexInfo_ info = { index.compressionFactor, sizeof(TSAValue), index.bwtLength };
     appendValue(infoString, info);
 
     name = fileName;    append(name, ".txt");
