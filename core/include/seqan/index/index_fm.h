@@ -461,8 +461,8 @@ inline void _determineSentinelSubstitute(TPrefixSumTable const & pst, TChar & su
 // ----------------------------------------------------------------------------
 
 // This function checks whether the index is empty. Its already documented.
-template <typename TText, typename TIndexSpec, typename TFMISpeedEnhancement>
-inline bool empty(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const & index)
+template <typename TText, typename TOccSpec, typename TSpec>
+inline bool empty(Index<TText, FMIndex<TOccSpec, TSpec> > const & index)
 {
     return empty(getFibre(index, FibreLfTable())) && empty(getFibre(index, FibreSA()));
 }
@@ -485,30 +485,30 @@ inline bool empty(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const
 ..include:seqan/index.h
 */
 
-template <typename TText, typename TIndexSpec, typename TFMISpeedEnhancement>
-typename Fibre<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FibreLfTable >::Type &
-getFibre(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > & index, FibreLfTable /*tag*/)
+template <typename TText, typename TOccSpec, typename TSpec>
+typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable >::Type &
+getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > & index, FibreLfTable /*tag*/)
 {
 	return index.lfTable;
 }
 
-template <typename TText, typename TIndexSpec, typename TFMISpeedEnhancement>
-typename Fibre<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FibreLfTable >::Type const &
-getFibre(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const & index, FibreLfTable /*tag*/)
+template <typename TText, typename TOccSpec, typename TSpec>
+typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable >::Type const &
+getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreLfTable /*tag*/)
 {
 	return index.lfTable;
 }
 
-template <typename TText, typename TIndexSpec, typename TFMISpeedEnhancement>
-typename Fibre<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FibreSA >::Type &
-getFibre(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > & index, FibreSA /*tag*/)
+template <typename TText, typename TOccSpec, typename TSpec>
+typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type &
+getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > & index, FibreSA /*tag*/)
 {
 	return index.compressedSA;
 }
 
-template <typename TText, typename TIndexSpec, typename TFMISpeedEnhancement>
-typename Fibre<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FibreSA >::Type const &
-getFibre(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const & index, FibreSA /*tag*/)
+template <typename TText, typename TOccSpec, typename TSpec>
+typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type const &
+getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreSA /*tag*/)
 {
 	return index.compressedSA;
 }
@@ -621,10 +621,12 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 	typedef typename Fibre<TOccTable, FibreSentinelPosition>::Type  TSentinelPosition;
 	typedef typename Value<TIndex>::Type						    TAlphabet;
 
-	createPrefixSumTable(index.lfTable.prefixSumTable, text);
+    TLfTable & lfTable = getFibre(index, FibreLfTable());
+
+	createPrefixSumTable(getFibre(lfTable, FibrePrefixSumTable()), text);
 
 	TAlphabet sentinelSub(0);
-	_determineSentinelSubstitute(index.lfTable.prefixSumTable, sentinelSub);
+	_determineSentinelSubstitute(getFibre(lfTable, FibrePrefixSumTable()), sentinelSub);
 
     // NOTE(esiragusa): The bwt as a String<TAlphabet> on the stack here seems very strange to me!
 	String<TAlphabet> bwt;
@@ -633,9 +635,9 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 
 	_createBwTable(bwt, sentinelPos, text, sa, sentinelSub);
 
-    createSentinelRankDictionary(index.lfTable, bwt, sentinelSub, sentinelPos);
+    createSentinelRankDictionary(lfTable, bwt, sentinelSub, sentinelPos);
 
-	_insertSentinel(index.lfTable.prefixSumTable, countSequences(text));
+	_insertSentinel(getFibre(lfTable, FibrePrefixSumTable()), countSequences(text));
 
 	return true;
 }
@@ -719,14 +721,21 @@ inline bool indexSupplied(Index<TText, FMIndex<TIndexSpec, TSpec > > const & ind
 // This function computes a range in the suffix array whose entries point to location
 // in the text where the pattern occurs. 
 template <typename TText, typename TOccSpec, typename TSpec, typename TPattern, typename TIter, typename TPairSpec>
-inline void _range(const Index<TText, FMIndex<TOccSpec, TSpec> > & index, const TPattern & pattern, 
+inline void _range(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, TPattern const & pattern,
                    Pair<TIter, TPairSpec> & range)
 {
-    typedef Index<TText, FMIndex<TOccSpec, TSpec> >             TIndex;
-    typedef typename Value<TIndex>::Type                        TAlphabet;
-    typedef typename ValueSize<TAlphabet>::Type                 TAlphabetSize;
-    typedef typename Size<TIndex>::Type                         TSize;
- 	typedef typename Value<TPattern>::Type                      TChar;
+    typedef Index<TText, FMIndex<TOccSpec, TSpec> >                 TIndex;
+	typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type     TPrefixSumTable;
+    typedef typename Fibre<TLfTable, FibreOccTable>::Type           TOccTable;
+    typedef typename Value<TIndex>::Type                            TAlphabet;
+    typedef typename ValueSize<TAlphabet>::Type                     TAlphabetSize;
+    typedef typename Size<TIndex>::Type                             TSize;
+ 	typedef typename Value<TPattern>::Type                      	TChar;
+
+    TLfTable const & lfTable = getFibre(index, FibreLfTable());
+    TPrefixSumTable const & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
+    TOccTable const & occTable = getFibre(lfTable, FibreOccTable());
 
     if (empty(pattern))
     {
@@ -737,20 +746,20 @@ inline void _range(const Index<TText, FMIndex<TOccSpec, TSpec> > & index, const 
 	TSize i = length(pattern) - 1;
 	TChar letter = pattern[i];
 
-    // initilization
-	TAlphabetSize letterPosition = getCharacterPosition(index.lfTable.prefixSumTable, letter);
-	TSize sp = getPrefixSum(index.lfTable.prefixSumTable, letterPosition);
-	TSize ep = getPrefixSum(index.lfTable.prefixSumTable, letterPosition + 1) - 1;
+    // Initilization.
+	TAlphabetSize letterPosition = getCharacterPosition(prefixSumTable, letter);
+	TSize sp = getPrefixSum(prefixSumTable, letterPosition);
+	TSize ep = getPrefixSum(prefixSumTable, letterPosition + 1) - 1;
 
-	// the search as proposed by Ferragina and Manzini
+	// The search as proposed by Ferragina and Manzini.
 	while ((sp <= ep) && (i > 0))
 	{
 	    --i;
 		letter = pattern[i];
-		letterPosition = getCharacterPosition(index.lfTable.prefixSumTable, letter);
-		TSize prefixSum = getPrefixSum(index.lfTable.prefixSumTable, letterPosition);
-		sp = prefixSum + countOccurrences(index.lfTable.occTable, letter, sp - 1);
-		ep = prefixSum + countOccurrences(index.lfTable.occTable, letter, ep) - 1;
+		letterPosition = getCharacterPosition(prefixSumTable, letter);
+		TSize prefixSum = getPrefixSum(prefixSumTable, letterPosition);
+		sp = prefixSum + countOccurrences(occTable, letter, sp - 1);
+		ep = prefixSum + countOccurrences(occTable, letter, ep) - 1;
 	}
 
     setPosition(range.i1, sp);
@@ -762,12 +771,12 @@ inline void _range(const Index<TText, FMIndex<TOccSpec, TSpec> > & index, const 
 // ----------------------------------------------------------------------------
 
 // This function is used by the finder interface. It initializes the range of the finder.
-template <typename TText, typename TPattern, typename TIndexSpec, typename TFMISpeedEnhancement>
+template <typename TText, typename TPattern, typename TOccSpec, typename TSpec>
 inline void
-_findFirstIndex(Finder<Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >, FinderFMIndex> & finder,
+_findFirstIndex(Finder<Index<TText, FMIndex<TOccSpec, TSpec> >, FinderFMIndex> & finder,
 		        TPattern const & pattern, FinderFMIndex const &)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >    TIndex;
+	typedef Index<TText, FMIndex<TOccSpec, TSpec> >    TIndex;
 
 	TIndex & index = haystack(finder);
 
@@ -826,9 +835,11 @@ inline bool open(Index<TText, FMIndex<TOccSpec, TSpec> > & index, const char * f
 //    if (infoString[0].sizeOfSAEntry != 0 && infoString[0].sizeOfSAEntry != sizeof(TSAValue))
 //        return false;
 
+    // Initialize index private members from info string.
     index.compressionFactor = infoString[0].compressionFactor;
     index.bwtLength = infoString[0].bwtLength;
-    getFibre(index, FibreSA()).lfTable = & getFibre(index, FibreLfTable());
+
+    setLfTable(getFibre(index, FibreSA()), getFibre(index, FibreLfTable()));
 
     return true;
 }
