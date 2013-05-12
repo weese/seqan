@@ -543,7 +543,7 @@ toSuffixPosition(Index<TText, FMIndex<TOccSpec, TIndexSpec > > const & index, TP
 // This function computes the full and compressed suffix array. 
 // Note, in contrast to indexCreate(index, FibreSA()) the full suffix array is also computed.
 template <typename TText, typename TIndexSpec, typename TSpec, typename TSA>
-inline bool _indexCreateSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TSA & fullSa, TText const & text)
+inline bool _indexCreateSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TSA const & fullSa, TText const & text)
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
 	typedef typename Fibre<TIndex, FibreSA>::Type       TCompressedSA;
@@ -568,7 +568,7 @@ inline bool _indexCreateSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TS
 
 // This function creates all table of the lf table given a text and a suffix array.
 template <typename TIndexSpec, typename TSpec, typename TText, typename TSA>
-inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText & text, TSA const & sa)
+inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >		        TIndex;
 	typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
@@ -586,7 +586,7 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
     // NOTE(esiragusa): The bwt as a String<TAlphabet> on the stack here seems very strange to me!
 	String<TAlphabet> bwt;
 	resize(bwt, index.bwtLength, Exact());
-	TSentinelPosition sentinelPos = _setDefaultSentinelPosition(length(bwt), TSentinelPosition());
+	TSentinelPosition sentinelPos = _getDefaultSentinelPosition(length(bwt), TSentinelPosition());
 
 	_createBwTable(bwt, sentinelPos, text, sa, sentinelSub);
 
@@ -611,18 +611,20 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 ...type:Tag.FM Index Fibres.tag.FibreSaLfTable
 */
 
-// This function creates the index.
 template <typename TText, typename TIndexSpec, typename TSpec>
-inline bool _indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, TText & text)
+inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, FibreSaLfTable const)
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
 	typedef typename Fibre<TIndex, FibreTempSA>::Type   TTempSA;
+
+    TText const & text = getFibre(index, FibreText());
 
     if (empty(text))
         return false;
 
     TTempSA tempSA;
-    
+
+	// Create the full SA.
 	resize(tempSA, length(text), Exact());
 	createSuffixArray(tempSA, text, Skew7());
 
@@ -633,12 +635,6 @@ inline bool _indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, TTe
 	_indexCreateLfTables(index, text, tempSA);
 
 	return true;
-}
-
-template <typename TText, typename TIndexSpec, typename TSpec>
-inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, FibreSaLfTable const)
-{
-    return _indexCreate(index, getFibre(index, FibreText()));
 }
 
 template <typename TText, typename TIndexSpec, typename TSpec>
