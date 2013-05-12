@@ -51,12 +51,15 @@ using namespace seqan;
 // --------------------------------------------------------------------------
 
 #ifdef __CUDACC__
-template <typename TText, typename TViewSpec, typename TSpec>
+template <typename TText, typename TViewSpec, typename TSpec, typename TPattern>
 __global__ void
-findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
+findCUDA(Index<View<TText, TViewSpec>, TSpec> index, View<TPattern, TViewSpec> pattern)
 {
     typedef Index<View<TText, TViewSpec>, TSpec>        TIndex;
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
+    typedef typename EdgeLabel<TIterator>::Type         TEdgeLabel;
+    typedef typename Fibre<TIndex, FibreText>::Type     TTextFibre;
+    typedef typename Infix<TTextFibre const>::Type      TRepresentative;
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
@@ -75,15 +78,24 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index)
 
     TIterator it(index);
 
-    printf("isRoot=%d\n", isRoot(it));
-    printf("countOccurrences=%ld\n", countOccurrences(it));
-    printf("isLeaf=%d\n", isLeaf(it));
-    printf("repLength=%ld\n", repLength(it));
-    printf("goDown=%d\n", goDown(it));
-    printf("repLength=%ld\n", repLength(it));
+    printf("isRoot()=%d\n", isRoot(it));
+    printf("countOccurrences()=%ld\n", countOccurrences(it));
+    printf("isLeaf()=%d\n", isLeaf(it));
+    printf("repLength()=%ld\n", repLength(it));
+    printf("goDown()=%d\n", goDown(it));
+    printf("repLength()=%ld\n", repLength(it));
+    printf("goRight()=%d\n", goRight(it));
 
-//    parentEdgeLabel(it);
-//    representative(it);
+    TEdgeLabel edgeLabel = parentEdgeLabel(it);
+    TRepresentative repr = representative(it);
+
+    goRoot(it);
+//    printf("goDown(pattern)=%d\n", goDown(it, pattern));
+
+    begin(repr, Standard());
+
+//    typedef typename Iterator<TRepresentative, Standard>::Type     TReprIt;
+//    TReprIt reprIt = begin(repr, Standard());
 }
 #endif
 
@@ -112,8 +124,13 @@ int main(int argc, char const ** argv)
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
 
+    // Create a pattern.
+    TText pattern("ex");
+    TDeviceText devicePattern;
+    assign(devicePattern, pattern);
+
     // Find on GPU.
-    findCUDA<<< 1,1 >>>(toView(deviceIndex));
+    findCUDA<<< 1,1 >>>(toView(deviceIndex), toView(devicePattern));
     cudaDeviceSynchronize();
 
     return 0;
