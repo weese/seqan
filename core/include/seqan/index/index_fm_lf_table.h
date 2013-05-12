@@ -56,25 +56,6 @@ class RankDictionary;
 template<typename TRankDirectorySpec, typename TSpec> 
 class SentinelRankDictionary;
 
-/**
-.Tag.LF Table Fibres
-..summary:Tag to select a specific fibre of a @Spec.FMIndex@.
-..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a FM index.
-..cat:Index
-
-..tag.FibreOccTable:The occurrence table of the lf table.
-..tag.FMTablePrefixSumTable:The prefix sum table of the lf table.
-
-..see:Metafunction.Fibre
-..see:Function.getFibre
-..include:seqan/index_fm.h
-*/
-struct FibreOccTable_;
-struct FibrePrefixSumTable_;
-
-typedef Tag<FibreOccTable_> const FibreOccTable;
-typedef Tag<FibrePrefixSumTable_> const FMTablePrefixSumTable;
-
 template <typename TOccTable, typename TPrefixSumTable>
 struct LfTable;
 
@@ -82,11 +63,31 @@ struct LfTable;
 // Tags
 // ==========================================================================
 
+/**
+.Tag.LF Table Fibres
+..summary:Tag to select a specific fibre of a @Spec.FMIndex@.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a FM index.
+..cat:Index
+
+..tag.FibreOccTable:The occurrence table of the lf table.
+..tag.FibrePrefixSumTable:The prefix sum table of the lf table.
+
+..see:Metafunction.Fibre
+..see:Function.getFibre
+..include:seqan/index_fm.h
+*/
+
+struct FibreOccTable_;
+typedef Tag<FibreOccTable_> const FibreOccTable;
+
+struct FibrePrefixSumTable_;
+typedef Tag<FibrePrefixSumTable_> const FibrePrefixSumTable;
+
 struct FibreRankDictionary_;
 typedef Tag<FibreRankDictionary_> const FibreRankDictionary;
 
-struct FibreSentinentalPosition_;
-typedef Tag<FibreSentinentalPosition_> const FibreSentinentalPosition;
+struct FibreSentinelPosition_;
+typedef Tag<FibreSentinelPosition_> const FibreSentinelPosition;
 
 // ==========================================================================
 // Metafunctions
@@ -109,13 +110,13 @@ struct Fibre<LfTable<TOccTable, TPrefixSumTable> const, FibreOccTable>
 };
 
 template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>
+struct Fibre<LfTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>
 {
     typedef TPrefixSumTable Type;
 };
 
 template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LfTable<TOccTable, TPrefixSumTable> const, FMTablePrefixSumTable>
+struct Fibre<LfTable<TOccTable, TPrefixSumTable> const, FibrePrefixSumTable>
 {
     typedef TPrefixSumTable const Type;
 };
@@ -248,10 +249,13 @@ inline bool
 createLfTable(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable,
               TText const text)
 {
+   /// WHAAAT text as value?
+
     typedef typename SAValue<TText>::Type   TSAValue;
     typedef TValue                          TAlphabet;
-    typedef typename Fibre<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, FibreSentinentalPosition>::Type TDollarPos;
+    typedef typename Fibre<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, FibreSentinelPosition>::Type TDollarPos;
 
+    // WHAT??
     String<TSAValue> sa;
     resize(sa, length(text), Exact());
     createSuffixArray(sa, text, Skew7());
@@ -297,15 +301,15 @@ createLfTable(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> 
 */
 
 template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type &
-getFibre(LfTable<TOccTable, TPrefixSumTable> & lfTable, FMTablePrefixSumTable)
+inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type &
+getFibre(LfTable<TOccTable, TPrefixSumTable> & lfTable, FibrePrefixSumTable)
 {
     return lfTable.prefixSumTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type const &
-getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FMTablePrefixSumTable)
+inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type const &
+getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FibrePrefixSumTable)
 {
     return lfTable.prefixSumTable;
 }
@@ -384,7 +388,7 @@ inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fil
     {
         return false;
     }
-    name = fileName;    open(getFibre(lfTable, FMTablePrefixSumTable()), toCString(name), openMode);
+    name = fileName;    open(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
     return true;
 
 }
@@ -423,7 +427,7 @@ inline bool save(LfTable<TOccTable, TPrefixSumTable> const & lfTable, const char
     {
         return false;
     }
-    name = fileName;    save(getFibre(lfTable, FMTablePrefixSumTable()), toCString(name), openMode);
+    name = fileName;    save(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
     return true;
 }
 

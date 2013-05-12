@@ -70,23 +70,19 @@ struct DefaultFinder<Index<TText, FMIndex<TOccSpec, TSpec> > >
 // Tags, Classes, Enums
 // ==========================================================================
 
-struct FibrePrefixSumTable_;
 struct FibreSA_;
 struct FibreTempSA_;
 struct FibreText_;
 struct FibreLfTable_;
 struct FibreSaLfTable_;
-struct CompressText_;
 struct Sentinel_;
 struct Sentinels_;
 
-typedef Tag<FibrePrefixSumTable_> const FibrePrefixSumTable;
 typedef Tag<FibreSA_> const             FibreSA;
 typedef Tag<FibreTempSA_> const         FibreTempSA;
 typedef Tag<FibreText_> const           FibreText;
 typedef Tag<FibreLfTable_> const        FibreLfTable;
 typedef Tag<FibreSaLfTable_> const      FibreSaLfTable;
-typedef Tag<CompressText_> const        CompressText;
 typedef Tag<Sentinel_> const            Sentinel;
 typedef Tag<Sentinels_> const           Sentinels;
 
@@ -110,14 +106,6 @@ typedef Tag<Sentinels_> const           Sentinels;
 ..include:seqan/index_fm.h
 */
 
-/**
-.Tag.CompressText
-..cat:Index
-..summary:Tag to select a FM index variant that can be used such that it is 
-not necessary to store the text after index construction. This index is very
-space efficient.
-*/
-
 // ==========================================================================
 // Metafunctions
 // ==========================================================================
@@ -138,7 +126,6 @@ space efficient.
 ..param.TSentinelRankDictionary:The type of the sentinel rank dictionary.
 ...type:Class.SentinelRankDictionary
 ..param.TSpec:Tag to specify a certain variant of the FM index.
-...type:Tag.CompressText
 ...default;$void$
 ..param.TFibreSpec:Tag to specify the fibre.
 ...type:Tag.FM Index Fibres
@@ -277,7 +264,6 @@ struct FmIndexInfo_
 ...remarks:The tags are really shortcuts for the different @Class.SentinelRankDictionary@s
 ...default:Tag.WT
 ..param.TSpec:FM index specialisation.
-...type:Tag.CompressText
 ...default:void
 ..include:seqan/index.h
 */
