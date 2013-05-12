@@ -37,9 +37,10 @@
 
 namespace seqan {
 
-// ==========================================================================
+// ============================================================================
 // Forwards
-// ==========================================================================
+// ============================================================================
+
 template <typename TOccTable, typename TPrefixSumTable>
 struct LfTable;
 
@@ -58,9 +59,9 @@ typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
 template <typename TChar, typename TSpec = void>
 class RightArrayBinaryTree;
 
-// ==========================================================================
+// ============================================================================
 // Tags 
-// ==========================================================================
+// ============================================================================
 //
 /**
 .Tag.RightArrayBinaryTree Fibres
@@ -78,9 +79,10 @@ class RightArrayBinaryTree;
 struct FibreTreeStructureEncoding_;
 typedef Tag<FibreTreeStructureEncoding_> const FibreTreeStructureEncoding;
 
-// ==========================================================================
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
+
 template <typename TChar, typename TSpec>
 struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>
 {
@@ -95,7 +97,7 @@ struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>
 //     typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type const Type;
 // };
 
-// ==========================================================================
+// ============================================================================
 template <typename TChar, typename TSpec>
 struct Reference<RightArrayBinaryTree<TChar, TSpec> >
 {
@@ -108,7 +110,7 @@ struct Reference<const RightArrayBinaryTree<TChar, TSpec> >
     typedef typename Value<RightArrayBinaryTree<TChar, TSpec> >::Type const & Type;
 };
 
-// ==========================================================================
+// ============================================================================
 template <typename TChar, typename TSpec>
 struct Value<RightArrayBinaryTree<TChar, TSpec> >
 {
@@ -129,9 +131,9 @@ struct Value<RightArrayBinaryTree<TChar, TSpec> const>
     typedef Pair<TChar, TPos> Type;
 };
 
-// ==========================================================================
-//Tags, Classes, Enums
-// ==========================================================================
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 /**
 .Class.RightArrayBinaryTree:
@@ -170,9 +172,9 @@ public:
     }
 };
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
 
 /**
 .Function.clear
@@ -185,7 +187,7 @@ inline void clear(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
     clear(treeStructure.treeVertices);
 }
 
-// ==========================================================================
+// ============================================================================
 /**
 .Function.createRightArrayBinaryTree
 ..summary:Computes the wavelet tree structure of a text.
@@ -226,7 +228,7 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
     while (!isRoot(it));
 }
 
-// ==========================================================================
+// ============================================================================
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TPrefixSumTable>
 inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
@@ -262,7 +264,7 @@ inline void createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & wave
     createRightArrayBinaryTree(it, pst);
 }
 
-// ==========================================================================
+// ============================================================================
 /**
 .Function.empty
 ..param.object:
@@ -274,7 +276,7 @@ inline bool empty(RightArrayBinaryTree<TChar, TSpec> const & treeStructure)
     return empty(getFibre(treeStructure, FibreTreeStructureEncoding()));
 }
 
-// ==========================================================================
+// ============================================================================
 /**
 .Function.RightArrayBinaryTree#getFibre:
 ..summary:Returns a specific fibre of a container.
@@ -302,7 +304,7 @@ getFibre(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, FibreTreeStru
     return treeStructure.treeVertices;
 }
 
-// ==========================================================================
+// ============================================================================
 // This function returns the number of different entries in the wavelet tree structure.
 template <typename TChar, typename TSpec>
 inline unsigned _length(RightArrayBinaryTree<TChar, TSpec> const & tree)
@@ -310,7 +312,7 @@ inline unsigned _length(RightArrayBinaryTree<TChar, TSpec> const & tree)
     return length(tree.treeVertices);
 }
 
-// ==========================================================================
+// ============================================================================
 // This function resizes the string holding the nodes of the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<RightArrayBinaryTree<TChar, TSpec> >::Type
@@ -329,7 +331,7 @@ _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size,
     return resize(treeStructure.treeVertices, size, value, tag);
 }
 
-// ==========================================================================
+// ============================================================================
 /**
 .Function.RightArrayBinaryTree#open
 ..class:Class.RightArrayBinaryTree
@@ -370,7 +372,7 @@ inline bool open(
     return open(treeStructure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }
 
-// ==========================================================================
+// ============================================================================
 /**
 .Function.RightArrayBinaryTree#save
 ..class:Class.RightArrayBinaryTree
