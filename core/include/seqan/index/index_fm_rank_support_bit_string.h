@@ -461,16 +461,16 @@ length(RankSupportBitString<TSpec> const & bitString)
 template <typename TSpec, typename TPos>
 inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
+    typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
+    typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type        TFibreBlocks;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
+    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+    typedef typename Value<TFibreBlocks>::Type                              TFibreBlocksValue;
+    typedef typename Value<TFibreSuperBlocks>::Type                         TFibreSuperBlocksValue;
+
     if (!empty(bitString))
     {
-        typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-        typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
-        typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type        TFibreBlocks;
-        typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
-        typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
-        typedef typename Value<TFibreBlocks>::Type                              TFibreBlocksValue;
-        typedef typename Value<TFibreSuperBlocks>::Type                         TFibreSuperBlocksValue;
-
         TFibreSuperBlocksValue i = _getBlockPos(bitString, pos);
 
         TFibreBlocksValue _blockSum;
@@ -651,7 +651,6 @@ resize(RankSupportBitString<TSpec> & bitString, TLength const _length, Tag<TExpa
 template <typename TSpec, typename TPos>
 inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
-    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
     typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
 
@@ -666,7 +665,6 @@ inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 template <typename TSpec, typename TPos>
 inline void clearBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
-    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
     typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
 
