@@ -255,35 +255,15 @@ inline void clear(RankSupportBitString<TSpec> & bitString)
 // Function _getRankInBlock()
 // ----------------------------------------------------------------------------
 
-// This function returns the number of bits set in a block until a specified position
-template <typename TValue>
-inline unsigned _getRankInBlock(TValue const value, False)
-{
-    return popCount(value);
-}
-
-template <typename TValue>
-inline unsigned _getRankInBlock(TValue const value, True)
-{
-    return popCount(value);
-}
-
-template <typename TValue>
-inline unsigned _getRankInBlock(TValue const value)
-{
-    return _getRankInBlock(value, typename Eval<(BitsPerValue<TValue>::VALUE > 32)>::Type());
-}
-
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
 _getRankInBlock(RankSupportBitString<TSpec> const & bitString, TPos const pos)
 {
-    //typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
+   typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type     TFibreBits;
     typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
 
     TFibreBitsValue const mask = ((TFibreBitsValue)2u << _getPosInBlock(bitString, pos)) - 1;
-    return _getRankInBlock(bitString.bits[_getBlockPos(bitString, pos)] & mask);
+    return popCount(bitString.bits[_getBlockPos(bitString, pos)] & mask);
 }
 
 // ----------------------------------------------------------------------------
@@ -512,7 +492,7 @@ inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
             ++i;
         for (; i < length(bitString.bits); ++i)
         {
-        	_blockSum += _getRankInBlock(bitString.bits[i - 1]);
+        	_blockSum += popCount(bitString.bits[i - 1]);
             if ((i % BitsPerValue<TFibreBitsValue>::VALUE) == 0u)
             {
                 _sBlockSum += _blockSum;
@@ -583,14 +563,14 @@ inline void _updateLastRank(RankSupportBitString<TSpec> & bitString)
     TFibreSuperBlocksValue blockPos = _getBlockPos(bitString, pos);
     if (blockPos > 0u && superBlockPos == _getSuperBlockPos(bitString, pos - 1))
         getFibre(bitString, FibreBlocks())[blockPos] = getFibre(bitString, FibreBlocks())[blockPos - 1]
-                + _getRankInBlock(bitString.bits[blockPos - 1]);
+                + popCount(bitString.bits[blockPos - 1]);
 
     // Here we compute the new rank if the last and second last bit are in
     // different blocks.
     if ((superBlockPos > _getSuperBlockPos(bitString, pos - 1)) && superBlockPos > 0u)
         getFibre(bitString, FibreSuperBlocks())[superBlockPos] = getFibre(bitString, FibreSuperBlocks())[superBlockPos - 1]
                 + getFibre(bitString, FibreBlocks())[blockPos - 1]
-                + _getRankInBlock(bitString.bits[blockPos - 1]);
+                + popCount(bitString.bits[blockPos - 1]);
 }
 
 // ----------------------------------------------------------------------------
@@ -612,7 +592,7 @@ reserve(RankSupportBitString<TSpec> & bitString, TSize const size, Tag<TExpand> 
     TFibreBlocksValue _bitsPerBlock = BitsPerValue<TFibreBitsValue>::VALUE;
     TFibreSuperBlocksValue _numberOfBlocks = (size + _bitsPerBlock - 1) / _bitsPerBlock;
 
-    resserve(bitString.blocks, _numberOfBlocks, tag);
+    reserve(bitString.blocks, _numberOfBlocks, tag);
     reserve(bitString.superBlocks, (_numberOfBlocks + _bitsPerBlock - 1) / _bitsPerBlock, tag);
     return reserve(bitString.bits, _numberOfBlocks, tag) * _bitsPerBlock;
 }
