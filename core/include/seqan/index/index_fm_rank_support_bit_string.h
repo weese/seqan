@@ -44,9 +44,6 @@ namespace seqan {
 template <typename TSpec = void>
 struct RankSupportBitString;
 
-template <typename TSpec, typename TPos>
-inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool setBit);
-
 // ============================================================================
 // Tags
 // ============================================================================
