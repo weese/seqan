@@ -252,7 +252,7 @@ public:
 // ==========================================================================
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function clear()
 // ----------------------------------------------------------------------------
 
 /**
@@ -273,7 +273,7 @@ inline void clear(RankDictionary<WaveletTree<TValue> > & dictionary)
 }
 
 // ----------------------------------------------------------------------------
-// Function empty
+// Function empty()
 // ----------------------------------------------------------------------------
 
 /**
@@ -294,7 +294,7 @@ inline bool empty(RankDictionary<WaveletTree<TValue> > const & dictionary)
 }
 
 // ----------------------------------------------------------------------------
-// Function getValue
+// Function getValue()
 // ----------------------------------------------------------------------------
 
 /**
@@ -358,7 +358,7 @@ getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function getFibre
+// Function getFibre()
 // ----------------------------------------------------------------------------
 
 /**
@@ -403,7 +403,7 @@ getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTre
 }
 
 // ----------------------------------------------------------------------------
-// Function countOccurrences
+// Function countOccurrences()
 // ----------------------------------------------------------------------------
 
 /**
@@ -422,8 +422,8 @@ getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTre
 */
 
 template < typename TValue, typename TCharIn, typename TPos>
-inline unsigned countOccurrences(RankDictionary<WaveletTree<TValue> > const & tree, TCharIn const character,
-                                   TPos const pos)
+inline typename Size<RankDictionary<WaveletTree<TValue> > >::Type
+countOccurrences(RankDictionary<WaveletTree<TValue> > const & tree, TCharIn const character, TPos const pos)
 {
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type TWaveletTreeStructure;
     typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type TWaveletTreeStructureString;
@@ -467,7 +467,7 @@ inline unsigned countOccurrences(RankDictionary<WaveletTree<TValue> > const & tr
 }
 
 // ----------------------------------------------------------------------------
-// Function _fillWaveletTree
+// Function _fillWaveletTree()
 // ----------------------------------------------------------------------------
 
 // This function is used to fill the bit strings of the wavelet tree.
@@ -513,7 +513,7 @@ inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText 
 }
 
 // ----------------------------------------------------------------------------
-// Function createRankDictionary
+// Function createRankDictionary()
 // ----------------------------------------------------------------------------
 /**
 .Function.RankDictionary#createRankDictionary
@@ -527,7 +527,6 @@ inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText 
 ..include:seqan/index.h
 */
 
-// TODO(singer): change to createRankDictionary
 template <typename TValue, typename TText> 
 inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dictionary, TText const & text)
 {
@@ -544,7 +543,7 @@ inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<W
 }
 
 // ----------------------------------------------------------------------------
-// Function open
+// Function open()
 // ----------------------------------------------------------------------------
 
 /**
@@ -581,7 +580,7 @@ inline bool open(RankDictionary<WaveletTree<TValue> > & tree, const char * fileN
 }
 
 // ----------------------------------------------------------------------------
-// Function save
+// Function save()
 // ----------------------------------------------------------------------------
 
 /**
