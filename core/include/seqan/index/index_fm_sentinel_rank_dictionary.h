@@ -40,7 +40,7 @@
 namespace seqan {
 
 // ==========================================================================
-//Forwards
+// Forwards
 // ==========================================================================
 
 template <typename TValue>
@@ -166,23 +166,6 @@ struct Value<SentinelRankDictionary<TRankDictionary, TSpec> const> :
 ..include:seqan/index.h
 */
 
-template <typename TLength, typename TTag>
-TTag
-_setDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/)
-{
-    return _length;
-}
-
-template <typename TLength, typename TBitStringSpec>
-RankSupportBitString<TBitStringSpec>
-_setDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/)
-{
-
-    RankSupportBitString<TBitStringSpec> bitString;
-    resize(bitString, _length, 0, Exact());
-    return bitString;
-}
-
 template <typename TRankDictionary, typename TSpec>
 class SentinelRankDictionary
 {
@@ -252,11 +235,32 @@ public:
 //     {}
 
 // ==========================================================================
-//Functions
+// Functions
 // ==========================================================================
 
 // ----------------------------------------------------------------------------
-// Function clear
+// Function _setDefaultSentinelPosition()
+// ----------------------------------------------------------------------------
+
+template <typename TLength, typename TTag>
+TTag
+_setDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/)
+{
+    return _length;
+}
+
+template <typename TLength, typename TBitStringSpec>
+RankSupportBitString<TBitStringSpec>
+_setDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/)
+{
+
+    RankSupportBitString<TBitStringSpec> bitString;
+    resize(bitString, _length, 0, Exact());
+    return bitString;
+}
+
+// ----------------------------------------------------------------------------
+// Function clear()
 // ----------------------------------------------------------------------------
 
 /**
@@ -270,11 +274,11 @@ public:
 */
 
 template <typename TRankDictionary>
-inline void _clearSentinental(SentinelRankDictionary<TRankDictionary, Sentinel> &)
+inline void _clearSentinel(SentinelRankDictionary<TRankDictionary, Sentinel> &)
 {}
 
 template <typename TRankDictionary>
-inline void _clearSentinental(SentinelRankDictionary<TRankDictionary, Sentinels> & dictionary)
+inline void _clearSentinel(SentinelRankDictionary<TRankDictionary, Sentinels> & dictionary)
 {
     clear(getFibre(dictionary, FibreSentinelPosition()));
 }
@@ -283,11 +287,11 @@ template <typename TRankDictionary, typename TSpec>
 inline void clear(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary)
 {
     clear(getFibre(dictionary, FibreRankDictionary()));
-    _clearSentinental(dictionary);
+    _clearSentinel(dictionary);
 }
 
 // ----------------------------------------------------------------------------
-// Function sentinelPosition
+// Function sentinelPosition()
 // ----------------------------------------------------------------------------
 
 /**
@@ -316,7 +320,7 @@ inline bool sentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> 
 }
 
 // ----------------------------------------------------------------------------
-// Function empty
+// Function empty()
 // ----------------------------------------------------------------------------
 
 /**
@@ -335,7 +339,7 @@ inline bool empty(SentinelRankDictionary<TRankDictionary, TSpec> const & diction
 }
 
 // ----------------------------------------------------------------------------
-// Function getValue
+// Function getValue()
 // ----------------------------------------------------------------------------
 
 /**
@@ -368,7 +372,7 @@ getValue(SentinelRankDictionary<TRankDictionary, TSpec > & dictionary,
 }
 
 // ----------------------------------------------------------------------------
-// Function getSentinelPosition
+// Function getSentinelPosition()
 // ----------------------------------------------------------------------------
 
 /*
@@ -403,7 +407,7 @@ _getSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> const & 
 }
 
 // ----------------------------------------------------------------------------
-// Function getFibre
+// Function getFibre()
 // ----------------------------------------------------------------------------
 
 /**
@@ -449,7 +453,7 @@ getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary, Fibr
 }
 
 // ----------------------------------------------------------------------------
-// Function countOccurrences
+// Function countOccurrences()
 // ----------------------------------------------------------------------------
 
 /**
@@ -495,7 +499,7 @@ inline unsigned countOccurrences(SentinelRankDictionary<TRankDictionary, Sentine
 }
 
 // ----------------------------------------------------------------------------
-// Function getSentinelSubstitute
+// Function getSentinelSubstitute()
 // ----------------------------------------------------------------------------
 
 /**
@@ -515,7 +519,7 @@ getSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> const & dic
 }
 
 // ----------------------------------------------------------------------------
-// Function setSentinelSubstitute
+// Function setSentinelSubstitute()
 // ----------------------------------------------------------------------------
 
 /**
@@ -537,7 +541,7 @@ inline void setSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec>
 }
 
 // ----------------------------------------------------------------------------
-// Function setSentinelPosition
+// Function setSentinelPosition()
 // ----------------------------------------------------------------------------
 
 /**
@@ -559,7 +563,7 @@ inline void setSentinelPosition(SentinelRankDictionary<TRankDictionary, TSpec> &
 }
 
 // ----------------------------------------------------------------------------
-// Function sentinelRankDictionaryCreate
+// Function sentinelRankDictionaryCreate()
 // ----------------------------------------------------------------------------
 
 /**
@@ -599,7 +603,7 @@ inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDic
 }
 
 // ----------------------------------------------------------------------------
-// Function open
+// Function open()
 // ----------------------------------------------------------------------------
 
 /**
@@ -686,7 +690,7 @@ inline bool open(
 }
 
 // ----------------------------------------------------------------------------
-// Function save
+// Function save()
 // ----------------------------------------------------------------------------
 
 /**
