@@ -1,5 +1,5 @@
 // ==========================================================================
-//                 seqan - the library for sequence analysis
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -173,7 +173,7 @@ struct LfTable
         return *this;
     }
 
-    inline bool operator==(const LfTable & b) const
+    inline bool operator==(LfTable const & b) const
     {
         return occTable == b.occTable &&
                prefixSumTable == b.prefixSumTable;
@@ -226,60 +226,6 @@ template <typename TOccTable, typename TPrefixSumTable>
 inline bool empty(LfTable<TOccTable, TPrefixSumTable> & lfTable)
 {
     return empty(lfTable.occTable) && empty(lfTable.prefixSumTable);
-}
-
-// ----------------------------------------------------------------------------
-// Function createLfTable
-// ----------------------------------------------------------------------------
-
-/**
-.Function.createLfTable
-..summary:Creates the LF table
-..signature:createLfTable(lfTable, text)
-..param.lfTable:The LF table to be constructed.
-...type:Class.LfTable.
-..param.text:The underlying text
-...type:Class.String
-..returns:$true$ on successes, $false$ otherwise.
-..include:seqan/index.h
-*/
-
-template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText>
-inline bool
-createLfTable(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable,
-              TText const text)
-{
-   /// WHAAAT text as value?
-
-    typedef typename SAValue<TText>::Type   TSAValue;
-    typedef TValue                          TAlphabet;
-    typedef typename Fibre<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, FibreSentinelPosition>::Type TDollarPos;
-
-    // WHAT??
-    String<TSAValue> sa;
-    resize(sa, length(text), Exact());
-    createSuffixArray(sa, text, Skew7());
-
-    createPrefixSumTable(lfTable.prefixSumTable, text);
-
-    TAlphabet dollarSub;
-    _determineDollarSubstitute(lfTable.prefixSumTable, dollarSub);
-
-    String<TAlphabet> bwt;
-    TDollarPos dollarPos = 0;
-    resize(bwt, _computeBwtLength(text), Exact());
-    _createBwTable(bwt, dollarPos, text, sa, dollarSub);
-
-    clear(sa);
-
-    createOccurrenceTable(lfTable, bwt, dollarSub, dollarPos);
-    clear(bwt);
-
-    _insertDollar(lfTable.prefixSumTable, countSequences(text));
-
-    //here comes the dollar modification
-    //addDollarNode(index.lfTable.occTable, dollarSub, dollarPos);
-    return true;
 }
 
 // ----------------------------------------------------------------------------

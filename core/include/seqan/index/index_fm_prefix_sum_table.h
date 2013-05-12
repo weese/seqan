@@ -382,6 +382,7 @@ inline unsigned getCharacterPosition(TDummy const & /*tag*/, TChar character)
 template <typename TChar, typename TSpec, typename TChar2>
 inline unsigned getCharacterPosition(PrefixSumTable<TChar, TSpec> const & /*tag*/, TChar2 character)
 {
+    // NOTE(esiragusa): This cast might cause problems with compiler optimizations.
     return ordValue(static_cast<TChar>(character));
 }
 
@@ -405,6 +406,7 @@ template <typename TChar, typename TSpec, typename TPos>
 inline typename CharacterValue<PrefixSumTable<TChar, TSpec> const>::Type
 getCharacter(PrefixSumTable<TChar, TSpec> const & /*tag*/, TPos const pos)
 {
+    // NOTE(esiragusa): This cast might cause problems with compiler optimizations.
     return static_cast<TChar>(pos);
 }
 

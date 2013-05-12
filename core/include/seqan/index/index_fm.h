@@ -37,9 +37,9 @@
 
 namespace seqan {
 
-// ==========================================================================
+// ============================================================================
 // Forwards
-// ==========================================================================
+// ============================================================================
 
 template <typename TChar, typename TSpec>
 class PrefixSumTable;
@@ -66,9 +66,9 @@ struct DefaultFinder<Index<TText, FMIndex<TOccSpec, TSpec> > >
 	typedef FinderFMIndex Type;
 };
 
-// ==========================================================================
+// ============================================================================
 // Tags, Classes, Enums
-// ==========================================================================
+// ============================================================================
 
 struct FibreSA_;
 struct FibreTempSA_;
@@ -106,9 +106,9 @@ typedef Tag<Sentinels_> const           Sentinels;
 ..include:seqan/index_fm.h
 */
 
-// ==========================================================================
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre
@@ -213,9 +213,9 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreTempSA>
 	typedef String<TSAValue, External<ExternalConfigLarge<> > >                 Type;
 };
 
-// ==========================================================================
+// ============================================================================
 // Classes
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Class FmIndexInfo_ 
@@ -298,9 +298,9 @@ public:
     }
 };
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Function clear
@@ -534,37 +534,6 @@ toSuffixPosition(Index<TText, FMIndex<TOccSpec, TIndexSpec > > const & index, TP
     SEQAN_ASSERT_GEQ(suffixLength(i, index), offset);
     setSeqOffset(i, suffixLength(i, index) - offset);
     return i;
-}
-
-// ----------------------------------------------------------------------------
-// Helper function _getFrequencies
-// ----------------------------------------------------------------------------
-
-// This function determines the number of the different characters in the text.
-template <typename TText, typename TSetSpec, typename TFreq>
-inline void _getFrequencies(TFreq & freq, StringSet<TText, TSetSpec> const & text)
-{
-	typedef typename Value<TText>::Type TChar;
-    typedef typename Size<TText>::Type  TSize;
-
-	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
-
-	for (TSize i = 0; i < length(text); ++i)
-	    for (TSize j = 0; j < length(text[i]); ++j)
-		    ++freq[getCharacterPosition(freq, text[i][j])];
-}
-
-// This function determines the number of the different characters in the text.
-template <typename TText, typename TFreq>
-inline void _getFrequencies(TFreq & freq, TText const & text)
-{
-	typedef typename Value<TText>::Type TChar;
-    typedef typename Size<TText>::Type  TSize;
-
-	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
-
-	for (TSize i = 0; i < length(text); ++i)
-		++freq[getCharacterPosition(freq, text[i])];
 }
 
 // ----------------------------------------------------------------------------
