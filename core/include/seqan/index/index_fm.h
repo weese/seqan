@@ -293,7 +293,8 @@ public:
     unsigned                                        compressionFactor; 
 
 	Index() :
-		bwtLength(0)
+		bwtLength(0),
+        compressionFactor(0)
 	{}
 
 	Index(TText & text, unsigned compressionFactor = 10) :
@@ -325,6 +326,8 @@ inline void clear(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 {
     clear(getFibre(index, FibreLfTable()));
     clear(getFibre(index, FibreSA()));
+    index.bwtLength = 0;
+    index.compressionFactor = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -433,20 +436,23 @@ inline void _createBwTable(TBwt & bwt, TSentinelPosition & sentinelPos, StringSe
 template <typename TPrefixSumTable, typename TChar>
 inline void _determineSentinelSubstitute(TPrefixSumTable const & pst, TChar & sub)
 {
-    typedef typename RemoveConst<TPrefixSumTable>::Type TNonConstPrefixSumTable;
-	typedef typename Value<TNonConstPrefixSumTable>::Type TValue;
+    typedef typename RemoveConst<TPrefixSumTable>::Type     TNonConstPrefixSumTable;
+	typedef typename Value<TNonConstPrefixSumTable>::Type   TValue;
+	typedef typename Size<TPrefixSumTable>::Type            TSize;
 
 	TValue min = getPrefixSum(pst, length(pst) - 1);
-	unsigned pos = length(pst) - 1;
-	for (unsigned i = 0; i < length(pst) - 1; ++i)
+	TSize pos = length(pst) - 1;
+    
+	for (TSize i = 0; i < length(pst) - 1; ++i)
 	{
-		unsigned diff = pst[i + 1] - pst[i];
+		TSize diff = pst[i + 1] - pst[i];
 		if (diff != 0 && diff < min)
 		{
 			min = diff;
 			pos = i;
 		}
 	}
+    
 	sub = getCharacter(pst, pos);
 }
 
@@ -458,8 +464,7 @@ inline void _determineSentinelSubstitute(TPrefixSumTable const & pst, TChar & su
 template <typename TText, typename TIndexSpec, typename TFMISpeedEnhancement>
 inline bool empty(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const & index)
 {
-    return empty(getFibre(index, FibreLfTable()))
-            && empty(getFibre(index, FibreSA()));
+    return empty(getFibre(index, FibreLfTable())) && empty(getFibre(index, FibreSA()));
 }
 
 // ----------------------------------------------------------------------------
@@ -551,13 +556,13 @@ toSuffixPosition(Index<TText, FMIndex<TOccSpec, TIndexSpec > > const & index, TP
 
 // This function determines the number of the different characters in the text.
 template <typename TText, typename TSetSpec, typename TFreq>
-inline void _getFrequencies(TFreq & freq,
-						    StringSet<TText, TSetSpec> const & text)
+inline void _getFrequencies(TFreq & freq, StringSet<TText, TSetSpec> const & text)
 {
 	typedef typename Value<TText>::Type TChar;
+    typedef typename Size<TText>::Type  TSize;
+
 	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
 
-    typedef typename Size<TText>::Type TSize;
 	for (TSize i = 0; i < length(text); ++i)
 	    for (TSize j = 0; j < length(text[i]); ++j)
 		    ++freq[getCharacterPosition(freq, text[i][j])];
@@ -565,13 +570,13 @@ inline void _getFrequencies(TFreq & freq,
 
 // This function determines the number of the different characters in the text.
 template <typename TText, typename TFreq>
-inline void _getFrequencies(TFreq & freq,
-		   	   	   	   	   TText const & text)
+inline void _getFrequencies(TFreq & freq, TText const & text)
 {
 	typedef typename Value<TText>::Type TChar;
+    typedef typename Size<TText>::Type  TSize;
+
 	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
 
-    typedef typename Size<TText>::Type TSize;
 	for (TSize i = 0; i < length(text); ++i)
 		++freq[getCharacterPosition(freq, text[i])];
 }
@@ -585,17 +590,18 @@ inline void _getFrequencies(TFreq & freq,
 template <typename TText, typename TIndexSpec, typename TSpec, typename TSA>
 inline bool _indexCreateSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TSA & fullSa, TText const & text)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TSpec> > TIndex;
-	typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
+	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
+	typedef typename Fibre<TIndex, FibreSA>::Type       TCompressedSA;
+	typedef typename Size<TIndex>::Type                 TSize;
 
     // TODO(singer): If there is a lfTable we do not need the Skew7
 	// create the fulle sa
 
-    // create the compressed sa
+    // Create the compressed sa.
 	TCompressedSA & compressedSA = getFibre(index, FibreSA());
     setLfTable(compressedSA, getFibre(index, FibreLfTable()));
 
-    unsigned numSentinel = countSequences(text);
+    TSize numSentinel = countSequences(text);
     createCompressedSa(compressedSA, fullSa, index.compressionFactor, numSentinel); 
 
 	return true;
@@ -620,6 +626,7 @@ inline bool _indexCreateLfTables(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 	TAlphabet sentinelSub(0);
 	_determineSentinelSubstitute(index.lfTable.prefixSumTable, sentinelSub);
 
+    // NOTE(esiragusa): The bwt as a String<TAlphabet> on the stack here seems very strange to me!
 	String<TAlphabet> bwt;
 	resize(bwt, index.bwtLength, Exact());
 	TSentinelPosition sentinelPos = _setDefaultSentinelPosition(length(bwt), TSentinelPosition());
@@ -662,10 +669,10 @@ inline bool _indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, TTe
 	resize(tempSA, length(text), Exact());
 	createSuffixArray(tempSA, text, Skew7());
 
-	// create the compressed SA
+	// Create the compressed SA.
 	_indexCreateSA(index, tempSA, text);
 
-	// create the lf table
+	// Create the lf table.
 	_indexCreateLfTables(index, text, tempSA);
 
 	return true;
@@ -798,10 +805,6 @@ template <typename TText, typename TOccSpec, typename TSpec>
 inline bool open(Index<TText, FMIndex<TOccSpec, TSpec> > & index, const char * fileName, int openMode)
 {
     String<char> name;
-
-//    typedef Index<TText, FMIndex<TOccSpec, TSpec> > TIndex;
-//    typedef typename Fibre<TIndex, FibreSA>::Type TSAFibre;
-//    typedef typename Value<TSAFibre>::Type TSAValue;
 
     String<FmIndexInfo_> infoString;
 
