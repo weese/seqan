@@ -182,10 +182,7 @@ begin(Index<TText, FMIndex<TOccSpec, TIndexSpec> > & index, TSpec const /*Tag*/)
 {
 	typedef typename Iterator<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, TSpec>::Type TIter;
 
-	TIter it(index);
-	value(it).range.i1 = index.lfTable.prefixSumTable[0];
-
-	return it;
+	return TIter(index);
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
@@ -195,10 +192,7 @@ begin(Index<TText, FMIndex<TOccSpec, TIndexSpec> > const & index, TSpec const /*
 {
 	typedef typename Iterator<Index<TText, FMIndex<TOccSpec, TIndexSpec> > const, TSpec>::Type TIter;
 
-	TIter it(index);
-	value(it).range.i1 = index.lfTable.prefixSumTable[0];
-
-	return it;
+	return TIter(index);
 }
 
 // ----------------------------------------------------------------------------
@@ -227,7 +221,7 @@ inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TS
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     return (value(it).range.i1 + 1 >= value(it).range.i2 &&
-            value(it).range.i1 == _getSentinelPosition(container(it).lfTable.occTable));
+            value(it).range.i1 == _getSentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable())));
 }
 
 template <typename TText, typename TSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
@@ -256,28 +250,30 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
                            TChar c)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
+    typedef typename Fibre<TIndex, FibreLfTable>::Type          TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+    typedef typename Fibre<TLfTable, FibreOccTable>::Type       TOccTable;
     typedef typename Value<TIndex>::Type                        TAlphabet;
     typedef typename ValueSize<TAlphabet>::Type                 TAlphabetSize;
     typedef typename Size<TIndex>::Type                         TSize;
 
-    typedef typename Fibre<TIndex, FibreLfTable>::Type          TLfTable;
-    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+    TIndex const & index = container(it);
+    TLfTable const & lfTable = getFibre(index, FibreLfTable());
+    TPrefixSumTable const & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
+    TOccTable const & occTable = getFibre(lfTable, FibreOccTable());
 
-    TIndex const & _index = container(it);
-    TPrefixSumTable const & pst = getFibre(getFibre(_index, FibreLfTable()), FibrePrefixSumTable());
-
-    TAlphabetSize cPosition = getCharacterPosition(pst, c);
+    TAlphabetSize cPosition = getCharacterPosition(prefixSumTable, c);
 
     if (_isRoot(vDesc))
     {
-        _range.i1 = getPrefixSum(pst, cPosition);
-        _range.i2 = getPrefixSum(pst, cPosition + 1);
+        _range.i1 = getPrefixSum(prefixSumTable, cPosition);
+        _range.i2 = getPrefixSum(prefixSumTable, cPosition + 1);
     }
     else
     {
-        TSize prefixSum = getPrefixSum(pst, cPosition);
-        _range.i1 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i1 - 1);
-        _range.i2 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i2 - 1);
+        TSize prefixSum = getPrefixSum(prefixSumTable, cPosition);
+        _range.i1 = prefixSum + countOccurrences(occTable, c, vDesc.range.i1 - 1);
+        _range.i2 = prefixSum + countOccurrences(occTable, c, vDesc.range.i2 - 1);
     }
 
     return _range.i1 + 1 <= _range.i2;
