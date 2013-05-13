@@ -305,6 +305,13 @@ inline void createRankDictionary(RankDictionary<SequenceBitMask<TValue> > & dict
         _updateRanks(bitStrings[i]);
 }
 
+template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText> 
+inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue> >, TSpec >, TPrefixSumTable> & lfTable,
+                                 TText const & text)
+{
+    createRankDictionary(getFibre(getFibre(lfTable, FibreOccTable()), FibreRankDictionary()), text);
+}
+
 // ----------------------------------------------------------------------------
 // Function open
 // ----------------------------------------------------------------------------
