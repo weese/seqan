@@ -108,7 +108,7 @@ struct Size<RankSupportBitString<TSpec> >
 
 template <typename TSpec>
 struct Position<RankSupportBitString<TSpec> > :
-	Size<RankSupportBitString<TSpec> > {};
+    Size<RankSupportBitString<TSpec> > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre
@@ -227,7 +227,7 @@ struct RankSupportBitString
 template <typename TSpec>
 inline void appendValue(RankSupportBitString<TSpec> & bitString, bool bit)
 {
-	typename Size<RankSupportBitString<TSpec> >::Type len = length(bitString);
+    typename Size<RankSupportBitString<TSpec> >::Type len = length(bitString);
     resize(bitString, len + 1);
     setBitTo(bitString, len, bit);
     _updateLastRank(bitString); 
@@ -279,7 +279,7 @@ _getSuperBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const 
     typedef typename Fibre<TRankSupportBitString, FibreBits>::Type      TFibreBits;
     typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type    TFibrelocks;
     typedef typename Value<TFibreBits>::Type                            TFibreBitsValue;
-    typedef typename Value<TFibrelocks>::Type                     		TFibreBlocksValue;
+    typedef typename Value<TFibrelocks>::Type                             TFibreBlocksValue;
 
     TFibreBlocksValue const _bitsPerValue = BitsPerValue<TFibreBitsValue>::VALUE;
     return pos / (_bitsPerValue * _bitsPerValue);
@@ -487,12 +487,12 @@ inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
         }
         else
             _sBlockSum = 0;
-        
+
         if (i == 0)
             ++i;
         for (; i < length(bitString.bits); ++i)
         {
-        	_blockSum += popCount(bitString.bits[i - 1]);
+            _blockSum += popCount(bitString.bits[i - 1]);
             if ((i % BitsPerValue<TFibreBitsValue>::VALUE) == 0u)
             {
                 _sBlockSum += _blockSum;
