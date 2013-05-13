@@ -288,9 +288,7 @@ void _fmIndexDetermineSentinelSubstitute(Index<TText, FMIndex<TIndexSpec, TOptim
 	    ++freq[ordValue(text[i])];
 	
 	TPrefixSumTable pst(text);
-	TChar sentinelSub;
-
-	_determineSentinelSubstitute(pst, sentinelSub);
+	TChar sentinelSub = determineSentinelSubstitute(pst);
 
 	for (unsigned i = 0; i < length(freq); ++i)
     {

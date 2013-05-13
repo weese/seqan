@@ -171,35 +171,30 @@ void prefixSumTableGetPivotPosition(TPrefixSumTable & /*tag*/)
 template <typename TPrefixSumTable>
 void prefixSumTableDetermineSentinelSubstitute(TPrefixSumTable & /*tag*/)
 {
-    typedef typename RemoveConst<TPrefixSumTable>::Type TNonConstPrefixSumTable;
-	typedef typename CharacterValue<TNonConstPrefixSumTable>::Type TChar;
+	typedef typename CharacterValue<TPrefixSumTable>::Type      TChar;
 
 	{
 		String<TChar> text = "ACGTNACGTNACGTNNN";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('A'));
 	}
 	{
 		String<TChar> text = "AGTNAGTNAGTNNN";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('A'));
 	}
 	{
 		String<TChar> text = "ACGTNAGTNAGTNNN";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('C'));
 	}
 	{
 		String<TChar> text = "ACGTNACGTNACGT";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('N'));
 	}
 }
@@ -235,7 +230,7 @@ void _prefixSumTableInsertSentinel(TPrefixSumTable & /*tag*/)
     TPrefixSumTable const pstConst = pst;
 
     unsigned numSentinel = 10;
-    _insertSentinel(pst, numSentinel);
+    insertSentinels(pst, numSentinel);
 
     for (unsigned i = 0; i < length(pst); ++i)
         SEQAN_ASSERT_EQ(getPrefixSum(pst, i), getPrefixSum(pstConst, i) + numSentinel);
