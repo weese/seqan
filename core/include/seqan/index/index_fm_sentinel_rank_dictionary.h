@@ -49,13 +49,6 @@ class RankDictionary;
 template<typename TRankDictionarySpec, typename TSpec> 
 class SentinelRankDictionary;
 
-template <typename TLength, typename TTag>
-TTag _getDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/);
-
-template <typename TLength, typename TBitStringSpec>
-RankSupportBitString<TBitStringSpec>
-_getDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/);
-
 // ==========================================================================
 // Tags
 // ==========================================================================
@@ -185,26 +178,29 @@ public:
     TChar sentinelSubstitute;
 
     SentinelRankDictionary() :
-        sentinelPosition(_getDefaultSentinelPosition(0u, TSentinelPosition())),
         sentinelSubstitute()
-    {}
-   
+    {
+        _initSentinelPosition(*this, 0u);
+    }
+
     // TODO(singer): Use concept sequence when available
     template <typename TValue, typename TStringSpec>
     SentinelRankDictionary(String<TValue, TStringSpec> const & text) :
         rankDictionary(text),
-        sentinelPosition(_getDefaultSentinelPosition(length(text), TSentinelPosition())),
         sentinelSubstitute()
-    {}
-    
+    {
+        _initSentinelPosition(*this, length(text));
+    }
+
     template <typename THost, typename TSegmentSpec>
     SentinelRankDictionary(Segment<THost, TSegmentSpec> const & text) :
         rankDictionary(text),
-        sentinelPosition(_getDefaultSentinelPosition(length(text), TSentinelPosition())),
         sentinelSubstitute()
-    {}
+    {
+        _initSentinelPosition(*this, length(text));
+    }
 
-    bool operator==(const SentinelRankDictionary & b) const
+    bool operator==(SentinelRankDictionary const & b) const
     {
         return rankDictionary == b.rankDictionary &&
                sentinelPosition == b.sentinelPosition &&
@@ -246,24 +242,19 @@ public:
 // ==========================================================================
 
 // ----------------------------------------------------------------------------
-// Function _getDefaultSentinelPosition()
+// Function _initSentinelPosition()
 // ----------------------------------------------------------------------------
 
-template <typename TLength, typename TTag>
-TTag
-_getDefaultSentinelPosition(TLength const _length, TTag const & /*tag*/)
+template <typename TRankDictionary, typename TSize>
+inline void _initSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinel> & dictionary, TSize sentinels)
 {
-    return _length;
+    setSentinelPosition(dictionary, sentinels);
 }
 
-template <typename TLength, typename TBitStringSpec>
-RankSupportBitString<TBitStringSpec>
-_getDefaultSentinelPosition(TLength const _length, RankSupportBitString<TBitStringSpec> const & /*tag*/)
+template <typename TRankDictionary, typename TSize>
+inline void _initSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> & dictionary, TSize sentinels)
 {
-
-    RankSupportBitString<TBitStringSpec> bitString;
-    resize(bitString, _length, 0, Exact());
-    return bitString;
+    resize(dictionary.sentinelPosition, sentinels, 0, Exact());
 }
 
 // ----------------------------------------------------------------------------
@@ -529,49 +520,31 @@ inline void setSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec>
 
 template <typename TRankDictionary, typename TSpec, typename TPos>
 inline void setSentinelPosition(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
-                              TPos const & position)
+                                TPos const & position)
 {
     dictionary.sentinelPosition = position;
 }
 
 // ----------------------------------------------------------------------------
-// Function sentinelRankDictionaryCreate()
+// Function createSentinelRankDictionary()
 // ----------------------------------------------------------------------------
 
 /**
 .Function.SentinelRankDictionary#createSentinelRankDictionary
 ..class:Class.SentinelRankDictionary
-..summary:This functions creates the dictionary structure.
+..summary:This function creates the dictionary structure.
 ..signature:void createSentinelRankDictionary(dictionary, text)
 ..param.dictionary:The dictionary.
 ...type:Class.RankDictionary.
-..param.text:A text to be transfered into a dictionary.
+..param.text:A text to be indexed by the dictionary.
 ...type:Class.String
 ..include:seqan/index.h
 */
 
-template <typename TRankDictionary, typename TSpec, typename TText, typename TSentinelSub, typename TSentinelPos>
-inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
-                              TText const & text,
-                              TSentinelSub const & sentinelSub,
-                              TSentinelPos const & sentinelPos)
+template <typename TRankDictionary, typename TSpec, typename TText>
+inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, TText const & text)
 {
-    setSentinelSubstitute(dictionary, sentinelSub);
-    setSentinelPosition(dictionary, sentinelPos);
-
     createRankDictionary(getFibre(dictionary, FibreRankDictionary()), text);
-}
-
-template <typename TRankDictionary, typename TSpec, typename TPrefixSumTable, typename TText, typename TDollarSub, typename TDollarPos>
-inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDictionary, TSpec>, TPrefixSumTable> & lfTable,
-                              TText const & text,
-                              TDollarSub const & dollarSub,
-                              TDollarPos const & dollarPos)
-{
-    setSentinelSubstitute(getFibre(lfTable, FibreOccTable()), dollarSub);
-    setSentinelPosition(getFibre(lfTable, FibreOccTable()), dollarPos);
-
-    createRankDictionary(lfTable, text);
 }
 
 // ----------------------------------------------------------------------------
@@ -597,41 +570,44 @@ inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDic
 */
 
 template <typename TRankDictionary>
-inline bool _openSentinelInformation(
-    SentinelRankDictionary<TRankDictionary, Sentinel> & dictionary,
-    const char * fileName,
-    int openMode)
+inline bool _openSentinelInformation(SentinelRankDictionary<TRankDictionary, Sentinel> & dictionary,
+                                     const char * fileName,
+                                     int openMode)
 {
-    String<char> name;
-
     typedef typename Fibre<SentinelRankDictionary<TRankDictionary, Sentinel>, FibreSentinelPosition>::Type TSentinelString;
     typedef typename Value<SentinelRankDictionary<TRankDictionary, Sentinel> >::Type TChar;
 
     String<Pair<TChar, TSentinelString, Pack> > sentinelValues;
 
-    name = fileName;    append(name, ".dr");
-    if (!open(sentinelValues, toCString(name), openMode) || empty(sentinelValues))
-    {
-        return false;
-    }
+    String<char> name = fileName;
+    append(name, ".dr");
+
+    if (!open(sentinelValues, toCString(name), openMode) || empty(sentinelValues)) return false;
+
     dictionary.sentinelSubstitute = sentinelValues[0].i1;
     dictionary.sentinelPosition = sentinelValues[0].i2;
+    
     return true;
 }
 
 template <typename TRankDictionary>
-inline bool _openSentinelInformation(
-    SentinelRankDictionary<TRankDictionary, Sentinels> & dictionary,
-    const char * fileName,
-    int openMode)
+inline bool _openSentinelInformation(SentinelRankDictionary<TRankDictionary, Sentinels> & dictionary,
+                                     const char * fileName,
+                                     int openMode)
 {
+    typedef typename Value<SentinelRankDictionary<TRankDictionary, Sentinels> >::Type TChar;
+
+    String<TChar> sentinelSub;
+
     String<char> name;
 
-    typedef typename Value<SentinelRankDictionary<TRankDictionary, Sentinels> >::Type TChar;
-    String<TChar> sentinelSub;
+    name = fileName;
+    append(name, ".drs");
+    if (!open(sentinelSub, toCString(name), openMode)) return false;
     
-    name = fileName;    append(name, ".drs"); if (!open(sentinelSub, toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".drp"); if (!open(dictionary.sentinelPosition, toCString(name), openMode)) return false;
+    name = fileName;
+    append(name, ".drp");
+    if (!open(dictionary.sentinelPosition, toCString(name), openMode)) return false;
     
     if (empty(sentinelSub))
         return false;
@@ -642,10 +618,7 @@ inline bool _openSentinelInformation(
 }
 
 template <typename TRankDictionary, typename TSpec>
-inline bool open(
-    SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
-    const char * fileName,
-    int openMode)
+inline bool open(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, const char * fileName, int openMode)
 {
     if (!open(getFibre(dictionary, FibreRankDictionary()), fileName, openMode)) return false;
     if (!_openSentinelInformation(dictionary, fileName, openMode)) return false;
@@ -653,10 +626,8 @@ inline bool open(
 }
 
 
-    template <typename TRankDictionary, typename TSpec>
-inline bool open(
-    SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
-    const char * fileName)
+template <typename TRankDictionary, typename TSpec>
+inline bool open(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, const char * fileName)
 {
     return open(dictionary, fileName, DefaultOpenMode<SentinelRankDictionary<TRankDictionary, Sentinel> >::VALUE);
 }
@@ -684,10 +655,9 @@ inline bool open(
 */
 
 template <typename TRankDictionary>
-inline bool _saveSentinelInformation(
-    SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary,
-    const char * fileName,
-    int openMode)
+inline bool _saveSentinelInformation(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary,
+                                     const char * fileName,
+                                     int openMode)
 {
     String<char> name;
 
@@ -702,10 +672,9 @@ inline bool _saveSentinelInformation(
 }
 
 template <typename TRankDictionary>
-inline bool _saveSentinelInformation(
-    SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary,
-    const char * fileName,
-    int openMode)
+inline bool _saveSentinelInformation(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary,
+                                     const char * fileName,
+                                     int openMode)
 {
     String<char> name;
 
@@ -719,10 +688,7 @@ inline bool _saveSentinelInformation(
 }
 
 template <typename TRankDictionary, typename TSpec>
-inline bool save(
-    SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary,
-    const char * fileName,
-    int openMode)
+inline bool save(SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary, const char * fileName, int openMode)
 {
     if (!save(getFibre(dictionary, FibreRankDictionary()), fileName, openMode)) return false;
     if (!_saveSentinelInformation(dictionary, fileName, openMode)) return false;
@@ -731,17 +697,13 @@ inline bool save(
 }
 
 template <typename TRankDictionary, typename TSpec>
-inline bool save(
-    SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary,
-    const char * fileName)
+inline bool save(SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary, const char * fileName)
 {
     return save(dictionary, fileName, DefaultOpenMode<SentinelRankDictionary<TRankDictionary, Sentinel> >::VALUE);
 }
 
 template <typename TRankDictionary, typename TSpec>
-inline bool save(
-    SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
-    const char * fileName)
+inline bool save(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, const char * fileName)
 {
     return save(dictionary, fileName, DefaultOpenMode<SentinelRankDictionary<TRankDictionary, Sentinel> >::VALUE);
 }
