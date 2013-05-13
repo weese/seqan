@@ -57,35 +57,9 @@ class WT;
 template <typename TOccSpec = WT<>, typename TSpec = void>
 class FMIndex;
 
-struct FinderFMIndex_;
-typedef Tag<FinderFMIndex_> FinderFMIndex;
-
-template <typename TText, typename TOccSpec, typename TSpec>
-struct DefaultFinder<Index<TText, FMIndex<TOccSpec, TSpec> > >
-{
-    typedef FinderFMIndex Type;
-};
-
 // ============================================================================
-// Tags, Classes, Enums
+// Tags
 // ============================================================================
-
-struct FibreSA_;
-struct FibreTempSA_;
-struct FibreText_;
-struct FibreLfTable_;
-struct FibreSaLfTable_;
-struct Sentinel_;
-struct Sentinels_;
-
-typedef Tag<FibreSA_> const             FibreSA;
-typedef Tag<FibreTempSA_> const         FibreTempSA;
-typedef Tag<FibreText_> const           FibreText;
-typedef Tag<FibreLfTable_> const        FibreLfTable;
-typedef Tag<FibreSaLfTable_> const      FibreSaLfTable;
-typedef Tag<Sentinel_> const            Sentinel;
-typedef Tag<Sentinels_> const           Sentinels;
-
 
 // FM index fibres
 /**
@@ -105,6 +79,29 @@ typedef Tag<Sentinels_> const           Sentinels;
 ..see:Function.getFibre
 ..include:seqan/index_fm.h
 */
+
+struct FibreSA_;
+struct FibreTempSA_;
+struct FibreText_;
+struct FibreLfTable_;
+struct FibreSaLfTable_;
+struct Sentinel_;
+struct Sentinels_;
+
+typedef Tag<FibreSA_> const             FibreSA;
+typedef Tag<FibreTempSA_> const         FibreTempSA;
+typedef Tag<FibreText_> const           FibreText;
+typedef Tag<FibreLfTable_> const        FibreLfTable;
+typedef Tag<FibreSaLfTable_> const      FibreSaLfTable;
+typedef Tag<Sentinel_> const            Sentinel;
+typedef Tag<Sentinels_> const           Sentinels;
+
+// ----------------------------------------------------------------------------
+// Tag FinderFMIndex
+// ----------------------------------------------------------------------------
+
+struct FinderFMIndex_;
+typedef Tag<FinderFMIndex_> FinderFMIndex;
 
 // ============================================================================
 // Metafunctions
@@ -227,40 +224,22 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreTempSA>
     typedef String<TSAValue, External<ExternalConfigLarge<> > >                 Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction DefaultFinder
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TOccSpec, typename TSpec>
+struct DefaultFinder<Index<TText, FMIndex<TOccSpec, TSpec> > >
+{
+    typedef FinderFMIndex Type;
+};
+
 // ============================================================================
 // Classes
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Class FmIndexInfo_ 
-// ----------------------------------------------------------------------------
-
-// Stores the information about an FM index file bundle and is written to the .fma file.
-
-#ifdef PLATFORM_WINDOWS
-    #pragma pack(push,1)
-#endif
-
-struct FmIndexInfo_
-{
-    // The compression factor.
-    __uint32 compressionFactor;
-    // The sizeof(TSAEntry) values for suffix array entries.
-    __uint32 sizeOfSAEntry;
-    // The length of the BWT.
-    __uint64 bwtLength;
-}
-
-#ifndef PLATFORM_WINDOWS
-    __attribute__((packed))
-#endif
-    ;
-#ifdef PLATFORM_WINDOWS
-      #pragma pack(pop)
-#endif
-
-// ----------------------------------------------------------------------------
-// Spec FMIndex 
+// Class FMIndex 
 // ----------------------------------------------------------------------------
 
 /**
@@ -311,6 +290,34 @@ public:
                compressionFactor == b.compressionFactor;
     }
 };
+
+// ----------------------------------------------------------------------------
+// Class FmIndexInfo_ 
+// ----------------------------------------------------------------------------
+
+// Stores the information about an FM index file bundle and is written to the .fma file.
+
+#ifdef PLATFORM_WINDOWS
+    #pragma pack(push,1)
+#endif
+
+struct FmIndexInfo_
+{
+    // The compression factor.
+    __uint32 compressionFactor;
+    // The sizeof(TSAEntry) values for suffix array entries.
+    __uint32 sizeOfSAEntry;
+    // The length of the BWT.
+    __uint64 bwtLength;
+}
+
+#ifndef PLATFORM_WINDOWS
+    __attribute__((packed))
+#endif
+    ;
+#ifdef PLATFORM_WINDOWS
+      #pragma pack(pop)
+#endif
 
 // ============================================================================
 // Functions

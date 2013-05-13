@@ -41,11 +41,12 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
-template <typename TPos, typename TOffSet>
-TPos _addGapDistance(TPos const & value, TOffSet const & offSet);
+template <typename TSparseString, typename TLfTable, typename TSpec>
+class CompressedSA;
 
-template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
-Pair<TSeqId, TPos> _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet);
+// ============================================================================
+// Tags
+// ============================================================================
 
 /**
 .Tag.CompressedSA Fibres
@@ -61,9 +62,6 @@ Pair<TSeqId, TPos> _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOff
 */
 struct FibreSparseString_;
 typedef Tag<FibreSparseString_> const FibreSparseString;
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-class CompressedSA;
 
 // ============================================================================
 // Metafunctions
