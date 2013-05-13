@@ -209,15 +209,24 @@ class PrefixSumTable
 public:
     TEntries entries;
 
+// ----------------------------------------------------------------------------
+// Constructors
+// ----------------------------------------------------------------------------
+
     PrefixSumTable() :
         entries()
     {}
 
-    PrefixSumTable(String<TChar> const & text) :
+    template <typename TText>
+    PrefixSumTable(TText const & text) :
         entries()
     {
         createPrefixSumTable(*this, text);
     }
+
+// ----------------------------------------------------------------------------
+// Operator []
+// ----------------------------------------------------------------------------
 
     template <typename TPos>
     inline TEntry & operator[](TPos pos)
@@ -230,6 +239,10 @@ public:
     {
         return value(*this, pos);
     }
+
+// ----------------------------------------------------------------------------
+// Operator ==
+// ----------------------------------------------------------------------------
 
     inline bool operator==(PrefixSumTable const & other)
     {
@@ -536,13 +549,45 @@ getFibre(PrefixSumTable<TChar, TSpec> & pst, FibreEntries const /*tag*/)
 }
 
 // ----------------------------------------------------------------------------
-// Function _insertSentinel()
+// Function determineSentinelSubstitute()
+// ----------------------------------------------------------------------------
+
+// This function determines the '$' substitute.
+// The character with the smallest number of occurrences greater 0 is chosen.
+template <typename TChar, typename TSpec>
+inline TChar determineSentinelSubstitute(PrefixSumTable<TChar, TSpec> const & pst)
+{
+    typedef PrefixSumTable<TChar, TSpec>                    TPrefixSumTable;
+	typedef typename Value<TPrefixSumTable>::Type           TValue;
+	typedef typename Size<TPrefixSumTable>::Type            TSize;
+
+	TValue min = getPrefixSum(pst, length(pst) - 1);
+	TSize pos = length(pst) - 1;
+    
+	for (TSize i = 0; i < length(pst) - 1; ++i)
+	{
+		TSize diff = pst[i + 1] - pst[i];
+		if (diff != 0 && diff < min)
+		{
+			min = diff;
+			pos = i;
+		}
+	}
+    
+	return getCharacter(pst, pos);
+}
+
+// ----------------------------------------------------------------------------
+// Function insertSentinels()
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TSpec, typename TNumSentinel>
-void _insertSentinel(PrefixSumTable<TChar, TSpec> & pst, TNumSentinel const numSentinel)
+void insertSentinels(PrefixSumTable<TChar, TSpec> & pst, TNumSentinel const numSentinel)
 {
-    for (unsigned i = 0; i < length(pst); ++i)
+    typedef PrefixSumTable<TChar, TSpec>                    TPrefixSumTable;
+	typedef typename Size<TPrefixSumTable>::Type            TSize;
+
+    for (TSize i = 0; i < length(pst); ++i)
         prefixSum(pst, i) = getPrefixSum(pst, i) + numSentinel;
 }
 
@@ -589,7 +634,7 @@ length(PrefixSumTable<TChar, TSpec> const & pst)
 
 template <typename TChar, typename TSpec, typename TPos>
 typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type &
-prefixSum(PrefixSumTable<TChar, TSpec>&pst, TPos const pos)
+prefixSum(PrefixSumTable<TChar, TSpec> & pst, TPos const pos)
 {
     return value(pst, pos);
 }
@@ -704,12 +749,7 @@ inline bool open(PrefixSumTable<TChar, TSpec> & pst, const char * fileName, int 
 {
     String<char> name;
     name = fileName;    append(name, ".pst");
-    if (!open(getFibre(pst, FibreEntries()), toCString(name), openMode))
-    {
-        return false;
-    }
-    return true;
-
+    return open(getFibre(pst, FibreEntries()), toCString(name), openMode);
 }
 
 template <typename TChar, typename TSpec>
@@ -745,11 +785,7 @@ inline bool save(PrefixSumTable<TChar, TSpec> const & pst, const char * fileName
 {
     String<char> name;
     name = fileName;    append(name, ".pst");
-    if (!save(getFibre(pst, FibreEntries()), toCString(name), openMode))
-    {
-        return false;
-    }
-    return true;
+    return save(getFibre(pst, FibreEntries()), toCString(name), openMode));
 }
 
 template <typename TChar, typename TSpec>
