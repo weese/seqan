@@ -244,12 +244,12 @@ public:
 // Operator ==
 // ----------------------------------------------------------------------------
 
-    inline bool operator==(PrefixSumTable const & other)
+inline bool operator==(PrefixSumTable const & other)
     {
         return entries == other.entries;
     }
 
-    inline bool operator==(PrefixSumTable const & other) const
+inline bool operator==(PrefixSumTable const & other) const
     {
         return entries == other.entries;
     }
@@ -267,27 +267,27 @@ public:
 template <typename TText, typename TSetSpec, typename TFreq>
 inline void _getFrequencies(TFreq & freq, StringSet<TText, TSetSpec> const & text)
 {
-	typedef typename Value<TText>::Type TChar;
+    typedef typename Value<TText>::Type TChar;
     typedef typename Size<TText>::Type  TSize;
 
-	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
+    resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
 
-	for (TSize i = 0; i < length(text); ++i)
-	    for (TSize j = 0; j < length(text[i]); ++j)
-		    ++freq[getCharacterPosition(freq, text[i][j])];
+    for (TSize i = 0; i < length(text); ++i)
+        for (TSize j = 0; j < length(text[i]); ++j)
+            ++freq[getCharacterPosition(freq, text[i][j])];
 }
 
 // This function determines the number of the different characters in the text.
 template <typename TText, typename TFreq>
 inline void _getFrequencies(TFreq & freq, TText const & text)
 {
-	typedef typename Value<TText>::Type TChar;
+    typedef typename Value<TText>::Type TChar;
     typedef typename Size<TText>::Type  TSize;
 
-	resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
+    resize(freq, ValueSize<TChar>::VALUE, 0, Exact());
 
-	for (TSize i = 0; i < length(text); ++i)
-		++freq[getCharacterPosition(freq, text[i])];
+    for (TSize i = 0; i < length(text); ++i)
+        ++freq[getCharacterPosition(freq, text[i])];
 }
 
 // ----------------------------------------------------------------------------
@@ -304,7 +304,7 @@ inline void _getFrequencies(TFreq & freq, TText const & text)
 ..include:seqan/index.h
 */
 
-    template <typename TChar, typename TSpec>
+template <typename TChar, typename TSpec>
 inline void clear(PrefixSumTable<TChar, TSpec> & prefixSumTable)
 {
     clear(prefixSumTable.entries);
@@ -558,23 +558,23 @@ template <typename TChar, typename TSpec>
 inline TChar determineSentinelSubstitute(PrefixSumTable<TChar, TSpec> const & pst)
 {
     typedef PrefixSumTable<TChar, TSpec>                    TPrefixSumTable;
-	typedef typename Value<TPrefixSumTable>::Type           TValue;
-	typedef typename Size<TPrefixSumTable>::Type            TSize;
+    typedef typename Value<TPrefixSumTable>::Type           TValue;
+    typedef typename Size<TPrefixSumTable>::Type            TSize;
 
-	TValue min = getPrefixSum(pst, length(pst) - 1);
-	TSize pos = length(pst) - 1;
-    
-	for (TSize i = 0; i < length(pst) - 1; ++i)
-	{
-		TSize diff = pst[i + 1] - pst[i];
-		if (diff != 0 && diff < min)
-		{
-			min = diff;
-			pos = i;
-		}
-	}
-    
-	return getCharacter(pst, pos);
+    TValue min = getPrefixSum(pst, length(pst) - 1);
+    TSize pos = length(pst) - 1;
+
+    for (TSize i = 0; i < length(pst) - 1; ++i)
+    {
+        TSize diff = pst[i + 1] - pst[i];
+        if (diff != 0 && diff < min)
+        {
+            min = diff;
+            pos = i;
+        }
+    }
+
+    return getCharacter(pst, pos);
 }
 
 // ----------------------------------------------------------------------------
@@ -585,7 +585,7 @@ template <typename TChar, typename TSpec, typename TNumSentinel>
 void insertSentinels(PrefixSumTable<TChar, TSpec> & pst, TNumSentinel const numSentinel)
 {
     typedef PrefixSumTable<TChar, TSpec>                    TPrefixSumTable;
-	typedef typename Size<TPrefixSumTable>::Type            TSize;
+    typedef typename Size<TPrefixSumTable>::Type            TSize;
 
     for (TSize i = 0; i < length(pst); ++i)
         prefixSum(pst, i) = getPrefixSum(pst, i) + numSentinel;
