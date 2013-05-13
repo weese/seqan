@@ -191,7 +191,7 @@ public:
 };
 
 // ==========================================================================
-//Functions
+// Functions
 // ==========================================================================
 
 // ----------------------------------------------------------------------------
@@ -305,13 +305,6 @@ inline void createRankDictionary(RankDictionary<SequenceBitMask<TValue> > & dict
         _updateRanks(bitStrings[i]);
 }
 
-template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText> 
-inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue> >, TSpec >, TPrefixSumTable> & lfTable,
-                              TText const & text)
-{
-    createRankDictionary(getFibre(getFibre(lfTable, FibreOccTable()), FibreRankDictionary()), text);
-}
-
 // ----------------------------------------------------------------------------
 // Function open
 // ----------------------------------------------------------------------------
@@ -319,9 +312,10 @@ inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<S
 template <typename TValue>
 inline bool open(RankDictionary<SequenceBitMask<TValue> > & dictionary, const char * fileName, int openMode)
 {
-    String<char> name;
-    name = fileName;    append(name, ".rd"); if (!open(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
-    return true;
+    String<char> name = fileName;
+    append(name, ".rd");
+    
+    return open(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode);
 }
 
 template <typename TValue>
@@ -337,8 +331,10 @@ inline bool open(RankDictionary<SequenceBitMask<TValue> > & dictionary, const ch
 template <typename TValue>
 inline bool save(RankDictionary<SequenceBitMask<TValue> > const & dictionary, const char * fileName, int openMode)
 {
-    String<char> name;
-    name = fileName;    append(name, ".rd");   if (!save(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
+    String<char> name = fileName;
+    append(name, ".rd");
+
+    if (!save(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
     
     return true;
 }
