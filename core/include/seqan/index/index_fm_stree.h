@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
+// Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
 #ifndef INDEX_FM_STREE_H_
@@ -93,7 +94,7 @@ struct VertexFmi
 template <typename TAlphabet, typename TSize>
 struct HistoryStackFmi_
 {
-    Pair<TSize> range;		// current SA interval of hits
+    Pair<TSize> range;
     TAlphabet   lastChar;
 
     HistoryStackFmi_() {}
@@ -173,16 +174,15 @@ void _indexRequireTopDownIteration(Index<TText, FMIndex<TOccSpec, TIndexSpec> > 
 // Function begin()                                                  [Iterator]
 // ----------------------------------------------------------------------------
 
-// ==========================================================================
 ///.Function.begin.param.object.type:Spec.FMIndex
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
 inline
 typename Iterator<Index<TText,FMIndex<TOccSpec, TIndexSpec> >, TSpec>::Type
 begin(Index<TText, FMIndex<TOccSpec, TIndexSpec> > & index, TSpec const /*Tag*/)
 {
-	typedef typename Iterator<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, TSpec>::Type TIter;
+    typedef typename Iterator<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, TSpec>::Type TIter;
 
-	return TIter(index);
+    return TIter(index);
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
@@ -190,9 +190,9 @@ inline
 typename Iterator<Index<TText,FMIndex<TOccSpec, TIndexSpec> > const, TSpec>::Type
 begin(Index<TText, FMIndex<TOccSpec, TIndexSpec> > const & index, TSpec const /*Tag*/)
 {
-	typedef typename Iterator<Index<TText, FMIndex<TOccSpec, TIndexSpec> > const, TSpec>::Type TIter;
+    typedef typename Iterator<Index<TText, FMIndex<TOccSpec, TIndexSpec> > const, TSpec>::Type TIter;
 
-	return TIter(index);
+    return TIter(index);
 }
 
 // ----------------------------------------------------------------------------
@@ -357,8 +357,6 @@ inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VST
                           TString const & string,
                           TSize & lcp)
 {
-    //typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
-    //typedef typename Value<TIndex>::Type                        TAlphabet;
     typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
     lcp = 0;
@@ -406,7 +404,7 @@ inline bool _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<T
 
             return true;
         }
-    
+
     return false;
 }
 
@@ -417,29 +415,29 @@ inline bool _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<T
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
 bool _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it)
 {
-	if (!isRoot(it))
-	{
+    if (!isRoot(it))
+    {
         value(it).range = it._parentDesc.range;
         value(it).lastChar = it._parentDesc.lastChar;
         --value(it).repLen;
         return true;
     }
-    
+
     return false;
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
 bool _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
 {
-	if (!isRoot(it))
-	{
+    if (!isRoot(it))
+    {
         value(it).range = back(it.history).range;
         value(it).lastChar = back(it.history).lastChar;
         --value(it).repLen;
         pop(it.history);
         return true;
     }
-    
+
     return false;
 }
 
@@ -492,7 +490,7 @@ template <typename TIndex, typename TAlphabet, typename TSize>
 inline typename Size<TIndex>::Type
 repLength(TIndex const &, VertexFmi<TAlphabet, TSize> const & vDesc)
 {
-	return vDesc.repLen;
+    return vDesc.repLen;
 }
 
 // ----------------------------------------------------------------------------

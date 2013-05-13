@@ -174,7 +174,7 @@ struct SparseString
     typedef typename Fibre<SparseString, FibreValueString>::Type TFibreValueString_;
     typedef typename Fibre<SparseString, FibreIndicatorString>::Type TFibreIndicatorString;
 
-    TFibreValueString_              	valueString;
+    TFibreValueString_                  valueString;
     TFibreIndicatorString               indicatorString;
 
     inline bool operator==(const SparseString & b) const
