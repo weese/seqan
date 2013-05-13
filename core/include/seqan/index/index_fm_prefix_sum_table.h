@@ -38,11 +38,12 @@
 namespace seqan {
 
 // ============================================================================
-// Forwards
+// Tags
 // ============================================================================
 
-template <typename TChar, typename TSpec>
-class PrefixSumTable;
+// ----------------------------------------------------------------------------
+// Tag PrefixSumTable
+// ----------------------------------------------------------------------------
 
 /**
 .Tag.PrefixSumTable Fibres
@@ -56,6 +57,14 @@ class PrefixSumTable;
 ..see:Function.getFibre
 ..include:seqan/index.h
 */
+
+template <typename TChar, typename TSpec>
+class PrefixSumTable;
+
+// ----------------------------------------------------------------------------
+// Tag FibreEntries
+// ----------------------------------------------------------------------------
+
 struct FibreEntries_;
 typedef Tag<FibreEntries_> const FibreEntries;
 
