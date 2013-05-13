@@ -351,8 +351,7 @@ inline bool empty(SentinelRankDictionary<TRankDictionary, TSpec> const & diction
 */
 template <typename TRankDictionary, typename TSpec, typename TPos>
 inline typename Value<TRankDictionary>::Type
-getValue(SentinelRankDictionary<TRankDictionary, TSpec > const & dictionary,
-                 TPos pos)
+getValue(SentinelRankDictionary<TRankDictionary, TSpec > const & dictionary, TPos pos)
 {
     SEQAN_ASSERT_NEQ(isSentinelPosition(dictionary, pos), true);
     return getValue(getFibre(dictionary, FibreRankDictionary()), pos);
@@ -360,8 +359,7 @@ getValue(SentinelRankDictionary<TRankDictionary, TSpec > const & dictionary,
 
 template <typename TRankDictionary, typename TSpec, typename TPos>
 inline typename Value<TRankDictionary>::Type
-getValue(SentinelRankDictionary<TRankDictionary, TSpec > & dictionary,
-                 TPos pos)
+getValue(SentinelRankDictionary<TRankDictionary, TSpec > & dictionary, TPos pos)
 {
     SEQAN_ASSERT_NEQ(isSentinelPosition(dictionary, pos), true);
     return getValue(getFibre(dictionary, FibreRankDictionary()), pos);
@@ -436,10 +434,11 @@ std::cout << countOccurrences(dictionary, 'a', 3) << std::endl; // 1
 std::cout << countOccurrences(dictionary, 'a', 4) << std::endl; // 2
 */
 
+// NOTE(esiragusa): Fix return type of countOccurrences(SentinelRankDictionary)
 template <typename TRankDictionary, typename TChar, typename TPos>
 inline unsigned countOccurrences(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary,
-                               TChar const character,
-                               TPos const pos)
+                                 TChar const character,
+                                 TPos const pos)
 {
     unsigned occ = countOccurrences(getFibre(dictionary, FibreRankDictionary()), character, pos);
     if (ordEqual(getSentinelSubstitute(dictionary), character) && pos >= dictionary.sentinelPosition)
@@ -449,8 +448,8 @@ inline unsigned countOccurrences(SentinelRankDictionary<TRankDictionary, Sentine
 
 template <typename TRankDictionary, typename TChar, typename TPos>
 inline unsigned countOccurrences(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary,
-                                TChar const character,
-                                TPos const pos)
+                                 TChar const character,
+                                 TPos const pos)
 {
     unsigned occ = countOccurrences(getFibre(dictionary, FibreRankDictionary()), character, pos);
     if (ordEqual(getSentinelSubstitute(dictionary), character))
@@ -496,7 +495,7 @@ getSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> const & dic
 
 template <typename TRankDictionary, typename TSpec, typename TChar>
 inline void setSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
-                                TChar sentinelSubstitute)
+                                  TChar sentinelSubstitute)
 {
     dictionary.sentinelSubstitute = sentinelSubstitute;
 }
@@ -524,31 +523,37 @@ inline void setSentinelPosition(SentinelRankDictionary<TRankDictionary, TSpec> &
 }
 
 // ----------------------------------------------------------------------------
-// Function createSentinelRankDictionary()
+// Function sentinelRankDictionaryCreate()
 // ----------------------------------------------------------------------------
 
 /**
 .Function.SentinelRankDictionary#createSentinelRankDictionary
 ..class:Class.SentinelRankDictionary
-..summary:This function creates the dictionary structure.
+..summary:This functions creates the dictionary structure.
 ..signature:void createSentinelRankDictionary(dictionary, text)
 ..param.dictionary:The dictionary.
 ...type:Class.RankDictionary.
-..param.text:A text to be indexed by the dictionary.
+..param.text:A text to be represented by the dictionary.
 ...type:Class.String
 ..include:seqan/index.h
 */
 
-template <typename TRankDictionary, typename TSpec, typename TText>
-inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, TText const & text)
+template <typename TRankDictionary, typename TSpec, typename TText, typename TSentinelSub, typename TSentinelPos>
+inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary,
+                                         TText const & text,
+                                         TSentinelSub const & sentinelSub,
+                                         TSentinelPos const & sentinelPos)
 {
+    setSentinelSubstitute(dictionary, sentinelSub);
+    setSentinelPosition(dictionary, sentinelPos);
+
     createRankDictionary(getFibre(dictionary, FibreRankDictionary()), text);
 }
 
 template <typename TRankDictionary, typename TSpec, typename TPrefixSumTable, typename TText, typename TSentinelSub>
 inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDictionary, TSpec>, TPrefixSumTable> & lfTable,
-                              TText const & text,
-                              TSentinelSub const & sentinelSub)
+                                         TText const & text,
+                                         TSentinelSub const & sentinelSub)
 {
     setSentinelSubstitute(getFibre(lfTable, FibreOccTable()), sentinelSub);
 //    setSentinelPosition(getFibre(lfTable, FibreOccTable()), sentinelPos);
