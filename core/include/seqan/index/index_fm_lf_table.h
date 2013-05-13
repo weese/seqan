@@ -31,6 +31,10 @@
 // ==========================================================================
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
+// LfTable is an object storing all necessary information for the LF-mapping.
+// To be more precise, the occurrence-table data structure as well as the
+// prefix-sum table are stored.
+// ============================================================================
 
 #ifndef INDEX_FM_LF_TABLE_H_
 #define INDEX_FM_LF_TABLE_H_
@@ -38,23 +42,8 @@
 namespace seqan {
 
 // ============================================================================
-// LfTable is an object storing all necessary information for the LF-mapping.
-// To be more precise, the occurrence-table data structure as well as the
-// prefix-sum table are stored.
-// ============================================================================
-
-// ============================================================================
 // Forwards
 // ============================================================================
-
-template <typename TValue>
-struct WaveletTree;
-
-template<typename TValue> 
-class RankDictionary;
-
-template<typename TRankDirectorySpec, typename TSpec> 
-class SentinelRankDictionary;
 
 template <typename TOccTable, typename TPrefixSumTable>
 struct LfTable;
@@ -178,7 +167,6 @@ struct LfTable
         return occTable == b.occTable &&
                prefixSumTable == b.prefixSumTable;
     }
-
 };
 
 // ============================================================================
