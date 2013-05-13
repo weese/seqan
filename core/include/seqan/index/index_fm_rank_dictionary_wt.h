@@ -41,18 +41,18 @@ namespace seqan {
 // Forwards
 // ==========================================================================
 
-struct FibreBitStrings_;
-struct FibreTreeStructure_;
-struct FibreDollarPosition_;
-struct FibreOccTable_;
-struct FibreRankDictionary_;
-
 template <typename TValue>
 struct WaveletTree;
 
 // ==========================================================================
 // Tags
 // ==========================================================================
+
+struct FibreBitStrings_;
+struct FibreTreeStructure_;
+struct FibreDollarPosition_;
+struct FibreOccTable_;
+struct FibreRankDictionary_;
 
 typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
 typedef Tag<FibreBitStrings_> const FibreBitStrings;
