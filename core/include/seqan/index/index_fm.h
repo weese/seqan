@@ -63,7 +63,7 @@ typedef Tag<FinderFMIndex_> FinderFMIndex;
 template <typename TText, typename TOccSpec, typename TSpec>
 struct DefaultFinder<Index<TText, FMIndex<TOccSpec, TSpec> > >
 {
-	typedef FinderFMIndex Type;
+    typedef FinderFMIndex Type;
 };
 
 // ============================================================================
@@ -113,7 +113,7 @@ typedef Tag<Sentinels_> const           Sentinels;
 // ----------------------------------------------------------------------------
 // Metafunction Fibre
 // ----------------------------------------------------------------------------
-    
+
 /*
 .Metafunction.Fibre:
 ..summary:Type of a specific FMIndex member (fibre).
@@ -141,7 +141,7 @@ template <typename TText, typename TWaveletTreeSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<WT<TWaveletTreeSpec>, TSpec> >, FibreOccTable>
 {
     typedef typename Value<TText>::Type TValue_;
-	typedef SentinelRankDictionary<RankDictionary<WaveletTree<TValue_> >, Sentinel> Type;
+    typedef SentinelRankDictionary<RankDictionary<WaveletTree<TValue_> >, Sentinel> Type;
 };
 
 template <typename TText, typename TStringSetSpec, typename TWaveletTreeSpec, typename TSpec>
@@ -155,7 +155,7 @@ template <typename TText, typename TSBMSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<SBM<TSBMSpec>, TSpec> >, FibreOccTable>
 {
     typedef typename Value<Index<TText, FMIndex<SBM<TSBMSpec>, TSpec> > >::Type         TValue_;
-	typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinel> Type;
+    typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinel> Type;
 };
 
 template <typename TText, typename TStringSetSpec, typename TSBMSpec, typename TSpec>
@@ -183,16 +183,16 @@ template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>
 {
     typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreOccTable>::Type        TOccTable_;
-	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibrePrefixSumTable>::Type  TPrefixSumTable_;
-	typedef LfTable<TOccTable_, TPrefixSumTable_>   	                                        Type;
+    typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibrePrefixSumTable>::Type  TPrefixSumTable_;
+    typedef LfTable<TOccTable_, TPrefixSumTable_>   	                                        Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibreLfTable>
 {
     typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibreOccTable>::Type          TOccTable_;
-	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibrePrefixSumTable>::Type    TPrefixSumTable_;
-	typedef LfTable<TOccTable_, TPrefixSumTable_>   	                                                Type;
+    typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibrePrefixSumTable>::Type    TPrefixSumTable_;
+    typedef LfTable<TOccTable_, TPrefixSumTable_>   	                                                Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
@@ -200,7 +200,7 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibrePrefixSumTable>
 {
     typedef typename Value<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type  TChar_;
     typedef typename MakeUnsigned<TChar_>::Type                             TUChar_;
-	typedef PrefixSumTable<TUChar_, void>                                   Type;
+    typedef PrefixSumTable<TUChar_, void>                                   Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
@@ -208,23 +208,23 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibrePrefixSumTable>
 {
     typedef typename Value<Index<TText, FMIndex<TOccSpec, TSpec> > const>::Type TChar_;
     typedef typename MakeUnsigned<TChar_>::Type                                 TUChar_;
-	typedef PrefixSumTable<TUChar_, void>                                       Type;
+    typedef PrefixSumTable<TUChar_, void>                                       Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
-	typedef typename SAValue<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type                TSAValue_;
-	typedef SparseString<String<TSAValue_>, void>                                           TSparseString_;
-	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type     TLfTable_;
-	typedef CompressedSA<TSparseString_, TLfTable_, void>                                   Type;
+    typedef typename SAValue<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type                TSAValue_;
+    typedef SparseString<String<TSAValue_>, void>                                           TSparseString_;
+    typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type     TLfTable_;
+    typedef CompressedSA<TSparseString_, TLfTable_, void>                                   Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreTempSA>
 {
-	typedef typename SAValue<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type    TSAValue;
-	typedef String<TSAValue, External<ExternalConfigLarge<> > >                 Type;
+    typedef typename SAValue<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type    TSAValue;
+    typedef String<TSAValue, External<ExternalConfigLarge<> > >                 Type;
 };
 
 // ============================================================================
@@ -287,21 +287,21 @@ class Index<TText, FMIndex<TOccSpec, TSpec> >
 {
 public:
     Holder<typename Fibre<Index, FibreText>::Type>  text;
-	typename Fibre<Index, FibreLfTable>::Type       lfTable;
-	typename Fibre<Index, FibreSA>::Type            compressedSA;
-	typename Size<TText>::Type                      bwtLength;
-    unsigned                                        compressionFactor; 
+    typename Fibre<Index, FibreLfTable>::Type       lfTable;
+    typename Fibre<Index, FibreSA>::Type            compressedSA;
+    typename Size<TText>::Type                      bwtLength;
+    unsigned                                        compressionFactor;
 
-	Index() :
-		bwtLength(0),
+    Index() :
+        bwtLength(0),
         compressionFactor(0)
-	{}
+    {}
 
-	Index(TText & text, unsigned compressionFactor = 10) :
-	    text(text),
-		bwtLength(_computeBwtLength(text)),
-		compressionFactor(compressionFactor)
-	{}
+    Index(TText & text, unsigned compressionFactor = 10) :
+        text(text),
+        bwtLength(_computeBwtLength(text)),
+        compressionFactor(compressionFactor)
+    {}
 
 	inline bool operator==(const Index & b) const
     {
@@ -363,28 +363,28 @@ template <typename TText, typename TOccSpec, typename TSpec>
 typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable >::Type &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > & index, FibreLfTable /*tag*/)
 {
-	return index.lfTable;
+    return index.lfTable;
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
 typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable >::Type const &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreLfTable /*tag*/)
 {
-	return index.lfTable;
+    return index.lfTable;
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
 typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > & index, FibreSA /*tag*/)
 {
-	return index.compressedSA;
+    return index.compressedSA;
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
 typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type const &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreSA /*tag*/)
 {
-	return index.compressedSA;
+    return index.compressedSA;
 }
 
 // ----------------------------------------------------------------------------
@@ -452,29 +452,31 @@ template <typename TBwt, typename TSentinelPosition, typename TText, typename TS
 inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, TText const & text, TSA const & sa,
 		                   TSentinelSub const sentinelSub)
 {
-	//typedefs
-	typedef typename GetValue<TSA>::Type                    TSAValue;
+    typedef typename GetValue<TSA>::Type                    TSAValue;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
     typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
 
-	//little helpers
     TSAIter saIt = begin(sa, Standard());
     TSAIter saItEnd = end(sa, Standard());
     TBwtIter bwtIt = begin(bwt, Standard());
-    
+
 	assignValue(bwtIt, back(text));
-	for (; saIt != saItEnd; ++saIt)
-	{
-        ++bwtIt;
-		TSAValue pos = getValue(saIt);
-		if (pos != 0)
-			assignValue(bwtIt, getValue(text, pos - 1));
-		else
-		{
-			assignValue(bwtIt, sentinelSub);
-			sentinelPos = bwtIt - begin(bwt, Standard());
-		}
-	}
+    ++bwtIt;
+
+    for (; saIt != saItEnd; ++saIt, ++bwtIt)
+    {
+        TSAValue pos = getValue(saIt);
+
+        if (pos != 0)
+        {
+            assignValue(bwtIt, getValue(text, pos - 1));
+        }
+        else
+        {
+            assignValue(bwtIt, sentinelSub);
+            sentinelPos = bwtIt - begin(bwt, Standard());
+        }
+    }
 }
 
 // This function computes the BWT of a text. Note that the sentinel sign is substituted and its position stored.
@@ -490,7 +492,6 @@ inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, StringSet<TT
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
     typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
 
-    // little Helpers
     TSize seqNum = countSequences(text);
     TSize totalLen = lengthSum(text);
 
@@ -501,15 +502,16 @@ inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, StringSet<TT
     TBwtIter bwtItBeg = begin(bwt, Standard());
     TBwtIter bwtIt = bwtItBeg;
 
-    // fill the sentinel positions (they are all at the beginning of the bwt)
+    // Fill the sentinel positions (they are all at the beginning of the bwt).
     for (TSize i = 1; i <= seqNum; ++i, ++bwtIt)
         assignValue(bwtIt, back(text[seqNum - i]));
 
-    // compute the rest of the bwt
+    // Compute the rest of the bwt.
     for (; saIt != saItEnd; ++saIt, ++bwtIt)
     {
         TSAValue pos;    // = SA[i];
         posLocalize(pos, getValue(saIt), stringSetLimits(text));
+        
         if (getSeqOffset(pos) != 0)
             assignValue(bwtIt, getValue(getValue(text, getSeqNo(pos)), getSeqOffset(pos) - 1));
         else
@@ -519,34 +521,31 @@ inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, StringSet<TT
         }
     }
 
-    // update the auxiliary rank support bit string information.
+    // Update the auxiliary rank support bit string information.
     _updateRanks(sentinelPos);
 }
 
 // ----------------------------------------------------------------------------
-// Function _indexCreateSA()
+// Function _indexCreateCompressedSA()
 // ----------------------------------------------------------------------------
 
 // This function computes the full and compressed suffix array. 
 // Note, in contrast to indexCreate(index, FibreSA()) the full suffix array is also computed.
 template <typename TText, typename TIndexSpec, typename TSpec, typename TSA>
-inline bool _indexCreateSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TSA const & fullSa, TText const & text)
+inline bool _indexCreateCompressedSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
-	typedef typename Fibre<TIndex, FibreSA>::Type       TCompressedSA;
-	typedef typename Size<TIndex>::Type                 TSize;
-
-    // TODO(singer): If there is a lfTable we do not need the Skew7
-	// create the fulle sa
+    typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
+    typedef typename Fibre<TIndex, FibreSA>::Type       TCompressedSA;
+    typedef typename Size<TIndex>::Type                 TSize;
 
     // Create the compressed sa.
 	TCompressedSA & compressedSA = getFibre(index, FibreSA());
     setLfTable(compressedSA, getFibre(index, FibreLfTable()));
 
     TSize numSentinel = countSequences(text);
-    createCompressedSa(compressedSA, fullSa, index.compressionFactor, numSentinel); 
+    createCompressedSa(compressedSA, sa, index.compressionFactor, numSentinel); 
 
-	return true;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -557,12 +556,12 @@ inline bool _indexCreateSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TS
 template <typename TIndexSpec, typename TSpec, typename TText, typename TSA>
 inline bool _indexCreateLfTable(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >		        TIndex;
-	typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
-	typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type     TPrefixSumTable;
-	typedef typename Fibre<TLfTable, FibreOccTable>::Type           TOccTable;
-	typedef typename Fibre<TOccTable, FibreSentinelPosition>::Type  TSentinelPosition;
-	typedef typename Value<TIndex>::Type						    TAlphabet;
+    typedef Index<TText, FMIndex<TIndexSpec, TSpec> >		        TIndex;
+    typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type     TPrefixSumTable;
+    typedef typename Fibre<TLfTable, FibreOccTable>::Type           TOccTable;
+    typedef typename Fibre<TOccTable, FibreSentinelPosition>::Type  TSentinelPosition;
+    typedef typename Value<TIndex>::Type						    TAlphabet;
 
     TLfTable & lfTable = getFibre(index, FibreLfTable());
     TPrefixSumTable & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
@@ -600,8 +599,8 @@ inline bool _indexCreateLfTable(Index<TText, FMIndex<TIndexSpec, TSpec> > & inde
 template <typename TText, typename TIndexSpec, typename TSpec>
 inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, FibreSaLfTable const)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
-	typedef typename Fibre<TIndex, FibreTempSA>::Type   TTempSA;
+    typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
+    typedef typename Fibre<TIndex, FibreTempSA>::Type   TTempSA;
 
     TText const & text = getFibre(index, FibreText());
 
@@ -610,17 +609,17 @@ inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, Fibre
 
     TTempSA tempSA;
 
-	// Create the full SA.
-	resize(tempSA, length(text), Exact());
-	createSuffixArray(tempSA, text, Skew7());
+    // Create the full SA.
+    resize(tempSA, length(text), Exact());
+    createSuffixArray(tempSA, text, Skew7());
 
-	// Create the compressed SA.
-	_indexCreateSA(index, tempSA, text);
+    // Create the compressed SA.
+    _indexCreateCompressedSA(index, text, tempSA);
 
-	// Create the lf table.
-	_indexCreateLfTable(index, text, tempSA);
+    // Create the lf table.
+    _indexCreateLfTable(index, text, tempSA);
 
-	return true;
+    return true;
 }
 
 template <typename TText, typename TIndexSpec, typename TSpec>
@@ -662,13 +661,13 @@ inline void _range(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, TPatte
                    Pair<TIter, TPairSpec> & range)
 {
     typedef Index<TText, FMIndex<TOccSpec, TSpec> >                 TIndex;
-	typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
+    typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
     typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type     TPrefixSumTable;
     typedef typename Fibre<TLfTable, FibreOccTable>::Type           TOccTable;
     typedef typename Value<TIndex>::Type                            TAlphabet;
     typedef typename ValueSize<TAlphabet>::Type                     TAlphabetSize;
     typedef typename Size<TIndex>::Type                             TSize;
- 	typedef typename Value<TPattern>::Type                      	TChar;
+    typedef typename Value<TPattern>::Type                      	TChar;
 
     TLfTable const & lfTable = getFibre(index, FibreLfTable());
     TPrefixSumTable const & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
@@ -680,27 +679,27 @@ inline void _range(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, TPatte
 	    setPosition(range.i2, index.bwtLength);
     }
 
-	TSize i = length(pattern) - 1;
-	TChar letter = pattern[i];
+    TSize i = length(pattern) - 1;
+    TChar letter = pattern[i];
 
     // Initilization.
-	TAlphabetSize letterPosition = getCharacterPosition(prefixSumTable, letter);
-	TSize sp = getPrefixSum(prefixSumTable, letterPosition);
-	TSize ep = getPrefixSum(prefixSumTable, letterPosition + 1) - 1;
+    TAlphabetSize letterPosition = getCharacterPosition(prefixSumTable, letter);
+    TSize sp = getPrefixSum(prefixSumTable, letterPosition);
+    TSize ep = getPrefixSum(prefixSumTable, letterPosition + 1) - 1;
 
-	// The search as proposed by Ferragina and Manzini.
-	while ((sp <= ep) && (i > 0))
-	{
-	    --i;
-		letter = pattern[i];
-		letterPosition = getCharacterPosition(prefixSumTable, letter);
-		TSize prefixSum = getPrefixSum(prefixSumTable, letterPosition);
-		sp = prefixSum + countOccurrences(occTable, letter, sp - 1);
-		ep = prefixSum + countOccurrences(occTable, letter, ep) - 1;
-	}
+    // The search as proposed by Ferragina and Manzini.
+    while ((sp <= ep) && (i > 0))
+    {
+        --i;
+        letter = pattern[i];
+        letterPosition = getCharacterPosition(prefixSumTable, letter);
+        TSize prefixSum = getPrefixSum(prefixSumTable, letterPosition);
+        sp = prefixSum + countOccurrences(occTable, letter, sp - 1);
+        ep = prefixSum + countOccurrences(occTable, letter, ep) - 1;
+    }
 
     setPosition(range.i1, sp);
-	setPosition(range.i2, ep + 1);
+    setPosition(range.i2, ep + 1);
 }
 
 // ----------------------------------------------------------------------------
@@ -713,15 +712,15 @@ inline void
 _findFirstIndex(Finder<Index<TText, FMIndex<TOccSpec, TSpec> >, FinderFMIndex> & finder,
 		        TPattern const & pattern, FinderFMIndex const &)
 {
-	typedef Index<TText, FMIndex<TOccSpec, TSpec> >    TIndex;
+    typedef Index<TText, FMIndex<TOccSpec, TSpec> >    TIndex;
 
-	TIndex & index = haystack(finder);
+    TIndex & index = haystack(finder);
 
-	indexRequire(index, FibreSaLfTable());
+    indexRequire(index, FibreSaLfTable());
     setContainer(finder.range.i1, getFibre(container(finder), FibreSA()));
     setContainer(finder.range.i2, getFibre(container(finder), FibreSA()));
 
-	_range(index, pattern, finder.range);
+    _range(index, pattern, finder.range);
 }
 
 // ----------------------------------------------------------------------------
@@ -765,12 +764,6 @@ inline bool open(Index<TText, FMIndex<TOccSpec, TSpec> > & index, const char * f
 
     name = fileName;    append(name, ".fma");
     if (!open(infoString, toCString(name), openMode)) return false;
-
-    // TODO(weese): Why do we check the SA size here? Everywhere else we require the types being the same for reading and writing
-    //              Moreover a correct size is not indicating a correct type
-    // Check that the size of the SA entries is correct.
-//    if (infoString[0].sizeOfSAEntry != 0 && infoString[0].sizeOfSAEntry != sizeof(TSAValue))
-//        return false;
 
     // Initialize index private members from info string.
     index.compressionFactor = infoString[0].compressionFactor;
