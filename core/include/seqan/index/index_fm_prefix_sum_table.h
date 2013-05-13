@@ -785,7 +785,7 @@ inline bool save(PrefixSumTable<TChar, TSpec> const & pst, const char * fileName
 {
     String<char> name;
     name = fileName;    append(name, ".pst");
-    return save(getFibre(pst, FibreEntries()), toCString(name), openMode));
+    return save(getFibre(pst, FibreEntries()), toCString(name), openMode);
 }
 
 template <typename TChar, typename TSpec>
