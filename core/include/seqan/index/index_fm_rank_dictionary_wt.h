@@ -534,14 +534,6 @@ inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dictiona
     _fillWaveletTree(dictionary, text);
 }
 
-template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText> 
-inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec >, TPrefixSumTable> & lfTable,
-                              TText const & text)
-{
-    createRightArrayBinaryTree(lfTable);
-    _fillWaveletTree(getFibre(getFibre(lfTable, FibreOccTable()), FibreRankDictionary()), text);
-}
-
 // ----------------------------------------------------------------------------
 // Function open()
 // ----------------------------------------------------------------------------
@@ -568,12 +560,19 @@ template <typename TValue>
 inline bool open(RankDictionary<WaveletTree<TValue> > & dictionary, const char * fileName, int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".wtc"); if (!open(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".wts"); if (!open(getFibre(dictionary, FibreTreeStructure()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".wtc");
+    if (!open(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".wts");
+    if (!open(getFibre(dictionary, FibreTreeStructure()), toCString(name), openMode)) return false;
+
     return true;
 }
 
-    template <typename TValue>
+template <typename TValue>
 inline bool open(RankDictionary<WaveletTree<TValue> > & tree, const char * fileName)
 {
     return open(tree, fileName, DefaultOpenMode<RankDictionary<WaveletTree<TValue> > >::VALUE);
