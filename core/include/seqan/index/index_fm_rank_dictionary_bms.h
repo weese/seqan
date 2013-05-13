@@ -272,16 +272,6 @@ countOccurrences(RankDictionary<SequenceBitMask<TValue> > const & dictionary,
     return getRank(dictionary.bitStrings[ordValue(character)], pos);
 }
 
-template < typename TValue, typename TCharIn, typename TPos>
-inline typename Size<RankDictionary<SequenceBitMask<TValue> > >::Type
-countOccurrences(RankDictionary<SequenceBitMask<TValue> > & dictionary, TCharIn const character,
-                                 TPos const pos)
-{
-    return countOccurrences(const_cast<RankDictionary<SequenceBitMask<TValue> > const &>(dictionary), character, pos);
-
-    //return getRank(dictionary.bitStrings[ordValue(character)], pos);
-}
-
 // ----------------------------------------------------------------------------
 // Function createRankDictionary
 // ----------------------------------------------------------------------------
