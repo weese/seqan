@@ -162,9 +162,9 @@ void _compressedSaGetNextPos(TIndex & /*tag*/)
     TCompressedSA & compressedSA = getFibre(index, FibreSA());
     TOccTable occTable = getFibre(getFibre(index, FibreLfTable()), FibreOccTable());
 
-    for(unsigned i = 1; i < length(text); ++i)
+    for (unsigned i = 1; i < length(text); ++i)
     {
-        if (!sentinelPosition(occTable, i))
+        if (!isSentinelPosition(occTable, i))
         {
             pos = i;
             pos2 = pos;

@@ -298,14 +298,14 @@ inline void clear(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary)
 }
 
 // ----------------------------------------------------------------------------
-// Function sentinelPosition()
+// Function isSentinelPosition()
 // ----------------------------------------------------------------------------
 
 /**
 .Function.SentinelRankDictionary#sentinelPosition
 ..class:Class.SentinelRankDictionary
 ..summary:Returns whether a specified position is a sentinel position.
-..signature:sentinelPosition(dictionary, pos)
+..signature:isSentinelPosition(dictionary, pos)
 ..param.dictionary:The dictionary.
 ...type:Class.SentinelRankDictionary
 ..param.pos:The position.
@@ -315,13 +315,13 @@ inline void clear(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary)
 
 //.Function.sentinelPosition.param.type:Class.RankDictionary
 template <typename TRankDictionary, typename TPos>
-inline bool sentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary, TPos pos)
+inline bool isSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary, TPos pos)
 {
     return dictionary.sentinelPosition == pos;
 }
 
 template <typename TRankDictionary, typename TPos>
-inline bool sentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary, TPos pos)
+inline bool isSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary, TPos pos)
 {
     return isBitSet(getFibre(dictionary, FibreSentinelPosition()), pos);
 }
@@ -365,7 +365,7 @@ inline typename Value<TRankDictionary>::Type
 getValue(SentinelRankDictionary<TRankDictionary, TSpec > const & dictionary,
                  TPos pos)
 {
-    SEQAN_ASSERT_NEQ(sentinelPosition(dictionary, pos), true);
+    SEQAN_ASSERT_NEQ(isSentinelPosition(dictionary, pos), true);
     return getValue(getFibre(dictionary, FibreRankDictionary()), pos);
 }
 
@@ -374,7 +374,7 @@ inline typename Value<TRankDictionary>::Type
 getValue(SentinelRankDictionary<TRankDictionary, TSpec > & dictionary,
                  TPos pos)
 {
-    SEQAN_ASSERT_NEQ(sentinelPosition(dictionary, pos), true);
+    SEQAN_ASSERT_NEQ(isSentinelPosition(dictionary, pos), true);
     return getValue(getFibre(dictionary, FibreRankDictionary()), pos);
 }
 

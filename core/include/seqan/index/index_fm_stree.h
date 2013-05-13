@@ -221,7 +221,7 @@ inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TS
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     return (value(it).range.i1 + 1 >= value(it).range.i2 &&
-        sentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable()), value(it).range.i1));
+        isSentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable()), value(it).range.i1));
 }
 
 // ----------------------------------------------------------------------------
