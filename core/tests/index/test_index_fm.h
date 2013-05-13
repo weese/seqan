@@ -215,7 +215,7 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
             TChar temp = getValue(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), i);
             ++occ[ordValue(temp)][i];
             if (temp == getSentinelSubstitute(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())) &&
-                i == _getSentinelPosition(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())))
+                sentinelPosition(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), i))
                 --occ[ordValue(temp)][i];
         }
 

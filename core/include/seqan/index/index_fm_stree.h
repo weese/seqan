@@ -221,22 +221,7 @@ inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TS
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     return (value(it).range.i1 + 1 >= value(it).range.i2 &&
-            value(it).range.i1 == _getSentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable())));
-}
-
-template <typename TText, typename TSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _isLeaf(Iter<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
-                    VSTreeIteratorTraits<TDfsOrder, False> const)
-{
-    return _isLeaf(it, VSTreeIteratorTraits<TDfsOrder, True>());
-}
-
-template <typename TText, typename TSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _isLeaf(Iter<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
-                    VSTreeIteratorTraits<TDfsOrder, True> const)
-{
-    return (value(it).range.i1 + 1 >= value(it).range.i2 &&
-            sentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable()), value(it).range.i1));
+        sentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable()), value(it).range.i1));
 }
 
 // ----------------------------------------------------------------------------

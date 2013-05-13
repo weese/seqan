@@ -379,41 +379,6 @@ getValue(SentinelRankDictionary<TRankDictionary, TSpec > & dictionary,
 }
 
 // ----------------------------------------------------------------------------
-// Function getSentinelPosition()
-// ----------------------------------------------------------------------------
-
-/*
-.Function.SentinelRankDictionary#_getSentinelPosition
-..class:Class.SentinelRankDictionary
-..summary:Returns the position(s) of sentinel(s).
-..signature:getSentinelPosition(dictionary)
-..param.dictionary:The dictionary.
-...type:Class.RankDictionary
-..remark:If there are several sentinels, a string containing the sentinel positions is returned.
- Should be used for debugging only.
-..include:seqan/index.h
-*/
-
-template <typename TRankDictionary>
-inline typename Size<SentinelRankDictionary<TRankDictionary, Sentinel> >::Type
-_getSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary)
-{
-    return dictionary.sentinelPosition;
-}
-
-template <typename TRankDictionary>
-inline String<typename Size<SentinelRankDictionary<TRankDictionary, Sentinel> >::Type > 
-_getSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary)
-{
-    String<unsigned long> sentinelPositions;
-
-    for (unsigned i = 0; i < length(dictionary.sentinelPosition); ++i)
-        if (isBitSet(dictionary.sentinelPosition, i))
-            appendValue(sentinelPositions, i);
-    return sentinelPositions;
-}
-
-// ----------------------------------------------------------------------------
 // Function getFibre()
 // ----------------------------------------------------------------------------
 
