@@ -317,24 +317,23 @@ resize(SparseString<TFibreValueString, TSpec> & string,
     if (value != DefaultValue<SparseString<TFibreValueString, TSpec> >::VALUE)
     {
         TSize _length = length(getFibre(string, FibreIndicatorString()));
+        
         if (_length < size)
             resize(getFibre(string, FibreValueString()), length(getFibre(string, FibreValueString())) + (size - length), value, tag);
         else
             resize(getFibre(string, FibreValueString()), getRank(string, size), value, tag);
-        resize(getFibre(string, FibreIndicatorString()), size, 1, tag);            
+
+        resize(getFibre(string, FibreIndicatorString()), size, 1, tag);
     }
     return resize(getFibre(string, FibreIndicatorString()), size, 0);
 }
 
 template <typename TFibreValueString, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
-resize(SparseString<TFibreValueString, TSpec> & string,
-                   TSize const size,
-                   Tag<TExpand> tag)
+resize(SparseString<TFibreValueString, TSpec> & string, TSize const size, Tag<TExpand> tag)
 {
     return resize(getFibre(string, FibreIndicatorString()), size, 0, tag);
 }
-
 
 /**
 .Function.open
@@ -342,25 +341,25 @@ resize(SparseString<TFibreValueString, TSpec> & string,
 ...type:Class.SparseString
 */
 template <typename TFibreValueString, typename TSpec>
-inline bool open(
-    SparseString<TFibreValueString, TSpec> & sparseString,
-    const char * fileName,
-    int openMode)
+inline bool open(SparseString<TFibreValueString, TSpec> & sparseString, const char * fileName, int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".val");
-    if (!open(getFibre(sparseString, FibreValueString()), toCString(name), openMode)) // val = value string
-    {
-        return false;
-    }
-    name = fileName;    append(name, ".ind");   open(getFibre(sparseString, FibreIndicatorString()), toCString(name), openMode); // ind = indicator string
+
+    // val = value string
+    name = fileName;
+    append(name, ".val");
+    if (!open(getFibre(sparseString, FibreValueString()), toCString(name), openMode)) return false;
+
+    // ind = indicator string
+    name = fileName;
+    append(name, ".ind");
+    if (!open(getFibre(sparseString, FibreIndicatorString()), toCString(name), openMode)) return false;
+
     return true;
 }
 
 template <typename TFibreValueString, typename TSpec>
-inline bool open(
-    SparseString<TFibreValueString, TSpec> & sparseString,
-    const char * fileName)
+inline bool open(SparseString<TFibreValueString, TSpec> & sparseString, const char * fileName)
 {
     return open(sparseString, fileName, DefaultOpenMode<SparseString<TFibreValueString, TSpec> >::VALUE);
 }
@@ -383,26 +382,25 @@ inline bool open(
 ..include:seqan/index.h
 */
 template <typename TFibreValueString, typename TSpec>
-inline bool save(
-    SparseString<TFibreValueString, TSpec> const & sparseString,
-    const char * fileName)
+inline bool save(SparseString<TFibreValueString, TSpec> const & sparseString, const char * fileName)
 {
     return save(sparseString, fileName, DefaultOpenMode<SparseString<TFibreValueString, TSpec> >::VALUE);
 }
 
 template <typename TFibreValueString, typename TSpec>
-inline bool save(
-    SparseString<TFibreValueString, TSpec> const & sparseString,
-    const char * fileName,
-    int openMode)
+inline bool save(SparseString<TFibreValueString, TSpec> const & sparseString, const char * fileName, int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".val");
-    if (!save(getFibre(sparseString, FibreValueString()), toCString(name), openMode))
-    {
-        return false;
-    }
-    name = fileName;    append(name, ".ind");   save(getFibre(sparseString, FibreIndicatorString()), toCString(name), openMode);
+
+    name = fileName;
+    append(name, ".val");
+
+    if (!save(getFibre(sparseString, FibreValueString()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".ind");
+    if (!save(getFibre(sparseString, FibreIndicatorString()), toCString(name), openMode)) return false;
+
     return true;
 }
 // TODO(singer): setValue function

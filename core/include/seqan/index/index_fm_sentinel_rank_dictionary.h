@@ -636,6 +636,7 @@ inline bool open(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, co
 {
     if (!open(getFibre(dictionary, FibreRankDictionary()), fileName, openMode)) return false;
     if (!_openSentinelInformation(dictionary, fileName, openMode)) return false;
+    
     return true;
 }
 
@@ -673,16 +674,17 @@ inline bool _saveSentinelInformation(SentinelRankDictionary<TRankDictionary, Sen
                                      const char * fileName,
                                      int openMode)
 {
-    String<char> name;
-
     typedef typename Value<SentinelRankDictionary<TRankDictionary, Sentinel> >::Type TChar;
     typedef typename Fibre<SentinelRankDictionary<TRankDictionary, Sentinel>, FibreSentinelPosition>::Type TSentinelString;
+
+    String<char> name;
 
     String<Pair<TChar, TSentinelString, Pack> > sentinelValues;
     appendValue(sentinelValues, Pair<TChar, TSentinelString>(dictionary.sentinelSubstitute, dictionary.sentinelPosition));
     
-    name = fileName;    append(name, ".dr"); if (!save(sentinelValues, toCString(name), openMode)) return false;
-    return true;
+    name = fileName;
+    append(name, ".dr");
+    return save(sentinelValues, toCString(name), openMode);
 }
 
 template <typename TRankDictionary>
@@ -690,14 +692,21 @@ inline bool _saveSentinelInformation(SentinelRankDictionary<TRankDictionary, Sen
                                      const char * fileName,
                                      int openMode)
 {
+    typedef typename Value<SentinelRankDictionary<TRankDictionary, Sentinels> >::Type TChar;
+
     String<char> name;
 
-    typedef typename Value<SentinelRankDictionary<TRankDictionary, Sentinels> >::Type TChar;
     String<TChar> sentinelSub;
     appendValue(sentinelSub, dictionary.sentinelSubstitute);
 
-    name = fileName;    append(name, ".drs"); if(!save(sentinelSub, toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".drp"); if(!save(dictionary.sentinelPosition, toCString(name), openMode)) return false;
+    name = fileName;
+    append(name, ".drs");
+    if (!save(sentinelSub, toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".drp");
+    if (!save(dictionary.sentinelPosition, toCString(name), openMode)) return false;
+    
     return true;
 }
 

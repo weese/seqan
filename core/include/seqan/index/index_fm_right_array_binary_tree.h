@@ -227,8 +227,8 @@ computeRightArrayBinaryTree(genome);
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TBorderString, typename TPrefixSumTable, typename TIterSpec>
 inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                                        TBorderString & borderString,
-                                        TPrefixSumTable & pst)
+                                       TBorderString & borderString,
+                                       TPrefixSumTable & pst)
 {
     do
     {
@@ -252,7 +252,7 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TPrefixSumTable>
 inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                                        TPrefixSumTable & pst)
+                                       TPrefixSumTable & pst)
 {
     typedef RightArrayBinaryTree<TChar, TSpec> TRightArrayBinaryTree;
     TRightArrayBinaryTree & waveletTreeStructure = container(it);
@@ -357,8 +357,8 @@ _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size, Tag<TExp
 template <typename TChar, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<RightArrayBinaryTree<TChar, TSpec> >::Type
 _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size,
-                   typename Value<typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type>::Type value,
-                   Tag<TExpand> tag)
+        typename Value<typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type>::Type value,
+        Tag<TExpand> tag)
 {
     return resize(treeStructure.treeVertices, size, value, tag);
 }
@@ -385,24 +385,27 @@ _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size,
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec>
-inline bool open(
-    RightArrayBinaryTree<TChar, TSpec> & treeStructure,
-    const char * fileName,
-    int openMode)
+inline bool open(RightArrayBinaryTree<TChar, TSpec> & treeStructure, const char * fileName, int openMode)
 {
     String<char> name;
 
+    name = fileName;
+    append(name, ".rtv");
+    if (!open(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
+
     String<TChar> minString;
-    name = fileName;    append(name, ".rtv");   if(!open(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".rtm");   if(!open(minString, toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".rtm");
+    if (!open(minString, toCString(name), openMode)) return false;
+
     treeStructure.minCharValue = minString[0];
+
     return true;
 }
 
 template <typename TChar, typename TSpec>
-inline bool open(
-    RightArrayBinaryTree<TChar, TSpec> & treeStructure,
-    const char * fileName)
+inline bool open(RightArrayBinaryTree<TChar, TSpec> & treeStructure, const char * fileName)
 {
     return open(treeStructure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }
@@ -429,24 +432,26 @@ inline bool open(
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec>
-inline bool save(
-    RightArrayBinaryTree<TChar, TSpec> const & treeStructure,
-    const char * fileName,
-    int openMode)
+inline bool save(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, const char * fileName, int openMode)
 {
     String<char> name;
 
+    name = fileName;
+    append(name, ".rtv");
+    if (!save(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
+
     String<TChar> minString;
     appendValue(minString, treeStructure.minCharValue);
-    name = fileName;    append(name, ".rtv");   if (!save(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".rtm");   if (!save(minString, toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".rtm");
+    if (!save(minString, toCString(name), openMode)) return false;
+
     return true;
 }
 
 template <typename TChar, typename TSpec>
-inline bool save(
-    RightArrayBinaryTree<TChar, TSpec> const & treeStructure,
-    const char * fileName)
+inline bool save(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, const char * fileName)
 {
     return save(treeStructure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }

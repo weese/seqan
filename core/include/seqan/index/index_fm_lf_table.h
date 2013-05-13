@@ -328,15 +328,10 @@ inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fileName, int openMode)
 {
-    String<char> name;
-    name = fileName; 
-    if (!open(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
-    {
-        return false;
-    }
-    name = fileName;    open(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
-    return true;
+    if (!open(getFibre(lfTable, FibreOccTable()), fileName, openMode)) return false;
+    if (!open(getFibre(lfTable, FibrePrefixSumTable()), fileName, openMode)) return false;
 
+    return true;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
@@ -366,14 +361,9 @@ inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fil
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool save(LfTable<TOccTable, TPrefixSumTable> const & lfTable, const char * fileName, int openMode)
 {
-    String<char> name;
+    if (!save(getFibre(lfTable, FibreOccTable()), fileName, openMode)) return false;
+    if (!save(getFibre(lfTable, FibrePrefixSumTable()), fileName, openMode)) return false;
 
-    name = fileName;
-    if (!save(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
-    {
-        return false;
-    }
-    name = fileName;    save(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
     return true;
 }
 

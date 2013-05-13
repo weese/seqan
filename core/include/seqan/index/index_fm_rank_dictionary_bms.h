@@ -341,9 +341,7 @@ inline bool save(RankDictionary<SequenceBitMask<TValue> > const & dictionary, co
     String<char> name = fileName;
     append(name, ".rd");
 
-    if (!save(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
-    
-    return true;
+    return save(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode);
 }
 
 template <typename TValue>

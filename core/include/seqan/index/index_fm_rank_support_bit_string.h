@@ -719,39 +719,44 @@ inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool val
 */
 
 template <typename TSpec>
-inline bool open(
-    RankSupportBitString<TSpec> & string,
-    const char * fileName,
-    int openMode)
+inline bool open(RankSupportBitString<TSpec> & string, const char * fileName, int openMode)
 {
     typedef typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type TValue;
+
+    String<char> name;
+
+    name = fileName;
+    append(name, ".bit");
+    if (!open(getFibre(string, FibreBits()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".bl");
+    if (!open(getFibre(string, FibreBlocks()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".sbl");
+    if (!open(getFibre(string, FibreSuperBlocks()), toCString(name), openMode)) return false;
+
     String<TValue> lengthString;
     resize(lengthString, 1, Exact());
 
-    String<char> name;
-    name = fileName;    append(name, ".bit");
-    if (!open(getFibre(string, FibreBits()), toCString(name), openMode))
-        return false;
+    name = fileName;
+    append(name, ".len");
+    if (!open(lengthString, toCString(name), openMode)) return false;
 
-    name = fileName;    append(name, ".bl");    open(getFibre(string, FibreBlocks()), toCString(name), openMode);
-    name = fileName;    append(name, ".sbl");   open(getFibre(string, FibreSuperBlocks()), toCString(name), openMode);
-    name = fileName;    append(name, ".len");    open(lengthString, toCString(name), openMode);
     string._length = lengthString[0];
+
     return true;
 }
 
 template <typename TSpec>
-inline bool open(
-    RankSupportBitString<TSpec> & string,
-    const char * fileName)
+inline bool open(RankSupportBitString<TSpec> & string, const char * fileName)
 {
     return open(string, fileName, OPEN_RDONLY);
 }
 
 template <typename TSpec, typename TSetSpec>
-inline bool open(
-    StringSet<RankSupportBitString<TSpec>, TSetSpec> & strings,
-    const char * fileName)
+inline bool open(StringSet<RankSupportBitString<TSpec>, TSetSpec> & strings, const char * fileName)
 {
     return open(strings, fileName, OPEN_RDONLY);
 }
@@ -778,35 +783,43 @@ inline bool open(
 ..include:seqan/index.h
 */
 template <typename TSpec>
-inline bool save(
-    RankSupportBitString<TSpec> const & string,
-    const char * fileName,
-    int openMode)
+inline bool save(RankSupportBitString<TSpec> const & string, const char * fileName, int openMode)
 {
     typedef typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type TValue;
+
+    String<char> name;
+
     String<TValue> lengthString;
     resize(lengthString, 1, Exact());
     lengthString[0] = length(string);
-    String<char> name;
-    name = fileName;    append(name, ".len");   save(lengthString, toCString(name), openMode);
-    name = fileName;    append(name, ".bit");   save(getFibre(string, FibreBits()), toCString(name), openMode);
-    name = fileName;    append(name, ".bl");    save(getFibre(string, FibreBlocks()), toCString(name), openMode);
-    name = fileName;    append(name, ".sbl");   save(getFibre(string, FibreSuperBlocks()), toCString(name), openMode);
+
+    name = fileName;
+    append(name, ".len");
+    if (!save(lengthString, toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".bit");
+    if (!save(getFibre(string, FibreBits()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".bl");
+    if (!save(getFibre(string, FibreBlocks()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".sbl");
+    if (!save(getFibre(string, FibreSuperBlocks()), toCString(name), openMode)) return false;
+
     return true;
 }
 
 template <typename TSpec>
-inline bool save(
-    RankSupportBitString<TSpec> const & string,
-    const char * fileName)
+inline bool save(RankSupportBitString<TSpec> const & string, const char * fileName)
 {
     return save(string, fileName, DefaultOpenMode<RankSupportBitString<TSpec> >::VALUE);
 }
 
 template <typename TSpec, typename TSetSpec>
-inline bool save(
-    StringSet<RankSupportBitString<TSpec>, TSetSpec> const & strings,
-    const char * fileName)
+inline bool save(StringSet<RankSupportBitString<TSpec>, TSetSpec> const & strings, const char * fileName)
 {
     return save(strings, fileName, DefaultOpenMode<RankSupportBitString<TSpec> >::VALUE);
 }

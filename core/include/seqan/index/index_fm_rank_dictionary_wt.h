@@ -612,12 +612,15 @@ template <typename TValue>
 inline bool save(RankDictionary<WaveletTree<TValue> > const & dictionary, const char * fileName, int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".wtc");   
+
+    name = fileName;
+    append(name, ".wtc");
     if (!save(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
-    
-    name = fileName;    append(name, ".wts");   
+
+    name = fileName;
+    append(name, ".wts");
     if (!save(getFibre(dictionary, FibreTreeStructure()), toCString(name), openMode)) return false;
-    
+
     return true;
 }
 
