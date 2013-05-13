@@ -32,10 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-// TODO(singer): sentinel
-
-#ifndef INDEX_FM_Sentinel_RANK_DICTIONARY_H_
-#define INDEX_FM_Sentinel_RANK_DICTIONARY_H_
+#ifndef INDEX_FM_SENTINEL_RANK_DICTIONARY_H_
+#define INDEX_FM_SENTINEL_RANK_DICTIONARY_H_
 
 namespace seqan {
 
@@ -547,6 +545,17 @@ inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary,
     createRankDictionary(getFibre(dictionary, FibreRankDictionary()), text);
 }
 
+template <typename TRankDictionary, typename TSpec, typename TPrefixSumTable, typename TText, typename TSentinelSub>
+inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDictionary, TSpec>, TPrefixSumTable> & lfTable,
+                              TText const & text,
+                              TSentinelSub const & sentinelSub)
+{
+    setSentinelSubstitute(getFibre(lfTable, FibreOccTable()), sentinelSub);
+//    setSentinelPosition(getFibre(lfTable, FibreOccTable()), sentinelPos);
+
+    createRankDictionary(lfTable, text);
+}
+
 // ----------------------------------------------------------------------------
 // Function open()
 // ----------------------------------------------------------------------------
@@ -709,5 +718,5 @@ inline bool save(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, co
 }
 
 }
-#endif  // INDEX_FM_Sentinel_RANK_DICTIONARY_H_
+#endif  // INDEX_FM_SENTINEL_RANK_DICTIONARY_H_
 
