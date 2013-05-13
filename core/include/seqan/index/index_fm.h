@@ -568,21 +568,19 @@ inline bool _indexCreateLfTable(Index<TText, FMIndex<TIndexSpec, TSpec> > & inde
     TPrefixSumTable & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
     TOccTable & occTable = getFibre(lfTable, FibreOccTable());
 
-	createPrefixSumTable(prefixSumTable, text);
+    createPrefixSumTable(prefixSumTable, text);
 
-	TAlphabet sentinelSub = determineSentinelSubstitute(prefixSumTable);
+    TAlphabet sentinelSub = determineSentinelSubstitute(prefixSumTable);
 
-    setSentinelSubstitute(occTable, sentinelSub);
+    String<TAlphabet> bwt;
+    resize(bwt, index.bwtLength, Exact());
+    _createBwt(bwt, getFibre(occTable, FibreSentinelPosition()), text, sa, sentinelSub);
 
-	String<TAlphabet> bwt;
-	resize(bwt, index.bwtLength, Exact());
-	_createBwt(bwt, getFibre(occTable, FibreSentinelPosition()), text, sa, sentinelSub);
+    createSentinelRankDictionary(lfTable, bwt, sentinelSub);
 
-    createSentinelRankDictionary(occTable, bwt);
+    insertSentinels(prefixSumTable, countSequences(text));
 
-	insertSentinels(prefixSumTable, countSequences(text));
-
-	return true;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
