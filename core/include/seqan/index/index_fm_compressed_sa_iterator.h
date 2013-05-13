@@ -41,11 +41,19 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
-struct FibreSparseString_;
-typedef Tag<FibreSparseString_> const FibreSparseString;
-
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
+
+// ============================================================================
+// Tags
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Tag FibreSparseString
+// ----------------------------------------------------------------------------
+
+struct FibreSparseString_;
+typedef Tag<FibreSparseString_> const FibreSparseString;
 
 // ============================================================================
 // Metafunctions
