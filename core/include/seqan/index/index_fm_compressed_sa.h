@@ -400,9 +400,7 @@ length(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA)
 */
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type>::Type
-resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
-                   TSize size,
-                   Tag<TExpand> tag)
+resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSize size, Tag<TExpand> tag)
 {
     return resize(getFibre(compressedSA, FibreSparseString()), size, tag);
 }
@@ -417,25 +415,13 @@ resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
 ...type:Class.CompressedSA
 */
 template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool open(
-    CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
-    const char * fileName,
-    int openMode)
+inline bool open(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, const char * fileName, int openMode)
 {
-    String<char> name;
-    name = fileName;
-    if (!open(getFibre(compressedSA, FibreSparseString()), toCString(name), openMode))
-    {
-        return false;
-    }
-    return true;
-
+    return open(getFibre(compressedSA, FibreSparseString()), fileName, openMode);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool open(
-    CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
-    const char * fileName)
+inline bool open(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, const char * fileName)
 {
     return open(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
 }
@@ -462,24 +448,13 @@ inline bool open(
 ..include:seqan/index.h
 */
 template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool save(
-    CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA,
-    const char * fileName,
-    int openMode)
+inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName, int openMode)
 {
-    String<char> name;
-    name = fileName;
-    if (!save(getFibre(compressedSA, FibreSparseString()), toCString(name), openMode))
-    {
-        return false;
-    }
-    return true;
+    return save(getFibre(compressedSA, FibreSparseString()), fileName, openMode);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool save(
-    CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA,
-    const char * fileName)
+inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName)
 {
     return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
 }
