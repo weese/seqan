@@ -44,6 +44,9 @@ namespace seqan {
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
 
+struct FibreLfTable_;
+typedef Tag<FibreLfTable_> const        FibreLfTable;
+
 // ============================================================================
 // Tags
 // ============================================================================
@@ -81,6 +84,18 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreSparseString>
 {
     typedef TSparseString Type;
+};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLfTable>
+{
+    typedef TLfTable Type;
+};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreLfTable>
+{
+    typedef TLfTable Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -139,6 +154,7 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 ..remarks:The compressed suffix array can only be used with the FM index.
 ..include:seqan/index.h
 */
+// TODO(esiragusa): Remove <typename TSparseString, typename TLfTable> from CompressedSa
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA
 {
@@ -187,7 +203,7 @@ public:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function _addGapDistance
+// Function _addGapDistance()
 // ----------------------------------------------------------------------------
 
 template <typename TPos, typename TOffSet>
@@ -213,6 +229,7 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 inline void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     clear(getFibre(compressedSA, FibreSparseString()));
+//    clear(getFibre(compressedSA, FibreLfTable()));
 }
 
 // ----------------------------------------------------------------------------
@@ -226,6 +243,7 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 inline bool empty(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     return empty(getFibre(compressedSA, FibreSparseString()));
+    //    && empty(getFibre(compressedSA, FibreLfTable()));
 }
 
 // ----------------------------------------------------------------------------
@@ -274,10 +292,10 @@ inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
 ..include:seqan/index.h
 */
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression, typename TSize>
-void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, 
-        TSA const & sa,
-        TCompression const compressionFactor, 
-        TSize offset)
+void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+                        TSA const & sa,
+                        TCompression const compressionFactor, 
+                        TSize offset)
 {
     typedef CompressedSA<TSparseString, TLfTable, TSpec>            TCompressedSA;
     typedef typename Size<TSA>::Type                                TSASize;
@@ -317,7 +335,9 @@ void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression>
-void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA, TCompression const compressionFactor)
+void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+                        TSA const & completeSA,
+                        TCompression const compressionFactor)
 {
     createCompressedSa(compressedSA, completeSA, compressionFactor, 0);
 }
@@ -343,6 +363,7 @@ Index< String<char> > index_esa("tobeornottobe");
 
 String<char> & text = getFibre(indexEsa, EsaText());
 */
+
 template <typename TSparseString, typename TLfTable, typename TSpec>
 inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type const &
 getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreSparseString)
@@ -352,29 +373,44 @@ getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, Fibr
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
 inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec>&compressedSA, FibreSparseString)
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreSparseString)
 {
     return compressedSA.sparseString;
 }
 
-// ----------------------------------------------------------------------------
-// Function _getNextPos()
-// ----------------------------------------------------------------------------
-
-// This functions computes the position in the suffix array of text[sa[pos] - 1]
-// iff the current position is not present in the compressed suffix array.
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
+template <typename TSparseString, typename TLfTable, typename TSpec>
+inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLfTable>::Type const &
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreLfTable)
 {
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
-    TIndicatorString const & indicatorString = compressedSA.sparseString.indicatorString;
+    return value(compressedSA.lfTable);
+}
 
-    if (isBitSet(indicatorString, pos))
-    {
-        return true;
-    }
-    pos = lfMapping(*compressedSA.lfTable, pos);
-    return false;
+template <typename TSparseString, typename TLfTable, typename TSpec>
+inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLfTable>::Type &
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreLfTable)
+{
+    return value(compressedSA.lfTable);
+}
+
+// ----------------------------------------------------------------------------
+// Function setLfTable()
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): setLfTable() could be renamed as setFibre(csa, fibre, FibreLfTable()) or setHost(csa, fibre)
+
+/**
+.Function.setLfTable
+..summary:Set the LfTable of the compressed suffix array.
+..signature:setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> compressedSa, TLfTable & lfTable)
+..param.CompressedSA<TSparseString, TLfTable, TSpec>:The compressed suffix array.
+...type:Class.CompressedSA
+..param.lfTable
+...type:Class.LfTable
+..include:seqan/index.h
+*/
+template <typename TSparseString, typename TLfTable, typename TSpec>
+void setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TLfTable & lfTable)
+{
+    setValue(compressedSA.lfTable, lfTable);
 }
 
 // ----------------------------------------------------------------------------
@@ -403,6 +439,71 @@ inline typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>
 resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSize size, Tag<TExpand> tag)
 {
     return resize(getFibre(compressedSA, FibreSparseString()), size, tag);
+}
+
+// ----------------------------------------------------------------------------
+// Function value()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.CompressedSA#value
+..summary:Returns the value stored at a specified position in the compressed suffix-array.
+..signature:value(compressedSA, pos)
+..param.compressedSA:The compressed suffix array to access.
+...type:Class.CompressedSA
+..param.pos:Position at which to access the suffix array.
+...type:Concept.UnsignedIntegerConcept
+..remarks:Note that the compressed suffix array is read only. Therefore a const reference is return by
+this function.
+*/
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+inline typename Value<TSparseString>::Type
+value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
+{
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+
+    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
+
+    TPos counter = 0;
+    for (; !isBitSet(indicatorString, pos); ++counter)
+        pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+
+    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
+}
+
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+inline typename Value<TSparseString>::Type const
+value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos pos)
+{
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+
+    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
+
+    TPos counter = 0;
+    for (; !isBitSet(indicatorString, pos); ++counter)
+        pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+
+    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
+}
+
+// ----------------------------------------------------------------------------
+// Function _getNextPos()
+// ----------------------------------------------------------------------------
+
+// This functions computes the position in the suffix array of text[sa[pos] - 1]
+// iff the current position is not present in the compressed suffix array.
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
+{
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+
+    TIndicatorString const & indicatorString = compressedSA.sparseString.indicatorString;
+
+    if (isBitSet(indicatorString, pos)) return true;
+
+    pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+
+    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -451,82 +552,13 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName, int openMode)
 {
     return save(getFibre(compressedSA, FibreSparseString()), fileName, openMode);
+//  save(getFibre(compressedSA, FibreLfTable()), fileName, openMode);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
 inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName)
 {
     return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
-}
-
-// ----------------------------------------------------------------------------
-// Function setLfTable()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setLfTable
-..summary:Set the LfTable of the compressed suffix array.
-..signature:setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> compressedSa, TLfTable & lfTable)
-..param.CompressedSA<TSparseString, TLfTable, TSpec>:The compressed suffix array.
-...type:Class.CompressedSA
-..param.lfTable
-...type:Class.LfTable
-..include:seqan/index.h
-*/
-template <typename TSparseString, typename TLfTable, typename TSpec>
-void setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TLfTable & lfTable)
-{
-    compressedSA.lfTable = &lfTable;
-}
-
-// ----------------------------------------------------------------------------
-// Function value()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.CompressedSA#value
-..summary:Returns the value stored at a specified position in the compressed suffix-array.
-..signature:value(compressedSA, pos)
-..param.compressedSA:The compressed suffix array to access.
-...type:Class.CompressedSA
-..param.pos:Position at which to access the suffix array.
-...type:Concept.UnsignedIntegerConcept
-..remarks:Note that the compressed suffix array is read only. Therefore a const reference is return by
-this function.
-*/
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline typename Value<TSparseString>::Type
-value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
-{
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
-
-    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
-    TPos counter = 0;
-    while (!isBitSet(indicatorString, pos))
-    {
-        pos = lfMapping(*compressedSA.lfTable, pos);
-        ++counter;
-    }
-
-    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
-}
-
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline typename Value<TSparseString>::Type const
-value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos pos)
-{
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
-
-    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
-    TPos counter = 0;
-
-    while (!isBitSet(indicatorString, pos))
-    {
-        pos = lfMapping(*compressedSA.lfTable, pos);
-        ++counter;
-    }
-
-    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
 }
 
 }
