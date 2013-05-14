@@ -212,8 +212,8 @@ smaller characters in a given text.
 template <typename TChar, typename TSpec = void>
 class PrefixSumTable
 {
-    typedef typename Fibre<PrefixSumTable, FibreEntries>::Type TEntries;
-    typedef typename Value<TEntries>::Type TEntry;
+    typedef typename Fibre<PrefixSumTable, FibreEntries>::Type  TEntries;
+    typedef typename Value<TEntries>::Type                      TEntry;
 
 public:
     TEntries entries;
@@ -253,12 +253,12 @@ public:
 // Operator ==
 // ----------------------------------------------------------------------------
 
-inline bool operator==(PrefixSumTable const & other)
+    inline bool operator==(PrefixSumTable const & other)
     {
         return entries == other.entries;
     }
 
-inline bool operator==(PrefixSumTable const & other) const
+    inline bool operator==(PrefixSumTable const & other) const
     {
         return entries == other.entries;
     }
@@ -404,8 +404,7 @@ inline unsigned getCharacterPosition(TDummy const & /*tag*/, TChar character)
 template <typename TChar, typename TSpec, typename TChar2>
 inline unsigned getCharacterPosition(PrefixSumTable<TChar, TSpec> const & /*tag*/, TChar2 character)
 {
-    // NOTE(esiragusa): This cast might cause problems with compiler optimizations.
-    return ordValue(static_cast<TChar>(character));
+    return ordValue(convert<TChar>(character));
 }
 
 // ----------------------------------------------------------------------------
@@ -428,8 +427,7 @@ template <typename TChar, typename TSpec, typename TPos>
 inline typename CharacterValue<PrefixSumTable<TChar, TSpec> const>::Type
 getCharacter(PrefixSumTable<TChar, TSpec> const & /*tag*/, TPos const pos)
 {
-    // NOTE(esiragusa): This cast might cause problems with compiler optimizations.
-    return static_cast<TChar>(pos);
+    return convert<TChar>(pos);
 }
 
 // ----------------------------------------------------------------------------
