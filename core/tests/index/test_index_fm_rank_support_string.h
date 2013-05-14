@@ -120,7 +120,9 @@ SEQAN_DEFINE_TEST(test_rss_resize)
 // ==========================================================================
 
     TRankSupportString rss;
-    reserve(rss, 1);
+    resize(rss, 1);
+    clear(back(rss).block);
+    clear(back(rss).sblock);
 
     std::cout << "length(RankSupportString): " << length(rss) << std::endl;
     std::cout << "capacity(RankSupportString): " << capacity(rss) << std::endl;
@@ -129,7 +131,15 @@ SEQAN_DEFINE_TEST(test_rss_resize)
 
     std::cout << "length(RankSupportString): " << length(rss) << std::endl;
     std::cout << "capacity(RankSupportString): " << capacity(rss) << std::endl;
+    std::cout << std::endl;
 
+// ==========================================================================
+
+    std::cout << "getRank(A, 5): " << getRank(rss, 5u, Dna('A')) << std::endl;
+    std::cout << "getRank(A, 31): " << getRank(rss, 31u, Dna('A')) << std::endl;
+    std::cout << "getRank(G, 9): " << getRank(rss, 9u, Dna('G')) << std::endl;
+
+    std::cout << std::endl;
 }
 
 #endif  // TEST_INDEX_FM_RANK_SUPPORT_STRING_H_

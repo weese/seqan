@@ -82,6 +82,40 @@ struct RankSupport
 // Functions
 // ============================================================================
 
+template <typename TText, typename TSpec, typename TPos, typename TChar>
+inline typename Size<TText>::Type
+_getRankInSuperBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPos, TChar c)
+{
+    return me[sblockPos].sblock[ordValue(c)];
+}
+
+template <typename TText, typename TSpec, typename TPos, typename TChar>
+inline typename Size<TText>::Type
+_getRankInBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPos, TPos blockPos, TChar c)
+{
+    typename Size<TText>::Type rankInBlock = 0;
+
+    // TODO(esiragusa): Use popCount().
+    for (unsigned i = 0; i < blockPos; ++i)
+        rankInBlock += isEqual(me[sblockPos].block[i], c);
+
+    return rankInBlock;
+}
+
+template <typename TText, typename TSpec, typename TPos, typename TChar>
+inline typename Size<TText>::Type
+getRank(String<RankSupport<TText>, TSpec> const & me, TPos pos, TChar c)
+{
+    typedef typename Value<TText>::Type     TValue;
+    typedef typename Size<TText>::Type      TSize;
+
+    // TODO(esiragusa): Use bit shifts to derive positions.
+    TSize sblockPos = pos / BlockSize<TValue>::VALUE;
+    TSize blockPos = pos % BlockSize<TValue>::VALUE;
+
+    return _getRankInSuperBlock(me, sblockPos, c) + _getRankInBlock(me, sblockPos + 1, blockPos, c);
+}
+
 }
 
 
