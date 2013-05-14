@@ -82,6 +82,7 @@ add_executable (test_index_fm
 			    test_index_fm_prefix_sum_table.h
 			    test_index_fm_rank_support_bit_string_iterator.h
 			    test_index_fm_rank_support_bit_string.h
+			    test_index_fm_rank_support_string.h
 			    test_index_fm_right_array_binary_tree_iterator.h
 			    test_index_fm_right_array_binary_tree.h
 			    test_index_fm_sparse_string.h
