@@ -116,5 +116,42 @@ SEQAN_DEFINE_TEST(test_rss_resize)
     std::cout << std::endl;
 }
 
+SEQAN_DEFINE_TEST(test_rss_getrank)
+{
+    typedef Dna                                         TAlphabet;
+    typedef Alloc<Nothing>                              TTextSpec;
+
+    typedef String<TAlphabet, TTextSpec>                TText;
+    typedef RankSupport<TText>                          TRankSupport;
+    typedef String<TRankSupport>                        TRankSupportString;
+
+    typedef typename Size<TText>::Type                  TTextSize;
+    typedef typename Iterator<TText>::Type              TTextIterator;
+    typedef typename ValueSize<TAlphabet>::Type         TAlphabetSize;
+    typedef String<TTextSize>                           TRankMap;
+
+    TAlphabetSize alphabetSize = ValueSize<TAlphabet>::VALUE;
+
+    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
+
+    TRankSupportString rss;
+    fillRankSupportString(rss, text);
+
+    TRankMap rank;
+    resize(rank, alphabetSize, 0);
+
+    // Scan the text.
+    TTextIterator textBegin = begin(text, Standard());
+    TTextIterator textEnd = end(text, Standard());
+    for (TTextIterator textIt = textBegin; textIt != textEnd; ++textIt)
+    {
+        // Check the rank for all alphabet symbols.
+        for (TAlphabetSize c = 0; c < alphabetSize; ++c)
+            SEQAN_ASSERT_EQ(rank[c], getRank(rss, textIt - textBegin, TAlphabet(c)));
+
+        // Update the naive rank.
+        rank[ordValue(value(textIt))]++;
+    }
+}
 #endif  // TEST_INDEX_FM_RANK_SUPPORT_STRING_H_
 
