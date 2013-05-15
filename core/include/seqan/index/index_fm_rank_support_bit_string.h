@@ -69,9 +69,9 @@ struct FibreBits_;
 struct FibreBlocks_;
 struct FibreSuperBlocks_;
 
-typedef Tag<FibreBits_> const           FibreBits;         
-typedef Tag<FibreBlocks_> const         FibreBlocks;      
-typedef Tag<FibreSuperBlocks_> const    FibreSuperBlocks; 
+typedef Tag<FibreBits_> const           FibreBits;
+typedef Tag<FibreBlocks_> const         FibreBlocks;
+typedef Tag<FibreSuperBlocks_> const    FibreSuperBlocks;
 
 typedef FibreBits           RankSupportBitStringBits;
 typedef FibreBlocks         RankSupportBitStringBlocks;
@@ -168,33 +168,14 @@ struct RankSupportBitString
     {}
 
     // TODO(singer): Use concept sequence when available
-    template <typename TValue, typename TStringSpec>
-    RankSupportBitString(String<TValue, TStringSpec> const & input) :
-        _length(length(input))
+    template <typename TText>
+    RankSupportBitString(TText const & text) :
+        _length(length(text))
     {
-        typedef typename Iterator<String<TValue, TStringSpec> const>::Type TIter_;
-
-        resize(*this, _length, Exact());
-        typename Position<RankSupportBitString>::Type i = 0;
-        for (TIter_ it = begin(input, Standard()); it != end(input, Standard()); ++it, ++i)
-            setBitTo(*this, i, getValue(it));
-        _updateRanks(*this);
-    }
-    
-    template <typename THost, typename TStringSpec>
-    RankSupportBitString(Segment<THost, TStringSpec> const & input) :
-        _length(length(input))
-    {
-        typedef typename Iterator<Segment<THost, TStringSpec> const>::Type TIter_;
-
-        resize(*this, _length, Exact());
-        typename Position<RankSupportBitString>::Type i = 0;
-        for (TIter_ it = begin(input, Standard()); it != end(input, Standard()); ++it, ++i)
-            setBitTo(*this, i, getValue(it));
-        _updateRanks(*this);
+        assign(*this, text);
     }
 
-    inline bool operator==(const RankSupportBitString & other) const
+    inline bool operator==(RankSupportBitString const & other) const
     {
         return _length == other._length &&
                bits == other.bits &&
@@ -206,157 +187,6 @@ struct RankSupportBitString
 // ============================================================================
 // Functions
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Function appendValue()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.RankSupportBitString#appendValue:
-..signature:appendValue(target, value)
-..cat:Index
-..summary:Appends a value to a container.
-..param.target:A container.
-...type:Class.RankSupportBitString
-..param.value:Value that is appended to $target$.
-...type:Concept.UnsignedIntegerConcept
-...type:nolink:bool
-...remarks:If the value is different from 0 it is interpreted as 1.
-..include:seqan/sequence.h
-*/
-template <typename TSpec>
-inline void appendValue(RankSupportBitString<TSpec> & bitString, bool bit)
-{
-    typename Size<RankSupportBitString<TSpec> >::Type len = length(bitString);
-    resize(bitString, len + 1);
-    setBitTo(bitString, len, bit);
-    _updateLastRank(bitString); 
-}
-
-// ----------------------------------------------------------------------------
-// Function clear()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.clear
-..param.object:
-...type:Class.RankSupportBitString
-*/
-template <typename TSpec>
-inline void clear(RankSupportBitString<TSpec> & bitString)
-{
-    clear(bitString.bits);
-    clear(bitString.blocks);
-    clear(bitString.superBlocks);
-    bitString._length = 0;
-}
-
-// ----------------------------------------------------------------------------
-// Function _getRankInBlock()
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
-_getRankInBlock(RankSupportBitString<TSpec> const & bitString, TPos const pos)
-{
-   typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type     TFibreBits;
-    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
-
-    TFibreBitsValue const mask = ((TFibreBitsValue)2u << _getPosInBlock(bitString, pos)) - 1;
-    return popCount(bitString.bits[_getBlockPos(bitString, pos)] & mask);
-}
-
-// ----------------------------------------------------------------------------
-// Function _getSuperBlockPos()
-// ----------------------------------------------------------------------------
-
-// This function returns the number of bits set in a block until a specified position
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
-_getSuperBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type      TFibreBits;
-    typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type    TFibrelocks;
-    typedef typename Value<TFibreBits>::Type                            TFibreBitsValue;
-    typedef typename Value<TFibrelocks>::Type                             TFibreBlocksValue;
-
-    TFibreBlocksValue const _bitsPerValue = BitsPerValue<TFibreBitsValue>::VALUE;
-    return pos / (_bitsPerValue * _bitsPerValue);
-}
-
-// ----------------------------------------------------------------------------
-// Function getRank()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getRank
-..summary:Returns the rank (the number of bits set from the start of the bit string) of a specified position.
-..signature:getRank(bitString, pos)
-..param.bitString:The bit string.
-...type:Class.RankSupportBitString
-..param.pos:Position of a bit.
-..returns:Value type of the super block fibre (default unsigned long).
-..include:seqan/index.h
-..example.code:
-*/
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
-getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
-{
-    return bitString.superBlocks[_getSuperBlockPos(bitString, pos)]
-         + bitString.blocks[_getBlockPos(bitString, pos)]
-         + _getRankInBlock(bitString, pos);
-}
-
-// ----------------------------------------------------------------------------
-// Function isBitSet()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.isSetBit
-..summary:Returns whether the bit with the given index is set to 1.
-..signature:isSetBit(bitString, pos)
-..param.bitString:The bit string.
-...type:Class.RankSupportBitString
-..param.pos:Position of the bit.
-..returns:Returns whether a specified bit is set or not.
-..include:seqan/index.h
-..example.code:
-String<Dna5> genome = "ACGTACGT";
-
-RankSupportBitString<> bitString;
-resize(bitString, length(genome));
-...
-mark all 'a's
-...
-
-for (unsigned i = 0; i < length(bitString); ++i)
-    if(isSetBit(bitString, i))
-        std::cout << "a found at: " << i << std::endl;
-*/
-
-template <typename TSpec, typename TPos>
-inline bool isBitSet(RankSupportBitString<TSpec> const & bitString, TPos const pos)
-{
-    return isBitSet(bitString.bits[_getBlockPos(bitString, pos)], _getPosInBlock(bitString, pos));
-}
-
-// ----------------------------------------------------------------------------
-// Function _getBlockPos()
-// ----------------------------------------------------------------------------
-
-// This function returns the position in the block string of the corresponding block.
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
-_getBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type  TFibreBits;
-    typedef typename Value<TFibreBits>::Type                        TFibreBitsValue;
-
-    return pos / BitsPerValue<TFibreBitsValue>::VALUE;
-}
 
 // ----------------------------------------------------------------------------
 // Function getFibre()
@@ -422,155 +252,21 @@ getFibre(const RankSupportBitString<TSpec>&string, const FibreSuperBlocks)
 }
 
 // ----------------------------------------------------------------------------
-// Function _getPosInBlock()
-// ----------------------------------------------------------------------------
-
-// This function returns the position of a specified bit within a block.
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreBlocks>::Type>::Type
-_getPosInBlock(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type  TFibreBits;
-    typedef typename Value<TFibreBits>::Type                        TFibreBitsValue;
-
-    return pos % BitsPerValue<TFibreBitsValue>::VALUE;
-}
-
-// ----------------------------------------------------------------------------
-// Function length()
+// Function clear()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.length
+.Function.clear
 ..param.object:
 ...type:Class.RankSupportBitString
 */
 template <typename TSpec>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
-length(RankSupportBitString<TSpec> const & bitString)
+inline void clear(RankSupportBitString<TSpec> & bitString)
 {
-    return bitString._length;
-}
-
-
-// ----------------------------------------------------------------------------
-// Function _updateRanksImpl()
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TPos>
-inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
-{
-    typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
-    typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type        TFibreBlocks;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
-    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
-    typedef typename Value<TFibreBlocks>::Type                              TFibreBlocksValue;
-    typedef typename Value<TFibreSuperBlocks>::Type                         TFibreSuperBlocksValue;
-
-    if (!empty(bitString))
-    {
-        TFibreSuperBlocksValue i = _getBlockPos(bitString, pos);
-
-        TFibreBlocksValue _blockSum;
-        if (i == 0)
-            _blockSum = 0;
-        else
-            _blockSum = bitString.blocks[i - 1];
-
-        TFibreSuperBlocksValue _sBlockSum;
-        TFibreSuperBlocksValue superBlockPos = _getSuperBlockPos(bitString, pos);
-        if (superBlockPos != 0)
-        {
-            _sBlockSum = bitString.superBlocks[superBlockPos];
-        }
-        else
-            _sBlockSum = 0;
-
-        if (i == 0)
-            ++i;
-        for (; i < length(bitString.bits); ++i)
-        {
-            _blockSum += popCount(bitString.bits[i - 1]);
-            if ((i % BitsPerValue<TFibreBitsValue>::VALUE) == 0u)
-            {
-                _sBlockSum += _blockSum;
-                bitString.superBlocks[++superBlockPos] = _sBlockSum;
-                _blockSum = 0;
-            }
-            bitString.blocks[i] = _blockSum;
-       }
-    }
-}
-
-
-// ----------------------------------------------------------------------------
-// Function _updateRanks()
-// ----------------------------------------------------------------------------
-
-/*
-.Function._updateRanks
-..summary:Adds the block and super block information to the bit string.
-..signature:_updateRanks(bitString)
-..param.bitString:The bit string to be completed.
-...type:Class.RankSupportBitString
-..include:seqan/index.h
-..example.code:
-String<Dna5> genome = "ACGTACGT";
-
-RankSupportBitString<> bitString;
-resize(bitString, length(genome));
-
-for (unsigned i = 0; i < length(genome); ++i)
-    if(genome[i] < Dna5('c'))
-        setBitTo(bitString, 1);
-
-_updateRanks(bitString);
-*/
-template <typename TSpec, typename TPos>
-inline void _updateRanks(RankSupportBitString<TSpec> & bitString, TPos pos)
-{
-    _updateRanksImpl(bitString, pos);
-}
-
-template <typename TSpec>
-inline void _updateRanks(RankSupportBitString<TSpec> & bitString)
-{
-    _updateRanksImpl(bitString, 0u);
-}
-
-// ----------------------------------------------------------------------------
-// Function _updateLastRank()
-// ----------------------------------------------------------------------------
-
-// This function update the rank information of the last block.
-template <typename TSpec>
-inline void _updateLastRank(RankSupportBitString<TSpec> & bitString)
-{
-    typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
-    typedef typename Value<TFibreSuperBlocks>::Type                         TFibreSuperBlocksValue;
-
-    // It is only necessary to update the rank at the start of a new block
-    TFibreSuperBlocksValue pos = length(bitString) - 1;
-    if (_getPosInBlock(bitString, pos) != 0u) return;
-
-    // Here we compute the new rank if the last bit does not reside in the 
-    // first block and the last as well as the second last bit are in the 
-    // same block.
-    TFibreSuperBlocksValue superBlockPos = _getSuperBlockPos(bitString, pos);
-    TFibreSuperBlocksValue blockPos = _getBlockPos(bitString, pos);
-    if (blockPos > 0u && superBlockPos == _getSuperBlockPos(bitString, pos - 1))
-        getFibre(bitString, FibreBlocks())[blockPos] = getFibre(bitString, FibreBlocks())[blockPos - 1]
-                + popCount(bitString.bits[blockPos - 1]);
-
-    // Here we compute the new rank if the last and second last bit are in
-    // different blocks.
-    if ((superBlockPos > _getSuperBlockPos(bitString, pos - 1)) && superBlockPos > 0u)
-        getFibre(bitString, FibreSuperBlocks())[superBlockPos] = getFibre(bitString, FibreSuperBlocks())[superBlockPos - 1]
-                + getFibre(bitString, FibreBlocks())[blockPos - 1]
-                + popCount(bitString.bits[blockPos - 1]);
+    clear(bitString.bits);
+    clear(bitString.blocks);
+    clear(bitString.superBlocks);
+    bitString._length = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -645,17 +341,68 @@ resize(RankSupportBitString<TSpec> & bitString, TLength const _length, Tag<TExpa
 }
 
 // ----------------------------------------------------------------------------
-// Function setBit()
+// Function length()
 // ----------------------------------------------------------------------------
 
-template <typename TSpec, typename TPos>
-inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos)
+/**
+.Function.length
+..param.object:
+...type:Class.RankSupportBitString
+*/
+template <typename TSpec>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
+length(RankSupportBitString<TSpec> const & bitString)
 {
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
-    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+    return bitString._length;
+}
 
-    TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
-    bitString.bits[_getBlockPos(bitString, pos)] |= shiftValue;
+// ----------------------------------------------------------------------------
+// Function appendValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.RankSupportBitString#appendValue:
+..signature:appendValue(target, value)
+..cat:Index
+..summary:Appends a value to a container.
+..param.target:A container.
+...type:Class.RankSupportBitString
+..param.value:Value that is appended to $target$.
+...type:Concept.UnsignedIntegerConcept
+...type:nolink:bool
+...remarks:If the value is different from 0 it is interpreted as 1.
+..include:seqan/sequence.h
+*/
+template <typename TSpec>
+inline void appendValue(RankSupportBitString<TSpec> & bitString, bool bit)
+{
+    typename Size<RankSupportBitString<TSpec> >::Type len = length(bitString);
+    resize(bitString, len + 1);
+    setBitTo(bitString, len, bit);
+    _updateLastRank(bitString);
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TText>
+inline void assign(RankSupportBitString<TSpec> & bitString, TText const & text)
+{
+    typedef RankSupportBitString<TSpec>                     TRankSupportBitString;
+    typedef typename Position<TRankSupportBitString>::Type  TPos;
+    typedef typename Value<TText>::Type                     TValue;
+    typedef typename Iterator<TText const>::Type            TIter;
+
+    resize(bitString, length(text), Exact());
+
+    TPos i = 0;
+    TIter textEnd = end(text, Standard());
+
+    for (TIter it = begin(text, Standard()); it != textEnd; ++it, ++i)
+        setBitTo(bitString, i, getValue(it));
+
+    _updateRanks(bitString);
 }
 
 // ----------------------------------------------------------------------------
@@ -670,6 +417,20 @@ inline void clearBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 
     TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
     bitString.bits[_getBlockPos(bitString, pos)] &= ~shiftValue;
+}
+
+// ----------------------------------------------------------------------------
+// Function setBit()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TPos>
+inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos)
+{
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
+    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+
+    TFibreBitsValue const shiftValue = (TFibreBitsValue)1u << _getPosInBlock(bitString, pos);
+    bitString.bits[_getBlockPos(bitString, pos)] |= shiftValue;
 }
 
 // ----------------------------------------------------------------------------
@@ -706,6 +467,246 @@ inline void setBitTo(RankSupportBitString<TSpec> & bitString, TPos pos, bool val
         clearBit(bitString, pos);
 }
 
+// ----------------------------------------------------------------------------
+// Function isBitSet()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.isSetBit
+..summary:Returns whether the bit with the given index is set to 1.
+..signature:isSetBit(bitString, pos)
+..param.bitString:The bit string.
+...type:Class.RankSupportBitString
+..param.pos:Position of the bit.
+..returns:Returns whether a specified bit is set or not.
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
+
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
+...
+mark all 'a's
+...
+
+for (unsigned i = 0; i < length(bitString); ++i)
+    if(isSetBit(bitString, i))
+        std::cout << "a found at: " << i << std::endl;
+*/
+
+template <typename TSpec, typename TPos>
+inline bool isBitSet(RankSupportBitString<TSpec> const & bitString, TPos const pos)
+{
+    return isBitSet(bitString.bits[_getBlockPos(bitString, pos)], _getPosInBlock(bitString, pos));
+}
+
+// ----------------------------------------------------------------------------
+// Function getRank()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getRank
+..summary:Returns the rank (the number of bits set from the start of the bit string) of a specified position.
+..signature:getRank(bitString, pos)
+..param.bitString:The bit string.
+...type:Class.RankSupportBitString
+..param.pos:Position of a bit.
+..returns:Value type of the super block fibre (default unsigned long).
+..include:seqan/index.h
+..example.code:
+*/
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
+getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
+{
+    return bitString.superBlocks[_getSuperBlockPos(bitString, pos)]
+         + bitString.blocks[_getBlockPos(bitString, pos)]
+         + _getRankInBlock(bitString, pos);
+}
+
+// ----------------------------------------------------------------------------
+// Function _getSuperBlockPos()
+// ----------------------------------------------------------------------------
+
+// This function returns the number of bits set in a block until a specified position
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
+_getSuperBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type      TFibreBits;
+    typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type    TFibrelocks;
+    typedef typename Value<TFibreBits>::Type                            TFibreBitsValue;
+    typedef typename Value<TFibrelocks>::Type                             TFibreBlocksValue;
+
+    TFibreBlocksValue const _bitsPerValue = BitsPerValue<TFibreBitsValue>::VALUE;
+    return pos / (_bitsPerValue * _bitsPerValue);
+}
+
+// ----------------------------------------------------------------------------
+// Function _getBlockPos()
+// ----------------------------------------------------------------------------
+
+// This function returns the position in the block string of the corresponding block.
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
+_getBlockPos(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type  TFibreBits;
+    typedef typename Value<TFibreBits>::Type                        TFibreBitsValue;
+
+    return pos / BitsPerValue<TFibreBitsValue>::VALUE;
+}
+
+// ----------------------------------------------------------------------------
+// Function _getPosInBlock()
+// ----------------------------------------------------------------------------
+
+// This function returns the position of a specified bit within a block.
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreBlocks>::Type>::Type
+_getPosInBlock(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type  TFibreBits;
+    typedef typename Value<TFibreBits>::Type                        TFibreBitsValue;
+
+    return pos % BitsPerValue<TFibreBitsValue>::VALUE;
+}
+
+// ----------------------------------------------------------------------------
+// Function _getRankInBlock()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
+_getRankInBlock(RankSupportBitString<TSpec> const & bitString, TPos const pos)
+{
+   typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type     TFibreBits;
+    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+
+    TFibreBitsValue const mask = ((TFibreBitsValue)2u << _getPosInBlock(bitString, pos)) - 1;
+    return popCount(bitString.bits[_getBlockPos(bitString, pos)] & mask);
+}
+
+// ----------------------------------------------------------------------------
+// Function _updateRanks()
+// ----------------------------------------------------------------------------
+
+/*
+.Function._updateRanks
+..summary:Adds the block and super block information to the bit string.
+..signature:_updateRanks(bitString)
+..param.bitString:The bit string to be completed.
+...type:Class.RankSupportBitString
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
+
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
+
+for (unsigned i = 0; i < length(genome); ++i)
+    if(genome[i] < Dna5('c'))
+        setBitTo(bitString, 1);
+
+_updateRanks(bitString);
+*/
+template <typename TSpec, typename TPos>
+inline void _updateRanks(RankSupportBitString<TSpec> & bitString, TPos pos)
+{
+    _updateRanksImpl(bitString, pos);
+}
+
+template <typename TSpec>
+inline void _updateRanks(RankSupportBitString<TSpec> & bitString)
+{
+    _updateRanksImpl(bitString, 0u);
+}
+
+// ----------------------------------------------------------------------------
+// Function _updateRanksImpl()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TPos>
+inline void _updateRanksImpl(RankSupportBitString<TSpec> & bitString, TPos pos)
+{
+    typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
+    typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type        TFibreBlocks;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
+    typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
+    typedef typename Value<TFibreBlocks>::Type                              TFibreBlocksValue;
+    typedef typename Value<TFibreSuperBlocks>::Type                         TFibreSuperBlocksValue;
+
+    if (!empty(bitString))
+    {
+        TFibreSuperBlocksValue i = _getBlockPos(bitString, pos);
+
+        TFibreBlocksValue _blockSum;
+        if (i == 0)
+            _blockSum = 0;
+        else
+            _blockSum = bitString.blocks[i - 1];
+
+        TFibreSuperBlocksValue _sBlockSum;
+        TFibreSuperBlocksValue superBlockPos = _getSuperBlockPos(bitString, pos);
+        if (superBlockPos != 0)
+        {
+            _sBlockSum = bitString.superBlocks[superBlockPos];
+        }
+        else
+            _sBlockSum = 0;
+
+        if (i == 0)
+            ++i;
+        for (; i < length(bitString.bits); ++i)
+        {
+            _blockSum += popCount(bitString.bits[i - 1]);
+            if ((i % BitsPerValue<TFibreBitsValue>::VALUE) == 0u)
+            {
+                _sBlockSum += _blockSum;
+                bitString.superBlocks[++superBlockPos] = _sBlockSum;
+                _blockSum = 0;
+            }
+            bitString.blocks[i] = _blockSum;
+       }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _updateLastRank()
+// ----------------------------------------------------------------------------
+
+// This function update the rank information of the last block.
+template <typename TSpec>
+inline void _updateLastRank(RankSupportBitString<TSpec> & bitString)
+{
+    typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
+    typedef typename Value<TFibreSuperBlocks>::Type                         TFibreSuperBlocksValue;
+
+    // It is only necessary to update the rank at the start of a new block
+    TFibreSuperBlocksValue pos = length(bitString) - 1;
+    if (_getPosInBlock(bitString, pos) != 0u) return;
+
+    // Here we compute the new rank if the last bit does not reside in the 
+    // first block and the last as well as the second last bit are in the 
+    // same block.
+    TFibreSuperBlocksValue superBlockPos = _getSuperBlockPos(bitString, pos);
+    TFibreSuperBlocksValue blockPos = _getBlockPos(bitString, pos);
+    if (blockPos > 0u && superBlockPos == _getSuperBlockPos(bitString, pos - 1))
+        getFibre(bitString, FibreBlocks())[blockPos] = getFibre(bitString, FibreBlocks())[blockPos - 1]
+                + popCount(bitString.bits[blockPos - 1]);
+
+    // Here we compute the new rank if the last and second last bit are in
+    // different blocks.
+    if ((superBlockPos > _getSuperBlockPos(bitString, pos - 1)) && superBlockPos > 0u)
+        getFibre(bitString, FibreSuperBlocks())[superBlockPos] = getFibre(bitString, FibreSuperBlocks())[superBlockPos - 1]
+                + getFibre(bitString, FibreBlocks())[blockPos - 1]
+                + popCount(bitString.bits[blockPos - 1]);
+}
 
 // ----------------------------------------------------------------------------
 // Function open()
