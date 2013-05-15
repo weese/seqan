@@ -136,12 +136,13 @@ void sentinelDictionarySentinelPosition(TRankDictionary & /*tag*/)
 	String<typename Value<TRankDictionary>::Type> text = "ACGTNACGTNACGTN";
 	TRankDictionary sentinelDictionary(text);
 
-    SEQAN_ASSERT_EQ(_getSentinelPosition(sentinelDictionary), length(text));
+    SEQAN_ASSERT_EQ(getFibre(sentinelDictionary, FibreSentinelPosition()), length(text));
 
     setSentinelPosition(sentinelDictionary, 2u);
-    SEQAN_ASSERT_EQ(_getSentinelPosition(sentinelDictionary), 2u);
+    SEQAN_ASSERT_EQ(getFibre(sentinelDictionary, FibreSentinelPosition()), 2u);
 }
-    
+
+// NOTE(esiragusa): This test fails now - it seems wrong to me.
 template <typename TRankDictionary>
 void sentinelDictionarySentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> & /*tag*/)
 {
@@ -149,8 +150,7 @@ void sentinelDictionarySentinelPosition(SentinelRankDictionary<TRankDictionary, 
 	SentinelRankDictionary<TRankDictionary, Sentinels> sentinelDictionary(text);
 
     String<unsigned> sentinelPos;
-
-    SEQAN_ASSERT_EQ(_getSentinelPosition(sentinelDictionary), sentinelPos);
+    SEQAN_ASSERT_EQ(getFibre(sentinelDictionary, FibreSentinelPosition()), sentinelPos);
 
     RankSupportBitString<> bitString;
     resize(bitString, length(text), 0);
@@ -158,7 +158,7 @@ void sentinelDictionarySentinelPosition(SentinelRankDictionary<TRankDictionary, 
     setSentinelPosition(sentinelDictionary, bitString);
     String<unsigned> temp;
     appendValue(temp, 2);
-    SEQAN_ASSERT_EQ(_getSentinelPosition(sentinelDictionary), temp);
+    SEQAN_ASSERT_EQ(getFibre(sentinelDictionary, FibreSentinelPosition()), temp);
 }
 
 SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, SentinelPosition)
