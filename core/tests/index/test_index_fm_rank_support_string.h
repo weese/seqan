@@ -45,7 +45,7 @@
 namespace seqan {
 
 template <typename TValue>
-struct Size<String<TValue, Alloc<Nothing> > >
+struct Size<String<TValue, Alloc<unsigned> > >
 {
     typedef unsigned Type;
 };
@@ -54,32 +54,18 @@ struct Size<String<TValue, Alloc<Nothing> > >
 
 using namespace seqan;
 
-SEQAN_DEFINE_TEST(test_rss_resize)
+SEQAN_DEFINE_TEST(test_rss_size)
 {
     typedef Dna                                         TAlphabet;
     typedef Alloc<Nothing>                              TTextSpec;
     typedef String<TAlphabet, TTextSpec>                TText;
-    typedef typename Iterator<TText, Standard>::Type    TTextIterator;
     typedef RankSupport<TText>                          TRankSupport;
     typedef String<TRankSupport>                        TRankSupportString;
-
-    std::cout << std::endl;
-
-// ==========================================================================
-
-    std::cout << "sizeof(text): " << sizeof(Size<TText>::Type) << std::endl;
-    std::cout << "sizeof(alphabet): " << sizeof(Size<TAlphabet>::Type) << std::endl;
-
-    std::cout << "bits(alphabet): " << static_cast<unsigned>(BitsPerValue<typename Value<TText>::Type>::VALUE) << std::endl;
-    std::cout << "bits(word): " << BitsPerValue<unsigned long>::VALUE << std::endl;
-
-    std::cout << std::endl;
-
-// ==========================================================================
 
     TRankSupport rs;
 
     std::cout << "sizeof(Block): " << sizeof(rs.block) << std::endl;
+
     std::cout << "bits(Block): " << BitsPerValue<TRankSupport::TBlock>::VALUE << std::endl;
     std::cout << "length(Block): " << length(rs.block) << std::endl;
     std::cout << "capacity(Block): " << capacity(rs.block) << std::endl;
@@ -94,50 +80,38 @@ SEQAN_DEFINE_TEST(test_rss_resize)
     std::cout << "sizeof(RankSupport): " << sizeof(rs) << std::endl;
     std::cout << "bits(RankSupport): " << BitsPerValue<TRankSupport>::VALUE << std::endl;
     std::cout << std::endl;
+}
 
-// ==========================================================================
+SEQAN_DEFINE_TEST(test_rss_resize)
+{
+    typedef Dna                                         TAlphabet;
+    typedef Alloc<Nothing>                              TTextSpec;
+    typedef String<TAlphabet, TTextSpec>                TText;
+    typedef RankSupport<TText>                          TRankSupport;
+    typedef String<TRankSupport>                        TRankSupportString;
 
-    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
 //    TText text = "ACGTNACGTNACGTNACGTNA";
-
-    for (TTextIterator it = begin(text, Standard()); it != end(text, Standard()); ++it)
-        assignValue(rs.block, position(it, text), value(it));
-
-    std::cout << "Text: " << text << std::endl;
-    std::cout << "Block: " << rs.block << std::endl;
-
-    std::cout << std::endl;
-
-// ==========================================================================
-
-    clear(rs.sblock);
-    for (TTextIterator it = begin(text, Standard()); it != end(text, Standard()); ++it)
-        rs.sblock[ordValue(value(it))]++;
-
-    std::cout << "SuperBlock: " << rs.sblock << std::endl;
-    std::cout << std::endl;
-
-// ==========================================================================
+//    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
+    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGTCCCCCCCCCCCCCCC";
 
     TRankSupportString rss;
-    resize(rss, 1);
-    clear(back(rss).block);
-    clear(back(rss).sblock);
+    fillRankSupportString(rss, text);
 
-    std::cout << "length(RankSupportString): " << length(rss) << std::endl;
-    std::cout << "capacity(RankSupportString): " << capacity(rss) << std::endl;
+    std::cout << "Text: " << text << std::endl;
+//    std::cout << "Block: " << rs.block << std::endl;
 
-    appendValue(rss, rs);
+    for (unsigned i = 0; i < length(rss); i++)
+        std::cout << rss[i].block << std::endl;
 
-    std::cout << "length(RankSupportString): " << length(rss) << std::endl;
-    std::cout << "capacity(RankSupportString): " << capacity(rss) << std::endl;
+    for (unsigned i = 0; i < length(rss); i++)
+        std::cout << rss[i].sblock << std::endl;
+
     std::cout << std::endl;
-
-// ==========================================================================
 
     std::cout << "getRank(A, 5): " << getRank(rss, 5u, Dna('A')) << std::endl;
     std::cout << "getRank(A, 31): " << getRank(rss, 31u, Dna('A')) << std::endl;
     std::cout << "getRank(G, 9): " << getRank(rss, 9u, Dna('G')) << std::endl;
+    std::cout << "getRank(C, 40): " << getRank(rss, 40u, Dna('C')) << std::endl;
 
     std::cout << std::endl;
 }

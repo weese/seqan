@@ -82,12 +82,112 @@ struct RankSupport
 // Functions
 // ============================================================================
 
+template <typename TText>
+inline void
+clear(RankSupport<TText> & me)
+{
+    clear(me.block);
+    clear(me.sblock);
+}
+
+// ----------------------------------------------------------------------------
+// Function assignBlock()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TTextIterator>
+inline void
+assignBlock(RankSupport<TText> & me, TTextIterator const & blockBegin, TTextIterator const & blockEnd)
+{
+    // Assign the text character by character.
+    for (TTextIterator blockIt = blockBegin; blockIt != blockEnd; ++blockIt)
+        assignValue(me.block, blockIt - blockBegin, value(blockIt));
+}
+
+// ----------------------------------------------------------------------------
+// Function updateSum()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TTextIterator>
+inline void
+updateSum(RankSupport<TText> & me, TTextIterator const & blockBegin, TTextIterator const & blockEnd)
+{
+    // Update in place the sum character by character.
+    for (TTextIterator blockIt = blockBegin; blockIt != blockEnd; ++blockIt)
+        me.sblock[ordValue(value(blockIt))]++;
+}
+
+// ----------------------------------------------------------------------------
+// Function fillRankSupportString()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TSource>
+inline void
+fillRankSupportString(String<RankSupport<TText>, TSpec> & me, TSource const & text)
+{
+    typedef RankSupport<TText>                                      TRankSupport;
+    typedef typename Value<TText>::Type                             TValue;
+    typedef typename Iterator<TSource const, Standard>::Type        TTextIterator;
+
+    // Reserve space in the RankSupport String.
+//    reserve(me, length(text), Exact());
+
+    // Get an empty RankSupport entry.
+    TRankSupport entry;
+    clear(entry);
+
+    // Append an empty entry at the beginning of the RankSupport String.
+    appendValue(me, entry);
+
+    // Last block might be smaller than BlockSize.
+    TTextIterator textEnd = end(text, Standard());
+    TTextIterator lastBlockBegin = textEnd - length(text) % BlockSize<TValue>::VALUE;
+    TTextIterator blockBegin = begin(text, Standard());
+    TTextIterator blockEnd = blockBegin + BlockSize<TValue>::VALUE;
+
+    // Scan the text blockwise.
+    while (blockBegin != lastBlockBegin)
+    {
+        // Assign the text block to the RankSupport entry.
+        assignBlock(entry, blockBegin, blockEnd);
+
+        // Update the rank.
+        updateSum(entry, blockBegin, blockEnd);
+
+        // Append entry to the RankSupport String.
+        appendValue(me, entry);
+
+        blockBegin = blockEnd;
+        blockEnd += BlockSize<TValue>::VALUE;
+    }
+
+    // Scan last text block.
+    if (blockBegin != textEnd)
+    {
+        // Assign the text block to the RankSupport entry.
+        assignBlock(entry, blockBegin, textEnd);
+
+        // Update the rank.
+        updateSum(entry, blockBegin, textEnd);
+
+        // Append entry to the RankSupport String.
+        appendValue(me, entry);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _getRankInSuperBlock()
+// ----------------------------------------------------------------------------
+
 template <typename TText, typename TSpec, typename TPos, typename TChar>
 inline typename Size<TText>::Type
 _getRankInSuperBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPos, TChar c)
 {
     return me[sblockPos].sblock[ordValue(c)];
 }
+
+// ----------------------------------------------------------------------------
+// Function _getRankInBlock()
+// ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec, typename TPos, typename TChar>
 inline typename Size<TText>::Type
@@ -102,6 +202,10 @@ _getRankInBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPos, TP
     return rankInBlock;
 }
 
+// ----------------------------------------------------------------------------
+// Function getRank()
+// ----------------------------------------------------------------------------
+
 template <typename TText, typename TSpec, typename TPos, typename TChar>
 inline typename Size<TText>::Type
 getRank(String<RankSupport<TText>, TSpec> const & me, TPos pos, TChar c)
@@ -115,6 +219,7 @@ getRank(String<RankSupport<TText>, TSpec> const & me, TPos pos, TChar c)
 
     return _getRankInSuperBlock(me, sblockPos, c) + _getRankInBlock(me, sblockPos + 1, blockPos, c);
 }
+
 
 }
 
