@@ -49,7 +49,9 @@
 
 SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
 {
-    SEQAN_CALL_TEST(test_rss_resize);
+//    SEQAN_CALL_TEST(test_rss_sizeof);
+//    SEQAN_CALL_TEST(test_rss_resize);
+    SEQAN_CALL_TEST(test_rss_getrank);
 
     SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
     SEQAN_CALL_TEST(test_rsbs_resize);
