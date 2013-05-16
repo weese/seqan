@@ -278,6 +278,17 @@ blockAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 // Function createRankDictionary()                             [RankDictionary]
 // ----------------------------------------------------------------------------
 
+template <typename TValue, typename TSpec, typename TSize, typename TExpand>
+inline void
+reserve(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpand> const tag)
+{
+    reserve(dict.ranks, size / BlockSize<TValue>::VALUE, tag);
+}
+
+// ----------------------------------------------------------------------------
+// Function createRankDictionary()                             [RankDictionary]
+// ----------------------------------------------------------------------------
+
 template <typename TValue, typename TSpec, typename TText>
 inline void
 createRankDictionary(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TText const & text)
@@ -286,8 +297,8 @@ createRankDictionary(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TText co
     typedef RankDictionaryValue_<TRankDictionarySpec>           TRankDictionaryValue;
     typedef typename Iterator<TText const, Standard>::Type      TTextIterator;
 
-    // Reserve space in the RankSupport String.
-//    reserve(dict, length(text), Exact());
+    // Reserve space in the RankDictionary.
+    reserve(dict, length(text), Exact());
 
     // Get an empty RankSupport entry.
     TRankDictionaryValue rank;
@@ -382,8 +393,7 @@ _getBitsRank(RankDictionary_<TwoLevels<Dna, TSpec> > const & dict, TPos blockPos
 
     TBits bits = bitsAt(dict, blockPos);
 
-    // Clear the last bitsPos positions.
-    // TODO(esiragusa): Change bitsPos << 1 to bitsPos * BitsPerValue in the generic case.
+    // Clear the last 2 * bitsPos positions.
     TBitVector word = bits.i & ~(MaxValue<TBitVector>::VALUE >> (bitsPos << 1));
 
     // And matches when c == G|T.
@@ -392,6 +402,7 @@ _getBitsRank(RankDictionary_<TwoLevels<Dna, TSpec> > const & dict, TPos blockPos
     // And matches when c == C|T.
     TBitVector even = ((ordValue(c) & ordValue(Dna('C'))) ? word : ~word);
 
+    // Apply the interleaved mask.
     TBitVector mask = odd & even & RankDictionaryBitMask_<TBitVector>::VALUE;
 
     // The rank is the sum of bits on.
@@ -422,7 +433,7 @@ _getBitsRank(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TPos blockPo
     // Clear the last bitsPos positions.
     TBitVector word = bits.i & ~(MaxValue<TBitVector>::VALUE >> bitsPos);
 
-    // The rank is the sum of bits on.
+    // Get the sum of the bits on.
     TSize bitsRank = popCount(word);
 
     // Return either the rank for c == true or its complement for c == false.
