@@ -49,13 +49,39 @@ namespace seqan {
 // Metafunctions
 // ============================================================================
 
-template <typename T>
-struct BlockSize;
+// ----------------------------------------------------------------------------
+// Metafunction BlockSize
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 struct BlockSize
 {
     static const unsigned VALUE = BitsPerValue<unsigned long>::VALUE / BitsPerValue<TValue>::VALUE;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction RankSupportBitMask_
+// ----------------------------------------------------------------------------
+
+template <typename TValue>
+struct RankSupportBitMask_;
+
+template <>
+struct RankSupportBitMask_<unsigned short>
+{
+    static const unsigned short VALUE = 0x5555;
+};
+
+template <>
+struct RankSupportBitMask_<unsigned int>
+{
+    static const unsigned int VALUE = 0x55555555;
+};
+
+template <>
+struct RankSupportBitMask_<__uint64>
+{
+    static const __uint64 VALUE = 0x5555555555555555;
 };
 
 // ============================================================================
@@ -71,11 +97,11 @@ struct RankSupport
 {
     typedef typename Value<TText>::Type                             TValue;
     typedef typename Size<TText>::Type                              TSize;
-    typedef Tuple<TValue, BlockSize<TValue>::VALUE, BitPacked<> >   TBlock;
     typedef Tuple<TSize, ValueSize<TValue>::VALUE>                  TSuperBlock;
+    typedef Tuple<TValue, BlockSize<TValue>::VALUE, BitPacked<> >   TBlock;
 
-    TBlock      block;      // A bit-compressed snippet of TText long BlockSize symbols.
     TSuperBlock sblock;     // A summary of counts for each TText symbol.
+    TBlock      block;      // A bit-compressed snippet of TText long BlockSize symbols.
 };
 
 // ============================================================================
@@ -86,8 +112,8 @@ template <typename TText>
 inline void
 clear(RankSupport<TText> & me)
 {
-    clear(me.block);
     clear(me.sblock);
+    clear(me.block);
 }
 
 // ----------------------------------------------------------------------------
@@ -135,9 +161,6 @@ fillRankSupportString(String<RankSupport<TText>, TSpec> & me, TSource const & te
     TRankSupport entry;
     clear(entry);
 
-    // Append an empty entry at the beginning of the RankSupport String.
-    appendValue(me, entry);
-
     // Last block might be smaller than BlockSize.
     TTextIterator textEnd = end(text, Standard());
     TTextIterator lastBlockBegin = textEnd - length(text) % BlockSize<TValue>::VALUE;
@@ -150,11 +173,11 @@ fillRankSupportString(String<RankSupport<TText>, TSpec> & me, TSource const & te
         // Assign the text block to the RankSupport entry.
         assignBlock(entry, blockBegin, blockEnd);
 
-        // Update the rank.
-        updateSum(entry, blockBegin, blockEnd);
-
         // Append entry to the RankSupport String.
         appendValue(me, entry);
+
+        // Update the ranks.
+        updateSum(entry, blockBegin, blockEnd);
 
         blockBegin = blockEnd;
         blockEnd += BlockSize<TValue>::VALUE;
@@ -165,9 +188,6 @@ fillRankSupportString(String<RankSupport<TText>, TSpec> & me, TSource const & te
     {
         // Assign the text block to the RankSupport entry.
         assignBlock(entry, blockBegin, textEnd);
-
-        // Update the rank.
-        updateSum(entry, blockBegin, textEnd);
 
         // Append entry to the RankSupport String.
         appendValue(me, entry);
@@ -189,15 +209,48 @@ _getRankInSuperBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPo
 // Function _getRankInBlock()
 // ----------------------------------------------------------------------------
 
+//template <typename TText, typename TSpec, typename TPos, typename TChar>
+//inline typename Size<TText>::Type
+//_getRankInBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPos, TPos blockPos, TChar c)
+//{
+//    typename Size<TText>::Type rankInBlock = 0;
+//
+//    // NOTE(esiragusa): This version is generic but absymally slow.
+//    for (unsigned i = 0; i < blockPos; ++i)
+//        rankInBlock += isEqual(me[sblockPos].block[i], c);
+//
+//    return rankInBlock;
+//}
+
 template <typename TText, typename TSpec, typename TPos, typename TChar>
 inline typename Size<TText>::Type
 _getRankInBlock(String<RankSupport<TText>, TSpec> const & me, TPos sblockPos, TPos blockPos, TChar c)
 {
-    typename Size<TText>::Type rankInBlock = 0;
+    typedef RankSupport<TText>                          TRankSupport;
+    typedef typename TRankSupport::TBlock               TBlock;
+    typedef typename TBlock::TBitVector                 TBlockBitVector;
+    typedef typename Value<TText>::Type                 TValue;
+    typedef typename Size<TText>::Type                  TSize;
 
-    // TODO(esiragusa): Use popCount().
-    for (unsigned i = 0; i < blockPos; ++i)
-        rankInBlock += isEqual(me[sblockPos].block[i], c);
+    TBlock block = me[sblockPos].block;
+
+    // Clear the last blockPos positions.
+    // TODO(esiragusa): Change blockPos << 1 to blockPos * BitsPerValue in the generic case.
+    TBlockBitVector word = block.i & ~(MaxValue<TBlockBitVector>::VALUE >> (blockPos << 1));
+
+    // And matches when c == G|T.
+    TBlockBitVector odd  = ((ordValue(c) & ordValue(Dna('G'))) ? word : ~word) >> 1;
+
+    // And matches when c == C|T.
+    TBlockBitVector even = ((ordValue(c) & ordValue(Dna('C'))) ? word : ~word);
+
+    TBlockBitVector mask = odd & even & RankSupportBitMask_<TBlockBitVector>::VALUE;
+
+    // The rank is the sum of bits on.
+    TSize rankInBlock = popCount(mask);
+
+    // If c == A then masked character positions must be subtracted from the count.
+    if (c == Dna('A')) rankInBlock -= BlockSize<TValue>::VALUE - blockPos;
 
     return rankInBlock;
 }
@@ -217,7 +270,7 @@ getRank(String<RankSupport<TText>, TSpec> const & me, TPos pos, TChar c)
     TSize sblockPos = pos / BlockSize<TValue>::VALUE;
     TSize blockPos = pos % BlockSize<TValue>::VALUE;
 
-    return _getRankInSuperBlock(me, sblockPos, c) + _getRankInBlock(me, sblockPos + 1, blockPos, c);
+    return _getRankInSuperBlock(me, sblockPos, c) + _getRankInBlock(me, sblockPos, blockPos, c);
 }
 
 
