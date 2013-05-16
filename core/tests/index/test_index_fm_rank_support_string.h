@@ -42,17 +42,84 @@
 
 #include <seqan/index/index_fm_rank_support_string.h>
 
-namespace seqan {
+using namespace seqan;
 
+// ----------------------------------------------------------------------------
+// Metafunction Size                                           [RankDictionary]
+// ----------------------------------------------------------------------------
+
+namespace seqan {
 template <typename TValue>
 struct Size<RankDictionary_<TwoLevels<TValue, unsigned> > >
 {
     typedef unsigned    Type;
 };
-
 }
 
-using namespace seqan;
+// ----------------------------------------------------------------------------
+// Function testRankDictionaryGetRank()
+// ----------------------------------------------------------------------------
+
+template <typename TAlphabet, typename TStringSpec, typename TSpec>
+void testRankDictionaryGetRank(String<TAlphabet, TStringSpec> const & text, TSpec const & /* tag */)
+{
+    typedef String<TAlphabet, TStringSpec> const        TText;
+    typedef typename Iterator<TText>::Type              TTextIterator;
+    typedef typename Size<TText>::Type                  TTextSize;
+    typedef typename ValueSize<TAlphabet>::Type         TAlphabetSize;
+    typedef String<TTextSize>                           TRankMap;
+    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
+    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
+
+    TAlphabetSize alphabetSize = ValueSize<TAlphabet>::VALUE;
+
+    // Build the RankDictionary object to test.
+    TRankDictionary dict(text);
+
+    // The naive rank dictionary is built while scanning the text.
+    TRankMap rank;
+    resize(rank, alphabetSize, 0);
+
+    // Scan the text.
+    TTextIterator textBegin = begin(text, Standard());
+    TTextIterator textEnd = end(text, Standard());
+    for (TTextIterator textIt = textBegin; textIt != textEnd; ++textIt)
+    {
+        // Check the rank for all alphabet symbols.
+        for (TAlphabetSize c = 0; c < alphabetSize; ++c)
+            SEQAN_ASSERT_EQ(rank[c], getRank(dict, textIt - textBegin, c));
+
+        // Update the naive rank.
+        rank[ordValue(value(textIt))]++;
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Test test_rss_getrank                                       [RankDictionary]
+// ----------------------------------------------------------------------------
+
+SEQAN_DEFINE_TEST(test_rss_getrank)
+{
+    {
+        String<char> text = "test";
+        testRankDictionaryGetRank(text, TwoLevels<char, unsigned>());
+    }
+    {
+        String<Dna> text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
+        testRankDictionaryGetRank(text, TwoLevels<Dna, unsigned>());
+    }
+    {
+        String<bool> text;
+        appendValue(text, 1);
+        appendValue(text, 0);
+        appendValue(text, 1);
+        appendValue(text, 0);
+        appendValue(text, 1);
+        appendValue(text, 1);
+        appendValue(text, 1);
+        testRankDictionaryGetRank(text, TwoLevels<bool, unsigned>());
+    }
+}
 
 //SEQAN_DEFINE_TEST(test_rss_sizeof)
 //{
@@ -83,68 +150,31 @@ using namespace seqan;
 //    std::cout << std::endl;
 //}
 
-SEQAN_DEFINE_TEST(test_rss_resize)
-{
-    typedef Dna                                         TAlphabet;
-    typedef Alloc<unsigned>                             TTextSpec;
-    typedef String<TAlphabet, TTextSpec>                TText;
-
-    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
-
-//    TText text = "ACGTNACGTNACGTNACGTNA";
-    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
-//    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGTCCCCCCCCCCCCCCC";
-
-    TRankDictionary dict(text);
-//    createRankDictionary(dict, text);
-
-    std::cout << "Text: " << text << std::endl;
-//    std::cout << "Block: " << rs.block << std::endl;
-
-    for (unsigned i = 0; i < 10; i++)
-        for (unsigned char c = 0; c < 4; c++)
-            std::cout << "getRank(" << Dna(c) << ", " << i << "): " << getRank(dict, i, Dna(c)) << std::endl;
-
-    std::cout << std::endl;
-}
-
-SEQAN_DEFINE_TEST(test_rss_getrank)
-{
-    typedef Dna                                         TAlphabet;
-    typedef Alloc<unsigned>                             TTextSpec;
-    typedef String<TAlphabet, TTextSpec>                TText;
-
-    typedef typename Iterator<TText>::Type              TTextIterator;
-    typedef typename Size<TText>::Type                  TTextSize;
-    typedef typename ValueSize<TAlphabet>::Type         TAlphabetSize;
-    typedef String<TTextSize>                           TRankMap;
-
-    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
-
-    TAlphabetSize alphabetSize = ValueSize<TAlphabet>::VALUE;
-
-    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
-
-    TRankDictionary dict(text);
-
-    TRankMap rank;
-    resize(rank, alphabetSize, 0);
-
-    // Scan the text.
-    TTextIterator textBegin = begin(text, Standard());
-    TTextIterator textEnd = end(text, Standard());
-    for (TTextIterator textIt = textBegin; textIt != textEnd; ++textIt)
-    {
-        // Check the rank for all alphabet symbols.
-        for (TAlphabetSize c = 0; c < alphabetSize; ++c)
-            SEQAN_ASSERT_EQ(rank[c], getRank(dict, textIt - textBegin, TAlphabet(c)));
-
-        // Update the naive rank.
-        rank[ordValue(value(textIt))]++;
-    }
-}
+//SEQAN_DEFINE_TEST(test_rss_resize)
+//{
+//    typedef Dna                                         TAlphabet;
+//    typedef Alloc<unsigned>                             TTextSpec;
+//    typedef String<TAlphabet, TTextSpec>                TText;
+//
+//    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
+//    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
+//
+////    TText text = "ACGTNACGTNACGTNACGTNA";
+//    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
+////    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGTCCCCCCCCCCCCCCC";
+//
+//    TRankDictionary dict(text);
+////    createRankDictionary(dict, text);
+//
+//    std::cout << "Text: " << text << std::endl;
+////    std::cout << "Block: " << rs.block << std::endl;
+//
+//    for (unsigned i = 0; i < 10; i++)
+//        for (unsigned char c = 0; c < 4; c++)
+//            std::cout << "getRank(" << Dna(c) << ", " << i << "): " << getRank(dict, i, Dna(c)) << std::endl;
+//
+//    std::cout << std::endl;
+//}
 
 #endif  // TEST_INDEX_FM_RANK_SUPPORT_STRING_H_
 
