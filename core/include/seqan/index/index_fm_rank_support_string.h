@@ -45,7 +45,7 @@ namespace seqan {
 // Tags
 // ============================================================================
 
-template <typename TSpec = void>
+template <typename TValue = bool, typename TSpec = void>
 struct TwoLevels;
 
 // ============================================================================
@@ -61,6 +61,20 @@ struct BlockSize
 {
     static const unsigned VALUE = BitsPerValue<unsigned long>::VALUE / BitsPerValue<TValue>::VALUE;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction Size
+// ----------------------------------------------------------------------------
+ 
+template <typename TValue, typename TSpec>
+struct Size<RankDictionary<TwoLevels<TValue, TSpec> > >
+{
+    typedef typename Size<String<TValue, TSpec> >::Type Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Size<RankDictionary<TwoLevels<TValue, TSpec> > const> :
+    public Size<RankDictionary<TwoLevels<TValue, TSpec> > > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction RankSupportBitMask_
@@ -92,14 +106,21 @@ struct RankSupportBitMask_<__uint64>
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Struct TwoLevelRankDictionaryValue_
+// Struct RankDictionaryValue_
 // ----------------------------------------------------------------------------
 
-template <typename TText>
-struct TwoLevelRankDictionaryValue_
+template <typename TSpec = TwoLevels<> >
+struct RankDictionaryValue_ {};
+
+// ----------------------------------------------------------------------------
+// Struct TwoLevels RankDictionaryValue_
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct RankDictionaryValue_<TwoLevels<TValue, TSpec> >
 {
-    typedef typename Value<TText>::Type                             TValue;
-    typedef typename Size<TText>::Type                              TSize;
+    typedef RankDictionary<TwoLevels<TValue, TSpec> >               TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                    TSize;
     typedef Tuple<TSize, ValueSize<TValue>::VALUE>                  TBlock;
     typedef Tuple<TValue, BlockSize<TValue>::VALUE, BitPacked<> >   TBits;
 
@@ -111,23 +132,24 @@ struct TwoLevelRankDictionaryValue_
 // Class RankDictionary_
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename = TwoLevels<> >
+template <typename TSpec>
 struct RankDictionary_ {};
 
 // ----------------------------------------------------------------------------
 // Class TwoLevels RankDictionary_
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec>
-struct RankDictionary_<TText, TwoLevels<TSpec> >
+template <typename TValue, typename TSpec>
+struct RankDictionary_<TwoLevels<TValue, TSpec> >
 {
-    typedef TwoLevelRankDictionaryValue_<TText>         TRankDictionaryValue;
-    typedef String<TRankDictionaryValue>                TRanksString;
+    typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> > TRankDictionaryValue;
+    typedef String<TRankDictionaryValue>                    TRanksFibre;
 
-    TRanksString ranks;
+    TRanksFibre ranks;
 
     RankDictionary_() {};
 
+    template <typename TText>
     RankDictionary_(TText const & text)
     {
         createRankDictionary(*this, text);
@@ -139,18 +161,18 @@ struct RankDictionary_<TText, TwoLevels<TSpec> >
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function _clear()                                               [RankEntry_]
+// Function _clear()                                     [RankDictionaryValue_]
 // ----------------------------------------------------------------------------
 
-template <typename TText>
-inline void _clear(TwoLevelRankDictionaryValue_<TText> & dict)
+template <typename TValue, typename TSpec>
+inline void _clear(RankDictionaryValue_<TwoLevels<TValue, TSpec> > & entry)
 {
-    clear(dict.block);
-    clear(dict.bits);
+    clear(entry.block);
+    clear(entry.bits);
 }
 
 // ----------------------------------------------------------------------------
-// Function _assignBits()                                          [RankEntry_]
+// Function _assignBits()
 // ----------------------------------------------------------------------------
 
 template <typename TBits, typename TTextIterator>
@@ -162,7 +184,7 @@ inline void _assignBits(TBits & bits, TTextIterator const & blockBegin, TTextIte
 }
 
 // ----------------------------------------------------------------------------
-// Function _updateBlockRank()                                     [RankEntry_]
+// Function _updateBlockRank()
 // ----------------------------------------------------------------------------
 
 template <typename TBlock, typename TTextIterator>
@@ -174,44 +196,43 @@ inline void _updateBlockRank(TBlock & block, TTextIterator const & blockBegin, T
 }
 
 // ----------------------------------------------------------------------------
-// Function bitsAt()                                          [RankDictionary_]
+// Function bitsAt()                                           [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec, typename TPos>
-inline typename TwoLevelRankDictionaryValue_<TText>::TBits const &
-bitsAt(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos pos)
+template <typename TValue, typename TSpec, typename TPos>
+inline typename RankDictionaryValue_<TwoLevels<TValue, TSpec> >::TBits const &
+bitsAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     return dict.ranks[pos].bits;
 }
 
 // ----------------------------------------------------------------------------
-// Function blockAt()                                         [RankDictionary_]
+// Function blockAt()                                          [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec, typename TPos>
-inline typename TwoLevelRankDictionaryValue_<TText>::TBlock const &
-blockAt(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos pos)
+template <typename TValue, typename TSpec, typename TPos>
+inline typename RankDictionaryValue_<TwoLevels<TValue, TSpec> >::TBlock const &
+blockAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     return dict.ranks[pos].block;
 }
 
 // ----------------------------------------------------------------------------
-// Function createRankDictionary()
+// Function createRankDictionary()                             [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec>
+template <typename TValue, typename TSpec, typename TText>
 inline void
-createRankDictionary(RankDictionary_<TText, TwoLevels<TSpec> > & dict, TText const & text)
+createRankDictionary(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TText const & text)
 {
-    typedef TwoLevelRankDictionaryValue_<TText>                     TRankEntry;
-    typedef typename Value<TText>::Type                             TValue;
-    typedef typename Iterator<TText const, Standard>::Type          TTextIterator;
+    typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> >     TRankDictionaryValue;
+    typedef typename Iterator<TText const, Standard>::Type      TTextIterator;
 
     // Reserve space in the RankSupport String.
 //    reserve(dict, length(text), Exact());
 
     // Get an empty RankSupport entry.
-    TRankEntry entry;
+    TRankDictionaryValue entry;
     _clear(entry);
 
     // Last bits might be smaller than BlockSize.
@@ -248,42 +269,49 @@ createRankDictionary(RankDictionary_<TText, TwoLevels<TSpec> > & dict, TText con
 }
 
 // ----------------------------------------------------------------------------
-// Function _getBlockRank()
+// Function _getBlockRank()                                    [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec, typename TPos, typename TChar>
-inline typename Size<TText>::Type
-_getBlockRank(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos blockPos, TChar c)
+template <typename TValue, typename TSpec, typename TPos, typename TChar>
+inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
+_getBlockRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos, TChar c)
 {
     return blockAt(dict, blockPos)[ordValue(c)];
 }
 
 // ----------------------------------------------------------------------------
-// Function _getBitsRank()
+// Function _getBitsRank()                                     [RankDictionary]
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): This version is generic but absymally slow.
+
+template <typename TValue, typename TSpec, typename TPos, typename TChar>
+inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
+_getBitsRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos, TPos bitsPos, TChar c)
+{
+    typedef RankDictionary_<TwoLevels<TValue, TSpec> >          TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                TSize;
+
+    TSize bitsRank = 0;
+
+    for (TSize i = 0; i < bitsPos; ++i)
+        bitsRank += isEqual(bitsAt(dict, blockPos)[i], c);
+
+    return bitsRank;
+}
+
+// ----------------------------------------------------------------------------
+// Function _getBitsRank()                                     [RankDictionary]
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TSpec, typename TPos, typename TChar>
-//inline typename Size<TText>::Type
-//_getBitsRank(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos blockPos, TPos bitsPos, TChar c)
-//{
-//    typename Size<TText>::Type bitsRank = 0;
-//
-//    // NOTE(esiragusa): This version is generic but absymally slow.
-//    for (unsigned i = 0; i < bitsPos; ++i)
-//        rankInBlock += isEqual(value(bitsAt(dict, blockPos), i), c);
-//
-//    return bitsRank;
-//}
-
-template <typename TText, typename TSpec, typename TPos, typename TChar>
-inline typename Size<TText>::Type
-_getBitsRank(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos blockPos, TPos bitsPos, TChar c)
+template <typename TSpec, typename TPos, typename TChar>
+inline typename Size<RankDictionary_<TwoLevels<Dna, TSpec> > const>::Type
+_getBitsRank(RankDictionary_<TwoLevels<Dna, TSpec> > const & dict, TPos blockPos, TPos bitsPos, TChar c)
 {
-    typedef TwoLevelRankDictionaryValue_<TText>         TRankEntry;
-    typedef typename TRankEntry::TBits                  TBits;
-    typedef typename TBits::TBitVector                  TBlockBitVector;
-    typedef typename Value<TText>::Type                 TValue;
-    typedef typename Size<TText>::Type                  TSize;
+    typedef RankDictionary_<TwoLevels<Dna, TSpec> >             TRankDictionary;
+    typedef RankDictionaryValue_<TwoLevels<Dna, TSpec> >        TRankDictionaryValue;
+    typedef typename TRankDictionaryValue::TBits                TBits;
+    typedef typename TBits::TBitVector                          TBlockBitVector;
+    typedef typename Size<TRankDictionary>::Type                TSize;
 
     TBits bits = bitsAt(dict, blockPos);
 
@@ -303,21 +331,21 @@ _getBitsRank(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos blockP
     TSize bitsRank = popCount(mask);
 
     // If c == A then masked character positions must be subtracted from the count.
-    if (c == Dna('A')) bitsRank -= BlockSize<TValue>::VALUE - bitsPos;
+    if (c == Dna('A')) bitsRank -= BlockSize<Dna>::VALUE - bitsPos;
 
     return bitsRank;
 }
 
 // ----------------------------------------------------------------------------
-// Function getRank()
+// Function getRank()                                          [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TSpec, typename TPos, typename TChar>
-inline typename Size<TText>::Type
-getRank(RankDictionary_<TText, TwoLevels<TSpec> > const & dict, TPos pos, TChar c)
+template <typename TValue, typename TSpec, typename TPos, typename TChar>
+inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
+getRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
-    typedef typename Value<TText>::Type     TValue;
-    typedef typename Size<TText>::Type      TSize;
+    typedef RankDictionary_<TwoLevels<TValue, TSpec> >          TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                TSize;
 
     // TODO(esiragusa): Use bit shifts to derive positions.
     TSize blockPos = pos / BlockSize<TValue>::VALUE;
