@@ -56,10 +56,10 @@
 #include <cmath>    // isnan, isinf
 #include <string.h> // memset
 
-//////////////////////////////////////////////////////////////////////////////
-// INDEX CONSTRUCTION
-//////////////////////////////////////////////////////////////////////////////
 
+// ==========================================================================
+// Index construction.
+// ==========================================================================
 
 #include <seqan/index/index_forwards.h>
 
@@ -69,8 +69,9 @@
 
 #include <seqan/index/index_base.h>
 
-//____________________________________________________________________________
-// q-gram index creator
+// ----------------------------------------------------------------------------
+// q-Gram index creator.
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/shape_base.h>
 #include <seqan/index/shape_gapped.h>
@@ -81,8 +82,9 @@
 #include <seqan/index/index_qgram_openaddressing.h>
 //#include <seqan/index/index_qgram_nested.h>
 
-//____________________________________________________________________________
-// suffix array creators
+// ----------------------------------------------------------------------------
+// Suffix array creators.
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/radix.h>
 #include <seqan/index/index_sa_btree.h>
@@ -102,8 +104,9 @@
 #include <seqan/index/pump_separator7.h>
 #include <seqan/index/index_skew7_multi.h>
 
-//____________________________________________________________________________
-// enhanced table creators
+// ----------------------------------------------------------------------------
+// Enhanced table creators.
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/pump_lcp_core.h>
 #include <seqan/index/index_lcp.h>
@@ -112,47 +115,50 @@
 #include <seqan/index/index_childtab.h>
 #include <seqan/index/index_bwt.h>
 
-
-//////////////////////////////////////////////////////////////////////////////
-// INDEX USAGE
-//////////////////////////////////////////////////////////////////////////////
+// ==========================================================================
+// Index usage.
+// ==========================================================================
 
 #include <seqan/index/index_shims.h>
 
-//____________________________________________________________________________
-// (virtual) string trees
+// ----------------------------------------------------------------------------
+// Virtual string trees.
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/index_esa_base.h>
 #include <seqan/index/index_esa_stree.h>
 #include <seqan/index/index_wotd.h>
 #include <seqan/index/index_dfi.h>
 
-//____________________________________________________________________________
-// suffix tree algorithms
+// ----------------------------------------------------------------------------
+// Suffix tree algorithms.
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/index_esa_algs.h>
 #include <seqan/index/index_esa_algs_multi.h>
 #include <seqan/index/index_esa_drawing.h>
 #include <seqan/index/repeat_base.h>
 
-//____________________________________________________________________________
-// Pizza & Chili interface (compressed indices)
+// ----------------------------------------------------------------------------
+// Pizza & Chili interface (compressed indices).
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/index_pizzachili.h>
 #include <seqan/index/index_pizzachili_find.h>
 
-//____________________________________________________________________________
-// Shawarma interface (suffix array creators)
+// ----------------------------------------------------------------------------
+// Shawarma interface (suffix array creators).
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/index_shawarma.h>
 
+// ==========================================================================
+// Finder interface.
+// ==========================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-// FINDER INTERFACE
-//////////////////////////////////////////////////////////////////////////////
-
-//____________________________________________________________________________
-// index based finders
+// ----------------------------------------------------------------------------
+// Index based finders.
+// ----------------------------------------------------------------------------
 
 #include <seqan/index/find_index_esa.h>
 #include <seqan/index/find_index_approx.h>
@@ -161,22 +167,55 @@
 #include <seqan/index/find_quasar.h>
 #include <seqan/index/find_swift.h>
 
-//////////////////////////////////////////////////////////////////////////////
-// FM INDEX
-//////////////////////////////////////////////////////////////////////////////
+// ==========================================================================
+// FM Index.
+// ==========================================================================
+
+// TODO(esiragusa): Remove RankSupportBitString.
 #include <seqan/index/index_fm_rank_support_bit_string.h>
-#include <seqan/index/index_fm_sparse_string.h>
-#include <seqan/index/index_fm_compressed_sa.h>
-#include <seqan/index/index_fm_compressed_sa_iterator.h>
+
+// TODO(esiragusa): Remove PrefixSumTable.
 #include <seqan/index/index_fm_prefix_sum_table.h>
+
+// ----------------------------------------------------------------------------
+// Rank dictionaries.
+// ----------------------------------------------------------------------------
+
+#include <seqan/index/index_fm_rank_dictionary_base.h>
+#include <seqan/index/index_fm_rank_dictionary_levels.h>
+
 #include <seqan/index/index_fm_right_array_binary_tree.h>
 #include <seqan/index/index_fm_right_array_binary_tree_iterator.h>
-// #include <seqan/index/index_fm_wavelet_tree.h>
 #include <seqan/index/index_fm_rank_dictionary_wt.h>
+
 #include <seqan/index/index_fm_rank_dictionary_bms.h>
+
 #include <seqan/index/index_fm_sentinel_rank_dictionary.h>
+
+// ----------------------------------------------------------------------------
+// Sparse strings.
+// ----------------------------------------------------------------------------
+
+#include <seqan/index/index_fm_sparse_string.h>
+
+// ----------------------------------------------------------------------------
+// Compressed suffix array.
+// ----------------------------------------------------------------------------
+
+#include <seqan/index/index_fm_compressed_sa.h>
+#include <seqan/index/index_fm_compressed_sa_iterator.h>
+
+// ----------------------------------------------------------------------------
+// Main index.
+// ----------------------------------------------------------------------------
+
 #include <seqan/index/index_fm_lf_table.h>
 #include <seqan/index/index_fm.h>
+
+// ----------------------------------------------------------------------------
+// Virtual string trees.
+// ----------------------------------------------------------------------------
+
 #include <seqan/index/index_fm_stree.h>
 
 #endif //#ifndef SEQAN_HEADER_...

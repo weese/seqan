@@ -32,22 +32,17 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef INDEX_FM_RANK_DICTIONARY_TWO_LEVELS_H_
-#define INDEX_FM_RANK_DICTIONARY_TWO_LEVELS_H_
+#ifndef INDEX_FM_RANK_DICTIONARY_LEVELS_H_
+#define INDEX_FM_RANK_DICTIONARY_LEVELS_H_
 
 namespace seqan {
 
 // ============================================================================
 // Forwards
 // ============================================================================
-// TODO(esiragusa): Move Base RankDictionary stuff to a separete header file.
-
-// ----------------------------------------------------------------------------
-// Class RankDictionary_
-// ----------------------------------------------------------------------------
 
 template <typename TSpec>
-struct RankDictionary_ {};
+struct RankDictionary_;
 
 // ----------------------------------------------------------------------------
 // Struct RankDictionaryValue_
@@ -77,19 +72,22 @@ struct RankDictionaryBits_;
 template <typename TSpec>
 struct RankDictionaryBitMask_;
 
-// ----------------------------------------------------------------------------
-// Metafunction RankDictionaryFibreSpec
-// ----------------------------------------------------------------------------
-
-template <typename TRankDictionary>
-struct RankDictionaryFibreSpec
-{
-    typedef Alloc<> Type;
-};
-
 // ============================================================================
 // Tags
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Tag FibreRanks
+// ----------------------------------------------------------------------------
+
+struct FibreRanks_;
+
+typedef Tag<FibreRanks_>
+const FibreRanks;
+
+// ----------------------------------------------------------------------------
+// Tag TwoLevels
+// ----------------------------------------------------------------------------
 
 template <typename TValue = bool, typename TSpec = void>
 struct TwoLevels {};
@@ -179,7 +177,7 @@ struct RankDictionaryBitMask_<__uint64>
 // ----------------------------------------------------------------------------
 
 template <typename TSpec>
-struct Fibre<RankDictionary_<TSpec>, FibreValueString>
+struct Fibre<RankDictionary_<TSpec>, FibreRanks>
 {
     typedef RankDictionary_<TSpec>                                          TRankDictionary_;
     typedef typename RankDictionaryFibreSpec<TRankDictionary_>::Type        TRankDictionaryFibreSpec_;
@@ -194,7 +192,6 @@ struct Fibre<RankDictionary_<TSpec>, FibreValueString>
 // ----------------------------------------------------------------------------
 // Struct RankDictionaryValue_
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Move Base RankDictionaryValue_ to a separete header file.
 
 template <typename TSpec = TwoLevels<> >
 struct RankDictionaryValue_ {};
@@ -223,7 +220,7 @@ template <typename TValue, typename TSpec>
 struct RankDictionary_<TwoLevels<TValue, TSpec> >
 {
     typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> >         TRankDictionaryValue;
-    typedef typename Fibre<RankDictionary_, FibreValueString>::Type TRankDictionaryFibre;
+    typedef typename Fibre<RankDictionary_, FibreRanks>::Type       TRankDictionaryFibre;
 
     TRankDictionaryFibre ranks;
 
@@ -578,7 +575,7 @@ inline void updateRanks(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos 
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
     typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
-    typedef typename Fibre<TRankDictionary, FibreValueString>::Type TFibreRanks;
+    typedef typename Fibre<TRankDictionary, FibreRanks>::Type       TFibreRanks;
     typedef typename Iterator<TFibreRanks, Standard>::Type          TFibreRanksIter;
 
     TFibreRanksIter ranksBegin = begin(dict.ranks, Standard());
@@ -649,4 +646,4 @@ createRankDictionary(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TText co
 
 }
 
-#endif  // INDEX_FM_RANK_DICTIONARY_TWO_LEVELS_H_
+#endif  // INDEX_FM_RANK_DICTIONARY_LEVELS_H_
