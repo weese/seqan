@@ -41,9 +41,6 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
-template <typename TSpec>
-struct RankDictionary_;
-
 // ----------------------------------------------------------------------------
 // Struct RankDictionaryValue_
 // ----------------------------------------------------------------------------
@@ -177,9 +174,9 @@ struct RankDictionaryBitMask_<__uint64>
 // ----------------------------------------------------------------------------
 
 template <typename TSpec>
-struct Fibre<RankDictionary_<TSpec>, FibreRanks>
+struct Fibre<RankDictionary<TSpec>, FibreRanks>
 {
-    typedef RankDictionary_<TSpec>                                          TRankDictionary_;
+    typedef RankDictionary<TSpec>                                           TRankDictionary_;
     typedef typename RankDictionaryFibreSpec<TRankDictionary_>::Type        TRankDictionaryFibreSpec_;
 
     typedef String<RankDictionaryValue_<TSpec>, TRankDictionaryFibreSpec_>  Type;
@@ -213,21 +210,21 @@ struct RankDictionaryValue_<TwoLevels<TValue, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
-// Class TwoLevels RankDictionary_
+// Class TwoLevels RankDictionary
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-struct RankDictionary_<TwoLevels<TValue, TSpec> >
+struct RankDictionary<TwoLevels<TValue, TSpec> >
 {
-    typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> >         TRankDictionaryValue;
-    typedef typename Fibre<RankDictionary_, FibreRanks>::Type       TRankDictionaryFibre;
+    typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> >     TRankDictionaryValue;
+    typedef typename Fibre<RankDictionary, FibreRanks>::Type    TRankDictionaryFibre;
 
     TRankDictionaryFibre ranks;
 
-    RankDictionary_() {};
+    RankDictionary() {};
 
     template <typename TText>
-    RankDictionary_(TText const & text)
+    RankDictionary(TText const & text)
     {
         createRankDictionary(*this, text);
     };
@@ -242,7 +239,7 @@ struct RankDictionary_<TwoLevels<TValue, TSpec> >
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline void _clearBlockAt(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+inline void _clearBlockAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     clear(blockAt(dict, pos));
 }
@@ -252,7 +249,7 @@ inline void _clearBlockAt(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPo
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TPos>
-inline void _clearBlockAt(RankDictionary_<TwoLevels<bool, TSpec> > & dict, TPos pos)
+inline void _clearBlockAt(RankDictionary<TwoLevels<bool, TSpec> > & dict, TPos pos)
 {
     blockAt(dict, pos) = 0u;
 }
@@ -277,14 +274,14 @@ inline void _assignBits(TBits & bits,
 
 template <typename TValue, typename TSpec, typename TPos>
 inline typename RankDictionaryBits_<TwoLevels<TValue, TSpec> >::Type &
-bitsAt(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+bitsAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     return dict.ranks[pos].bits;
 }
 
 template <typename TValue, typename TSpec, typename TPos>
 inline typename RankDictionaryBits_<TwoLevels<TValue, TSpec> >::Type const &
-bitsAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
+bitsAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     return dict.ranks[pos].bits;
 }
@@ -295,14 +292,14 @@ bitsAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 
 template <typename TValue, typename TSpec, typename TPos>
 inline typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type &
-blockAt(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+blockAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     return dict.ranks[pos].block;
 }
 
 template <typename TValue, typename TSpec, typename TPos>
 inline typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type const &
-blockAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
+blockAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     return dict.ranks[pos].block;
 }
@@ -313,7 +310,7 @@ blockAt(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 
 template <typename TValue, typename TSpec, typename TSize, typename TExpand>
 inline void
-reserve(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpand> const tag)
+reserve(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpand> const tag)
 {
     reserve(dict.ranks, std::ceil(size / static_cast<double>(BlockSize<TValue>::VALUE)), tag);
 }
@@ -324,7 +321,7 @@ reserve(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpa
 
 template <typename TValue, typename TSpec, typename TSize, typename TExpand>
 inline void
-resize(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpand> const tag)
+resize(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpand> const tag)
 {
     resize(dict.ranks, std::ceil(size / static_cast<double>(BlockSize<TValue>::VALUE)), tag);
 }
@@ -334,8 +331,8 @@ resize(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TSize size, Tag<TExpan
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos, typename TChar>
-inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
-_getBlockRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos, TChar c)
+inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+_getBlockRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos, TChar c)
 {
     return blockAt(dict, blockPos)[ordValue(c)];
 }
@@ -345,8 +342,8 @@ _getBlockRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos bloc
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TPos>
-inline typename Size<RankDictionary_<TwoLevels<bool, TSpec> > const>::Type
-_getBlockRank(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TPos blockPos, bool c)
+inline typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
+_getBlockRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos blockPos, bool c)
 {
     // Not blockPos but starting position of the block.
     return c ? blockAt(dict, blockPos) : blockPos - blockAt(dict, blockPos);
@@ -358,11 +355,11 @@ _getBlockRank(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TPos blockP
 // NOTE(esiragusa): This version is generic but absymally slow.
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TBitsPos>
-inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
-_getBitsRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos, TValue c)
+inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+_getBitsRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos, TValue c)
 {
     typedef TwoLevels<Dna, TSpec>                                   TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
 
     TSize bitsRank = 0;
@@ -378,11 +375,11 @@ _getBitsRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TBlockPos 
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TBlockPos, typename TBitsPos>
-inline typename Size<RankDictionary_<TwoLevels<Dna, TSpec> > const>::Type
-_getBitsRank(RankDictionary_<TwoLevels<Dna, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos, Dna c)
+inline typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
+_getBitsRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos, Dna c)
 {
     typedef TwoLevels<Dna, TSpec>                                   TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
     typedef typename RankDictionaryBits_<TRankDictionarySpec>::Type TBits;
     typedef typename TBits::TBitVector                              TBitVector;
@@ -415,11 +412,11 @@ _getBitsRank(RankDictionary_<TwoLevels<Dna, TSpec> > const & dict, TBlockPos blo
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TBlockPos, typename TBitsPos>
-inline typename Size<RankDictionary_<TwoLevels<bool, TSpec> > const>::Type
-_getBitsRank(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos, bool c)
+inline typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
+_getBitsRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos, bool c)
 {
     typedef TwoLevels<bool, TSpec>                                  TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
     typedef typename RankDictionaryBits_<TRankDictionarySpec>::Type TBits;
     typedef typename TBits::TBitVector                              TBitVector;
@@ -441,8 +438,8 @@ _getBitsRank(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TBlockPos bl
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
-_getBitsRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos, TValue c)
+inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+_getBitsRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos, TValue c)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
     typedef typename RankDictionaryBits_<TRankDictionarySpec>::Type TBits;
@@ -458,7 +455,7 @@ _getBitsRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos block
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TBitsPos>
 inline typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type
-_getBitsRanks(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos)
+_getBitsRanks(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos)
 {
     typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
     typedef typename RankDictionaryBlock_<TRankDictionarySpec>::Type    TBlock;
@@ -478,7 +475,7 @@ _getBitsRanks(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TBlockPos
 
 template <typename TSpec, typename TBlockPos, typename TBitsPos>
 inline typename RankDictionaryBlock_<TwoLevels<bool, TSpec> >::Type
-_getBitsRanks(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos)
+_getBitsRanks(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TBlockPos blockPos, TBitsPos bitsPos)
 {
     return _getBitsRank(dict, blockPos, bitsPos, true);
 }
@@ -489,7 +486,7 @@ _getBitsRanks(RankDictionary_<TwoLevels<bool, TSpec> > const & dict, TBlockPos b
 
 template <typename TValue, typename TSpec, typename TPos>
 inline typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type
-_getBitsRanks(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos)
+_getBitsRanks(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos blockPos)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
     typedef typename RankDictionaryBits_<TRankDictionarySpec>::Type TBits;
@@ -503,11 +500,11 @@ _getBitsRanks(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos bloc
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos, typename TChar>
-inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
-getRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
+inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
 
     // TODO(esiragusa): Use bit shifts to derive positions.
@@ -523,10 +520,10 @@ getRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline TValue getValue(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
+inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
 
     // TODO(esiragusa): Use bit shifts to derive positions.
@@ -541,10 +538,10 @@ inline TValue getValue(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, 
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos, typename TChar>
-inline void setValue(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos pos, TChar c)
+inline void setValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos, TChar c)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
 
     // TODO(esiragusa): Use bit shifts to derive positions.
@@ -559,7 +556,7 @@ inline void setValue(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos pos
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TChar, typename TExpand>
-inline void appendValue(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
+inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
 {
     resize(dict, length(dict) + 1, tag);
     setValue(dict, length(dict), c);
@@ -570,10 +567,10 @@ inline void appendValue(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TChar
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline void updateRanks(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
     typedef typename Fibre<TRankDictionary, FibreRanks>::Type       TFibreRanks;
     typedef typename Iterator<TFibreRanks, Standard>::Type          TFibreRanksIter;
@@ -596,7 +593,7 @@ inline void updateRanks(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TPos 
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline void updateRanks(RankDictionary_<TwoLevels<TValue, TSpec> > & dict)
+inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 {
     updateRanks(dict, 0u);
 }
@@ -607,10 +604,10 @@ inline void updateRanks(RankDictionary_<TwoLevels<TValue, TSpec> > & dict)
 
 template <typename TValue, typename TSpec, typename TText>
 inline void
-createRankDictionary(RankDictionary_<TwoLevels<TValue, TSpec> > & dict, TText const & text)
+createRankDictionary(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TText const & text)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
     typedef typename Iterator<TText const, Standard>::Type          TTextIterator;
 

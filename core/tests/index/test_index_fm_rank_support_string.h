@@ -32,15 +32,13 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef TEST_INDEX_FM_RANK_SUPPORT_STRING_H_
-#define TEST_INDEX_FM_RANK_SUPPORT_STRING_H_
+#ifndef TEST_INDEX_FM_RANK_DICTIONARY_LEVELS_H_
+#define TEST_INDEX_FM_RANK_DICTIONARY_LEVELS_H_
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/random.h>
 #include <seqan/index.h>
-
-#include <seqan/index/index_fm_rank_support_string.h>
 
 using namespace seqan;
 
@@ -50,7 +48,7 @@ using namespace seqan;
 
 namespace seqan {
 template <typename TValue>
-struct Size<RankDictionary_<TwoLevels<TValue, unsigned> > >
+struct Size<RankDictionary<TwoLevels<TValue, unsigned> > >
 {
     typedef unsigned    Type;
 };
@@ -69,7 +67,7 @@ void testRankDictionaryGetRank(String<TAlphabet, TStringSpec> const & text, TSpe
     typedef typename ValueSize<TAlphabet>::Type         TAlphabetSize;
     typedef String<TTextSize>                           TRankMap;
     typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
-    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
+    typedef RankDictionary<TRankDictionarySpec>         TRankDictionary;
 
     TAlphabetSize alphabetSize = ValueSize<TAlphabet>::VALUE;
 
@@ -128,7 +126,7 @@ SEQAN_DEFINE_TEST(test_rss_getrank)
 //    typedef String<TAlphabet, TTextSpec>                TText;
 //
 //    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
-//    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
+//    typedef RankDictionary<TRankDictionarySpec>         TRankDictionary;
 //
 //    TRankSupport rs;
 //
@@ -157,7 +155,7 @@ SEQAN_DEFINE_TEST(test_rss_getrank)
 //    typedef String<TAlphabet, TTextSpec>                TText;
 //
 //    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
-//    typedef RankDictionary_<TRankDictionarySpec>        TRankDictionary;
+//    typedef RankDictionary<TRankDictionarySpec>         TRankDictionary;
 //
 ////    TText text = "ACGTNACGTNACGTNACGTNA";
 //    TText text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
@@ -176,5 +174,5 @@ SEQAN_DEFINE_TEST(test_rss_getrank)
 //    std::cout << std::endl;
 //}
 
-#endif  // TEST_INDEX_FM_RANK_SUPPORT_STRING_H_
+#endif  // TEST_INDEX_FM_RANK_DICTIONARY_LEVELS_H_
 
