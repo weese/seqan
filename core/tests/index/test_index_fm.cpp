@@ -36,8 +36,6 @@
 #include <seqan/file.h>
 
 #include "test_index_fm.h"
-#include "test_index_fm_rank_support_string.h"
-#include "test_index_fm_rank_support_bit_string.h"
 #include "test_index_fm_prefix_sum_table.h"
 #include "test_index_fm_right_array_binary_tree.h"
 #include "test_index_fm_right_array_binary_tree_iterator.h"
@@ -46,25 +44,34 @@
 #include "test_index_fm_compressed_sa_iterator.h"
 #include "test_index_fm_stree.h"
 
+// TODO(esiragusa): Move this stuff into test_index_fm_rank_dictionary tests.
+#include "test_index_fm_rank_support_string.h"
+
+// TODO(esiragusa): Remove this stuff.
+//#include "test_index_fm_rank_support_bit_string.h"
+
 SEQAN_BEGIN_TESTSUITE(test_fm_index)
 {
+
+    // TODO(esiragusa): Move this stuff into test_index_fm_rank_dictionary tests.
 //    SEQAN_CALL_TEST(test_rss_sizeof);
 //    SEQAN_CALL_TEST(test_rss_resize);
     SEQAN_CALL_TEST(test_rss_getrank);
 
-    SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
-    SEQAN_CALL_TEST(test_rsbs_resize);
-    SEQAN_CALL_TEST(test_rsbs_getBuPos);
-    SEQAN_CALL_TEST(test_rsbs_getSBuPos);
-    SEQAN_CALL_TEST(test_rsbs_getPosInBu);
-    SEQAN_CALL_TEST(test_rsbs_isBitSet);
-    SEQAN_CALL_TEST(test_rsbs_append_value);
-    SEQAN_CALL_TEST(test_rsbs_rank);
-    SEQAN_CALL_TEST(test_rsbs_update_ranks_);
-    SEQAN_CALL_TEST(test_rsbs_constructor);
-    SEQAN_CALL_TEST(test_rsbs_equalOperator);
-    SEQAN_CALL_TEST(test_rsbs_assignOperator);
-    SEQAN_CALL_TEST(test_rsbs_open_save);
+    // TODO(esiragusa): Remove this stuff.
+//    SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
+//    SEQAN_CALL_TEST(test_rsbs_resize);
+//    SEQAN_CALL_TEST(test_rsbs_getBuPos);
+//    SEQAN_CALL_TEST(test_rsbs_getSBuPos);
+//    SEQAN_CALL_TEST(test_rsbs_getPosInBu);
+//    SEQAN_CALL_TEST(test_rsbs_isBitSet);
+//    SEQAN_CALL_TEST(test_rsbs_append_value);
+//    SEQAN_CALL_TEST(test_rsbs_rank);
+//    SEQAN_CALL_TEST(test_rsbs_update_ranks_);
+//    SEQAN_CALL_TEST(test_rsbs_constructor);
+//    SEQAN_CALL_TEST(test_rsbs_equalOperator);
+//    SEQAN_CALL_TEST(test_rsbs_assignOperator);
+//    SEQAN_CALL_TEST(test_rsbs_open_save);
 
     SEQAN_CALL_TEST(prefix_sum_table_constructor);
     SEQAN_CALL_TEST(prefix_sum_table_get_alphabet_size);
