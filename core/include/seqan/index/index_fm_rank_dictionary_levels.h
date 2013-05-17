@@ -603,33 +603,19 @@ inline void setValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos,
     TSize blockPos = pos / BlockSize<TValue>::VALUE;
     TSize bitsPos = pos % BlockSize<TValue>::VALUE;
 
-    bitsAt(dict, blockPos)[bitsPos] = convert<TValue>(c);
+    assignValue(bitsAt(dict, blockPos), bitsPos, convert<TValue>(c));
 }
-
-//template <typename TSpec, typename TPos, typename TChar>
-//inline void setValue(RankDictionary<TwoLevels<bool, TSpec> > & dict, TPos pos, TChar c)
-//{
-//    typedef TwoLevels<bool, TSpec>                                  TRankDictionarySpec;
-//    typedef RankDictionary<TRankDictionarySpec>                     TRankDictionary;
-//    typedef typename Size<TRankDictionary>::Type                    TSize;
-//
-//    // TODO(esiragusa): Use bit shifts to derive positions.
-//    TSize blockPos = pos / BlockSize<bool>::VALUE;
-//    TSize bitsPos = pos % BlockSize<bool>::VALUE;
-//
-//    bitsAt(dict, blockPos)[bitsPos] = c ? true : false;
-//}
 
 // ----------------------------------------------------------------------------
 // Function appendValue()                                      [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec, typename TChar, typename TExpand>
-inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
-{
-    resize(dict, length(dict) + 1, tag);
-    setValue(dict, length(dict), c);
-}
+//template <typename TValue, typename TSpec, typename TChar, typename TExpand>
+//inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
+//{
+//    resize(dict, length(dict) + 1, tag);
+//    setValue(dict, length(dict), c);
+//}
 
 // ----------------------------------------------------------------------------
 // Function updateRanks()                                      [RankDictionary]
