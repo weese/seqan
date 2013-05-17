@@ -66,8 +66,6 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(test_rsbs_equalOperator);
     SEQAN_CALL_TEST(test_rsbs_assignOperator);
     SEQAN_CALL_TEST(test_rsbs_open_save);
-    
-    SEQAN_CALL_TEST(test_rsbs_iterator_get_value);
 
     SEQAN_CALL_TEST(prefix_sum_table_constructor);
     SEQAN_CALL_TEST(prefix_sum_table_get_alphabet_size);
@@ -117,7 +115,7 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(sparse_string_clear_length_resize);
     SEQAN_CALL_TEST(sparse_string_empty);
     SEQAN_CALL_TEST(sparse_string_get_fibre);
-    
+
     SEQAN_CALL_TEST(compressed_sa_clear_length_resize);
     SEQAN_CALL_TEST(compressed_sa_empty);
     SEQAN_CALL_TEST(compressed_sa_create_compressed_sa);
@@ -126,10 +124,10 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(compressed_sa_set_lf_table);
     SEQAN_CALL_TEST(compressed_sa_value_access);
     SEQAN_CALL_TEST(compressed_sa_open_save);
-    
+
     SEQAN_CALL_TEST(compressed_sa_iterator_begin);
     SEQAN_CALL_TEST(compressed_sa_iterator_end);
-    
+
     SEQAN_CALL_TEST(test_lf_table_lf_mapping);
 
     SEQAN_CALL_TEST(test_fm_index_constructor);
