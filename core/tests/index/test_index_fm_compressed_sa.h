@@ -105,27 +105,27 @@ void compressedSaCreateCompressedSa(TCompressedSA & /*tag*/)
 
     createCompressedSa(compressedSA, fullSA, 3u);
 
-    SEQAN_ASSERT_EQ(length(getFibre(getFibre(compressedSA, FibreSparseString()), FibreValueString())), 4u);
+    SEQAN_ASSERT_EQ(length(getFibre(getFibre(compressedSA, FibreSparseString()), FibreValues())), 4u);
 
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 2), 6u);
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 5), 9u);
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 7), 0u);
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 9), 3u);
 
-    typedef typename Fibre<typename Fibre<TCompressedSA, FibreSparseString>::Type, FibreIndicatorString>::Type TIndicatorString;
+    typedef typename Fibre<typename Fibre<TCompressedSA, FibreSparseString>::Type, FibreIndicators>::Type TIndicators;
 
-    TIndicatorString & indicatorString = getFibre(getFibre(compressedSA, FibreSparseString()), FibreIndicatorString());
+    TIndicators & indicators = getFibre(getFibre(compressedSA, FibreSparseString()), FibreIndicators());
 
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 0), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 1), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 2), true);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 3), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 4), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 5), true);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 6), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 7), true);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 8), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 9), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 0), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 1), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 2), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 3), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 4), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 5), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 6), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 7), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 8), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 9), true);
 }
 
 template <typename TCompressedSA>

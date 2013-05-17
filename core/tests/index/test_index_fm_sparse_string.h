@@ -71,17 +71,17 @@ template <typename TSparseString>
 void sparseStringGetValue(TSparseString & /*tag*/)
 { 
     TSparseString sparseString;
-    resize(getFibre(sparseString, FibreValueString()), 3);
+    resize(getFibre(sparseString, FibreValues()), 3);
 
-    assignValue(getFibre(sparseString, FibreValueString()), 0, 0);
-    assignValue(getFibre(sparseString, FibreValueString()), 1, 2);
-    assignValue(getFibre(sparseString, FibreValueString()), 2, 3);
+    assignValue(getFibre(sparseString, FibreValues()), 0, 0);
+    assignValue(getFibre(sparseString, FibreValues()), 1, 2);
+    assignValue(getFibre(sparseString, FibreValues()), 2, 3);
 
-    resize(getFibre(sparseString, FibreIndicatorString()), 30);
-    setBitTo(getFibre(sparseString, FibreIndicatorString()), 0, 1);
-    setBitTo(getFibre(sparseString, FibreIndicatorString()), 10, 1);
-    setBitTo(getFibre(sparseString, FibreIndicatorString()), 20, 1);
-    _updateRanks(getFibre(sparseString, FibreIndicatorString()));
+    resize(getFibre(sparseString, FibreIndicators()), 30);
+    setBitTo(getFibre(sparseString, FibreIndicators()), 0, 1);
+    setBitTo(getFibre(sparseString, FibreIndicators()), 10, 1);
+    setBitTo(getFibre(sparseString, FibreIndicators()), 20, 1);
+    updateRanks(getFibre(sparseString, FibreIndicators()));
 
     SEQAN_ASSERT_EQ(getValue(sparseString, 0), 0u);
     SEQAN_ASSERT_EQ(getValue(sparseString, 10), 2u);
@@ -118,20 +118,10 @@ void sparseStringEmpty(TSparseString & /*tag*/)
     SEQAN_ASSERT_EQ(empty(sparseString), true);
 }
 
-template <typename TSparseString>
-void sparseStringGetFibre(TSparseString & /*tag*/)
-{ 
-    TSparseString sparseString;
-
-    resize(sparseString, 3);
-    SEQAN_ASSERT(getFibre(sparseString, FibreValueString()) == sparseString.valueString);
-    SEQAN_ASSERT(getFibre(sparseString, FibreIndicatorString()) == sparseString.indicatorString);
-}
-
 // template <typename TSparseString>
 // void sparseStringValue(TSparseString & /*tag*/)
 // { 
-//     typedef typename Fibre<TSparseString, FibreValueString>::Type TValueString;
+//     typedef typename Fibre<TSparseString, FibreValues>::Type TValueString;
 //     typedef typename Value<TValueString>::Type TValue;
 // 
 //     TSparseString sparseString;

@@ -44,11 +44,20 @@ using namespace seqan;
 template <typename TIndex>
 void compressedSaIterBegin(TIndex & /*tag*/)
 { 
-    typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
+    typedef typename Fibre<TIndex, FibreSA>::Type                   TCompressedSA;
+    typedef typename Fibre<TCompressedSA, FibreSparseString>::Type  TSparseString;
+    typedef typename Fibre<TSparseString, FibreIndicators>::Type    TIndicators;
+    typedef typename Fibre<TSparseString, FibreValues>::Type        TValues;
+
     TCompressedSA compressedSA;
+
+    TIndicators & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
+    TValues & values = getFibre(compressedSA.sparseString, FibreValues());
+
     resize(compressedSA, 3);
-    setBitTo(compressedSA.sparseString.indicatorString, 0, 1);
-    appendValue(compressedSA.sparseString.valueString, 12);
+    setValue(indicators, 0, true);
+    updateRanks(indicators);
+    appendValue(values, 12);
 
     typename Iterator<TCompressedSA>::Type defaultIter = begin(compressedSA);
     SEQAN_ASSERT_EQ(value(defaultIter), 12u);
@@ -64,12 +73,20 @@ void compressedSaIterBegin(TIndex & /*tag*/)
 template <typename TIndex>
 void compressedSaIterEnd(TIndex & /*tag*/)
 { 
-    typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
+    typedef typename Fibre<TIndex, FibreSA>::Type                   TCompressedSA;
+    typedef typename Fibre<TCompressedSA, FibreSparseString>::Type  TSparseString;
+    typedef typename Fibre<TSparseString, FibreIndicators>::Type    TIndicators;
+    typedef typename Fibre<TSparseString, FibreValues>::Type        TValues;
+
     TCompressedSA compressedSA;
+
+    TIndicators & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
+    TValues & values = getFibre(compressedSA.sparseString, FibreValues());
+
     resize(compressedSA, 3);
-    setBitTo(compressedSA.sparseString.indicatorString, 2, 1);
-    _updateRanks(compressedSA.sparseString.indicatorString);
-    appendValue(compressedSA.sparseString.valueString, 12);
+    setValue(indicators, 2, true);
+    updateRanks(indicators);
+    appendValue(values, 12);
 
     typename Iterator<TCompressedSA>::Type defaultIter = end(compressedSA);
     SEQAN_ASSERT_EQ(value(--defaultIter), 12u);

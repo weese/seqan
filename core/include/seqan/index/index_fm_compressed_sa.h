@@ -63,6 +63,7 @@ typedef Tag<FibreLfTable_> const        FibreLfTable;
 ..see:Function.getFibre
 ..include:seqan/index.h
 */
+// TODO(esiragusa): Rename FibreSparseString as FibreSparseValues.
 struct FibreSparseString_;
 typedef Tag<FibreSparseString_> const FibreSparseString;
 
@@ -158,10 +159,11 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA
 {
-    typedef typename Value<typename Fibre<TSparseString, FibreValueString>::Type>::Type TCompressedSaValue;
+    typedef typename Value<typename Fibre<TSparseString, FibreValues>::Type>::Type  TCompressedSaValue;
 
 public:
     TSparseString   sparseString;
+    // TODO(esiragusa): Change the lfTable pointer to a Member<>::Type metafunction.
     TLfTable *      lfTable;
 
     CompressedSA() :
@@ -174,8 +176,8 @@ public:
 
     inline CompressedSA & operator=(CompressedSA const & other)
     {
-        sparseString = other.sparseString;
-        lfTable = other.lfTable;
+        getFibre(*this, FibreSparseString()) = getFibre(other, FibreSparseString());
+        getFibre(*this, FibreLfTable()) = getFibre(other, FibreLfTable());
         return *this;
     }
 
@@ -193,8 +195,8 @@ public:
 
     inline bool operator==(CompressedSA const & other) const
     {
-        return sparseString == other.sparseString &&
-               *lfTable == *(other.lfTable);
+        return getFibre(*this, FibreSparseString()) == getFibre(other, FibreSparseString());
+               getFibre(*this, FibreLfTable()) == getFibre(other, FibreLfTable());
     }
 };
 
@@ -300,11 +302,13 @@ void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     typedef CompressedSA<TSparseString, TLfTable, TSpec>            TCompressedSA;
     typedef typename Size<TSA>::Type                                TSASize;
     typedef typename Fibre<TCompressedSA, FibreSparseString>::Type  TSparseSA;
-    typedef typename Fibre<TSparseSA, FibreIndicatorString>::Type   TIndicatorString;
+    typedef typename Fibre<TSparseSA, FibreIndicators>::Type        TIndicators;
+    typedef typename Fibre<TSparseSA, FibreValues>::Type            TValues;
     typedef typename Iterator<TSA const, Standard>::Type            TSAIter;
 
     TSparseSA & sparseString = getFibre(compressedSA, FibreSparseString());
-    TIndicatorString & indicatorString = getFibre(sparseString, FibreIndicatorString());
+    TIndicators & indicators = getFibre(sparseString, FibreIndicators());
+    TValues & values = getFibre(sparseString, FibreValues());
 
     TSASize saLen = length(sa);
     resize(compressedSA, saLen + offset, Exact());
@@ -315,20 +319,20 @@ void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     for (TSASize pos = offset; saIt != saItEnd; ++saIt, ++pos)
     {
         if (getSeqOffset(getValue(saIt)) % compressionFactor == 0)
-            setBit(indicatorString, pos);
+            setValue(indicators, pos, true);
         else
-            clearBit(indicatorString, pos);
+            setValue(indicators, pos, false);
     }
-    _updateRanks(indicatorString);
+    updateRanks(indicators);
 
-    resize(sparseString.valueString, getRank(indicatorString, length(indicatorString) - 1), Exact());
+    resize(values, getRank(indicators, length(indicators) - 1), Exact());
 
     saIt = begin(sa, Standard());
     for (TSASize pos = offset, counter = 0; saIt != saItEnd; ++saIt, ++pos)
     {
-        if (isBitSet(indicatorString, pos))
+        if (getValue(indicators, pos))
         {
-            assignValue(compressedSA.sparseString.valueString, counter, getValue(saIt));
+            assignValue(values, counter, getValue(saIt));
             ++counter;
         }
     }
@@ -460,30 +464,34 @@ template <typename TSparseString, typename TLfTable, typename TSpec, typename TP
 inline typename Value<TSparseString>::Type
 value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
 {
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+    typedef typename Fibre<TSparseString, FibreIndicators>::Type    TIndicators;
+    typedef typename Fibre<TSparseString, FibreValues>::Type        TValues;
 
-    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
+    TIndicators const & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
+    TValues const & values = getFibre(compressedSA.sparseString, FibreValues());
 
     TPos counter = 0;
-    for (; !isBitSet(indicatorString, pos); ++counter)
+    for (; !getValue(indicators, pos); ++counter)
         pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
 
-    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
+    return _addGapDistance(getValue(values, getRank(indicators, pos) - 1), counter);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
 inline typename Value<TSparseString>::Type const
 value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos pos)
 {
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+    typedef typename Fibre<TSparseString, FibreIndicators>::Type    TIndicators;
+    typedef typename Fibre<TSparseString, FibreValues>::Type        TValues;
 
-    TIndicatorString const & indicatorString = getFibre(compressedSA.sparseString, FibreIndicatorString());
+    TIndicators const & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
+    TValues const & values = getFibre(compressedSA.sparseString, FibreValues());
 
     TPos counter = 0;
-    for (; !isBitSet(indicatorString, pos); ++counter)
+    for (; !getValue(indicators, pos); ++counter)
         pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
 
-    return _addGapDistance(getValue(compressedSA.sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
+    return _addGapDistance(getValue(values, getRank(indicators, pos) - 1), counter);
 }
 
 // ----------------------------------------------------------------------------
@@ -495,11 +503,11 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos po
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
 inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
 {
-    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+    typedef typename Fibre<TSparseString, FibreIndicators>::Type TIndicators;
 
-    TIndicatorString const & indicatorString = compressedSA.sparseString.indicatorString;
+    TIndicators const & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
 
-    if (isBitSet(indicatorString, pos)) return true;
+    if (getValue(indicators, pos)) return true;
 
     pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
 
