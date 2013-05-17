@@ -40,6 +40,52 @@ namespace seqan {
 // ============================================================================
 // Forwards
 // ============================================================================
+// TODO(esiragusa): Move Base RankDictionary stuff to a separete header file.
+
+// ----------------------------------------------------------------------------
+// Class RankDictionary_
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct RankDictionary_ {};
+
+// ----------------------------------------------------------------------------
+// Struct RankDictionaryValue_
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct RankDictionaryValue_;
+
+// ----------------------------------------------------------------------------
+// Metafunction RankDictionaryBlock_
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct RankDictionaryBlock_;
+
+// ----------------------------------------------------------------------------
+// Metafunction RankDictionaryBits_
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct RankDictionaryBits_;
+
+// ----------------------------------------------------------------------------
+// Metafunction RankDictionaryBitMask_
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct RankDictionaryBitMask_;
+
+// ----------------------------------------------------------------------------
+// Metafunction RankDictionaryFibreSpec
+// ----------------------------------------------------------------------------
+
+template <typename TRankDictionary>
+struct RankDictionaryFibreSpec
+{
+    typedef Alloc<> Type;
+};
 
 // ============================================================================
 // Tags
@@ -80,9 +126,6 @@ struct BlockSize
 // Metafunction RankDictionaryBlock_                                [TwoLevels]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-struct RankDictionaryBlock_;
-
 template <typename TValue, typename TSpec>
 struct RankDictionaryBlock_<TwoLevels<TValue, TSpec> >
 {
@@ -103,9 +146,6 @@ struct RankDictionaryBlock_<TwoLevels<bool, TSpec> >
 // Metafunction RankDictionaryBits_                                 [TwoLevels]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-struct RankDictionaryBits_;
-
 template <typename TValue, typename TSpec>
 struct RankDictionaryBits_<TwoLevels<TValue, TSpec> >
 {
@@ -115,9 +155,6 @@ struct RankDictionaryBits_<TwoLevels<TValue, TSpec> >
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitMask_
 // ----------------------------------------------------------------------------
-
-template <typename TValue>
-struct RankDictionaryBitMask_;
 
 template <>
 struct RankDictionaryBitMask_<unsigned short>
@@ -137,6 +174,19 @@ struct RankDictionaryBitMask_<__uint64>
     static const __uint64 VALUE = 0x5555555555555555;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction Fibre
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct Fibre<RankDictionary_<TSpec>, FibreValueString>
+{
+    typedef RankDictionary_<TSpec>                                          TRankDictionary_;
+    typedef typename RankDictionaryFibreSpec<TRankDictionary_>::Type        TRankDictionaryFibreSpec_;
+
+    typedef String<RankDictionaryValue_<TSpec>, TRankDictionaryFibreSpec_>  Type;
+};
+
 // ============================================================================
 // Classes
 // ============================================================================
@@ -144,6 +194,7 @@ struct RankDictionaryBitMask_<__uint64>
 // ----------------------------------------------------------------------------
 // Struct RankDictionaryValue_
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): Move Base RankDictionaryValue_ to a separete header file.
 
 template <typename TSpec = TwoLevels<> >
 struct RankDictionaryValue_ {};
@@ -165,21 +216,14 @@ struct RankDictionaryValue_<TwoLevels<TValue, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
-// Class RankDictionary_
-// ----------------------------------------------------------------------------
-
-template <typename TSpec>
-struct RankDictionary_ {};
-
-// ----------------------------------------------------------------------------
 // Class TwoLevels RankDictionary_
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
 struct RankDictionary_<TwoLevels<TValue, TSpec> >
 {
-    typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> > TRankDictionaryValue;
-    typedef String<TRankDictionaryValue>                    TRankDictionaryFibre;
+    typedef RankDictionaryValue_<TwoLevels<TValue, TSpec> >         TRankDictionaryValue;
+    typedef typename Fibre<RankDictionary_, FibreValueString>::Type TRankDictionaryFibre;
 
     TRankDictionaryFibre ranks;
 
@@ -215,7 +259,7 @@ inline void _clear(RankDictionaryValue_<TwoLevels<bool, TSpec> > & entry)
 }
 
 // ----------------------------------------------------------------------------
-// Function _assignBits()
+// Function _assignBits()                                [RankDictionaryValue_]
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TTextIterator>
@@ -229,7 +273,7 @@ inline void _assignBits(RankDictionaryValue_<TwoLevels<TValue, TSpec> > & rank,
 }
 
 // ----------------------------------------------------------------------------
-// Function _updateBlockRank()
+// Function _updateBlockRank()                           [RankDictionaryValue_]
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TTextIterator>
