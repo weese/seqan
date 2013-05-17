@@ -165,7 +165,6 @@
 // FM INDEX
 //////////////////////////////////////////////////////////////////////////////
 #include <seqan/index/index_fm_rank_support_bit_string.h>
-#include <seqan/index/index_fm_rank_support_bit_string_iterator.h>
 #include <seqan/index/index_fm_sparse_string.h>
 #include <seqan/index/index_fm_compressed_sa.h>
 #include <seqan/index/index_fm_compressed_sa_iterator.h>

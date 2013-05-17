@@ -38,7 +38,6 @@
 #include "test_index_fm.h"
 #include "test_index_fm_rank_support_string.h"
 #include "test_index_fm_rank_support_bit_string.h"
-#include "test_index_fm_rank_support_bit_string_iterator.h"
 #include "test_index_fm_prefix_sum_table.h"
 #include "test_index_fm_right_array_binary_tree.h"
 #include "test_index_fm_right_array_binary_tree_iterator.h"
