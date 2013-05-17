@@ -172,7 +172,7 @@ struct RankSupportBitString
     RankSupportBitString(TText const & text) :
         _length(length(text))
     {
-        assign(*this, text);
+        createRankSupportBitString(*this, text);
     }
 
     inline bool operator==(RankSupportBitString const & other) const
@@ -383,11 +383,11 @@ inline void appendValue(RankSupportBitString<TSpec> & bitString, bool bit)
 }
 
 // ----------------------------------------------------------------------------
-// Function assign()
+// Function createRankSupportBitString()
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TText>
-inline void assign(RankSupportBitString<TSpec> & bitString, TText const & text)
+inline void createRankSupportBitString(RankSupportBitString<TSpec> & bitString, TText const & text)
 {
     typedef RankSupportBitString<TSpec>                     TRankSupportBitString;
     typedef typename Position<TRankSupportBitString>::Type  TPos;
@@ -834,12 +834,8 @@ inline void printBits(TValue entrie)
 {
     unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
-    std::cout << "entrie: " << entrie << std::endl;
-    std::cout << bitsPerValue << std::endl;
     for (TValue i = 0; i < bitsPerValue; ++i)
-    {
         std::cout << ((entrie >> i) & one);
-    }
     std::cout << std::endl;
 }
 
