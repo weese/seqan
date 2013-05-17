@@ -1,5 +1,5 @@
 // ==========================================================================
-//                               fm_index_beta
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -46,7 +46,7 @@
 #include "test_index_fm_compressed_sa_iterator.h"
 #include "test_index_fm_stree.h"
 
-SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
+SEQAN_BEGIN_TESTSUITE(test_fm_index)
 {
 //    SEQAN_CALL_TEST(test_rss_sizeof);
 //    SEQAN_CALL_TEST(test_rss_resize);
