@@ -48,7 +48,7 @@ template <typename TValue>
 struct WaveletTree;
 
 template<typename TValue> 
-class RankDictionary;
+struct RankDictionary;
 
 template<typename TRankDictionarySpec, typename TSpec> 
 class SentinelRankDictionary;
