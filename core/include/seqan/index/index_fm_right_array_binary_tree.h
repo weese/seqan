@@ -226,9 +226,9 @@ computeRightArrayBinaryTree(genome);
 */
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TBorderString, typename TPrefixSumTable, typename TIterSpec>
-inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                                       TBorderString & borderString,
-                                       TPrefixSumTable & pst)
+inline void _createRightArrayBinaryTreeImpl(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
+                                            TBorderString & borderString,
+                                            TPrefixSumTable & pst)
 {
     do
     {
@@ -251,8 +251,8 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
 
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TPrefixSumTable>
-inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                                       TPrefixSumTable & pst)
+inline void _createRightArrayBinaryTreeImpl(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
+                                            TPrefixSumTable & pst)
 {
     typedef RightArrayBinaryTree<TChar, TSpec> TRightArrayBinaryTree;
     TRightArrayBinaryTree & waveletTreeStructure = container(it);
@@ -261,10 +261,11 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
     String<Pair<unsigned> > borderString;
     appendValue(borderString, Pair<unsigned>(0, alpSize - 1));
     _resize(waveletTreeStructure, 1, Exact());
-    createRightArrayBinaryTree(it, borderString, pst);
+    _createRightArrayBinaryTreeImpl(it, borderString, pst);
 }
 
 // This function computes the wavelet tree structure contained in the lfTable.
+// TODO(singer): get rid of this
 template < typename TValue, typename TSpec, typename TPrefixSumTable>
 inline void createRightArrayBinaryTree(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable)
 {
@@ -272,7 +273,7 @@ inline void createRightArrayBinaryTree(LfTable<SentinelRankDictionary<RankDictio
     TRightArrayBinaryTree & rightArrayBinaryTree = lfTable.occTable.rankDictionary.waveletTreeStructure;
 
     typename Iterator<TRightArrayBinaryTree, TopDown<ParentLinks<void> > >::Type it(rightArrayBinaryTree, 0u);
-    createRightArrayBinaryTree(it, lfTable.prefixSumTable);
+    _createRightArrayBinaryTreeImpl(it, lfTable.prefixSumTable);
 }
 
 template <typename TChar, typename TSpec, typename TText>
@@ -281,7 +282,7 @@ inline void createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & wave
     PrefixSumTable<TChar, void> pst(text);
 
     typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TopDown<ParentLinks<> > >::Type it(waveletTreeStructure, 0u);
-    createRightArrayBinaryTree(it, pst);
+    _createRightArrayBinaryTreeImpl(it, pst);
 }
 
 // ----------------------------------------------------------------------------
