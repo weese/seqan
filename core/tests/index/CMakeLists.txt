@@ -76,23 +76,19 @@ target_link_libraries (test_index_drawing ${SEQAN_LIBRARIES})
 
 add_executable (test_index_fm
                 test_index_fm.cpp
-			    test_index_fm.h
-			    test_index_fm_compressed_sa_iterator.h
-			    test_index_fm_compressed_sa.h
-			    test_index_fm_prefix_sum_table.h
-			    test_index_fm_rank_support_bit_string_iterator.h
-			    test_index_fm_rank_support_bit_string.h
-			    test_index_fm_rank_support_string.h
-			    test_index_fm_right_array_binary_tree_iterator.h
-			    test_index_fm_right_array_binary_tree.h
-			    test_index_fm_sparse_string.h
-			    test_index_fm_stree.h)
+                test_index_fm.h
+                test_index_fm_compressed_sa_iterator.h
+                test_index_fm_compressed_sa.h
+                test_index_fm_prefix_sum_table.h
+                test_index_fm_right_array_binary_tree_iterator.h
+                test_index_fm_right_array_binary_tree.h
+                test_index_fm_sparse_string.h
+                test_index_fm_stree.h)
 target_link_libraries (test_index_fm ${SEQAN_LIBRARIES})
 
 add_executable (test_index_fm_rank_dictionary
                 test_index_fm_rank_dictionary.cpp
-			    test_index_fm_rank_dictionary.h
-			    test_index_fm_sentinel_rank_dictionary.h)
+                test_index_fm_sentinel_rank_dictionary.h)
 target_link_libraries (test_index_fm_rank_dictionary ${SEQAN_LIBRARIES})
 
 
