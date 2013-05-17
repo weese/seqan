@@ -448,7 +448,7 @@ template <typename TValue, typename TSpec, typename TPos, typename TChar>
 inline typename Size<RankDictionary_<TwoLevels<TValue, TSpec> > const>::Type
 getRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
-    typedef TwoLevels<Dna, TSpec>                                   TRankDictionarySpec;
+    typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
     typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
 
@@ -458,6 +458,24 @@ getRank(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar
 
     return _getBlockRank(dict, blockPos, convert<TValue>(c)) +
            _getBitsRank(dict, blockPos, bitsPos, convert<TValue>(c));
+}
+
+// ----------------------------------------------------------------------------
+// Function getValue()                                         [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec, typename TPos>
+inline TValue getValue(RankDictionary_<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
+{
+    typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
+    typedef RankDictionary_<TRankDictionarySpec>                    TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                    TSize;
+
+    // TODO(esiragusa): Use bit shifts to derive positions.
+    TSize blockPos = pos / BlockSize<TValue>::VALUE;
+    TSize bitsPos = pos % BlockSize<TValue>::VALUE;
+
+    return bitsAt(dict, blockPos)[bitsPos];
 }
 
 }
