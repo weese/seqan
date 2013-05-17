@@ -177,12 +177,11 @@ by a 1 form the string of the right subtree. Therefore, only the bit string of t
 */
 
 template <typename TValue>
-class RankDictionary<WaveletTree<TValue> >
+struct RankDictionary<WaveletTree<TValue> >
 {
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type    TBitStrings;
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type TWaveletTreeStructure;
 
-public:
     TBitStrings bitStrings;
     TWaveletTreeStructure waveletTreeStructure;
 

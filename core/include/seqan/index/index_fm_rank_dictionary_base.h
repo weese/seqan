@@ -58,7 +58,7 @@ sequence.
 ..include:seqan/index.h
 */
 template <typename TSpec> 
-class RankDictionary;
+struct RankDictionary;
 
 // ============================================================================
 // Metafunctions

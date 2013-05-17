@@ -45,7 +45,7 @@ template <typename TValue>
 class SequenceBitMask;
 
 template<typename TSpec> 
-class RankDictionary;
+struct RankDictionary;
 
 // ==========================================================================
 // Tags
@@ -142,11 +142,10 @@ of the rank of a specified character at a specified position.
 ..remarks:This data structure is optimized for very small alphabets, such as @Spec.Dna$ or @Spec.Dna5@. Consider using a @Spec.WaveletTree@ if your alphabet size is larger.
 */
 template <typename TValue>
-class RankDictionary<SequenceBitMask<TValue> >
+struct RankDictionary<SequenceBitMask<TValue> >
 {
     typedef typename Fibre<RankDictionary<SequenceBitMask<TValue> >, FibreBitStrings>::Type    TBitStrings;
 
-public:
     TBitStrings bitStrings;
 
     RankDictionary() {}
