@@ -283,7 +283,7 @@ void sentinelRankDictionaryGetRank(TRankDictionary & /*tag*/)
                 ++counter;
             if ((TChar)i == 'A' && j == 0)
                 --counter;
-            SEQAN_ASSERT_EQ(getRank(sentinelRankDictionary, (TChar)i, j), counter);
+            SEQAN_ASSERT_EQ(getRank(sentinelRankDictionary, j, (TChar)i), counter);
         }
     }
 }
@@ -316,7 +316,7 @@ void sentinelRankDictionaryGetRank(SentinelRankDictionary<TRankDictionary, Senti
                 ++counter;
             if ((TChar)i == 'A' && (j == 0 || j == 99 || j == 999))
                 --counter;
-            SEQAN_ASSERT_EQ(getRank(sentinelRankDictionary, (TChar)i, j), counter);
+            SEQAN_ASSERT_EQ(getRank(sentinelRankDictionary, j, (TChar)i), counter);
         }
     }
 }
