@@ -508,15 +508,6 @@ inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dictiona
     _fillWaveletTree(dictionary, text);
 }
 
-// TODO(esiragusa): Remove this.
-template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText> 
-inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec >, TPrefixSumTable> & lfTable,
-                                 TText const & text)
-{
-    createRightArrayBinaryTree(lfTable);
-    _fillWaveletTree(getFibre(getFibre(lfTable, FibreOccTable()), FibreRankDictionary()), text);
-}
-
 // ----------------------------------------------------------------------------
 // Function open()
 // ----------------------------------------------------------------------------

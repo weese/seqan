@@ -526,18 +526,6 @@ inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary,
     createRankDictionary(getFibre(dictionary, FibreRankDictionary()), text);
 }
 
-// TODO(esiragusa): Remove this.
-template <typename TRankDictionary, typename TSpec, typename TPrefixSumTable, typename TText, typename TSentinelSub>
-inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDictionary, TSpec>, TPrefixSumTable> & lfTable,
-                                         TText const & text,
-                                         TSentinelSub const & sentinelSub)
-{
-    setSentinelSubstitute(getFibre(lfTable, FibreOccTable()), sentinelSub);
-//    setSentinelPosition(getFibre(lfTable, FibreOccTable()), sentinelPos);
-
-    createRankDictionary(lfTable, text);
-}
-
 // ----------------------------------------------------------------------------
 // Function open()
 // ----------------------------------------------------------------------------

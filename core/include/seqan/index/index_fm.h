@@ -585,7 +585,7 @@ inline bool _indexCreateLfTable(Index<TText, FMIndex<TIndexSpec, TSpec> > & inde
     resize(bwt, index.bwtLength, Exact());
     _createBwt(bwt, getFibre(occTable, FibreSentinelPosition()), text, sa, sentinelSub);
 
-    createSentinelRankDictionary(lfTable, bwt, sentinelSub);
+    createSentinelRankDictionary(occTable, bwt, sentinelSub, getFibre(occTable, FibreSentinelPosition()));
 
     insertSentinels(prefixSumTable, countSequences(text));
 
@@ -704,8 +704,8 @@ inline void _range(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, TPatte
         letter = pattern[i];
         letterPosition = getCharacterPosition(prefixSumTable, letter);
         TSize prefixSum = getPrefixSum(prefixSumTable, letterPosition);
-        sp = prefixSum + getRank(occTable, letter, sp - 1);
-        ep = prefixSum + getRank(occTable, letter, ep) - 1;
+        sp = prefixSum + getRank(occTable, sp - 1, letter);
+        ep = prefixSum + getRank(occTable, ep, letter) - 1;
     }
 
     setPosition(range.i1, sp);
