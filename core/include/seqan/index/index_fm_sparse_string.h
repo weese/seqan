@@ -190,6 +190,7 @@ struct Iterator<SparseString<TFibreValues, TSpec> const, Rooted>:
 // ----------------------------------------------------------------------------
 // Class SparseString
 // ----------------------------------------------------------------------------
+// NOTE(esiragusa): Why is SparseString not a specialization of String?
 
 /**
 .Class.SparseString:
@@ -204,15 +205,18 @@ struct Iterator<SparseString<TFibreValues, TSpec> const, Rooted>:
 template <typename TValueString, typename TSpec = void>
 struct SparseString
 {
-    typedef typename Fibre<SparseString, FibreValues>::Type        TFibreValues_;
-    typedef typename Fibre<SparseString, FibreIndicators>::Type    TFibreIndicators_;
+    typedef typename Fibre<SparseString, FibreValues>::Type         TFibreValues_;
+    typedef typename Fibre<SparseString, FibreIndicators>::Type     TFibreIndicators_;
+    typedef typename Size<SparseString>::Type                       TSize;
 
-    TFibreValues_                  values;
-    TFibreIndicators_              indicators;
+    TFibreValues_           values;
+    TFibreIndicators_       indicators;
+    TSize                   _length;
 
     inline bool operator==(SparseString const & b) const
     {
-        return values == b.values &&
+        return length(*this) == length(b) &&
+               values == b.values &&
                indicators == b.indicators;
     }
 };
@@ -240,6 +244,7 @@ inline void _assignValueInValueString(SparseString<TFibreValues, TSpec> & string
 template <typename TFibreValues, typename TSpec>
 inline void clear(SparseString<TFibreValues, TSpec> & string)
 {
+    string._length = 0;
     clear(getFibre(string, FibreValues()));
     clear(getFibre(string, FibreIndicators()));
 }
@@ -252,7 +257,8 @@ inline void clear(SparseString<TFibreValues, TSpec> & string)
 template <typename TFibreValues, typename TSpec>
 inline bool empty(SparseString<TFibreValues, TSpec> const & string)
 {
-    return empty(getFibre(string, FibreIndicators()));
+//    return empty(getFibre(string, FibreIndicators()));
+    return length(string) == 0;
 }
 
 template <typename TFibreValues, typename TSpec, typename TPos>
@@ -362,42 +368,42 @@ template <typename TFibreValues, typename TSpec>
 inline typename Size<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type
 length(SparseString<TFibreValues, TSpec> const & string)
 {
-    return length(getFibre(string, FibreIndicators()));
+    return string._length;
 }
 
 // ----------------------------------------------------------------------------
 // Function resize()
 // ----------------------------------------------------------------------------
+// NOTE(esiragusa): This version of resize() was now working, therefore it was commented out.
 
 ///.Function.resize.param.object.type:Class.SparseString
-template <typename TFibreValues, typename TSpec, typename TSize, typename TValue, typename TExpand>
-inline typename Size<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type
-resize(SparseString<TFibreValues, TSpec> & string,
-                   TSize const size,
-                   TValue const value,
-                   Tag<TExpand> const tag)
-{
-    if (value != DefaultValue<SparseString<TFibreValues, TSpec> >::VALUE)
-    {
-        TSize _length = length(getFibre(string, FibreIndicators()));
-        
-        if (_length < size)
-            resize(getFibre(string, FibreValues()), length(getFibre(string, FibreValues())) + (size - length), value, tag);
-        else
-            resize(getFibre(string, FibreValues()), getRank(string, size), value, tag);
-
-        resize(getFibre(string, FibreIndicators()), size, 1, tag);
-    }
-    return resize(getFibre(string, FibreIndicators()), size, 0);
-}
+//template <typename TFibreValues, typename TSpec, typename TSize, typename TValue, typename TExpand>
+//inline typename Size<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type
+//resize(SparseString<TFibreValues, TSpec> & string, TSize size, TValue value, Tag<TExpand> const tag)
+//{
+//    if (value != DefaultValue<SparseString<TFibreValues, TSpec> >::VALUE)
+//    {
+//        if (length(string) < size)
+//            resize(getFibre(string, FibreValues()), length(getFibre(string, FibreValues())) + (size - length(string)), value, tag);
+//        else
+//            resize(getFibre(string, FibreValues()), getRank(getFibre(string, FibreIndicators()), size), value, tag);
+//
+//        resize(getFibre(string, FibreIndicators()), size, true, tag);
+//    }
+//
+//    string._length = size;
+//
+//    return resize(getFibre(string, FibreIndicators()), size, false);
+//}
 
 template <typename TFibreValues, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type
-resize(SparseString<TFibreValues, TSpec> & string, TSize const size, Tag<TExpand> tag)
+resize(SparseString<TFibreValues, TSpec> & string, TSize size, Tag<TExpand> tag)
 {
-    // TODO(esiragusa): Fix resize().
-//    return resize(getFibre(string, FibreIndicators()), size, 0, tag);
+//    return resize(string, size, DefaultValue<SparseString<TFibreValues, TSpec> >::VALUE, tag);
 
+    string._length = size;
+    return resize(getFibre(string, FibreIndicators()), size, tag);
 }
 
 // ----------------------------------------------------------------------------
@@ -414,12 +420,17 @@ inline bool open(SparseString<TFibreValues, TSpec> & sparseString, const char * 
 {
     String<char> name;
 
-    // val = value string
+    // Length saved inside a .len file.
+    name = fileName;
+    append(name, ".len");
+    if (!open(sparseString._length, toCString(name), openMode)) return false;
+
+    // Values saved inside a .val file.
     name = fileName;
     append(name, ".val");
     if (!open(getFibre(sparseString, FibreValues()), toCString(name), openMode)) return false;
 
-    // ind = indicator string
+    // Indicators saved inside a .ind file.
     name = fileName;
     append(name, ".ind");
     if (!open(getFibre(sparseString, FibreIndicators()), toCString(name), openMode)) return false;
@@ -466,8 +477,11 @@ inline bool save(SparseString<TFibreValues, TSpec> const & sparseString, const c
     String<char> name;
 
     name = fileName;
-    append(name, ".val");
+    append(name, ".len");
+    if (!save(length(sparseString), toCString(name), openMode)) return false;
 
+    name = fileName;
+    append(name, ".val");
     if (!save(getFibre(sparseString, FibreValues()), toCString(name), openMode)) return false;
 
     name = fileName;
