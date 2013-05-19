@@ -450,11 +450,10 @@ getRank(RankDictionary<WaveletTree<TValue> > const & tree, TChar character, TPos
 template <typename TValue, typename TText>
 inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText const & text)
 {
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type     TFibreRankSupportBitStrings;
-    typedef typename Value<TFibreRankSupportBitStrings>::Type                               TFibreRankSupportBitString;
-    typedef typename Fibre<TFibreRankSupportBitString, FibreBits>::Type                     TFibreBitString;
-    typedef typename Size<TFibreBitString>::Type                                            TSize;
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type  TWaveletTreeStructure;
+    typedef WaveletTree<TValue>                                         TRankDictionarySpec;
+    typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                        TSize;
+    typedef typename Fibre<TRankDictionary, FibreTreeStructure>::Type   TWaveletTreeStructure;
 
     resize(tree.bitStrings, _length(tree.waveletTreeStructure), Exact());
 
@@ -483,9 +482,8 @@ inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText 
         }
     }
 
-    TFibreRankSupportBitStrings & bitStrings = getFibre(tree, FibreBitStrings());
-    for (TSize i = 0; i < length(bitStrings); ++i)
-        updateRanks(bitStrings[i]);
+    for (TSize i = 0; i < length(getFibre(tree, FibreBitStrings())); ++i)
+        updateRanks(getFibre(tree, FibreBitStrings())[i]);
 }
 
 // ----------------------------------------------------------------------------
