@@ -444,14 +444,14 @@ _getBitsRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos, boo
     TSize bitPos = _toBitPos(dict, pos);
     TBits bits = _bitsAt(dict, pos);
 
+    // Negate the bits to compute the rank of zero.
+    TBitVector word = c ? bits.i : ~bits.i;
+
     // Clear the last bitsPos positions.
-    TBitVector word = bits.i & ~(MaxValue<TBitVector>::VALUE >> bitPos);
+    TBitVector mask = word & ~((TBitVector(1) << (BitsPerValue<TBitVector>::VALUE - 1 - bitPos)) - TBitVector(1));
 
     // Get the sum of the bits on.
-    TSize bitsRank = popCount(word);
-
-    // Return either the rank for c == true or its complement for c == false.
-    return c ? bitsRank : bitPos - bitsRank;
+    return popCount(mask);
 }
 
 // ----------------------------------------------------------------------------
@@ -514,6 +514,13 @@ getRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos)
 // ----------------------------------------------------------------------------
 // Function getValue()                                         [RankDictionary]
 // ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec, typename TPos>
+inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+{
+//    SEQAN_ASSERT_LT(pos, length(dict));
+    return _bitsAt(dict, pos)[_toBitPos(dict, pos)];
+}
 
 template <typename TValue, typename TSpec, typename TPos>
 inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
