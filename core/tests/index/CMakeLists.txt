@@ -88,6 +88,7 @@ target_link_libraries (test_index_fm ${SEQAN_LIBRARIES})
 
 add_executable (test_index_fm_rank_dictionary
                 test_index_fm_rank_dictionary.cpp
+                test_index_fm_rank_dictionary.h
                 test_index_fm_sentinel_rank_dictionary.h)
 target_link_libraries (test_index_fm_rank_dictionary ${SEQAN_LIBRARIES})
 
