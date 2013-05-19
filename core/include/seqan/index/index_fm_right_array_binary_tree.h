@@ -176,13 +176,7 @@ public:
         treeVertices(),
         minCharValue()
     {
-        createRightArrayBinaryTree(*this,
-                                    text);
-    }
-
-    inline bool operator==(const RightArrayBinaryTree & b) const
-    {
-        return treeVertices == b.treeVertices;
+        createRightArrayBinaryTree(*this, text);
     }
 };
 

@@ -195,13 +195,6 @@ public:
     {
         _initSentinelPosition(*this, length(text));
     }
-
-//    bool operator==(SentinelRankDictionary const & b) const
-//    {
-//        return rankDictionary == b.rankDictionary &&
-//               sentinelPosition == b.sentinelPosition &&
-//               sentinelSubstitute == b.sentinelSubstitute;
-//    }
 };
 
 // ==========================================================================

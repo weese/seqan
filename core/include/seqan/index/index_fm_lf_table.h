@@ -159,12 +159,6 @@ struct LfTable
         prefixSumTable = other.prefixSumTable;
         return *this;
     }
-
-    inline bool operator==(LfTable const & b) const
-    {
-        return occTable == b.occTable &&
-               prefixSumTable == b.prefixSumTable;
-    }
 };
 
 // ============================================================================

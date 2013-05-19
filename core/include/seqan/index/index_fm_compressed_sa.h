@@ -192,12 +192,6 @@ public:
     {
         return value(*this, pos);
     }
-
-    inline bool operator==(CompressedSA const & other) const
-    {
-        return getFibre(*this, FibreSparseString()) == getFibre(other, FibreSparseString());
-               getFibre(*this, FibreLfTable()) == getFibre(other, FibreLfTable());
-    }
 };
 
 // ============================================================================

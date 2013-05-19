@@ -193,18 +193,6 @@ struct RankDictionary<WaveletTree<TValue> >
         createRankDictionary(*this, text);
     }
 
-    template <typename TText, typename TFreqTable>
-    RankDictionary(TText const & text, TFreqTable const & freqTable)
-    {
-        createRankDictionary(*this, text, freqTable);
-    }
-
-    template <typename TText, typename TFreqTable, typename TPrefixSumTable>
-    RankDictionary(TText const & text, TFreqTable const & freqTable, TPrefixSumTable const & prefixSumTable)
-    {
-        createRankDictionary(*this, text, freqTable, prefixSumTable);
-    }
-
     RankDictionary & operator=(RankDictionary const & other)
     {
         bitStrings = other.bitStrings;

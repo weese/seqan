@@ -217,13 +217,6 @@ struct SparseString
     SparseString() :
         _length(0)
     {};
-
-    inline bool operator==(SparseString const & b) const
-    {
-        return length(*this) == length(b) &&
-               values == b.values &&
-               indicators == b.indicators;
-    }
 };
 
 // ==========================================================================

@@ -196,14 +196,14 @@ template <typename TChar, typename TSpec, typename TIterSpec>
 inline typename Iterator<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec>::Type
 end(RightArrayBinaryTree<TChar, TSpec> const & waveletTreeStructure, TIterSpec const &)
 {
-    return typename Iterator<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec>::Type(waveletTreeStructure, _length(waveletTreeStructure));
+    return typename Iterator<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec>::Type(waveletTreeStructure, length(waveletTreeStructure));
 }
 
 template <typename TChar, typename TSpec, typename TIterSpec>
 inline typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type
 end(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure, TIterSpec const &)
 {
-    return typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type(waveletTreeStructure, _length(waveletTreeStructure));
+    return typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type(waveletTreeStructure, length(waveletTreeStructure));
 }
 
 // ----------------------------------------------------------------------------
