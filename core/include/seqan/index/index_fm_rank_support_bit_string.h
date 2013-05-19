@@ -826,35 +826,6 @@ inline bool save(StringSet<RankSupportBitString<TSpec>, TSetSpec> const & string
 }
 
 // ----------------------------------------------------------------------------
-// Function printBits()
-// ----------------------------------------------------------------------------
-
-template <typename TValue>
-inline void printBits(TValue entrie)
-{
-    unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
-    TValue one = 1;
-    for (TValue i = 0; i < bitsPerValue; ++i)
-        std::cout << ((entrie >> i) & one);
-    std::cout << std::endl;
-}
-
-template <typename TValue, typename TSize>
-inline std::ostream & printBits(std::ostream & stream, TValue entrie, TSize blockSize)
-{
-    unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
-    bool temp;
-    for (int i = bitsPerValue - 1; i >= 0; --i)
-    {
-        temp = (entrie >> i) & 1;
-        stream << temp;
-        if ((bitsPerValue - i) % blockSize == 0)
-            stream << " ";
-    }
-    return stream;
-}
-
-// ----------------------------------------------------------------------------
 // Operator <<
 // ----------------------------------------------------------------------------
 

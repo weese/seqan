@@ -360,6 +360,35 @@ popCount(TWord word)
     return _popCountImpl(word, WordSize_<BitsPerValue<TWord>::VALUE>());
 }
 
+// ----------------------------------------------------------------------------
+// Function printBits()
+// ----------------------------------------------------------------------------
+
+template <typename TValue>
+inline void printBits(TValue word)
+{
+    unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
+    TValue one = 1;
+    for (TValue i = 0; i < bitsPerValue; ++i)
+        std::cout << ((word >> i) & one);
+    std::cout << std::endl;
+}
+
+template <typename TValue, typename TSize>
+inline std::ostream & printBits(std::ostream & stream, TValue word, TSize blockSize)
+{
+    unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
+    bool temp;
+    for (int i = bitsPerValue - 1; i >= 0; --i)
+    {
+        temp = (word >> i) & 1;
+        stream << temp;
+        if ((bitsPerValue - i) % blockSize == 0)
+            stream << " ";
+    }
+    return stream;
+}
+
 }  // namespace seqan
 
 #endif // #ifndef SEQAN_MISC_MISC_BIT_TWIDDLING_H_
