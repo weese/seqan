@@ -54,11 +54,11 @@ struct FibreDollarPosition_;
 struct FibreOccTable_;
 struct FibreRankDictionary_;
 
-typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
-typedef Tag<FibreBitStrings_> const FibreBitStrings;
-typedef Tag<FibreDollarPosition_> const FibreDollarPosition;
-typedef Tag<FibreOccTable_> const FibreOccTable;
-typedef Tag<FibreRankDictionary_> const FibreRankDictionary;
+typedef Tag<FibreTreeStructure_>    const FibreTreeStructure;
+typedef Tag<FibreBitStrings_>       const FibreBitStrings;
+typedef Tag<FibreDollarPosition_>   const FibreDollarPosition;
+typedef Tag<FibreOccTable_>         const FibreOccTable;
+typedef Tag<FibreRankDictionary_>   const FibreRankDictionary;
 
 // ==========================================================================
 // Metafunctions
@@ -182,8 +182,8 @@ struct RankDictionary<WaveletTree<TValue> >
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type    TBitStrings;
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type TWaveletTreeStructure;
 
-    TBitStrings bitStrings;
-    TWaveletTreeStructure waveletTreeStructure;
+    TBitStrings             bitStrings;
+    TWaveletTreeStructure   waveletTreeStructure;
 
     RankDictionary() {}
 
@@ -212,24 +212,69 @@ struct RankDictionary<WaveletTree<TValue> >
         return *this;
     }
 
-    bool operator==(RankDictionary const & b) const
-    {
-        typedef typename Size<typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type>::Type TSize;
-        
-        if (length(bitStrings) != length(b.bitStrings))
-            return false;
-
-        for (TSize i = 0; i < length(bitStrings); ++i)
-            if (!(bitStrings[i] == b.bitStrings[i]))
-                return false;
-
-        return waveletTreeStructure == b.waveletTreeStructure;
-    }
+//    bool operator==(RankDictionary const & b) const
+//    {
+//        typedef typename Size<typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type>::Type TSize;
+//        
+//        if (length(bitStrings) != length(b.bitStrings))
+//            return false;
+//
+//        for (TSize i = 0; i < length(bitStrings); ++i)
+//            if (!(bitStrings[i] == b.bitStrings[i]))
+//                return false;
+//
+//        return waveletTreeStructure == b.waveletTreeStructure;
+//    }
 };
 
 // ==========================================================================
 // Functions
 // ==========================================================================
+
+// ----------------------------------------------------------------------------
+// Function getFibre()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.RankDictionary#getFibre:
+..summary:Returns a specific fibre of a dictionary.
+..signature:getFibre(dictionary, fibreTag)
+..class:Class.RankDictionary
+..cat:Index
+..param.dictionary:The dictionary holding the fibre.
+...type:Class.RankDictionary
+..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
+...type:Tag.WaveletTree Fibres
+..returns:A reference to the @Metafunction.Fibre@ object.
+..include:seqan/index.h
+*/
+template <typename TValue>
+inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type &
+getFibre(RankDictionary<WaveletTree<TValue> >& dictionary, const FibreBitStrings)
+{
+    return dictionary.bitStrings;
+}
+
+template <typename TValue>
+inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type const &
+getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreBitStrings)
+{
+    return dictionary.bitStrings;
+}
+
+template <typename TValue>
+inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type &
+getFibre(RankDictionary<WaveletTree<TValue> >& dictionary, FibreTreeStructure)
+{
+    return dictionary.waveletTreeStructure;
+}
+
+template <typename TValue>
+inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const &
+getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTreeStructure)
+{
+    return dictionary.waveletTreeStructure;
+}
 
 // ----------------------------------------------------------------------------
 // Function clear()
@@ -289,9 +334,7 @@ inline bool empty(RankDictionary<WaveletTree<TValue> > const & dictionary)
 */
 
 template <typename TValue, typename TPos>
-inline TValue
-getValue(RankDictionary<WaveletTree<TValue> > & dictionary,
-                 TPos pos)
+inline TValue getValue(RankDictionary<WaveletTree<TValue> > & dictionary, TPos pos)
 {
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const    TWaveletTreeStructure;
     typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type                 TWaveletTreeStructureString;
@@ -331,65 +374,18 @@ getValue(RankDictionary<WaveletTree<TValue> > & dictionary,
 
 // TODO(singer): We would like to have only one variant BUT there is a getValue() with const.
 template <typename TValue, typename TPos>
-inline TValue
-getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos)
+inline TValue getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos)
 {
     return getValue(const_cast<RankDictionary<WaveletTree<TValue> > &>(tree), pos);
 }
-
 // ----------------------------------------------------------------------------
-// Function getFibre()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.RankDictionary#getFibre:
-..summary:Returns a specific fibre of a dictionary.
-..signature:getFibre(dictionary, fibreTag)
-..class:Class.RankDictionary
-..cat:Index
-..param.dictionary:The dictionary holding the fibre.
-...type:Class.RankDictionary
-..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
-...type:Tag.WaveletTree Fibres
-..returns:A reference to the @Metafunction.Fibre@ object.
-..include:seqan/index.h
-*/
-template <typename TValue>
-inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type &
-getFibre(RankDictionary<WaveletTree<TValue> >& dictionary, const FibreBitStrings)
-{
-    return dictionary.bitStrings;
-}
-
-template <typename TValue>
-inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type const &
-getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreBitStrings)
-{
-    return dictionary.bitStrings;
-}
-
-template <typename TValue>
-inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type &
-getFibre(RankDictionary<WaveletTree<TValue> >& dictionary, FibreTreeStructure)
-{
-    return dictionary.waveletTreeStructure;
-}
-
-template <typename TValue>
-inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const &
-getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTreeStructure)
-{
-    return dictionary.waveletTreeStructure;
-}
-
-// ----------------------------------------------------------------------------
-// Function countOccurrences()
+// Function getRank()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.RankDictionary#countOccurrences:
+.Function.RankDictionary#getRank:
 ..summary:Returns the rank (number of occurrences) of a specified character up to a specified position. 
-..signature:countOccurrences(dictionary, character, pos)
+..signature:getRank(dictionary, character, pos)
 ..class:Class.RankDictionary
 ..cat:Index
 ..param.dictionary:The dictionary.
@@ -401,14 +397,14 @@ getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTre
 ..include:seqan/index.h
 */
 
-template <typename TValue, typename TCharIn, typename TPos>
+template <typename TValue, typename TChar, typename TPos>
 inline typename Size<RankDictionary<WaveletTree<TValue> > >::Type
-countOccurrences(RankDictionary<WaveletTree<TValue> > const & tree, TCharIn const character, TPos const pos)
+getRank(RankDictionary<WaveletTree<TValue> > const & tree, TChar character, TPos pos)
 {
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type TWaveletTreeStructure;
-    typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type TWaveletTreeStructureString;
-    typedef typename Value<TWaveletTreeStructureString>::Type TWaveletTreeStructureEntry;
-    typedef typename Value<TWaveletTreeStructureEntry, 1>::Type TChar;
+    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type  TWaveletTreeStructure;
+    typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type         TWaveletTreeStructureString;
+    typedef typename Value<TWaveletTreeStructureString>::Type                               TWaveletTreeStructureEntry;
+    typedef typename Value<TWaveletTreeStructureEntry, 1>::Type                             TChar_;
 
     TPos sum = pos;
     TPos treePos = 0;
@@ -416,7 +412,7 @@ countOccurrences(RankDictionary<WaveletTree<TValue> > const & tree, TCharIn cons
     // determine the leaf containing the character
     // count the number of 1 or 0 up to the computed position
     typename Iterator<TWaveletTreeStructure const, TopDown<> >::Type it(tree.waveletTreeStructure, treePos);
-    TChar charInTree = tree.waveletTreeStructure.minCharValue;
+    TChar_ charInTree = tree.waveletTreeStructure.minCharValue;
     while (true)
     {
         TPos addValue = getRank(tree.bitStrings[treePos], sum);
@@ -514,6 +510,7 @@ inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dictiona
     _fillWaveletTree(dictionary, text);
 }
 
+// TODO(esiragusa): Remove this.
 template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText> 
 inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec >, TPrefixSumTable> & lfTable,
                                  TText const & text)

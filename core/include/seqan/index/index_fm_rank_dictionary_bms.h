@@ -174,19 +174,19 @@ struct RankDictionary<SequenceBitMask<TValue> >
         return *this;
     }
 
-    bool operator==(RankDictionary const & b) const
-    {
-        typedef typename Size<typename Fibre<RankDictionary<SequenceBitMask<TValue> >, FibreBitStrings>::Type>::Type TSize;
-        
-        if (length(bitStrings) != length(b.bitStrings))
-            return false;
-        
-        for (TSize i = 0; i < length(bitStrings); ++i)
-            if (!(bitStrings[i] == b.bitStrings[i]))
-                return false;
-        
-        return true;
-    }
+//    bool operator==(RankDictionary const & b) const
+//    {
+//        typedef typename Size<typename Fibre<RankDictionary<SequenceBitMask<TValue> >, FibreBitStrings>::Type>::Type TSize;
+//        
+//        if (length(bitStrings) != length(b.bitStrings))
+//            return false;
+//        
+//        for (TSize i = 0; i < length(bitStrings); ++i)
+//            if (!(bitStrings[i] == b.bitStrings[i]))
+//                return false;
+//        
+//        return true;
+//    }
 };
 
 // ==========================================================================
@@ -218,8 +218,7 @@ inline bool empty(RankDictionary<SequenceBitMask<TValue> > const & dictionary)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TPos>
-inline TValue
-getValue(RankDictionary<SequenceBitMask<TValue> > const & dictionary, TPos pos)
+inline TValue getValue(RankDictionary<SequenceBitMask<TValue> > const & dictionary, TPos pos)
 {
     typedef typename Fibre<RankDictionary<SequenceBitMask<TValue> > const, FibreBitStrings>::Type TBitStrings;
 
@@ -232,8 +231,7 @@ getValue(RankDictionary<SequenceBitMask<TValue> > const & dictionary, TPos pos)
 }
 
 template <typename TValue, typename TPos>
-inline TValue
-getValue(RankDictionary<SequenceBitMask<TValue> > & dictionary, TPos pos)
+inline TValue getValue(RankDictionary<SequenceBitMask<TValue> > & dictionary, TPos pos)
 {
     return getValue(const_cast<RankDictionary<SequenceBitMask<TValue> > const &>(dictionary), pos);
 }
@@ -252,7 +250,7 @@ getFibre(RankDictionary<SequenceBitMask<TValue> >& dictionary, FibreBitStrings)
 
 template <typename TValue>
 inline typename Fibre<RankDictionary<SequenceBitMask<TValue> >, FibreBitStrings>::Type const &
-getFibre(RankDictionary<SequenceBitMask<TValue> > const &dictionary, FibreBitStrings)
+getFibre(RankDictionary<SequenceBitMask<TValue> > const & dictionary, FibreBitStrings)
 {
     return dictionary.bitStrings;
 }
@@ -263,10 +261,9 @@ getFibre(RankDictionary<SequenceBitMask<TValue> > const &dictionary, FibreBitStr
 
 // This functions computes the number of occurrences of a specified character
 // up to a specified position.
-template <typename TValue, typename TCharIn, typename TPos>
+template <typename TValue, typename TChar, typename TPos>
 inline typename Size<RankDictionary<SequenceBitMask<TValue> > const>::Type
-countOccurrences(RankDictionary<SequenceBitMask<TValue> > const & dictionary,
-                                 TCharIn const character, TPos const pos)
+getRank(RankDictionary<SequenceBitMask<TValue> > const & dictionary, TChar character, TPos pos)
 {
     return getRank(dictionary.bitStrings[ordValue(character)], pos);
 }
@@ -294,6 +291,7 @@ inline void createRankDictionary(RankDictionary<SequenceBitMask<TValue> > & dict
         _updateRanks(bitStrings[i]);
 }
 
+// TODO(esiragusa): Remove this.
 template <typename TValue, typename TSpec, typename TPrefixSumTable, typename TText> 
 inline void createRankDictionary(LfTable<SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue> >, TSpec >, TPrefixSumTable> & lfTable,
                                  TText const & text)

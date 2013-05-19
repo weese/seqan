@@ -257,8 +257,8 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
     else
     {
         TSize prefixSum = getPrefixSum(prefixSumTable, cPosition);
-        _range.i1 = prefixSum + countOccurrences(occTable, c, vDesc.range.i1 - 1);
-        _range.i2 = prefixSum + countOccurrences(occTable, c, vDesc.range.i2 - 1);
+        _range.i1 = prefixSum + getRank(occTable, c, vDesc.range.i1 - 1);
+        _range.i2 = prefixSum + getRank(occTable, c, vDesc.range.i2 - 1);
     }
 
     return _range.i1 + 1 <= _range.i2;

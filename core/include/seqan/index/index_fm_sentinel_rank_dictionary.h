@@ -42,7 +42,7 @@ namespace seqan {
 // ==========================================================================
 
 template <typename TValue>
-class RankDictionary;
+struct RankDictionary;
 
 template<typename TRankDictionarySpec, typename TSpec> 
 class SentinelRankDictionary;
@@ -124,7 +124,7 @@ struct Fibre<SentinelRankDictionary<TRankDictionary, Sentinel> const, FibreSenti
 template <typename TRankDictionary>
 struct Fibre<SentinelRankDictionary<TRankDictionary, Sentinels>, FibreSentinelPosition>
 {
-    typedef RankSupportBitString<void> Type;
+    typedef RankDictionary<TwoLevels<bool> >    Type;
 };
 
 template <typename TRankDictionary>
@@ -171,9 +171,9 @@ public:
     typedef typename Value<SentinelRankDictionary>::Type TChar;
     typedef typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreSentinelPosition>::Type TSentinelPosition;
 
-    TRankDictionary rankDictionary;
-    TSentinelPosition sentinelPosition;
-    TChar sentinelSubstitute;
+    TRankDictionary     rankDictionary;
+    TSentinelPosition   sentinelPosition;
+    TChar               sentinelSubstitute;
 
     SentinelRankDictionary() :
         sentinelSubstitute()
@@ -182,58 +182,21 @@ public:
     }
 
     // TODO(singer): Use concept sequence when available
-    template <typename TValue, typename TStringSpec>
-    SentinelRankDictionary(String<TValue, TStringSpec> const & text) :
+    template <typename TText>
+    SentinelRankDictionary(TText const & text) :
         rankDictionary(text),
         sentinelSubstitute()
     {
         _initSentinelPosition(*this, length(text));
     }
 
-    template <typename THost, typename TSegmentSpec>
-    SentinelRankDictionary(Segment<THost, TSegmentSpec> const & text) :
-        rankDictionary(text),
-        sentinelSubstitute()
-    {
-        _initSentinelPosition(*this, length(text));
-    }
-
-    bool operator==(SentinelRankDictionary const & b) const
-    {
-        return rankDictionary == b.rankDictionary &&
-               sentinelPosition == b.sentinelPosition &&
-               sentinelSubstitute == b.sentinelSubstitute;
-    }
+//    bool operator==(SentinelRankDictionary const & b) const
+//    {
+//        return rankDictionary == b.rankDictionary &&
+//               sentinelPosition == b.sentinelPosition &&
+//               sentinelSubstitute == b.sentinelSubstitute;
+//    }
 };
-
-//     // TODO(singer): Use concept sequence when available
-//     template <typename TRankDictionary, typename TValue, typename TStringSpec>
-//     SentinelRankDictionary<TRankDictionary, Sentinel>::SentinelRankDictionary(String<TValue, TStringSpec> const & text) :
-//         rankDictionary(text),
-//         sentinelPosition(length(text)),
-//         sentinelSubstitute()
-//     {}
-//     
-//     template <typename TRankDictionary, typename THost, typename TSegmentSpec>
-//     SentinelRankDictionary::SentinelRankDictionary<TRankDictionary, Sentinel>(Segment<THost, TSegmentSpec> const & text) :
-//         rankDictionary(text),
-//         sentinelPosition(length(text)),
-//         sentinelSubstitute()
-//     {}
-// 
-//     template <typename TRankDictionary, typename TValue, typename TStringSpec>
-//     SentinelRankDictionary::SentinelRankDictionary<TRankDictionary, Sentinels>(String<TValue, TStringSpec> const & text) :
-//         rankDictionary(text),
-//         sentinelPosition(),
-//         sentinelSubstitute()
-//     {}
-//     
-//     template <typename TRankDictionary, typename THost, typename TSegmentSpec>
-//     SentinelRankDictionary::SentinelRankDictionary<TRankDictionary, Sentinels>(Segment<THost, TSegmentSpec> const & text) :
-//         rankDictionary(text),
-//         sentinelPosition(length(text)),
-//         sentinelSubstitute()
-//     {}
 
 // ==========================================================================
 // Functions
@@ -252,7 +215,8 @@ inline void _initSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentin
 template <typename TRankDictionary, typename TSize>
 inline void _initSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> & dictionary, TSize sentinels)
 {
-    resize(dictionary.sentinelPosition, sentinels, 0, Exact());
+//    resize(dictionary.sentinelPosition, sentinels, 0, Exact());
+    resize(dictionary.sentinelPosition, sentinels, Exact());
 }
 
 // ----------------------------------------------------------------------------
@@ -312,7 +276,7 @@ inline bool isSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinel>
 template <typename TRankDictionary, typename TPos>
 inline bool isSentinelPosition(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary, TPos pos)
 {
-    return isBitSet(getFibre(dictionary, FibreSentinelPosition()), pos);
+    return getValue(getFibre(dictionary, FibreSentinelPosition()), pos);
 }
 
 // ----------------------------------------------------------------------------
@@ -412,7 +376,7 @@ getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary, Fibr
 }
 
 // ----------------------------------------------------------------------------
-// Function countOccurrences()
+// Function getRank()
 // ----------------------------------------------------------------------------
 
 /**
@@ -434,28 +398,34 @@ std::cout << countOccurrences(dictionary, 'a', 3) << std::endl; // 1
 std::cout << countOccurrences(dictionary, 'a', 4) << std::endl; // 2
 */
 
-// NOTE(esiragusa): Fix return type of countOccurrences(SentinelRankDictionary)
 template <typename TRankDictionary, typename TChar, typename TPos>
-inline unsigned countOccurrences(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary,
-                                 TChar const character,
-                                 TPos const pos)
+inline typename Size<SentinelRankDictionary<TRankDictionary, Sentinel> >::Type
+getRank(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary, TChar character, TPos pos)
 {
-    unsigned occ = countOccurrences(getFibre(dictionary, FibreRankDictionary()), character, pos);
+    typedef SentinelRankDictionary<TRankDictionary, Sentinel>   TSentinelRankDictionary;
+    typedef typename Size<TSentinelRankDictionary>::Type        TSize;
+
+    TSize rank = getRank(getFibre(dictionary, FibreRankDictionary()), character, pos);
+
     if (ordEqual(getSentinelSubstitute(dictionary), character) && pos >= dictionary.sentinelPosition)
-         --occ;
-    return occ;
+         --rank;
+
+    return rank;
 }
 
 template <typename TRankDictionary, typename TChar, typename TPos>
-inline unsigned countOccurrences(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary,
-                                 TChar const character,
-                                 TPos const pos)
+inline  typename Size<SentinelRankDictionary<TRankDictionary, Sentinels> >::Type
+getRank(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary, TChar character, TPos pos)
 {
-    unsigned occ = countOccurrences(getFibre(dictionary, FibreRankDictionary()), character, pos);
-    if (ordEqual(getSentinelSubstitute(dictionary), character))
-        return occ - getRank(getFibre(dictionary, FibreSentinelPosition()), pos);
+    typedef SentinelRankDictionary<TRankDictionary, Sentinels>  TSentinelRankDictionary;
+    typedef typename Size<TSentinelRankDictionary>::Type        TSize;
 
-    return occ;
+    TSize rank = getRank(getFibre(dictionary, FibreRankDictionary()), character, pos);
+
+    if (ordEqual(getSentinelSubstitute(dictionary), character))
+        return rank - getRank(getFibre(dictionary, FibreSentinelPosition()), pos);
+
+    return rank;
 }
 
 // ----------------------------------------------------------------------------
@@ -550,6 +520,8 @@ inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary,
     createRankDictionary(getFibre(dictionary, FibreRankDictionary()), text);
 }
 
+
+// TODO(esiragusa): Remove this.
 template <typename TRankDictionary, typename TSpec, typename TPrefixSumTable, typename TText, typename TSentinelSub>
 inline void createSentinelRankDictionary(LfTable<SentinelRankDictionary<TRankDictionary, TSpec>, TPrefixSumTable> & lfTable,
                                          TText const & text,

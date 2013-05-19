@@ -67,15 +67,13 @@ struct LfTable;
 */
 
 struct FibreOccTable_;
-typedef Tag<FibreOccTable_> const FibreOccTable;
-
 struct FibrePrefixSumTable_;
-typedef Tag<FibrePrefixSumTable_> const FibrePrefixSumTable;
-
 struct FibreRankDictionary_;
-typedef Tag<FibreRankDictionary_> const FibreRankDictionary;
-
 struct FibreSentinelPosition_;
+
+typedef Tag<FibreOccTable_>         const FibreOccTable;
+typedef Tag<FibrePrefixSumTable_>   const FibrePrefixSumTable;
+typedef Tag<FibreRankDictionary_>   const FibreRankDictionary;
 typedef Tag<FibreSentinelPosition_> const FibreSentinelPosition;
 
 // ============================================================================
@@ -287,7 +285,7 @@ inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
 
     TChar c = getValue(lfTable.occTable, pos);
 
-    return countOccurrences(getFibre(lfTable, FibreOccTable()), c, pos) +
+    return getRank(getFibre(lfTable, FibreOccTable()), c, pos) +
            getPrefixSum(lfTable.prefixSumTable, getCharacterPosition(lfTable.prefixSumTable, c)) - 1;
 }
 
