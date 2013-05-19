@@ -243,8 +243,8 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
 
     inline bool operator==(RankDictionary const & other) const
     {
-        return ranks == other.ranks;// &&
-//               _length == other.length;
+        return //length(*this) == length(other) &&
+                ranks == other.ranks;
     }
 };
 
@@ -543,7 +543,8 @@ inline void setValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos,
 // ----------------------------------------------------------------------------
 // Function appendValue()                                      [RankDictionary]
 // ----------------------------------------------------------------------------
-//
+// NOTE(esiragusa): Better not to have appendValue() - it is not efficient - and thus neither length().
+
 //template <typename TValue, typename TSpec, typename TChar, typename TExpand>
 //inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
 //{
