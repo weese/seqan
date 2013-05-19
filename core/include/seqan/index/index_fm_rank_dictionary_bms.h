@@ -86,7 +86,7 @@ class SBM;
 template <typename TValue>
 struct Fibre<RankDictionary<SequenceBitMask<TValue> >, FibreBitStrings>
 {
-    typedef StringSet<RankSupportBitString<void> > Type;
+    typedef StringSet<RankDictionary<TwoLevels<bool> > > Type;
 };
 
 template <typename TValue>
@@ -224,7 +224,7 @@ inline TValue getValue(RankDictionary<SequenceBitMask<TValue> > const & dictiona
 
     TBitStrings & bitStrings = getFibre(dictionary, FibreBitStrings());
     for (unsigned i = 0; i < ValueSize<TValue>::VALUE - 1; ++i)
-        if (isBitSet(bitStrings[i], pos))
+        if (getValue(bitStrings[i], pos))
             return i;
 
     return maxValue<TValue>();
@@ -285,10 +285,10 @@ inline void createRankDictionary(RankDictionary<SequenceBitMask<TValue> > & dict
         resize(bitStrings[i], length(text), 0, Exact());
     
     for (unsigned i = 0; i < length(text); ++i)
-        setBitTo(bitStrings[ordValue(text[i])], i, 1);
+        setValue(bitStrings[ordValue(text[i])], i, true);
 
     for (unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
-        _updateRanks(bitStrings[i]);
+        updateRanks(bitStrings[i]);
 }
 
 // TODO(esiragusa): Remove this.
