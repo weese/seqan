@@ -406,8 +406,8 @@ _getBitsRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna 
     TSize bitPos = _toBitPos(dict, pos);
     TBits bits = _bitsAt(dict, pos);
 
-    // Clear the last 2 * bitsPos positions.
-    TBitVector word = bits.i & ~(MaxValue<TBitVector>::VALUE >> (bitPos << 1));
+    // Clear the last bitsPos positions.
+    TBitVector word = bits.i & ~((TBitVector(1) << (BitsPerValue<TBitVector>::VALUE - 2 - bitPos*2)) - TBitVector(1));
 
     // And matches when c == G|T.
     TBitVector odd  = ((ordValue(c) & ordValue(Dna('G'))) ? word : ~word) >> 1;
@@ -422,7 +422,7 @@ _getBitsRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna 
     TSize bitsRank = popCount(mask);
 
     // If c == A then masked character positions must be subtracted from the count.
-    if (c == Dna('A')) bitsRank -= BlockSize<Dna>::VALUE - bitPos;
+    if (c == Dna('A')) bitsRank -= BlockSize<Dna>::VALUE - 1 - bitPos;
 
     return bitsRank;
 }
@@ -580,9 +580,6 @@ inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos /
         TSize next = _toPos(dict, blockPos + 1);
 
         _blockAt(dict, next) = _blockAt(dict, curr) + _getBitsRanks(dict, next - 1);
-
-        std::cout << "Block " << blockPos + 1 << ": [" << curr << "," << next - 1 << "]" << std::endl;
-        std::cout << _blockAt(dict, next) << std::endl;
     }
 }
 
