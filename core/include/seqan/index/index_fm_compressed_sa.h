@@ -325,7 +325,7 @@ void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     }
     updateRanks(indicators);
 
-    resize(values, getRank(indicators, length(indicators) - 1), Exact());
+    resize(values, getRank(indicators, length(sparseString) - 1), Exact());
 
     saIt = begin(sa, Standard());
     for (TSASize pos = offset, counter = 0; saIt != saItEnd; ++saIt, ++pos)
