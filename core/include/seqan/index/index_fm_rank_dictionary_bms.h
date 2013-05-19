@@ -256,14 +256,14 @@ getFibre(RankDictionary<SequenceBitMask<TValue> > const & dictionary, FibreBitSt
 }
 
 // ----------------------------------------------------------------------------
-// Function countOccurrences
+// Function getRank
 // ----------------------------------------------------------------------------
 
 // This functions computes the number of occurrences of a specified character
 // up to a specified position.
-template <typename TValue, typename TChar, typename TPos>
+template <typename TValue, typename TPos, typename TChar>
 inline typename Size<RankDictionary<SequenceBitMask<TValue> > const>::Type
-getRank(RankDictionary<SequenceBitMask<TValue> > const & dictionary, TChar character, TPos pos)
+getRank(RankDictionary<SequenceBitMask<TValue> > const & dictionary, TPos pos, TChar character)
 {
     return getRank(dictionary.bitStrings[ordValue(character)], pos);
 }

@@ -94,6 +94,20 @@ struct TwoLevels {};
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
+{
+    typedef TValue  Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Value<RankDictionary<TwoLevels<TValue, TSpec> > const > :
+    public Value<RankDictionary<TwoLevels<TValue, TSpec> > > {};
+
+// ----------------------------------------------------------------------------
 // Metafunction Size                                           [RankDictionary]
 // ----------------------------------------------------------------------------
 

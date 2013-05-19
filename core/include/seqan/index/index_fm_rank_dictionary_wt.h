@@ -385,7 +385,7 @@ inline TValue getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos p
 /**
 .Function.RankDictionary#getRank:
 ..summary:Returns the rank (number of occurrences) of a specified character up to a specified position. 
-..signature:getRank(dictionary, character, pos)
+..signature:getRank(dictionary, pos, character)
 ..class:Class.RankDictionary
 ..cat:Index
 ..param.dictionary:The dictionary.
@@ -397,9 +397,9 @@ inline TValue getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos p
 ..include:seqan/index.h
 */
 
-template <typename TValue, typename TChar, typename TPos>
+template <typename TValue, typename TPos, typename TChar>
 inline typename Size<RankDictionary<WaveletTree<TValue> > >::Type
-getRank(RankDictionary<WaveletTree<TValue> > const & tree, TChar character, TPos pos)
+getRank(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos, TChar character)
 {
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type  TWaveletTreeStructure;
     typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type         TWaveletTreeStructureString;

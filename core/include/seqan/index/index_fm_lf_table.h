@@ -285,7 +285,7 @@ inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
 
     TChar c = getValue(lfTable.occTable, pos);
 
-    return getRank(getFibre(lfTable, FibreOccTable()), c, pos) +
+    return getRank(getFibre(lfTable, FibreOccTable()), pos, c) +
            getPrefixSum(lfTable.prefixSumTable, getCharacterPosition(lfTable.prefixSumTable, c)) - 1;
 }
 

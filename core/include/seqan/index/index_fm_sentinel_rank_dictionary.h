@@ -103,6 +103,12 @@ struct Fibre<SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue> >, TS
     typedef RankDictionary<SequenceBitMask<TValue> > Type;
 };
 
+template <typename TValue, typename TRankDictSpec, typename TSpec>
+struct Fibre<SentinelRankDictionary<RankDictionary<TwoLevels<TValue, TRankDictSpec> >, TSpec>, FibreRankDictionary>
+{
+    typedef RankDictionary<TwoLevels<TValue, TRankDictSpec> >   Type;
+};
+
 template <typename TRankDictionary, typename TSpec>
 struct Fibre<SentinelRankDictionary<TRankDictionary, TSpec> const, FibreRankDictionary>
 {
@@ -363,7 +369,7 @@ getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary, Fibr
 
 template <typename TRankDictionary, typename TSpec>
 inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreSentinelPosition>::Type &
-getFibre(SentinelRankDictionary<TRankDictionary, TSpec>& dictionary, FibreSentinelPosition)
+getFibre(SentinelRankDictionary<TRankDictionary, TSpec> & dictionary, FibreSentinelPosition)
 {
     return dictionary.sentinelPosition;
 }
@@ -384,7 +390,7 @@ getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dictionary, Fibr
 ..class:Class.SentinelRankDictionary
 ..summary:Returns the number of occurrences of a specified character from the start
 to a specified position.
-..signature:countOccurrences(dictionary, character, pos)
+..signature:getRank(dictionary, pos, character)
 ..param.dictionary:The dictionary.
 ...type:Class.RankDictionary
 ..param.character:The character.
@@ -394,18 +400,18 @@ to a specified position.
 String<Dna5> genome = "ACGTACGT";
 RankDictionary<String<Dna5> > dictionary(genome);
 
-std::cout << countOccurrences(dictionary, 'a', 3) << std::endl; // 1
-std::cout << countOccurrences(dictionary, 'a', 4) << std::endl; // 2
+std::cout << getRank(dictionary, 3, 'a') << std::endl; // 1
+std::cout << getRank(dictionary, 4, 'a') << std::endl; // 2
 */
 
-template <typename TRankDictionary, typename TChar, typename TPos>
+template <typename TRankDictionary, typename TPos, typename TChar>
 inline typename Size<SentinelRankDictionary<TRankDictionary, Sentinel> >::Type
-getRank(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary, TChar character, TPos pos)
+getRank(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary, TPos pos, TChar character)
 {
     typedef SentinelRankDictionary<TRankDictionary, Sentinel>   TSentinelRankDictionary;
     typedef typename Size<TSentinelRankDictionary>::Type        TSize;
 
-    TSize rank = getRank(getFibre(dictionary, FibreRankDictionary()), character, pos);
+    TSize rank = getRank(getFibre(dictionary, FibreRankDictionary()), pos, character);
 
     if (ordEqual(getSentinelSubstitute(dictionary), character) && pos >= dictionary.sentinelPosition)
          --rank;
@@ -413,14 +419,14 @@ getRank(SentinelRankDictionary<TRankDictionary, Sentinel> const & dictionary, TC
     return rank;
 }
 
-template <typename TRankDictionary, typename TChar, typename TPos>
+template <typename TRankDictionary, typename TPos, typename TChar>
 inline  typename Size<SentinelRankDictionary<TRankDictionary, Sentinels> >::Type
-getRank(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary, TChar character, TPos pos)
+getRank(SentinelRankDictionary<TRankDictionary, Sentinels> const & dictionary, TPos pos, TChar character)
 {
     typedef SentinelRankDictionary<TRankDictionary, Sentinels>  TSentinelRankDictionary;
     typedef typename Size<TSentinelRankDictionary>::Type        TSize;
 
-    TSize rank = getRank(getFibre(dictionary, FibreRankDictionary()), character, pos);
+    TSize rank = getRank(getFibre(dictionary, FibreRankDictionary()), pos, character);
 
     if (ordEqual(getSentinelSubstitute(dictionary), character))
         return rank - getRank(getFibre(dictionary, FibreSentinelPosition()), pos);
@@ -519,7 +525,6 @@ inline void createSentinelRankDictionary(SentinelRankDictionary<TRankDictionary,
 
     createRankDictionary(getFibre(dictionary, FibreRankDictionary()), text);
 }
-
 
 // TODO(esiragusa): Remove this.
 template <typename TRankDictionary, typename TSpec, typename TPrefixSumTable, typename TText, typename TSentinelSub>
