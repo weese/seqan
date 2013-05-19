@@ -104,7 +104,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 template <typename TValue>
 struct Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>
 {
-    typedef StringSet<RankSupportBitString<void> > Type;
+    typedef StringSet<RankDictionary<TwoLevels<bool> > > Type;
 };
 
 template <typename TValue>
@@ -353,7 +353,7 @@ inline TValue getValue(RankDictionary<WaveletTree<TValue> > & dictionary, TPos p
     while (true)
     {
         TPos rank1 = getRank(dictionary.bitStrings[treePos], pos);
-        if (isBitSet(dictionary.bitStrings[treePos], pos))
+        if (getValue(dictionary.bitStrings[treePos], pos))
         {
             character = getCharacter(iter); 
             pos = rank1 - 1;  // -1 because strings start at 0
@@ -485,7 +485,7 @@ inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText 
 
     TFibreRankSupportBitStrings & bitStrings = getFibre(tree, FibreBitStrings());
     for (TSize i = 0; i < length(bitStrings); ++i)
-        _updateRanks(bitStrings[i]);
+        updateRanks(bitStrings[i]);
 }
 
 // ----------------------------------------------------------------------------
