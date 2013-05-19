@@ -41,21 +41,6 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
-template <typename TOccTable, typename TPrefixSumTable>
-struct LfTable;
-
-template <typename TValue>
-struct WaveletTree;
-
-template<typename TValue> 
-struct RankDictionary;
-
-template<typename TRankDictionarySpec, typename TSpec> 
-class SentinelRankDictionary;
-
-struct FibreTreeStructure_;
-typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
-
 template <typename TChar, typename TSpec = void>
 class RightArrayBinaryTree;
 
@@ -78,6 +63,9 @@ class RightArrayBinaryTree;
 ///.Metafunction.Fibre.param.TSpec.type:Tag.RightArrayBinaryTree Fibres
 struct FibreTreeStructureEncoding_;
 typedef Tag<FibreTreeStructureEncoding_> const FibreTreeStructureEncoding;
+
+struct FibreTreeStructure_;
+typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
 
 // ============================================================================
 // Metafunctions
@@ -256,18 +244,6 @@ inline void _createRightArrayBinaryTreeImpl(Iter<RightArrayBinaryTree<TChar, TSp
     appendValue(borderString, Pair<unsigned>(0, alpSize - 1));
     _resize(waveletTreeStructure, 1, Exact());
     _createRightArrayBinaryTreeImpl(it, borderString, pst);
-}
-
-// This function computes the wavelet tree structure contained in the lfTable.
-// TODO(singer): get rid of this
-template < typename TValue, typename TSpec, typename TPrefixSumTable>
-inline void createRightArrayBinaryTree(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable)
-{
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type TRightArrayBinaryTree;
-    TRightArrayBinaryTree & rightArrayBinaryTree = lfTable.occTable.rankDictionary.waveletTreeStructure;
-
-    typename Iterator<TRightArrayBinaryTree, TopDown<ParentLinks<void> > >::Type it(rightArrayBinaryTree, 0u);
-    _createRightArrayBinaryTreeImpl(it, lfTable.prefixSumTable);
 }
 
 template <typename TChar, typename TSpec, typename TText>
