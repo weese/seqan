@@ -55,6 +55,28 @@ struct Size<RankDictionary<TwoLevels<TValue, unsigned> > >
 }
 
 // ----------------------------------------------------------------------------
+// Function testRankDictionaryGetValue()
+// ----------------------------------------------------------------------------
+
+template <typename TAlphabet, typename TStringSpec, typename TSpec>
+void testRankDictionaryGetValue(String<TAlphabet, TStringSpec> const & text, TSpec const & /* tag */)
+{
+    typedef String<TAlphabet, TStringSpec> const        TText;
+    typedef typename Iterator<TText>::Type              TTextIterator;
+    typedef TwoLevels<TAlphabet, unsigned>              TRankDictionarySpec;
+    typedef RankDictionary<TRankDictionarySpec>         TRankDictionary;
+
+    // Build the RankDictionary object to test.
+    TRankDictionary dict(text);
+
+    // Scan the text.
+    TTextIterator textBegin = begin(text, Standard());
+    TTextIterator textEnd = end(text, Standard());
+    for (TTextIterator textIt = textBegin; textIt != textEnd; ++textIt)
+        SEQAN_ASSERT_EQ(value(textIt), getValue(dict, textIt - textBegin));
+}
+
+// ----------------------------------------------------------------------------
 // Function testRankDictionaryGetRank()
 // ----------------------------------------------------------------------------
 
@@ -83,12 +105,42 @@ void testRankDictionaryGetRank(String<TAlphabet, TStringSpec> const & text, TSpe
     TTextIterator textEnd = end(text, Standard());
     for (TTextIterator textIt = textBegin; textIt != textEnd; ++textIt)
     {
+        // Update the naive rank.
+        rank[ordValue(value(textIt))]++;
+
         // Check the rank for all alphabet symbols.
         for (TAlphabetSize c = 0; c < alphabetSize; ++c)
             SEQAN_ASSERT_EQ(rank[c], getRank(dict, textIt - textBegin, c));
+    }
+}
 
-        // Update the naive rank.
-        rank[ordValue(value(textIt))]++;
+// ----------------------------------------------------------------------------
+// Test test_rss_getvalue                                      [RankDictionary]
+// ----------------------------------------------------------------------------
+
+SEQAN_DEFINE_TEST(test_rss_getvalue)
+{
+    {
+        String<char> text = "testestestestestestestestestestestestestestestestestest";
+        testRankDictionaryGetValue(text, TwoLevels<char, unsigned>());
+    }
+    {
+        String<Dna> text = "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
+        testRankDictionaryGetValue(text, TwoLevels<Dna, unsigned>());
+    }
+    {
+        String<bool> text;
+        for (unsigned i = 0; i < 10; i++)
+        {
+            appendValue(text, 1);
+            appendValue(text, 0);
+            appendValue(text, 1);
+            appendValue(text, 0);
+            appendValue(text, 1);
+            appendValue(text, 1);
+            appendValue(text, 1);
+        }
+        testRankDictionaryGetValue(text, TwoLevels<bool, unsigned>());
     }
 }
 
@@ -99,25 +151,34 @@ void testRankDictionaryGetRank(String<TAlphabet, TStringSpec> const & text, TSpe
 SEQAN_DEFINE_TEST(test_rss_getrank)
 {
     {
-        String<char> text = "test";
+        String<char> text = "testestestestestestestestestestestestestestestestestest";
         testRankDictionaryGetRank(text, TwoLevels<char, unsigned>());
     }
     {
-        String<Dna> text = "ACGTACGTACGTACGTACGTACGTACGTACGT";
+        String<Dna> text = "ACGTACGTACGTACGTACGTACGTACGTACGTCCCCCCCCCCCCCCCCCCGCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
         testRankDictionaryGetRank(text, TwoLevels<Dna, unsigned>());
     }
     {
         String<bool> text;
-        appendValue(text, 1);
-        appendValue(text, 0);
-        appendValue(text, 1);
-        appendValue(text, 0);
-        appendValue(text, 1);
-        appendValue(text, 1);
-        appendValue(text, 1);
+        for (unsigned i = 0; i < 10; i++)
+        {
+            appendValue(text, 1);
+            appendValue(text, 0);
+            appendValue(text, 1);
+            appendValue(text, 0);
+            appendValue(text, 1);
+            appendValue(text, 1);
+            appendValue(text, 1);
+        }
+        for (unsigned i = 0; i < 150; i++)
+            appendValue(text, 1);
         testRankDictionaryGetRank(text, TwoLevels<bool, unsigned>());
     }
 }
+
+// ----------------------------------------------------------------------------
+// Test ...                                                    [RankDictionary]
+// ----------------------------------------------------------------------------
 
 //SEQAN_DEFINE_TEST(test_rss_sizeof)
 //{
