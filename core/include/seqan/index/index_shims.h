@@ -721,6 +721,23 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 //////////////////////////////////////////////////////////////////////////////
 // open
 
+    // TODO(esiragusa): Move open() / save() to respective String/StringSet classes.
+
+	template <typename TValue>
+	inline bool open(TValue & value, const char *fileName, int openMode)
+    {
+		String<TValue, External< ExternalConfigLarge<> > > extString;
+		if (!open(extString, fileName, openMode & ~OPEN_CREATE)) return false;
+		assignValue(value, back(extString), Exact());
+		return true;
+	}
+    
+	template <typename TValue>
+	inline bool open(TValue & value, const char *fileName)
+    {
+		return open(value, fileName, OPEN_RDONLY);
+	}
+
 	template < typename TValue, typename TSpec >
 	inline bool open(String<TValue, TSpec> &string, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
@@ -813,6 +830,21 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 //////////////////////////////////////////////////////////////////////////////
 // save
+
+	template <typename TValue>
+	inline bool save(TValue val, const char *fileName, int openMode)
+    {
+        String<TValue, External< ExternalConfigLarge<> > > extString;
+        if (!open(extString, fileName, openMode)) return false;
+        appendValue(extString, val);
+        return true;
+    }
+
+	template <typename TValue>
+	inline bool save(TValue val, const char *fileName)
+    {
+        return save(val, fileName, OPEN_WRONLY | OPEN_CREATE);
+    }
 
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> const &string, const char *fileName, int openMode) {
