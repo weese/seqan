@@ -520,16 +520,19 @@ inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, StringSet<TT
         posLocalize(pos, getValue(saIt), stringSetLimits(text));
         
         if (getSeqOffset(pos) != 0)
+        {
             assignValue(bwtIt, getValue(getValue(text, getSeqNo(pos)), getSeqOffset(pos) - 1));
+            setValue(sentinelPos, bwtIt - bwtItBeg, false);
+        }
         else
         {
             assignValue(bwtIt, sentinelSub);
-            setBit(sentinelPos, bwtIt - bwtItBeg);
+            setValue(sentinelPos, bwtIt - bwtItBeg, true);
         }
     }
 
     // Update the auxiliary rank support bit string information.
-    _updateRanks(sentinelPos);
+    updateRanks(sentinelPos);
 }
 
 // ----------------------------------------------------------------------------
@@ -701,8 +704,8 @@ inline void _range(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, TPatte
         letter = pattern[i];
         letterPosition = getCharacterPosition(prefixSumTable, letter);
         TSize prefixSum = getPrefixSum(prefixSumTable, letterPosition);
-        sp = prefixSum + countOccurrences(occTable, letter, sp - 1);
-        ep = prefixSum + countOccurrences(occTable, letter, ep) - 1;
+        sp = prefixSum + getRank(occTable, letter, sp - 1);
+        ep = prefixSum + getRank(occTable, letter, ep) - 1;
     }
 
     setPosition(range.i1, sp);
