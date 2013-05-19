@@ -302,12 +302,12 @@ getFibre(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, FibreTreeStru
 }
 
 // ----------------------------------------------------------------------------
-// Function _length()
+// Function length()
 // ----------------------------------------------------------------------------
 
 // This function returns the number of different entries in the wavelet tree structure.
 template <typename TChar, typename TSpec>
-inline unsigned _length(RightArrayBinaryTree<TChar, TSpec> const & tree)
+inline unsigned length(RightArrayBinaryTree<TChar, TSpec> const & tree)
 {
     return length(tree.treeVertices);
 }

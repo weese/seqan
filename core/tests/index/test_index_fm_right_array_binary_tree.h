@@ -209,11 +209,11 @@ void waveletTreeStructureLength(TRightArrayBinaryTree & /*tag*/)
 		TRightArrayBinaryTree waveletTreeStructure;
 		
 		TWaveletTreeVertices & temp = getFibre(waveletTreeStructure, FibreTreeStructureEncoding());
-		SEQAN_ASSERT_EQ(_length(waveletTreeStructure), 0u);
+		SEQAN_ASSERT_EQ(length(waveletTreeStructure), 0u);
 
 		resize(temp, 10);
 		
-		SEQAN_ASSERT_EQ(_length(waveletTreeStructure), 10u);
+		SEQAN_ASSERT_EQ(length(waveletTreeStructure), 10u);
 	}
 }
 
@@ -229,21 +229,21 @@ void waveletTreeStructureResize(TRightArrayBinaryTree & /*tag*/)
 		TRightArrayBinaryTree waveletTreeStructure;
 		
 		TWaveletTreeVertices & temp = getFibre(waveletTreeStructure, FibreTreeStructureEncoding());
-		SEQAN_ASSERT_EQ(_length(waveletTreeStructure), 0u);
+		SEQAN_ASSERT_EQ(length(waveletTreeStructure), 0u);
 
 		resize(temp, 10);
 		
-		SEQAN_ASSERT_EQ(_length(waveletTreeStructure), 10u);
+		SEQAN_ASSERT_EQ(length(waveletTreeStructure), 10u);
 	}
 	{
 		TRightArrayBinaryTree waveletTreeStructure;
 		
 		TWaveletTreeVertices & temp = getFibre(waveletTreeStructure, FibreTreeStructureEncoding());
-		SEQAN_ASSERT_EQ(_length(waveletTreeStructure), 0u);
+		SEQAN_ASSERT_EQ(length(waveletTreeStructure), 0u);
 
 		resize(temp, 10, TWaveletTreeVertex(0, 10));
 		
-		SEQAN_ASSERT_EQ(_length(waveletTreeStructure), 10u);
+		SEQAN_ASSERT_EQ(length(waveletTreeStructure), 10u);
 		SEQAN_ASSERT_EQ(getFibre(waveletTreeStructure, FibreTreeStructureEncoding())[9],  TWaveletTreeVertex(0, 10));
 	}
 
