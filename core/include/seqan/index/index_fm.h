@@ -54,6 +54,9 @@ class PrefixSumTable;
 template <typename TSpec = void>
 class WT;
 
+template <typename TSpec = void>
+class TL;
+
 template <typename TOccSpec = WT<>, typename TSpec = void>
 class FMIndex;
 
@@ -162,19 +165,19 @@ struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<SBM<TSBMSpec>, TSpe
     typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinels> Type;
 };
 
-//template <typename TText, typename TBWTSpec, typename TSpec>
-//struct Fibre<Index<TText, FMIndex<BWT<TBWTSpec>, TSpec> >, FibreOccTable>
-//{
-//    typedef typename Value<Index<TText, FMIndex<BWT<TBWTSpec>, TSpec> > >::Type         TValue_;
-//	typedef SentinelRankDictionary<RankDictionary<BWT<TValue_> >, Sentinel> Type;
-//};
-//
-//template <typename TText, typename TStringSetSpec, typename TBWTSpec, typename TSpec>
-//struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<BWT<TBWTSpec>, TSpec > >, FibreOccTable>
-//{
-//    typedef typename Value<TText>::Type TValue_;
-//    typedef SentinelRankDictionary<RankDictionary<BWT<TValue_> >, Sentinels> Type;
-//};
+template <typename TText, typename TTLSpec, typename TSpec>
+struct Fibre<Index<TText, FMIndex<TL<TTLSpec>, TSpec> >, FibreOccTable>
+{
+    typedef typename Value<Index<TText, FMIndex<TwoLevels<TTLSpec>, TSpec> > >::Type        TValue_;
+	typedef SentinelRankDictionary<RankDictionary<TwoLevels<TValue_> >, Sentinel>           Type;
+};
+
+template <typename TText, typename TStringSetSpec, typename TTLSpec, typename TSpec>
+struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<TL<TTLSpec>, TSpec > >, FibreOccTable>
+{
+    typedef typename Value<TText>::Type                                                     TValue_;
+    typedef SentinelRankDictionary<RankDictionary<TwoLevels<TValue_> >, Sentinels>          Type;
+};
 
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>
