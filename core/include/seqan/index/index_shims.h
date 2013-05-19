@@ -728,7 +728,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
     {
 		String<TValue, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode & ~OPEN_CREATE)) return false;
-		assignValue(value, back(extString), Exact());
+		assignValue(value, back(extString));
 		return true;
 	}
     
