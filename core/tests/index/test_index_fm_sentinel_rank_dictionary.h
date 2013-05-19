@@ -1,5 +1,5 @@
 // ==========================================================================
-//                 seqan - the library for sequence analysis
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -103,13 +103,13 @@ void sentinelRankDictionaryConstructor(TRankDictionary & /*tag*/)
     }
 }
 
-SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, Constuctor)
-{
-    using namespace seqan;
-
-    typename TestFixture::TSentinelRankDictionarySpec dictionay;
-    sentinelRankDictionaryConstructor(dictionay);
-}
+//SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, Constuctor)
+//{
+//    using namespace seqan;
+//
+//    typename TestFixture::TSentinelRankDictionarySpec dictionay;
+//    sentinelRankDictionaryConstructor(dictionay);
+//}
 
 template <typename TRankDictionary>
 void sentinelDictionaryClear(TRankDictionary & /*tag*/)
@@ -152,24 +152,25 @@ void sentinelDictionarySentinelPosition(SentinelRankDictionary<TRankDictionary, 
     String<unsigned> sentinelPos;
     SEQAN_ASSERT_EQ(getFibre(sentinelDictionary, FibreSentinelPosition()), sentinelPos);
 
-    RankSupportBitString<> bitString;
-    resize(bitString, length(text), 0);
-    setBitTo(bitString, 2u, 1);
+    RankDictionary<TwoLevels<bool> > bitString;
+//    resize(bitString, length(text), 0);
+    resize(bitString, length(text));
+    setValue(bitString, 2u, true);
     setSentinelPosition(sentinelDictionary, bitString);
     String<unsigned> temp;
     appendValue(temp, 2);
     SEQAN_ASSERT_EQ(getFibre(sentinelDictionary, FibreSentinelPosition()), temp);
 }
 
-SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, SentinelPosition)
-{
-    using namespace seqan;
-
-    {
-        typename TestFixture::TSentinelRankDictionarySpec dictionay;
-        sentinelDictionarySentinelPosition(dictionay);
-    }
-}
+//SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, SentinelPosition)
+//{
+//    using namespace seqan;
+//
+//    {
+//        typename TestFixture::TSentinelRankDictionarySpec dictionay;
+//        sentinelDictionarySentinelPosition(dictionay);
+//    }
+//}
 
 template <typename TRankDictionary>
 void sentinelRankDictionaryEmpty(TRankDictionary & /*tag*/)
@@ -260,7 +261,7 @@ SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, GetFibre)
 }
 
 template <typename TRankDictionary>
-void sentinelRankDictionaryCountOcc(TRankDictionary & /*tag*/)
+void sentinelRankDictionaryGetRank(TRankDictionary & /*tag*/)
 {
     typedef typename Value<TRankDictionary>::Type TChar;
     String<TChar> text;
@@ -282,12 +283,12 @@ void sentinelRankDictionaryCountOcc(TRankDictionary & /*tag*/)
                 ++counter;
             if ((TChar)i == 'A' && j == 0)
                 --counter;
-            SEQAN_ASSERT_EQ(countOccurrences(sentinelRankDictionary, (TChar)i, j), counter);
+            SEQAN_ASSERT_EQ(getRank(sentinelRankDictionary, (TChar)i, j), counter);
         }
     }
 }
 template <typename TRankDictionary>
-void sentinelRankDictionaryCountOcc(SentinelRankDictionary<TRankDictionary, Sentinels> & /*tag*/)
+void sentinelRankDictionaryGetRank(SentinelRankDictionary<TRankDictionary, Sentinels> & /*tag*/)
 {
     typedef typename Value<TRankDictionary>::Type TChar;
     String<TChar> text;
@@ -300,10 +301,10 @@ void sentinelRankDictionaryCountOcc(SentinelRankDictionary<TRankDictionary, Sent
     
     SentinelRankDictionary<TRankDictionary, Sentinels> sentinelRankDictionary(text);
     setSentinelSubstitute(sentinelRankDictionary, 'A');
-    setBitTo(sentinelRankDictionary.sentinelPosition, 0, 1);
-    setBitTo(sentinelRankDictionary.sentinelPosition, 99, 1);
-    setBitTo(sentinelRankDictionary.sentinelPosition, 999, 1);
-    _updateRanks(sentinelRankDictionary.sentinelPosition);
+    setValue(sentinelRankDictionary.sentinelPosition, 0, true);
+    setValue(sentinelRankDictionary.sentinelPosition, 99, true);
+    setValue(sentinelRankDictionary.sentinelPosition, 999, true);
+    updateRanks(sentinelRankDictionary.sentinelPosition);
 
 
     for (int i = MinValue<TChar>::VALUE; i <= MaxValue<TChar>::VALUE; ++i)
@@ -315,61 +316,23 @@ void sentinelRankDictionaryCountOcc(SentinelRankDictionary<TRankDictionary, Sent
                 ++counter;
             if ((TChar)i == 'A' && (j == 0 || j == 99 || j == 999))
                 --counter;
-            SEQAN_ASSERT_EQ(countOccurrences(sentinelRankDictionary, (TChar)i, j), counter);
+            SEQAN_ASSERT_EQ(getRank(sentinelRankDictionary, (TChar)i, j), counter);
         }
     }
 }
 
-SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, CountOcc)
+SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, GetRank)
 {
     using namespace seqan;
     {
         typename TestFixture::TSentinelRankDictionarySpec dictionay;
-        sentinelRankDictionaryCountOcc(dictionay);
+        sentinelRankDictionaryGetRank(dictionay);
     }
     {
         typename TestFixture::TSentinelRankDictionarySpec dictionay;
-        sentinelRankDictionaryCountOcc(dictionay);
+        sentinelRankDictionaryGetRank(dictionay);
     }
 }
-
-
-// // template <typename TString, typename TSpec>
-// // void sentinelRankDictionaryCountOcc(WaveletTree<TString, FmiDollarSubstituted<TSpec> > & /*tag*/)
-// // {
-// //     typedef WaveletTree<TString, FmiDollarSubstituted<TSpec> > TRankDictionary;
-// // 	typedef typename Fibre<TRankDictionary, FibreTreeStructure>::Type TRankDictionaryStructure;
-// // 	typedef typename Fibre<TRankDictionaryStructure, FibreTreeStructureEncoding>::Type TRankDictionaryVertices;
-// // 	typedef typename Value<TRankDictionaryVertices>::Type TRankDictionaryVertex;
-// // 	typedef typename Value<TRankDictionary>::Type TChar;
-// // 	typedef typename Value<TRankDictionaryVertex, 2>::Type TPos;
-// // 
-// // 	{
-// // 		String<TChar> text;
-// //  		generateText(text);
-// //  		resize(text, 1000);
-// // 
-// // 		TRankDictionary sentinelRankDictionary(text);
-// // 		setDollarSubstitute(sentinelRankDictionary, getCharacter(sentinelRankDictionary, 0u));
-// // 		setDollarPosition(sentinelRankDictionary, 0u);
-// // 
-// //         for (int i = MinValue<TChar>::VALUE; i <= MaxValue<TChar>::VALUE; ++i)
-// //         {
-// //             unsigned counter = 0;
-// //             for (unsigned j = 0; j < length(text); ++j)
-// //             {
-// //                 if(text[j] == (TChar)i)
-// //                 {
-// //                     ++counter;
-// //                     if(text[j] == getDollarSubstitute(sentinelRankDictionary) && j == getDollarPosition(sentinelRankDictionary))
-// //                         --counter;
-// //                 }
-// // 		        SEQAN_ASSERT_EQ(countOccurrences(sentinelRankDictionary, (TChar)i, j), counter);
-// //             }
-// //         }
-// //     }
-// // }
-// 
 
 template <typename TRankDictionary>
 void sentinelRankDictionaryOpenSave(TRankDictionary & /*tag*/)
@@ -392,207 +355,14 @@ void sentinelRankDictionaryOpenSave(TRankDictionary & /*tag*/)
 template <typename TValue>
 void sentinelRankDictionaryOpenSave(RankDictionary<SequenceBitMask<TValue> > & /*tag*/) {}
 
-SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, OpenSave)
-{
-    using namespace seqan;
-    {
-        typename TestFixture::TSentinelRankDictionarySpec dictionay;
-        sentinelRankDictionaryOpenSave(dictionay);
-    }
-}
-
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_clear)
-// {
-//     using namespace seqan;
-// 
-//     RankDictionary<WaveletTree<String<Dna> > > dnaTag;
-//     WaveletTree<String<Dna5>, void> dna5Tag;
-//     WaveletTree<String<AminoAcid>, void> asTag;
-//     WaveletTree<String<char>, void> charTag;
-//     WaveletTree<String<unsigned char>, void> uCharTag;
-//     sentinelRankDictionaryClear(dnaTag);
-//     sentinelRankDictionaryClear(dna5Tag);
-//     sentinelRankDictionaryClear(asTag);
-//     sentinelRankDictionaryClear(charTag);
-//     sentinelRankDictionaryClear(uCharTag);
-// }
-// 
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_constructor)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna>, void> dnaTag;
-//     WaveletTree<String<Dna5>, void> dna5Tag;
-//     WaveletTree<String<AminoAcid>, void> asTag;
-//     WaveletTree<String<char>, void> charTag;
-//     WaveletTree<String<unsigned char>, void> uCharTag;
-//     WaveletTree<String<unsigned char>, FmiDollarSubstituted<SingleDollar<void> > > uCharDollarTag;
-//     sentinelRankDictionaryConstructor(dnaTag);
-//     sentinelRankDictionaryConstructor(dna5Tag);
-//     sentinelRankDictionaryConstructor(asTag);
-//     sentinelRankDictionaryConstructor(charTag);
-//     sentinelRankDictionaryConstructor(uCharTag);
-//     sentinelRankDictionaryConstructor(uCharDollarTag);
-// }
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_dollar_position)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna>, FmiDollarSubstituted<SingleDollar<void> > > dnaTag;
-//     WaveletTree<String<Dna5>, FmiDollarSubstituted<SingleDollar<void> > > dna5Tag;
-//     WaveletTree<String<AminoAcid>, FmiDollarSubstituted<SingleDollar<void> > > asTag;
-//     WaveletTree<String<char>, FmiDollarSubstituted<SingleDollar<void> > > charTag;
-//     WaveletTree<String<unsigned char>, FmiDollarSubstituted<SingleDollar<void> > > uCharTag;
-//     sentinelRankDictionaryDollarPosition(dnaTag);
-//     sentinelRankDictionaryDollarPosition(dna5Tag);
-//     sentinelRankDictionaryDollarPosition(asTag);
-//     sentinelRankDictionaryDollarPosition(charTag);
-//     sentinelRankDictionaryDollarPosition(uCharTag);
-// }
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_dollar_substitute)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna>, FmiDollarSubstituted<SingleDollar<void> > > dnaTag;
-//     WaveletTree<String<Dna5>, FmiDollarSubstituted<SingleDollar<void> > > dna5Tag;
-//     WaveletTree<String<AminoAcid>, FmiDollarSubstituted<SingleDollar<void> > > asTag;
-//     WaveletTree<String<char>, FmiDollarSubstituted<SingleDollar<void> > > charTag;
-//     WaveletTree<String<unsigned char>, FmiDollarSubstituted<SingleDollar<void> > > uCharTag;
-//     sentinelRankDictionaryDollarSubstitute(dnaTag);
-//     sentinelRankDictionaryDollarSubstitute(dna5Tag);
-//     sentinelRankDictionaryDollarSubstitute(asTag);
-//     sentinelRankDictionaryDollarSubstitute(charTag);
-//     sentinelRankDictionaryDollarSubstitute(uCharTag);
-// }
-// 
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_empty)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna>, void> dnaTag;
-//     WaveletTree<String<Dna5>, void> dna5Tag;
-//     WaveletTree<String<AminoAcid>, void> asTag;
-//     WaveletTree<String<char>, void> charTag;
-//     WaveletTree<String<unsigned char>, void> uCharTag;
-//     sentinelRankDictionaryEmpty(dnaTag);
-//     sentinelRankDictionaryEmpty(dna5Tag);
-//     sentinelRankDictionaryEmpty(asTag);
-//     sentinelRankDictionaryEmpty(charTag);
-//     sentinelRankDictionaryEmpty(uCharTag);
-// }
-// 
-// 
-// 
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_get_character)
-// {
-//     using namespace seqan;
-//     {   
-//         WaveletTree<String<Dna>, void> dnaTag;
-//         WaveletTree<String<Dna5>, void> dna5Tag;
-//         WaveletTree<String<AminoAcid>, void> asTag;
-//         WaveletTree<String<signed char>, void> charTag;
-//         WaveletTree<String<unsigned char>, void> uCharTag;
-// 
-//         sentinelRankDictionaryGetCharacter(dnaTag);
-//         sentinelRankDictionaryGetCharacter(dna5Tag);
-//         sentinelRankDictionaryGetCharacter(asTag);
-//         sentinelRankDictionaryGetCharacter(charTag);
-//         sentinelRankDictionaryGetCharacter(uCharTag);
-//     }
-//     {
-//         WaveletTree<String<Dna>, FmiDollarSubstituted<SingleDollar<void> > > dnaTag;
-//         WaveletTree<String<Dna5>, FmiDollarSubstituted<SingleDollar<void> > > dna5Tag;
-//         WaveletTree<String<AminoAcid>, FmiDollarSubstituted<SingleDollar<void> > > asTag;
-//         WaveletTree<String<signed char>, FmiDollarSubstituted<SingleDollar<void> > > charTag;
-//         WaveletTree<String<unsigned char>, FmiDollarSubstituted<SingleDollar<void> > > uCharTag;
-// 
-//         sentinelRankDictionaryGetCharacter(dnaTag);
-//         sentinelRankDictionaryGetCharacter(dna5Tag);
-//         sentinelRankDictionaryGetCharacter(asTag);
-//         sentinelRankDictionaryGetCharacter(charTag);
-//         sentinelRankDictionaryGetCharacter(uCharTag);
-//     }
-// }
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_get_fibre)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna>, void> dnaTag;
-//     WaveletTree<String<Dna5>, void> dna5Tag;
-//     WaveletTree<String<AminoAcid>, void> asTag;
-//     WaveletTree<String<char>, void> charTag;
-//     WaveletTree<String<unsigned char>, void> uCharTag;
-//     sentinelRankDictionaryGetFibre(dnaTag);
-//     sentinelRankDictionaryGetFibre(dna5Tag);
-//     sentinelRankDictionaryGetFibre(asTag);
-//     sentinelRankDictionaryGetFibre(charTag);
-//     sentinelRankDictionaryGetFibre(uCharTag);
-// }
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_get_occ)
-// {
-//     using namespace seqan;
-// 
-//     {
-//         WaveletTree<String<Dna>, void> dnaTag;
-//         WaveletTree<String<Dna5>, void> dna5Tag;
-//         WaveletTree<String<AminoAcid>, void> asTag;
-//         WaveletTree<String<signed char>, void> charTag;
-//         WaveletTree<String<unsigned char>, void> uCharTag;
-// 
-//         sentinelRankDictionaryCountOcc(dnaTag);
-//         sentinelRankDictionaryCountOcc(dna5Tag);
-//         sentinelRankDictionaryCountOcc(asTag);
-//         sentinelRankDictionaryCountOcc(charTag);
-//         sentinelRankDictionaryCountOcc(uCharTag);
-//     }
-// //     {
-// //         WaveletTree<String<Dna>, FmiDollarSubstituted<SingleDollar<void> > > dnaTag;
-// //         WaveletTree<String<Dna5>, FmiDollarSubstituted<SingleDollar<void> > > dna5Tag;
-// //         WaveletTree<String<AminoAcid>, FmiDollarSubstituted<SingleDollar<void> > > asTag;
-// //         WaveletTree<String<signed char>, FmiDollarSubstituted<SingleDollar<void> > > charTag;
-// //         WaveletTree<String<unsigned char>, FmiDollarSubstituted<SingleDollar<void> > > uCharTag;
-// // 
-// //         sentinelRankDictionaryCountOcc(dnaTag);
-// //         sentinelRankDictionaryCountOcc(dna5Tag);
-// //         sentinelRankDictionaryCountOcc(asTag);
-// //         sentinelRankDictionaryCountOcc(charTag);
-// //         sentinelRankDictionaryCountOcc(uCharTag);
-// //     }
-// }
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_fill_wavelet_tree_)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna>, void> dnaTag;
-//     WaveletTree<String<Dna5>, void> dna5Tag;
-//     WaveletTree<String<AminoAcid>, void> asTag;
-//     WaveletTree<String<signed char>, void> charTag;
-//     WaveletTree<String<unsigned char>, void> uCharTag;
-// 
-//     _sentinelRankDictionaryFillWaveletTree(dnaTag);
-//     _sentinelRankDictionaryFillWaveletTree(dna5Tag);
-//     _sentinelRankDictionaryFillWaveletTree(asTag);
-//     _sentinelRankDictionaryFillWaveletTree(charTag);
-//     _sentinelRankDictionaryFillWaveletTree(uCharTag);
-// }
-// 
-// SEQAN_DEFINE_TEST(test_wavelet_tree_open_save)
-// {
-//     using namespace seqan;
-// 
-//     WaveletTree<String<Dna5>, void> dna5Tag;
-// 
-//     sentinelRankDictionaryOpenSave(dna5Tag);
-// }
+//SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, OpenSave)
+//{
+//    using namespace seqan;
+//    {
+//        typename TestFixture::TSentinelRankDictionarySpec dictionay;
+//        sentinelRankDictionaryOpenSave(dictionay);
+//    }
+//}
 
 #endif  // TEST_INDEX_FM_SENTINEL_RANK_DICTIONARY
 
