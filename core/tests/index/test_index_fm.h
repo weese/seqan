@@ -224,7 +224,7 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
         {
             ++counter;
             for (unsigned i = 0; i < length(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())); ++i)
-                SEQAN_ASSERT_EQ(countOccurrences(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), character, i), occ[ordValue(character)][i]);
+                SEQAN_ASSERT_EQ(getRank(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), character, i), occ[ordValue(character)][i]);
         }
 
         // check the compressed suffix array
