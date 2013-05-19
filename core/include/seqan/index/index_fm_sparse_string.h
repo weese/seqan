@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
+// Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
 #ifndef INDEX_FM_SPARSE_STRING_H_
@@ -212,6 +213,10 @@ struct SparseString
     TFibreValues_           values;
     TFibreIndicators_       indicators;
     TSize                   _length;
+
+    SparseString() :
+        _length(0)
+    {};
 
     inline bool operator==(SparseString const & b) const
     {
