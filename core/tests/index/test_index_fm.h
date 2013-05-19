@@ -194,7 +194,6 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
         unsigned pos = 0;
         for (unsigned i = 0; i < length(text); ++ i)
         {
-//             static_cast<Nothing>(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()));
             TChar character = getValue(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), pos);
             SEQAN_ASSERT_EQ(character, text[length(text) - 1 - i]);
             pos = lfMapping(getFibre(fmiIndex, FibreLfTable()), pos);
@@ -224,7 +223,7 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
         {
             ++counter;
             for (unsigned i = 0; i < length(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())); ++i)
-                SEQAN_ASSERT_EQ(getRank(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), character, i), occ[ordValue(character)][i]);
+                SEQAN_ASSERT_EQ(getRank(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), i, character), occ[ordValue(character)][i]);
         }
 
         // check the compressed suffix array
@@ -508,6 +507,10 @@ SEQAN_DEFINE_TEST(test_fm_index_constructor)
 //         fmIndexConstructor(asTag);
 //         fmIndexConstructor(uCharTag);
 //         fmIndexConstructor(charTag);
+    }
+    {
+        Index<DnaString, FMIndex<TL<> > > dnaTag;
+        fmIndexConstructor(dnaTag);
     }
 }
 
