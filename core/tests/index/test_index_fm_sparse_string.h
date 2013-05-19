@@ -78,9 +78,9 @@ void sparseStringGetValue(TSparseString & /*tag*/)
     assignValue(getFibre(sparseString, FibreValues()), 2, 3);
 
     resize(getFibre(sparseString, FibreIndicators()), 30);
-    setBitTo(getFibre(sparseString, FibreIndicators()), 0, 1);
-    setBitTo(getFibre(sparseString, FibreIndicators()), 10, 1);
-    setBitTo(getFibre(sparseString, FibreIndicators()), 20, 1);
+    setValue(getFibre(sparseString, FibreIndicators()), 0, true);
+    setValue(getFibre(sparseString, FibreIndicators()), 10, true);
+    setValue(getFibre(sparseString, FibreIndicators()), 20, true);
     updateRanks(getFibre(sparseString, FibreIndicators()));
 
     SEQAN_ASSERT_EQ(getValue(sparseString, 0), 0u);
