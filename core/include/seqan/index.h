@@ -171,9 +171,6 @@
 // FM Index.
 // ==========================================================================
 
-// TODO(esiragusa): Remove RankSupportBitString.
-#include <seqan/index/index_fm_rank_support_bit_string.h>
-
 // TODO(esiragusa): Remove PrefixSumTable.
 #include <seqan/index/index_fm_prefix_sum_table.h>
 
