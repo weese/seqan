@@ -186,13 +186,6 @@ struct RankDictionary<WaveletTree<TValue> >
     {
         createRankDictionary(*this, text);
     }
-
-    RankDictionary & operator=(RankDictionary const & other)
-    {
-        bitStrings = other.bitStrings;
-        waveletTreeStructure = other.waveletTreeStructure;
-        return *this;
-    }
 };
 
 // ==========================================================================

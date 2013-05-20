@@ -152,13 +152,6 @@ struct LfTable
         occTable(occTable),
         prefixSumTable(prefixSumTable)
     {}
-
-    inline LfTable & operator=(LfTable const & other)
-    {
-        occTable = other.occTable;
-        prefixSumTable = other.prefixSumTable;
-        return *this;
-    }
 };
 
 // ============================================================================

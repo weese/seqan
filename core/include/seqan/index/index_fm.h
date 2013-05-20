@@ -270,14 +270,6 @@ public:
         bwtLength(_computeBwtLength(text)),
         compressionFactor(compressionFactor)
     {}
-
-	inline bool operator==(const Index & b) const
-    {
-        return lfTable == b.lfTable &&
-               compressedSA == b.compressedSA &&
-               bwtLength == b.bwtLength &&
-               compressionFactor == b.compressionFactor;
-    }
 };
 
 // ----------------------------------------------------------------------------
