@@ -267,9 +267,9 @@ If you omit the $OPEN_APPEND$ flag in write mode, the file will be cleared when 
 ..include:seqan/file.h
 */
 
-template <typename TSpec, typename TFilename, typename TOpenMode>
+template <typename TSpec>
 inline bool
-open(FileMapping<TSpec> &mapping, TFilename const &filename, TOpenMode const &openMode)
+open(FileMapping<TSpec> &mapping, const char *filename, int openMode)
 {
     _initialize(mapping);
     bool result = open(mapping.file, filename, openMode);
