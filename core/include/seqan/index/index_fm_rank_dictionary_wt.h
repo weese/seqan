@@ -486,10 +486,10 @@ inline void updateRanks(RankDictionary<WaveletTree<TValue> > & dict)
 ..include:seqan/index.h
 */
 
-template <typename TValue, typename TText> 
-inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dict, TText const & text)
+template <typename TValue, typename TText, typename TPrefixSumTable>
+inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dict, TText const & text, TPrefixSumTable & pst)
 {
-    createRightArrayBinaryTree(getFibre(dict, FibreTreeStructure()), text);
+    createRightArrayBinaryTree(getFibre(dict, FibreTreeStructure()), pst);
 //    _resizeStructure(dict, text);
     _fillStructure(dict, text);
     updateRanks(dict);

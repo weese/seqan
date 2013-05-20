@@ -421,130 +421,25 @@ toSuffixPosition(Index<TText, FMIndex<TOccSpec, TIndexSpec > > const & index, TP
 }
 
 // ----------------------------------------------------------------------------
-// Helper function _computeBwtLength()
-// ----------------------------------------------------------------------------
-
-// This function computes the length of the bwt string.
-template <typename TText>
-typename Size<TText>::Type _computeBwtLength(TText const & text)
-{
-    return length(text) + 1;
-}
-
-// This function computes the length of the bwt string.
-template <typename TText, typename TSetSpec>
-typename Size<StringSet<TText, TSetSpec> >::Type _computeBwtLength(StringSet<TText, TSetSpec> const & text)
-{
-    return lengthSum(text) + countSequences(text);
-}
-
-// ----------------------------------------------------------------------------
-// Helper function _createBwt()
-// ----------------------------------------------------------------------------
-
-// This function computes the BWT of a text. Note that the sentinel sign is substituted and its position stored.
-// The function is tested implicitly in lfTableLfMapping() in test_index_fm.h
-template <typename TBwt, typename TSentinelPosition, typename TText, typename TSA, typename TSentinelSub>
-inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, TText const & text, TSA const & sa,
-		                   TSentinelSub const sentinelSub)
-{
-    typedef typename GetValue<TSA>::Type                    TSAValue;
-    typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
-    typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
-
-    TSAIter saIt = begin(sa, Standard());
-    TSAIter saItEnd = end(sa, Standard());
-    TBwtIter bwtIt = begin(bwt, Standard());
-
-	assignValue(bwtIt, back(text));
-    ++bwtIt;
-
-    for (; saIt != saItEnd; ++saIt, ++bwtIt)
-    {
-        TSAValue pos = getValue(saIt);
-
-        if (pos != 0)
-        {
-            assignValue(bwtIt, getValue(text, pos - 1));
-        }
-        else
-        {
-            assignValue(bwtIt, sentinelSub);
-            sentinelPos = bwtIt - begin(bwt, Standard());
-        }
-    }
-}
-
-// This function computes the BWT of a text. Note that the sentinel sign is substituted and its position stored.
-// The function is tested implicitly in lfTableLfMapping() in test_index_fm.h
-template <typename TBwt, typename TSentinelPosition, typename TText, typename TSetSpec, typename TSA,
-          typename TSentinelSub>
-inline void _createBwt(TBwt & bwt, TSentinelPosition & sentinelPos, StringSet<TText, TSetSpec> const & text,
-                       TSA const & sa,
-                       TSentinelSub const sentinelSub)
-{
-    typedef typename Value<TSA>::Type                       TSAValue;
-    typedef typename Size<TSA>::Type                        TSize;
-    typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
-    typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
-
-    TSize seqNum = countSequences(text);
-    TSize totalLen = lengthSum(text);
-
-    resize(sentinelPos, seqNum + totalLen, Exact());
-    
-    TSAIter saIt = begin(sa, Standard());
-    TSAIter saItEnd = end(sa, Standard());
-    TBwtIter bwtItBeg = begin(bwt, Standard());
-    TBwtIter bwtIt = bwtItBeg;
-
-    // Fill the sentinel positions (they are all at the beginning of the bwt).
-    for (TSize i = 1; i <= seqNum; ++i, ++bwtIt)
-        assignValue(bwtIt, back(text[seqNum - i]));
-
-    // Compute the rest of the bwt.
-    for (; saIt != saItEnd; ++saIt, ++bwtIt)
-    {
-        TSAValue pos;    // = SA[i];
-        posLocalize(pos, getValue(saIt), stringSetLimits(text));
-        
-        if (getSeqOffset(pos) != 0)
-        {
-            assignValue(bwtIt, getValue(getValue(text, getSeqNo(pos)), getSeqOffset(pos) - 1));
-            setValue(sentinelPos, bwtIt - bwtItBeg, false);
-        }
-        else
-        {
-            assignValue(bwtIt, sentinelSub);
-            setValue(sentinelPos, bwtIt - bwtItBeg, true);
-        }
-    }
-
-    // Update the auxiliary rank support bit string information.
-    updateRanks(sentinelPos);
-}
-
-// ----------------------------------------------------------------------------
 // Function _indexCreateCompressedSA()
 // ----------------------------------------------------------------------------
 
 // This function computes the full and compressed suffix array. 
 // Note, in contrast to indexCreate(index, FibreSA()) the full suffix array is also computed.
 template <typename TText, typename TIndexSpec, typename TSpec, typename TSA>
-inline bool _indexCreateCompressedSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
+inline void _indexCreateCompressedSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
 {
     typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
     typedef typename Fibre<TIndex, FibreSA>::Type       TCompressedSA;
     typedef typename Size<TIndex>::Type                 TSize;
 
-    // Create the compressed sa.
+    // Set the FMIndex LfTable as the CompressedSA LfTable.
 	TCompressedSA & compressedSA = getFibre(index, FibreSA());
     setLfTable(compressedSA, getFibre(index, FibreLfTable()));
 
+    // Create the CompressedSA.
     TSize numSentinel = countSequences(text);
-    createCompressedSa(compressedSA, sa, index.compressionFactor, numSentinel); 
-
-    return true;
+    createCompressedSa(compressedSA, sa, index.compressionFactor, numSentinel);
 }
 
 // ----------------------------------------------------------------------------
@@ -553,32 +448,19 @@ inline bool _indexCreateCompressedSA(Index<TText, FMIndex<TIndexSpec, TSpec> > &
 
 // This function creates all table of the lf table given a text and a suffix array.
 template <typename TIndexSpec, typename TSpec, typename TText, typename TSA>
-inline bool _indexCreateLfTable(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
+inline void _indexCreateLfTable(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
 {
     typedef Index<TText, FMIndex<TIndexSpec, TSpec> >		        TIndex;
     typedef typename Fibre<TIndex, FibreLfTable>::Type              TLfTable;
     typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type     TPrefixSumTable;
     typedef typename Fibre<TLfTable, FibreOccTable>::Type           TOccTable;
-    typedef typename Fibre<TOccTable, FibreSentinelPosition>::Type  TSentinelPosition;
-    typedef typename Value<TIndex>::Type						    TAlphabet;
 
     TLfTable & lfTable = getFibre(index, FibreLfTable());
     TPrefixSumTable & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
     TOccTable & occTable = getFibre(lfTable, FibreOccTable());
 
-    createPrefixSumTable(prefixSumTable, text);
-
-    TAlphabet sentinelSub = determineSentinelSubstitute(prefixSumTable);
-
-    String<TAlphabet> bwt;
-    resize(bwt, index.bwtLength, Exact());
-    _createBwt(bwt, getFibre(occTable, FibreSentinelPosition()), text, sa, sentinelSub);
-
-    createSentinelRankDictionary(occTable, bwt, sentinelSub, getFibre(occTable, FibreSentinelPosition()));
-
-    insertSentinels(prefixSumTable, countSequences(text));
-
-    return true;
+    // Create SentinelRankDictionary and PrefixSumTable.
+    createSentinelRankDictionary(occTable, prefixSumTable, text, sa);
 }
 
 // ----------------------------------------------------------------------------

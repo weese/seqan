@@ -246,11 +246,15 @@ inline void _createRightArrayBinaryTreeImpl(Iter<RightArrayBinaryTree<TChar, TSp
     _createRightArrayBinaryTreeImpl(it, borderString, pst);
 }
 
-template <typename TChar, typename TSpec, typename TText>
-inline void createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure, TText const & text)
-{
-    PrefixSumTable<TChar, void> pst(text);
+// ----------------------------------------------------------------------------
+// Function createRightArrayBinaryTree()
+// ----------------------------------------------------------------------------
 
+template <typename TChar, typename TSpec, typename TPrefixSumTable>
+inline void
+createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure,
+                           TPrefixSumTable & pst)
+{
     typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TopDown<ParentLinks<> > >::Type it(waveletTreeStructure, 0u);
     _createRightArrayBinaryTreeImpl(it, pst);
 }
