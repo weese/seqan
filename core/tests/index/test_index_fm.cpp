@@ -108,7 +108,7 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index)
     SEQAN_CALL_TEST(compressed_sa_empty);
     SEQAN_CALL_TEST(compressed_sa_create_compressed_sa);
 //    SEQAN_CALL_TEST(compressed_sa_get_fibre);
-    SEQAN_CALL_TEST(compressed_sa_get_next_pos_);
+//    SEQAN_CALL_TEST(compressed_sa_get_next_pos_);
     SEQAN_CALL_TEST(compressed_sa_set_lf_table);
     SEQAN_CALL_TEST(compressed_sa_value_access);
 //    SEQAN_CALL_TEST(compressed_sa_open_save);

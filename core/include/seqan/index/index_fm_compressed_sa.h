@@ -203,13 +203,15 @@ public:
 // ----------------------------------------------------------------------------
 
 template <typename TPos, typename TOffSet>
-TPos _addGapDistance(TPos const & value, TOffSet const & offSet)
+inline TPos
+_addGapDistance(TPos const & value, TOffSet const & offSet)
 {
     return value + offSet;
 }
 
 template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
-Pair<TSeqId, TPos> _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet)
+inline Pair<TSeqId, TPos>
+_addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet)
 {
     return Pair<TSeqId, TPos>(value.i1, value.i2 + offSet);
 }
@@ -492,21 +494,22 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos po
 // Function _getNextPos()
 // ----------------------------------------------------------------------------
 
+// NOTE(esiragusa): getNextPos() does not seem to be used anywhere.
 // This functions computes the position in the suffix array of text[sa[pos] - 1]
 // iff the current position is not present in the compressed suffix array.
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
-{
-    typedef typename Fibre<TSparseString, FibreIndicators>::Type TIndicators;
-
-    TIndicators const & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
-
-    if (getValue(indicators, pos)) return true;
-
-    pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
-
-    return false;
-}
+//template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+//inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
+//{
+//    typedef typename Fibre<TSparseString, FibreIndicators>::Type TIndicators;
+//
+//    TIndicators const & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
+//
+//    if (getValue(indicators, pos)) return true;
+//
+//    pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+//
+//    return false;
+//}
 
 // ----------------------------------------------------------------------------
 // Function open()

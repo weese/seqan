@@ -137,47 +137,47 @@ void compressedSaGetFibre(TCompressedSA & /*tag*/)
     SEQAN_ASSERT(getFibre(compressedSA, FibreSparseString()) == compressedSA.sparseString);
 }
 
-template <typename TIndex>
-void _compressedSaGetNextPos(TIndex & /*tag*/)
-{ 
-    typedef typename Fibre<TIndex, FibreText>::Type TText;
-    typedef typename SAValue<TText>::Type TSAValue;
-    typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
-    typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
-    typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
-
-    typedef String<TSAValue> TSAString;
-
-    TText text;
-    generateText(text);
-
-    TSAString sa;
-    resize(sa, length(text));
-    createSuffixArray(sa, text, Skew7());
-
-    TIndex index(text, 3);
-    indexCreate(index);
-
-    unsigned pos, pos2;
-    TCompressedSA & compressedSA = getFibre(index, FibreSA());
-    TOccTable occTable = getFibre(getFibre(index, FibreLfTable()), FibreOccTable());
-
-    for (unsigned i = 1; i < length(text); ++i)
-    {
-        if (!isSentinelPosition(occTable, i))
-        {
-            pos = i;
-            pos2 = pos;
-            while(compressedSA[pos] % 3 != 0)
-            {
-                SEQAN_ASSERT(_getNextPos(compressedSA, pos) == false);
-                pos2 = lfMapping(getFibre(index, FibreLfTable()), pos2);
-            }
-            SEQAN_ASSERT(_getNextPos(compressedSA, pos) == true);
-            SEQAN_ASSERT_EQ(pos, pos2);
-        }
-    }
-}
+//template <typename TIndex>
+//void _compressedSaGetNextPos(TIndex & /*tag*/)
+//{ 
+//    typedef typename Fibre<TIndex, FibreText>::Type TText;
+//    typedef typename SAValue<TText>::Type TSAValue;
+//    typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
+//    typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
+//    typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
+//
+//    typedef String<TSAValue> TSAString;
+//
+//    TText text;
+//    generateText(text);
+//
+//    TSAString sa;
+//    resize(sa, length(text));
+//    createSuffixArray(sa, text, Skew7());
+//
+//    TIndex index(text, 3);
+//    indexCreate(index);
+//
+//    unsigned pos, pos2;
+//    TCompressedSA & compressedSA = getFibre(index, FibreSA());
+//    TOccTable occTable = getFibre(getFibre(index, FibreLfTable()), FibreOccTable());
+//
+//    for (unsigned i = 1; i < length(text); ++i)
+//    {
+//        if (!isSentinelPosition(occTable, i))
+//        {
+//            pos = i;
+//            pos2 = pos;
+//            while(compressedSA[pos] % 3 != 0)
+//            {
+//                SEQAN_ASSERT(_getNextPos(compressedSA, pos) == false);
+//                pos2 = lfMapping(getFibre(index, FibreLfTable()), pos2);
+//            }
+//            SEQAN_ASSERT(_getNextPos(compressedSA, pos) == true);
+//            SEQAN_ASSERT_EQ(pos, pos2);
+//        }
+//    }
+//}
 
 template <typename TCompressedSA>
 void compressedSaSetLfTable(TCompressedSA & /*tag*/)
@@ -284,17 +284,18 @@ SEQAN_DEFINE_TEST(compressed_sa_get_fibre)
     compressedSaGetFibre(tag);
 }
 
-SEQAN_DEFINE_TEST(compressed_sa_get_next_pos_)
-{
-    using namespace seqan;
-
-    typedef Dna TChar;
-    typedef String<TChar> TText;
-
-    Index<TText, FMIndex<WT<>, void > > tag;
-
-    _compressedSaGetNextPos(tag);
-}
+// NOTE(esiragusa): getNextPos() does not seem to be used anywhere.
+//SEQAN_DEFINE_TEST(compressed_sa_get_next_pos_)
+//{
+//    using namespace seqan;
+//
+//    typedef Dna TChar;
+//    typedef String<TChar> TText;
+//
+//    Index<TText, FMIndex<WT<>, void > > tag;
+//
+//    _compressedSaGetNextPos(tag);
+//}
 
 SEQAN_DEFINE_TEST(compressed_sa_set_lf_table)
 {
