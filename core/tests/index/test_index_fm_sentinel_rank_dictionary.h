@@ -241,7 +241,6 @@ SEQAN_TYPED_TEST(SentinelRankDictionaryTestCommon, GetFibre)
 {
     using namespace seqan;
 
-    using namespace seqan;
     {
         typename TestFixture::TSentinelRankDictionarySpec dictionay;
         sentinelRankDictionaryGetFibre(dictionay);
