@@ -262,9 +262,10 @@ public:
 
     Index() :
         bwtLength(0),
-        compressionFactor(0)
+        compressionFactor(10)
     {}
 
+    // TODO(esiragusa): Move compression factor inside CompressedSA.
     Index(TText & text, unsigned compressionFactor = 10) :
         text(text),
         bwtLength(_computeBwtLength(text)),
