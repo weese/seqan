@@ -237,29 +237,19 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
     typedef typename Size<RankDictionary>::Type                 TSize;
 
     TRankDictionaryFibre ranks;
-//    TSize _length;
+    TSize _length;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    RankDictionary() /* : _length(0) */ {};
+    RankDictionary() : _length(0) {};
 
     template <typename TText>
     RankDictionary(TText const & text)
     {
         createRankDictionary(*this, text);
     };
-
-    // ------------------------------------------------------------------------
-    // Operator==()
-    // ------------------------------------------------------------------------
-
-    inline bool operator==(RankDictionary const & other) const
-    {
-        return //length(*this) == length(other) &&
-                ranks == other.ranks;
-    }
 };
 
 // ============================================================================
@@ -559,12 +549,12 @@ inline void setValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos,
 // ----------------------------------------------------------------------------
 // NOTE(esiragusa): Better not to have appendValue() - it is not efficient - and thus neither length().
 
-//template <typename TValue, typename TSpec, typename TChar, typename TExpand>
-//inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
-//{
-//    resize(dict, length(dict) + 1, tag);
-//    setValue(dict, length(dict) - 1, c);
-//}
+template <typename TValue, typename TSpec, typename TChar, typename TExpand>
+inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar c, Tag<TExpand> const tag)
+{
+    resize(dict, length(dict) + 1, tag);
+    setValue(dict, length(dict) - 1, c);
+}
 
 // ----------------------------------------------------------------------------
 // Function updateRanks()                                      [RankDictionary]
@@ -658,12 +648,12 @@ inline bool empty(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
 // Function length()                                           [RankDictionary]
 // ----------------------------------------------------------------------------
 
-//template <typename TValue, typename TSpec>
-//inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
-//length(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
-//{
-//    return dict._length;
-//}
+template <typename TValue, typename TSpec>
+inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+length(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
+{
+    return dict._length;
+}
 
 // ----------------------------------------------------------------------------
 // Function reserve()                                          [RankDictionary]
@@ -684,7 +674,7 @@ template <typename TValue, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 resize(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TSize newLength, Tag<TExpand> const tag)
 {
-//    dict._length = newLength;
+    dict._length = newLength;
     return resize(dict.ranks, std::ceil(newLength / static_cast<double>(BlockSize<TValue>::VALUE)), tag);
 }
 

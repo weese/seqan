@@ -50,15 +50,9 @@ struct WaveletTree;
 
 struct FibreBitStrings_;
 struct FibreTreeStructure_;
-struct FibreDollarPosition_;
-struct FibreOccTable_;
-struct FibreRankDictionary_;
 
 typedef Tag<FibreTreeStructure_>    const FibreTreeStructure;
 typedef Tag<FibreBitStrings_>       const FibreBitStrings;
-typedef Tag<FibreDollarPosition_>   const FibreDollarPosition;
-typedef Tag<FibreOccTable_>         const FibreOccTable;
-typedef Tag<FibreRankDictionary_>   const FibreRankDictionary;
 
 // ==========================================================================
 // Metafunctions
@@ -199,20 +193,6 @@ struct RankDictionary<WaveletTree<TValue> >
         waveletTreeStructure = other.waveletTreeStructure;
         return *this;
     }
-
-//    bool operator==(RankDictionary const & b) const
-//    {
-//        typedef typename Size<typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type>::Type TSize;
-//        
-//        if (length(bitStrings) != length(b.bitStrings))
-//            return false;
-//
-//        for (TSize i = 0; i < length(bitStrings); ++i)
-//            if (!(bitStrings[i] == b.bitStrings[i]))
-//                return false;
-//
-//        return waveletTreeStructure == b.waveletTreeStructure;
-//    }
 };
 
 // ==========================================================================
@@ -238,30 +218,30 @@ struct RankDictionary<WaveletTree<TValue> >
 */
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type &
-getFibre(RankDictionary<WaveletTree<TValue> >& dictionary, const FibreBitStrings)
+getFibre(RankDictionary<WaveletTree<TValue> > & dict, const FibreBitStrings)
 {
-    return dictionary.bitStrings;
+    return dict.bitStrings;
 }
 
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type const &
-getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreBitStrings)
+getFibre(RankDictionary<WaveletTree<TValue> > const & dict, const FibreBitStrings)
 {
-    return dictionary.bitStrings;
+    return dict.bitStrings;
 }
 
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type &
-getFibre(RankDictionary<WaveletTree<TValue> >& dictionary, FibreTreeStructure)
+getFibre(RankDictionary<WaveletTree<TValue> > & dict, FibreTreeStructure)
 {
-    return dictionary.waveletTreeStructure;
+    return dict.waveletTreeStructure;
 }
 
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const &
-getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTreeStructure)
+getFibre(RankDictionary<WaveletTree<TValue> > const & dict, const FibreTreeStructure)
 {
-    return dictionary.waveletTreeStructure;
+    return dict.waveletTreeStructure;
 }
 
 // ----------------------------------------------------------------------------
@@ -279,10 +259,10 @@ getFibre(RankDictionary<WaveletTree<TValue> > const & dictionary, const FibreTre
 */
 
 template <typename TValue>
-inline void clear(RankDictionary<WaveletTree<TValue> > & dictionary)
+inline void clear(RankDictionary<WaveletTree<TValue> > & dict)
 {
-    clear(getFibre(dictionary, FibreBitStrings()));
-    clear(getFibre(dictionary, FibreTreeStructure()));
+    clear(getFibre(dict, FibreBitStrings()));
+    clear(getFibre(dict, FibreTreeStructure()));
 }
 
 // ----------------------------------------------------------------------------
@@ -301,9 +281,9 @@ inline void clear(RankDictionary<WaveletTree<TValue> > & dictionary)
 */
 
 template <typename TValue>
-inline bool empty(RankDictionary<WaveletTree<TValue> > const & dictionary)
+inline bool empty(RankDictionary<WaveletTree<TValue> > const & dict)
 {
-    return empty(getFibre(dictionary, FibreTreeStructure()));
+    return empty(getFibre(dict, FibreTreeStructure()));
 }
 
 // ----------------------------------------------------------------------------
@@ -322,7 +302,7 @@ inline bool empty(RankDictionary<WaveletTree<TValue> > const & dictionary)
 */
 
 template <typename TValue, typename TPos>
-inline TValue getValue(RankDictionary<WaveletTree<TValue> > & dictionary, TPos pos)
+inline TValue getValue(RankDictionary<WaveletTree<TValue> > & dict, TPos pos)
 {
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const    TWaveletTreeStructure;
     typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type                 TWaveletTreeStructureString;
@@ -330,18 +310,18 @@ inline TValue getValue(RankDictionary<WaveletTree<TValue> > & dictionary, TPos p
     typedef typename Value<TWaveletTreeStructureEntry, 1>::Type                                     TChar;
 
     unsigned treePos = 0;
-    typename Iterator<TWaveletTreeStructure, TopDown<> >::Type iter(dictionary.waveletTreeStructure, treePos);
-    
+    typename Iterator<TWaveletTreeStructure, TopDown<> >::Type iter(dict.waveletTreeStructure, treePos);
+
     // initialize the return value with the smallest possible value
-    TChar character = dictionary.waveletTreeStructure.minCharValue;
+    TChar character = dict.waveletTreeStructure.minCharValue;
 
     // while the current node is not a leaf, go right if the bit at the current position is 1
     // go left otherwise
     // note that when going right the return value changes
     while (true)
     {
-        TPos rank1 = getRank(dictionary.bitStrings[treePos], pos);
-        if (getValue(dictionary.bitStrings[treePos], pos))
+        TPos rank1 = getRank(dict.bitStrings[treePos], pos);
+        if (getValue(dict.bitStrings[treePos], pos))
         {
             character = getCharacter(iter); 
             pos = rank1 - 1;  // -1 because strings start at 0
@@ -362,10 +342,11 @@ inline TValue getValue(RankDictionary<WaveletTree<TValue> > & dictionary, TPos p
 
 // TODO(singer): We would like to have only one variant BUT there is a getValue() with const.
 template <typename TValue, typename TPos>
-inline TValue getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos)
+inline TValue getValue(RankDictionary<WaveletTree<TValue> > const & dict, TPos pos)
 {
-    return getValue(const_cast<RankDictionary<WaveletTree<TValue> > &>(tree), pos);
+    return getValue(const_cast<RankDictionary<WaveletTree<TValue> > &>(dict), pos);
 }
+
 // ----------------------------------------------------------------------------
 // Function getRank()
 // ----------------------------------------------------------------------------
@@ -387,7 +368,7 @@ inline TValue getValue(RankDictionary<WaveletTree<TValue> > const & tree, TPos p
 
 template <typename TValue, typename TPos, typename TChar>
 inline typename Size<RankDictionary<WaveletTree<TValue> > >::Type
-getRank(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos, TChar character)
+getRank(RankDictionary<WaveletTree<TValue> > const & dict, TPos pos, TChar character)
 {
     typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type  TWaveletTreeStructure;
     typedef typename Fibre<TWaveletTreeStructure, FibreTreeStructureEncoding>::Type         TWaveletTreeStructureString;
@@ -399,11 +380,12 @@ getRank(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos, TChar chara
 
     // determine the leaf containing the character
     // count the number of 1 or 0 up to the computed position
-    typename Iterator<TWaveletTreeStructure const, TopDown<> >::Type it(tree.waveletTreeStructure, treePos);
-    TChar_ charInTree = tree.waveletTreeStructure.minCharValue;
+    typename Iterator<TWaveletTreeStructure const, TopDown<> >::Type it(dict.waveletTreeStructure, treePos);
+    TChar_ charInTree = dict.waveletTreeStructure.minCharValue;
+
     while (true)
     {
-        TPos addValue = getRank(tree.bitStrings[treePos], sum);
+        TPos addValue = getRank(dict.bitStrings[treePos], sum);
         if (ordGreater(getCharacter(it), character))
         {
             if (addValue > sum) return 0;
@@ -431,47 +413,62 @@ getRank(RankDictionary<WaveletTree<TValue> > const & tree, TPos pos, TChar chara
 }
 
 // ----------------------------------------------------------------------------
-// Function _fillWaveletTree()
+// Function _fillStructure()
 // ----------------------------------------------------------------------------
 
 // This function is used to fill the bit strings of the wavelet tree.
 template <typename TValue, typename TText>
-inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText const & text)
+inline void _fillStructure(RankDictionary<WaveletTree<TValue> > & dict, TText const & text)
 {
     typedef WaveletTree<TValue>                                         TRankDictionarySpec;
     typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
-    typedef typename Size<TRankDictionary>::Type                        TSize;
     typedef typename Fibre<TRankDictionary, FibreTreeStructure>::Type   TWaveletTreeStructure;
+    typedef typename Iterator<TWaveletTreeStructure, TopDown<> >::Type  TWaveletTreeIterator;
+    typedef typename Size<TRankDictionary>::Type                        TSize;
+    typedef typename Iterator<TText const, Standard>::Type              TTextIterator;
 
-    resize(tree.bitStrings, _length(tree.waveletTreeStructure), Exact());
+    resize(dict.bitStrings, length(dict.waveletTreeStructure), Exact());
 
-    for (TSize i = 0; i < length(text); ++i)
+    TTextIterator textBegin = begin(text, Standard());
+    TTextIterator textEnd = end(text, Standard());
+
+    for (TTextIterator textIt = textBegin; textIt != textEnd; ++textIt)
     {
-        typename Iterator<TWaveletTreeStructure, TopDown<> >::Type it(tree.waveletTreeStructure, 0);
-        bool bit;
+        TWaveletTreeIterator it(dict.waveletTreeStructure, 0);
 
         while (true)
         {
             // decide whether the character is smaller then the pivot element of the current node 
-            if (ordGreater(getCharacter(it), getValue(text, i)))
+            if (ordGreater(getCharacter(it), value(textIt)))
             {
-                bit = 0;
-                appendValue(getFibre(tree, FibreBitStrings())[getPosition(it)], bit);
+                // TODO(esiragusa): use resize() & setValue() instead of appendValue().
+                appendValue(getFibre(dict, FibreBitStrings())[getPosition(it)], false);
                 if (!goLeftChild(it))
                     break;
             }
             else
             {
-                bit = 1;
-                appendValue(getFibre(tree, FibreBitStrings())[getPosition(it)], bit);
+                appendValue(getFibre(dict, FibreBitStrings())[getPosition(it)], true);
                 if (!goRightChild(it))
                     break;
             }
         }
     }
+}
 
-    for (TSize i = 0; i < length(getFibre(tree, FibreBitStrings())); ++i)
-        updateRanks(getFibre(tree, FibreBitStrings())[i]);
+// ----------------------------------------------------------------------------
+// Function updateRanks()                                      [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue>
+inline void updateRanks(RankDictionary<WaveletTree<TValue> > & dict)
+{
+    typedef WaveletTree<TValue>                                         TRankDictionarySpec;
+    typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                        TSize;
+
+    for (TSize i = 0; i < length(getFibre(dict, FibreBitStrings())); ++i)
+        updateRanks(getFibre(dict, FibreBitStrings())[i]);
 }
 
 // ----------------------------------------------------------------------------
@@ -490,10 +487,12 @@ inline void _fillWaveletTree(RankDictionary<WaveletTree<TValue> > & tree, TText 
 */
 
 template <typename TValue, typename TText> 
-inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dictionary, TText const & text)
+inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dict, TText const & text)
 {
-    createRightArrayBinaryTree(getFibre(dictionary, FibreTreeStructure()), text);
-    _fillWaveletTree(dictionary, text);
+    createRightArrayBinaryTree(getFibre(dict, FibreTreeStructure()), text);
+//    _resizeStructure(dict, text);
+    _fillStructure(dict, text);
+    updateRanks(dict);
 }
 
 // ----------------------------------------------------------------------------
@@ -519,25 +518,25 @@ inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dictiona
 */
 
 template <typename TValue>
-inline bool open(RankDictionary<WaveletTree<TValue> > & dictionary, const char * fileName, int openMode)
+inline bool open(RankDictionary<WaveletTree<TValue> > & dict, const char * fileName, int openMode)
 {
     String<char> name;
 
     name = fileName;
     append(name, ".wtc");
-    if (!open(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
+    if (!open(getFibre(dict, FibreBitStrings()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".wts");
-    if (!open(getFibre(dictionary, FibreTreeStructure()), toCString(name), openMode)) return false;
+    if (!open(getFibre(dict, FibreTreeStructure()), toCString(name), openMode)) return false;
 
     return true;
 }
 
 template <typename TValue>
-inline bool open(RankDictionary<WaveletTree<TValue> > & tree, const char * fileName)
+inline bool open(RankDictionary<WaveletTree<TValue> > & dict, const char * fileName)
 {
-    return open(tree, fileName, DefaultOpenMode<RankDictionary<WaveletTree<TValue> > >::VALUE);
+    return open(dict, fileName, DefaultOpenMode<RankDictionary<WaveletTree<TValue> > >::VALUE);
 }
 
 // ----------------------------------------------------------------------------
@@ -563,25 +562,25 @@ inline bool open(RankDictionary<WaveletTree<TValue> > & tree, const char * fileN
 */
 
 template <typename TValue>
-inline bool save(RankDictionary<WaveletTree<TValue> > const & dictionary, const char * fileName, int openMode)
+inline bool save(RankDictionary<WaveletTree<TValue> > const & dict, const char * fileName, int openMode)
 {
     String<char> name;
 
     name = fileName;
     append(name, ".wtc");
-    if (!save(getFibre(dictionary, FibreBitStrings()), toCString(name), openMode)) return false;
+    if (!save(getFibre(dict, FibreBitStrings()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".wts");
-    if (!save(getFibre(dictionary, FibreTreeStructure()), toCString(name), openMode)) return false;
+    if (!save(getFibre(dict, FibreTreeStructure()), toCString(name), openMode)) return false;
 
     return true;
 }
 
 template <typename TValue>
-inline bool save(RankDictionary<WaveletTree<TValue> > const & tree, const char * fileName)
+inline bool save(RankDictionary<WaveletTree<TValue> > const & dict, const char * fileName)
 {
-    return save(tree, fileName, DefaultOpenMode<RankDictionary<WaveletTree<TValue> > >::VALUE);
+    return save(dict, fileName, DefaultOpenMode<RankDictionary<WaveletTree<TValue> > >::VALUE);
 }
 
 }
