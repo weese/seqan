@@ -97,12 +97,6 @@ struct Fibre<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>
     typedef RankDictionary<WaveletTree<TValue> > Type;
 };
 
-template <typename TValue, typename TSpec>
-struct Fibre<SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue> >, TSpec>, FibreRankDictionary>
-{
-    typedef RankDictionary<SequenceBitMask<TValue> > Type;
-};
-
 template <typename TValue, typename TRankDictSpec, typename TSpec>
 struct Fibre<SentinelRankDictionary<RankDictionary<TwoLevels<TValue, TRankDictSpec> >, TSpec>, FibreRankDictionary>
 {
