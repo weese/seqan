@@ -364,13 +364,9 @@ inline bool open(RightArrayBinaryTree<TChar, TSpec> & treeStructure, const char 
     append(name, ".rtv");
     if (!open(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
 
-    String<TChar> minString;
-
     name = fileName;
     append(name, ".rtm");
-    if (!open(minString, toCString(name), openMode)) return false;
-
-    treeStructure.minCharValue = minString[0];
+    if (!open(treeStructure.minCharValue, toCString(name), openMode)) return false;
 
     return true;
 }
@@ -411,12 +407,9 @@ inline bool save(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, const
     append(name, ".rtv");
     if (!save(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
 
-    String<TChar> minString;
-    appendValue(minString, treeStructure.minCharValue);
-
     name = fileName;
     append(name, ".rtm");
-    if (!save(minString, toCString(name), openMode)) return false;
+    if (!save(treeStructure.minCharValue, toCString(name), openMode)) return false;
 
     return true;
 }
