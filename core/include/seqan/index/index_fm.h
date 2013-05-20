@@ -151,20 +151,6 @@ struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<WT<TWaveletTreeSpec
     typedef SentinelRankDictionary<RankDictionary<WaveletTree<TValue_> >, Sentinels> Type;
 };
 
-template <typename TText, typename TSBMSpec, typename TSpec>
-struct Fibre<Index<TText, FMIndex<SBM<TSBMSpec>, TSpec> >, FibreOccTable>
-{
-    typedef typename Value<Index<TText, FMIndex<SBM<TSBMSpec>, TSpec> > >::Type         TValue_;
-    typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinel> Type;
-};
-
-template <typename TText, typename TStringSetSpec, typename TSBMSpec, typename TSpec>
-struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<SBM<TSBMSpec>, TSpec > >, FibreOccTable>
-{
-    typedef typename Value<TText>::Type TValue_;
-    typedef SentinelRankDictionary<RankDictionary<SequenceBitMask<TValue_> >, Sentinels> Type;
-};
-
 template <typename TText, typename TTLSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TL<TTLSpec>, TSpec> >, FibreOccTable>
 {

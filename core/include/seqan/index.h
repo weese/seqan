@@ -185,8 +185,6 @@
 #include <seqan/index/index_fm_right_array_binary_tree_iterator.h>
 #include <seqan/index/index_fm_rank_dictionary_wt.h>
 
-#include <seqan/index/index_fm_rank_dictionary_bms.h>
-
 #include <seqan/index/index_fm_sentinel_rank_dictionary.h>
 
 // ----------------------------------------------------------------------------

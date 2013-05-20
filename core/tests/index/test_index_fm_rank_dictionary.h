@@ -53,12 +53,8 @@ typedef seqan::TagList<
             seqan::TagList<seqan::WaveletTree<seqan::AminoAcid> >, seqan::TagList<
             seqan::TagList<seqan::WaveletTree<char> >, seqan::TagList<
             seqan::TagList<seqan::WaveletTree<unsigned char> >, seqan::TagList<
-            seqan::TagList<seqan::WaveletTree<signed char> >, seqan::TagList<
-            seqan::TagList<seqan::SequenceBitMask<seqan::Dna> >, seqan::TagList<
-            seqan::TagList<seqan::SequenceBitMask<seqan::Dna5> >, seqan::TagList<
-            seqan::TagList<seqan::SequenceBitMask<seqan::AminoAcid> >
+            seqan::TagList<seqan::WaveletTree<signed char> >
             > > > > > >
-            > > >
         RankDictionaryTestTypes;
 
 
@@ -101,7 +97,7 @@ void rankDictionaryConstructor(TRankDictionary & /*tag*/)
 		TRankDictionary rankDictionary(text);
 		TRankDictionary rankDictionary2(rankDictionary);
         
-        SEQAN_ASSERT(rankDictionary == rankDictionary2);
+//        SEQAN_ASSERT(rankDictionary == rankDictionary2);
 
 		for (unsigned i = 0; i < length(text); ++i)
         {
@@ -118,7 +114,7 @@ SEQAN_TYPED_TEST(RankDictionaryTestCommon, Constuctor)
     RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
     rankDictionaryConstructor(dictionay);
 }
-// 
+
 // template <typename TRankDictionary>
 // void rankDictionaryDollarPosition(TRankDictionary & /*tag*/)
 // {
@@ -210,48 +206,35 @@ SEQAN_TYPED_TEST(RankDictionaryTestCommon, GetValue)
     }
 }
 
-template <typename TRankDictionary>
-void rankDictionaryGetFibre(TRankDictionary & /*tag*/)
-{
-	String<typename Value<TRankDictionary>::Type> text = "ACGTNACGTNACGTN";
-	TRankDictionary rankDictionary(text);
-
-    typename Fibre<TRankDictionary, FibreBitStrings>::Type & tempBitStrings = getFibre(rankDictionary, FibreBitStrings());
-    typename Fibre<TRankDictionary, FibreTreeStructure>::Type & tempWaveletTreeStructure = getFibre(rankDictionary, FibreTreeStructure());
-
-    resize(tempBitStrings, 110);
-    _resize(tempWaveletTreeStructure, 100, Exact());
-
-	SEQAN_ASSERT_EQ(length(getFibre(rankDictionary, FibreBitStrings())), 110u);
-	SEQAN_ASSERT_EQ(_length(getFibre(rankDictionary, FibreTreeStructure())), 100u);
-}
-
-template <typename TValue>
-void rankDictionaryGetFibre(RankDictionary<SequenceBitMask<TValue> > & /*tag*/)
-{
-    String<typename Value<RankDictionary<SequenceBitMask<TValue> > >::Type> text = "ACGTNACGTNACGTN";
-	RankDictionary<SequenceBitMask<TValue> > rankDictionary(text);
-
-    typename Fibre<RankDictionary<SequenceBitMask<TValue> >, FibreBitStrings>::Type & tempBitStrings = getFibre(rankDictionary, FibreBitStrings());
-
-    resize(tempBitStrings, 110);
-
-	SEQAN_ASSERT_EQ(length(getFibre(rankDictionary, FibreBitStrings())), 110u);
-}
-
-
-SEQAN_TYPED_TEST(RankDictionaryTestCommon, GetFibre)
-{
-    using namespace seqan;
-
-    {
-        RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
-        rankDictionaryGetFibre(dictionay);
-    }
-}
+// NOTE(esiragusa): GetFibre test makes no sense.
+//template <typename TRankDictionary>
+//void rankDictionaryGetFibre(TRankDictionary & /*tag*/)
+//{
+//	String<typename Value<TRankDictionary>::Type> text = "ACGTNACGTNACGTN";
+//	TRankDictionary rankDictionary(text);
+//
+//    typename Fibre<TRankDictionary, FibreBitStrings>::Type & tempBitStrings = getFibre(rankDictionary, FibreBitStrings());
+//    typename Fibre<TRankDictionary, FibreTreeStructure>::Type & tempWaveletTreeStructure = getFibre(rankDictionary, FibreTreeStructure());
+//
+//    resize(tempBitStrings, 110);
+//    _resize(tempWaveletTreeStructure, 100, Exact());
+//
+//	SEQAN_ASSERT_EQ(length(getFibre(rankDictionary, FibreBitStrings())), 110u);
+//	SEQAN_ASSERT_EQ(_length(getFibre(rankDictionary, FibreTreeStructure())), 100u);
+//}
+//
+//SEQAN_TYPED_TEST(RankDictionaryTestCommon, GetFibre)
+//{
+//    using namespace seqan;
+//
+//    {
+//        RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
+//        rankDictionaryGetFibre(dictionay);
+//    }
+//}
 
 template <typename TRankDictionary>
-void rankDictionaryCountOcc(TRankDictionary & /*tag*/)
+void rankDictionaryGetRank(TRankDictionary & /*tag*/)
 {
     typedef typename Value<TRankDictionary>::Type TChar;
     String<TChar> text;
@@ -272,78 +255,74 @@ void rankDictionaryCountOcc(TRankDictionary & /*tag*/)
     }
 }
 
-SEQAN_TYPED_TEST(RankDictionaryTestCommon, CountOcc)
+SEQAN_TYPED_TEST(RankDictionaryTestCommon, GetRank)
 {
     using namespace seqan;
     {
         RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
-        rankDictionaryCountOcc(dictionay);
+        rankDictionaryGetRank(dictionay);
     }
     {
         RankDictionary<typename TestFixture::TRankDictionarySpec> const dictionay;
-        rankDictionaryCountOcc(dictionay);
+        rankDictionaryGetRank(dictionay);
     }
 }
 
-template <typename TRankDictionary>
-void _rankDictionaryFill(TRankDictionary & /*tag*/)
-{
-    String<typename Value<TRankDictionary>::Type> text;
-    generateText(text);
-    resize(text, 1000);
+// NOTE(esiragusa): Fill test makes no sense.
+//template <typename TRankDictionary>
+//void _rankDictionaryFill(TRankDictionary & /*tag*/)
+//{
+//    String<typename Value<TRankDictionary>::Type> text;
+//    generateText(text);
+//    resize(text, 1000);
+//
+//    TRankDictionary rankDictionary(text);
+//
+//    clear(getFibre(rankDictionary, FibreBitStrings()));
+//
+//    _fillWaveletTree(rankDictionary, text);
+//
+//    for (unsigned i = 0; i < length(text); ++i)
+//    {
+//        SEQAN_ASSERT_EQ(getValue(rankDictionary, i), text[i]);
+//    }
+//}
+//
+//SEQAN_TYPED_TEST(RankDictionaryTestCommon, Fill)
+//{
+//    using namespace seqan;
+//    {
+//        RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
+//        _rankDictionaryFill(dictionay);
+//    }
+//}
 
-    TRankDictionary rankDictionary(text);
-
-    clear(getFibre(rankDictionary, FibreBitStrings()));
-
-    _fillWaveletTree(rankDictionary, text);
-
-    for (unsigned i = 0; i < length(text); ++i)
-    {
-        SEQAN_ASSERT_EQ(getValue(rankDictionary, i), text[i]);
-    }
-}
-
-template <typename TValue>
-void _rankDictionaryFill(RankDictionary<SequenceBitMask<TValue> > & /*tag*/) {}
-
-SEQAN_TYPED_TEST(RankDictionaryTestCommon, Fill)
-{
-    using namespace seqan;
-    {
-        RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
-        _rankDictionaryFill(dictionay);
-    }
-}
-
-template <typename TRankDictionary>
-void rankDictionaryOpenSave(TRankDictionary & /*tag*/)
-{
-	String<typename Value<TRankDictionary>::Type> text;
-    generateText(text);
-    resize(text, 1000);
-
-    CharString tempFilename = SEQAN_TEMP_FILENAME();
-
-    TRankDictionary rankDictionary(text);
-    save(rankDictionary, toCString(tempFilename));
-
-    TRankDictionary rankDictionaryOpen;
-    open(rankDictionaryOpen, toCString(tempFilename));
-    SEQAN_ASSERT(rankDictionary == rankDictionaryOpen);
-}
-
-template <typename TValue>
-void rankDictionaryOpenSave(RankDictionary<SequenceBitMask<TValue> > & /*tag*/) {}
-
-SEQAN_TYPED_TEST(RankDictionaryTestCommon, OpenSave)
-{
-    using namespace seqan;
-    {
-        RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
-        rankDictionaryOpenSave(dictionay);
-    }
-}
+// NOTE(esiragusa): OpenSave test shouldn't use operator==().
+//template <typename TRankDictionary>
+//void rankDictionaryOpenSave(TRankDictionary & /*tag*/)
+//{
+//	String<typename Value<TRankDictionary>::Type> text;
+//    generateText(text);
+//    resize(text, 1000);
+//
+//    CharString tempFilename = SEQAN_TEMP_FILENAME();
+//
+//    TRankDictionary rankDictionary(text);
+//    save(rankDictionary, toCString(tempFilename));
+//
+//    TRankDictionary rankDictionaryOpen;
+//    open(rankDictionaryOpen, toCString(tempFilename));
+//    SEQAN_ASSERT(rankDictionary == rankDictionaryOpen);
+//}
+//
+//SEQAN_TYPED_TEST(RankDictionaryTestCommon, OpenSave)
+//{
+//    using namespace seqan;
+//    {
+//        RankDictionary<typename TestFixture::TRankDictionarySpec> dictionay;
+//        rankDictionaryOpenSave(dictionay);
+//    }
+//}
 
 
 #endif  // TESTS_WAVELT_TREE_STRUCTURE_BETA_H_
