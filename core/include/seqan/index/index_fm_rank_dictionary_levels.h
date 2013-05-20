@@ -569,6 +569,8 @@ inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos /
     typedef typename Fibre<TRankDictionary, FibreRanks>::Type       TFibreRanks;
     typedef typename Iterator<TFibreRanks, Standard>::Type          TFibreRanksIter;
 
+    if (empty(dict)) return;
+
 //    SEQAN_ASSERT_LT(pos, length(dict));
 
     TFibreRanksIter ranksBegin = begin(dict.ranks, Standard());
