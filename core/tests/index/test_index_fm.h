@@ -497,18 +497,6 @@ SEQAN_DEFINE_TEST(test_fm_index_constructor)
         fmIndexConstructor(charTag);
     }
     {
-        Index<String<Dna>, FMIndex<SBM<>, void > > dnaTag;
-        Index<String<Dna5>, FMIndex<SBM<>, void > > dna5Tag;
-//         Index<String<AminoAcid>, FMIndex<SBM<>, void > > asTag;
-//         Index<String<signed char>, FMIndex<SBM<>, void > > charTag;
-//         Index<String<unsigned char>, FMIndex<SBM<>, void > > uCharTag;
-        fmIndexConstructor(dnaTag);
-        fmIndexConstructor(dna5Tag);
-//         fmIndexConstructor(asTag);
-//         fmIndexConstructor(uCharTag);
-//         fmIndexConstructor(charTag);
-    }
-    {
         Index<DnaString, FMIndex<TL<> > > dnaTag;
         fmIndexConstructor(dnaTag);
     }
