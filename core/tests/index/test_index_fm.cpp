@@ -76,10 +76,10 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index)
     SEQAN_CALL_TEST(wavelet_tree_structure_get_fibre);
     SEQAN_CALL_TEST(wavelet_tree_structure_length);
     SEQAN_CALL_TEST(wavelet_tree_structure_resize);
-    SEQAN_CALL_TEST(wavelet_tree_structure_open_save);
+//    SEQAN_CALL_TEST(wavelet_tree_structure_open_save);
 
     SEQAN_CALL_TEST(wavelet_tree_structure_iterator_begin);
-    SEQAN_CALL_TEST(wavelet_tree_structure_iterator_container);
+//    SEQAN_CALL_TEST(wavelet_tree_structure_iterator_container);
     SEQAN_CALL_TEST(wavelet_tree_structure_iterator_end);
     SEQAN_CALL_TEST(wavelet_tree_structure_iterator_get_character);
     SEQAN_CALL_TEST(wavelet_tree_structure_iterator_get_child_pos);
