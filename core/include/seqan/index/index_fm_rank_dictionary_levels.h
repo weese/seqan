@@ -380,7 +380,7 @@ template <typename TValue, typename TSpec, typename TPos>
 inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 _getBitsRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TValue c)
 {
-    typedef TwoLevels<Dna, TSpec>                                   TRankDictionarySpec;
+    typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
     typedef RankDictionary<TRankDictionarySpec>                     TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                    TSize;
 
