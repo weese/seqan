@@ -499,8 +499,7 @@ inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
 //    SEQAN_ASSERT_LT(pos, length(dict));
-    return _getBlockRank(dict, pos, convert<TValue>(c)) +
-           _getBitsRank(dict, pos, convert<TValue>(c));
+    return _getBlockRank(dict, pos, c) + _getBitsRank(dict, pos, c);
 }
 
 // ----------------------------------------------------------------------------
@@ -541,7 +540,7 @@ template <typename TValue, typename TSpec, typename TPos, typename TChar>
 inline void setValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos, TChar c)
 {
 //    SEQAN_ASSERT_LT(pos, length(dict));
-    assignValue(_bitsAt(dict, pos), _toBitPos(dict, pos), convert<TValue>(c));
+    assignValue(_bitsAt(dict, pos), _toBitPos(dict, pos), c);
 }
 
 // ----------------------------------------------------------------------------
