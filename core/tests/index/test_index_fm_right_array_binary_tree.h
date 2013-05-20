@@ -249,31 +249,32 @@ void waveletTreeStructureResize(TRightArrayBinaryTree & /*tag*/)
 
 }
 
-template <typename TRightArrayBinaryTree>
-void waveletTreeStructureOpenSave(TRightArrayBinaryTree & /*tag*/)
-{
-	//typedef typename Fibre<TRightArrayBinaryTree, FibreTreeStructureEncoding>::Type TWaveletTreeVertices;
-	//typedef typename Value<TWaveletTreeVertices>::Type TWaveletTreeVertex;
-	//typedef typename Value<TWaveletTreeVertex, 1>::Type TChar;
-	//typedef typename Value<TWaveletTreeVertex, 2>::Type TPos;
-
-	
-    TRightArrayBinaryTree waveletTreeStructure;
-    _resize(waveletTreeStructure, 10, Exact());
-
-    CharString tempFilename = SEQAN_TEMP_FILENAME();
-
-    save(waveletTreeStructure, toCString(tempFilename));
-    
-    TRightArrayBinaryTree openWaveletTreeStructure;
-    open(openWaveletTreeStructure, toCString(tempFilename));
-
-    SEQAN_ASSERT(waveletTreeStructure == openWaveletTreeStructure); 
-
-    waveletTreeStructure = openWaveletTreeStructure;
-    
-    SEQAN_ASSERT(waveletTreeStructure == openWaveletTreeStructure); 
-}
+// NOTE(esiragusa): OpenSave test should not use operator==()
+//template <typename TRightArrayBinaryTree>
+//void waveletTreeStructureOpenSave(TRightArrayBinaryTree & /*tag*/)
+//{
+//	//typedef typename Fibre<TRightArrayBinaryTree, FibreTreeStructureEncoding>::Type TWaveletTreeVertices;
+//	//typedef typename Value<TWaveletTreeVertices>::Type TWaveletTreeVertex;
+//	//typedef typename Value<TWaveletTreeVertex, 1>::Type TChar;
+//	//typedef typename Value<TWaveletTreeVertex, 2>::Type TPos;
+//
+//	
+//    TRightArrayBinaryTree waveletTreeStructure;
+//    _resize(waveletTreeStructure, 10, Exact());
+//
+//    CharString tempFilename = SEQAN_TEMP_FILENAME();
+//
+//    save(waveletTreeStructure, toCString(tempFilename));
+//    
+//    TRightArrayBinaryTree openWaveletTreeStructure;
+//    open(openWaveletTreeStructure, toCString(tempFilename));
+//
+//    SEQAN_ASSERT(waveletTreeStructure == openWaveletTreeStructure); 
+//
+//    waveletTreeStructure = openWaveletTreeStructure;
+//    
+//    SEQAN_ASSERT(waveletTreeStructure == openWaveletTreeStructure); 
+//}
 
 SEQAN_DEFINE_TEST(wavelet_tree_structure_constructor)
 {
@@ -371,13 +372,14 @@ SEQAN_DEFINE_TEST(wavelet_tree_structure_resize)
     waveletTreeStructureResize(uCharTag);
 }
 
-SEQAN_DEFINE_TEST(wavelet_tree_structure_open_save)
-{
-    using namespace seqan;
-
-    RightArrayBinaryTree<AminoAcid, void> asTag;
-    waveletTreeStructureOpenSave(asTag);
-}
+// NOTE(esiragusa): OpenSave test should not use operator==()
+//SEQAN_DEFINE_TEST(wavelet_tree_structure_open_save)
+//{
+//    using namespace seqan;
+//
+//    RightArrayBinaryTree<AminoAcid, void> asTag;
+//    waveletTreeStructureOpenSave(asTag);
+//}
 
 
 #endif  // TESTS_WAVELT_TREE_STRUCTURE_BETA_H_
