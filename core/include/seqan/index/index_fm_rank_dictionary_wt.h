@@ -480,12 +480,21 @@ inline void updateRanks(RankDictionary<WaveletTree<TValue> > & dict)
 */
 
 template <typename TValue, typename TText, typename TPrefixSumTable>
-inline void createRankDictionary(RankDictionary<WaveletTree<TValue> > & dict, TText const & text, TPrefixSumTable & pst)
+inline void
+createRankDictionary(RankDictionary<WaveletTree<TValue> > & dict, TText const & text, TPrefixSumTable & pst)
 {
     createRightArrayBinaryTree(getFibre(dict, FibreTreeStructure()), pst);
 //    _resizeStructure(dict, text);
     _fillStructure(dict, text);
     updateRanks(dict);
+}
+
+template <typename TValue, typename TText>
+inline void
+createRankDictionary(RankDictionary<WaveletTree<TValue> > & dict, TText const & text)
+{
+    PrefixSumTable<TValue> pst(text);
+    createRankDictionary(dict, text, pst);
 }
 
 // ----------------------------------------------------------------------------
