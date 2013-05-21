@@ -37,7 +37,6 @@
 
 #include "test_index_fm.h"
 #include "test_index_fm_rank_dictionary.h"
-#include "test_index_fm_sentinel_rank_dictionary.h"
 
 int main(int argc, char const ** argv) {
     seqan::TestSystem::init(argc, argv);
