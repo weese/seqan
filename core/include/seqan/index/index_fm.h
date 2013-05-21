@@ -204,6 +204,8 @@ public:
     Holder<typename Fibre<Index, FibreText>::Type>  text;
     typename Fibre<Index, FibreLF>::Type            lfTable;
     typename Fibre<Index, FibreSA>::Type            compressedSA;
+
+//  TODO(esiragusa): Remove bwtLength and move compressionFactor into CSA.
     typename Size<TText>::Type                      bwtLength;
     unsigned                                        compressionFactor;
 
@@ -223,6 +225,7 @@ public:
 // ----------------------------------------------------------------------------
 // Class FmIndexInfo_ 
 // ----------------------------------------------------------------------------
+//  TODO(esiragusa): Move compressionFactor into CSA and remove FmIndexInfo_.
 
 // Stores the information about an FM index file bundle and is written to the .fma file.
 

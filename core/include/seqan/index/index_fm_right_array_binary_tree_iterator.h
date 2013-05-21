@@ -655,6 +655,45 @@ inline void setCharacter(Iter<TTree, RightArrayBinaryTreeIterator<TopDown<TIterS
 }
 
 // ----------------------------------------------------------------------------
+// Function _getPivotPosition()
+// ----------------------------------------------------------------------------
+
+// This function returns the position of the character which ensures that the sum of occurrences of the characters from
+// beginPos to the computed pos and the sum of occurrences from the computed pos to endPos are about the same.
+template <typename TChar, typename TSpec, typename TBeginPos, typename TEndPos>
+unsigned _getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos beginPos, TEndPos endPos)
+{
+    TBeginPos realBeginPos = beginPos + 1;
+    TEndPos realEndPos = endPos + 1;
+    unsigned lengthRange = realEndPos - realBeginPos + 1;
+    unsigned pivotPos = realBeginPos + lengthRange / 2 - 1;
+
+    unsigned tooSmallValues = pst[beginPos];
+    long currentMin = pst[realEndPos] + 1;
+
+    if (pst[pivotPos] - tooSmallValues >= pst[realEndPos] - pst[pivotPos])
+    {
+        while ((pivotPos >= realBeginPos) && std::abs((long)(pst[pivotPos] - tooSmallValues) - (long)((pst[realEndPos] - pst[pivotPos]))) <= currentMin)
+        {
+            currentMin = std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
+            --pivotPos;
+        }
+        ++pivotPos;
+    }
+    else
+    {
+        while (std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos]))) < currentMin && (pivotPos < realEndPos))
+        {
+            currentMin = std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
+            ++pivotPos;
+        }
+        --pivotPos;
+    }
+
+    return pivotPos;
+}
+
+// ----------------------------------------------------------------------------
 // Function _setChildVertices()
 // ----------------------------------------------------------------------------
 

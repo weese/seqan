@@ -518,21 +518,21 @@ SEQAN_DEFINE_TEST(test_fm_index_clear)
     fmIndexClear(charTag);
 }
 
-SEQAN_DEFINE_TEST(test_fm_index_determine_sentinel_substitute_)
-{
-    using namespace seqan;
-
-    Index<DnaString, FMIndex<WT<>, void > > dnaTag;
-    Index<String<Dna5>, FMIndex<WT<>, void > > dna5Tag;
-    Index<String<AminoAcid>, FMIndex<WT<>, void > > asTag;
-    Index<String<signed char>, FMIndex<WT<>, void > > charTag;
-    Index<String<unsigned char>, FMIndex<WT<>, void > > uCharTag;
-    _fmIndexDetermineSentinelSubstitute(dnaTag);
-    _fmIndexDetermineSentinelSubstitute(dna5Tag);
-    _fmIndexDetermineSentinelSubstitute(asTag);
-    _fmIndexDetermineSentinelSubstitute(uCharTag);
-    _fmIndexDetermineSentinelSubstitute(charTag);
-}
+//SEQAN_DEFINE_TEST(test_fm_index_determine_sentinel_substitute_)
+//{
+//    using namespace seqan;
+//
+//    Index<DnaString, FMIndex<WT<>, void > > dnaTag;
+//    Index<String<Dna5>, FMIndex<WT<>, void > > dna5Tag;
+//    Index<String<AminoAcid>, FMIndex<WT<>, void > > asTag;
+//    Index<String<signed char>, FMIndex<WT<>, void > > charTag;
+//    Index<String<unsigned char>, FMIndex<WT<>, void > > uCharTag;
+//    _fmIndexDetermineSentinelSubstitute(dnaTag);
+//    _fmIndexDetermineSentinelSubstitute(dna5Tag);
+//    _fmIndexDetermineSentinelSubstitute(asTag);
+//    _fmIndexDetermineSentinelSubstitute(uCharTag);
+//    _fmIndexDetermineSentinelSubstitute(charTag);
+//}
 
 SEQAN_DEFINE_TEST(test_fm_index_empty)
 {

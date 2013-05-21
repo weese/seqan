@@ -391,16 +391,16 @@ SEQAN_DEFINE_TEST(prefix_sum_table_get_pivot_position)
     //prefixSumTableGetPivotPosition(constTag);
 }
 
-SEQAN_DEFINE_TEST(prefix_sum_table_determine_sentinel_substitute)
-{
-    using namespace seqan;
-
-    PrefixSumTable<Dna5, void> tag;
-    prefixSumTableDetermineSentinelSubstitute(tag);
-
-    PrefixSumTable<Dna5, void> const constTag;
-    prefixSumTableDetermineSentinelSubstitute(constTag);
-}
+//SEQAN_DEFINE_TEST(prefix_sum_table_determine_sentinel_substitute)
+//{
+//    using namespace seqan;
+//
+//    PrefixSumTable<Dna5, void> tag;
+//    prefixSumTableDetermineSentinelSubstitute(tag);
+//
+//    PrefixSumTable<Dna5, void> const constTag;
+//    prefixSumTableDetermineSentinelSubstitute(constTag);
+//}
 
 SEQAN_DEFINE_TEST(prefix_sum_table_get_value)
 {
@@ -410,13 +410,13 @@ SEQAN_DEFINE_TEST(prefix_sum_table_get_value)
     prefixSumTableGetValue(tag);
 }
 
-SEQAN_DEFINE_TEST(prefix_sum_table_insert_sentinel_)
-{
-    using namespace seqan;
-
-    PrefixSumTable<Dna5, void> tag;
-    _prefixSumTableInsertSentinel(tag);
-}
+//SEQAN_DEFINE_TEST(prefix_sum_table_insert_sentinel_)
+//{
+//    using namespace seqan;
+//
+//    PrefixSumTable<Dna5, void> tag;
+//    _prefixSumTableInsertSentinel(tag);
+//}
 
 SEQAN_DEFINE_TEST(prefix_sum_table_length)
 {

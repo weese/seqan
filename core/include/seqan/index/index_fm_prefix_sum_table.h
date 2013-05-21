@@ -431,45 +431,6 @@ getCharacter(PrefixSumTable<TChar, TSpec> const & /*tag*/, TPos const pos)
 }
 
 // ----------------------------------------------------------------------------
-// Function _getPivotPosition()
-// ----------------------------------------------------------------------------
-
-// This function returns the position of the character which ensures that the sum of occurrences of the characters from
-// beginPos to the computed pos and the sum of occurrences from the computed pos to endPos are about the same.
-template <typename TChar, typename TSpec, typename TBeginPos, typename TEndPos>
-unsigned _getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos beginPos, TEndPos endPos)
-{
-    TBeginPos realBeginPos = beginPos + 1;
-    TEndPos realEndPos = endPos + 1;
-    unsigned lengthRange = realEndPos - realBeginPos + 1;
-    unsigned pivotPos = realBeginPos + lengthRange / 2 - 1;
-
-    unsigned tooSmallValues = pst[beginPos];
-    long currentMin = pst[realEndPos] + 1;
-
-    if (pst[pivotPos] - tooSmallValues >= pst[realEndPos] - pst[pivotPos])
-    {
-        while ((pivotPos >= realBeginPos) && std::abs((long)(pst[pivotPos] - tooSmallValues) - (long)((pst[realEndPos] - pst[pivotPos]))) <= currentMin)
-        {
-            currentMin = std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
-            --pivotPos;
-        }
-        ++pivotPos;
-    }
-    else
-    {
-        while (std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos]))) < currentMin && (pivotPos < realEndPos))
-        {
-            currentMin = std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
-            ++pivotPos;
-        }
-        --pivotPos;
-    }
-
-    return pivotPos;
-}
-
-// ----------------------------------------------------------------------------
 // Function getPrefixSum()
 // ----------------------------------------------------------------------------
 
@@ -553,49 +514,6 @@ inline typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type &
 getFibre(PrefixSumTable<TChar, TSpec> & pst, FibreEntries const /*tag*/)
 {
     return pst.entries;
-}
-
-// ----------------------------------------------------------------------------
-// Function determineSentinelSubstitute()
-// ----------------------------------------------------------------------------
-
-// This function determines the '$' substitute.
-// The character with the smallest number of occurrences greater 0 is chosen.
-template <typename TChar, typename TSpec>
-inline TChar determineSentinelSubstitute(PrefixSumTable<TChar, TSpec> const & pst)
-{
-    typedef PrefixSumTable<TChar, TSpec>                    TPrefixSumTable;
-    typedef typename Value<TPrefixSumTable>::Type           TValue;
-    typedef typename Size<TPrefixSumTable>::Type            TSize;
-
-    TValue min = MaxValue<TValue>::VALUE;
-    TSize pos = length(pst) - 1;
-
-    for (TSize i = 0; i < length(pst) - 1; ++i)
-    {
-        TSize diff = pst[i + 1] - pst[i];
-        if (diff != 0 && diff < min)
-        {
-            min = diff;
-            pos = i;
-        }
-    }
-
-    return getCharacter(pst, pos);
-}
-
-// ----------------------------------------------------------------------------
-// Function insertSentinels()
-// ----------------------------------------------------------------------------
-
-template <typename TChar, typename TSpec, typename TNumSentinel>
-void insertSentinels(PrefixSumTable<TChar, TSpec> & pst, TNumSentinel const numSentinel)
-{
-    typedef PrefixSumTable<TChar, TSpec>                    TPrefixSumTable;
-    typedef typename Size<TPrefixSumTable>::Type            TSize;
-
-    for (TSize i = 0; i < length(pst); ++i)
-        prefixSum(pst, i) = getPrefixSum(pst, i) + numSentinel;
 }
 
 // ----------------------------------------------------------------------------

@@ -415,7 +415,40 @@ inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
 
     TValue c = getValue(values, pos);
 
-    return _getRank(lfTable, pos, c) + getPrefixSum(prefixSum, getCharacterPosition(prefixSum, c)) - 1;
+    return _getRank(lfTable, pos, c) + getPrefixSum(prefixSum, ordValue(c)) - 1;
+}
+
+// ----------------------------------------------------------------------------
+// Function _setSentinelSubstitute()
+// ----------------------------------------------------------------------------
+// This function determines the '$' substitute.
+// The character with the smallest number of occurrences greater 0 is chosen.
+
+template <typename TText, typename TSpec>
+inline void _setSentinelSubstitute(LfTable<TText, TSpec> & lfTable)
+{
+    typedef LfTable<TText, TSpec>                                   TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSum>::Type          TPrefixSum;
+    typedef typename Size<TPrefixSum>::Type                         TSize;
+    typedef typename Value<TPrefixSum>::Type                        TValue;
+
+    TPrefixSum & prefixSum = getFibre(lfTable, FibrePrefixSum());
+
+    TValue minRank = MaxValue<TValue>::VALUE;
+    TSize ordVal = length(prefixSum) - 1;
+
+    // NOTE(esiragusa): This doesn't work for maps!!
+    for (TSize i = 0; i < length(prefixSum) - 1; ++i)
+    {
+        TSize diff = prefixSum[i + 1] - prefixSum[i];
+        if (diff != 0 && diff < minRank)
+        {
+            minRank = diff;
+            ordVal = i;
+        }
+    }
+
+    lfTable.sentinelSubstitute = ordVal;
 }
 
 // ----------------------------------------------------------------------------
@@ -548,6 +581,24 @@ _createRankDictionary(LfTable<TText, TSpec> & lfTable,
 //}
 
 // ----------------------------------------------------------------------------
+// Function _insertSentinels()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TNumSentinel>
+void _insertSentinels(LfTable<TText, TSpec> & lfTable, TNumSentinel numSentinel)
+{
+    typedef LfTable<TText, TSpec>                                   TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSum>::Type          TPrefixSum;
+    typedef typename Size<TPrefixSum>::Type                         TSize;
+
+    TPrefixSum & prefixSum_ = getFibre(lfTable, FibrePrefixSum());
+
+    // NOTE(esiragusa): This doesn't work for maps!!
+    for (TSize i = 0; i < length(prefixSum_); ++i)
+        prefixSum(prefixSum_, i) = getPrefixSum(prefixSum_, i) + numSentinel;
+}
+
+// ----------------------------------------------------------------------------
 // Function createLFTable()
 // ----------------------------------------------------------------------------
 
@@ -565,8 +616,7 @@ inline void createLFTable(LfTable<TText, TSpec> & lfTable, TOtherText const & te
 
     createPrefixSumTable(prefixSum, text);
 
-    // TODO(esiragusa): Make a method _computeSentinelSubstitute(lfTable)
-    lfTable.sentinelSubstitute = determineSentinelSubstitute(prefixSum);
+    _setSentinelSubstitute(lfTable);
 
     // TODO(esiragusa): Rename this to fillValues() / fillSentinels().
     TBwt bwt;
@@ -575,7 +625,7 @@ inline void createLFTable(LfTable<TText, TSpec> & lfTable, TOtherText const & te
 
     _createRankDictionary(lfTable, bwt, prefixSum);
 
-    insertSentinels(prefixSum, countSequences(text));
+    _insertSentinels(lfTable, countSequences(text));
 }
 
 // ----------------------------------------------------------------------------

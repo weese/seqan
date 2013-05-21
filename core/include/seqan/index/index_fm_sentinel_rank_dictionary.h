@@ -302,116 +302,116 @@ getValue(SentinelRankDictionary<TRankDictionary, TSpec > & dict, TPos pos)
     SEQAN_ASSERT_NEQ(isSentinelPosition(dict, pos), true);
     return getValue(getFibre(dict, FibreRankDictionary()), pos);
 }
-
-// ----------------------------------------------------------------------------
-// Function getFibre()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.SentinelRankDictionary#getFibre:
-..class:Class.SentinelRankDictionary
-..summary:Returns a specific fibre of a dictionary.
-..signature:getFibre(dictionary, fibreTag)
-..class:Class.RankDictionary
-..cat:Index
-..param.dictionary:The dictionary holding the fibre.
-...type:Class.RankDictionary
-..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
-...type:Tag.SentinelRankDictionary Fibres
-..returns:A reference to the @Metafunction.Fibre@ object.
-..include:seqan/index.h
-*/
-template <typename TRankDictionary, typename TSpec>
-inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreRankDictionary>::Type &
-getFibre(SentinelRankDictionary<TRankDictionary, TSpec> & dict, FibreRankDictionary)
-{
-    return dict.rankDictionary;
-}
-
-template <typename TRankDictionary, typename TSpec>
-inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreRankDictionary>::Type const &
-getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dict, FibreRankDictionary)
-{
-    return dict.rankDictionary;
-}
-
-template <typename TRankDictionary, typename TSpec>
-inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreSentinelPosition>::Type &
-getFibre(SentinelRankDictionary<TRankDictionary, TSpec> & dict, FibreSentinelPosition)
-{
-    return dict.sentinelPosition;
-}
-
-template <typename TRankDictionary, typename TSpec>
-inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreSentinelPosition>::Type const &
-getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dict, FibreSentinelPosition)
-{
-    return dict.sentinelPosition;
-}
-
-// ----------------------------------------------------------------------------
-// Function getSentinelSubstitute()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.SentinelRankDictionary#getSentinelSubstitute
-..class:Class.SentinelRankDictionary
-..summary:Returns the character used to substitute the sentinel sign.
-..signature:getSentinelSubstitute(dictionary)
-..param.dictionary:The dictionary.
-...type:Class.RankDictionary
-..include:seqan/index.h
-*/
-template <typename TRankDictionary, typename TSpec>
-inline typename Value<TRankDictionary>::Type
-getSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> const & dict /*tag*/)
-{
-    return dict.sentinelSubstitute;
-}
-
-// ----------------------------------------------------------------------------
-// Function setSentinelSubstitute()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.SentinelRankDictionary#setSentinelSubstitute
-..class:Class.SentinelRankDictionary
-..summary:Sets the character used to substitute the sentinel sign.
-..signature:setSentinelSubstitute(dictionary, character)
-..param.dictionary:The dictionary.
-...type:Class.RankDictionary
-..param.character:The sentinel substitute.
-..include:seqan/index.h
-*/
-
-template <typename TRankDictionary, typename TSpec, typename TChar>
-inline void setSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> & dict,
-                                  TChar sentinelSubstitute)
-{
-    dict.sentinelSubstitute = sentinelSubstitute;
-}
-
-// ----------------------------------------------------------------------------
-// Function setSentinelPosition()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.SentinelRankDictionary#setSentinelPosition
-..class:Class.SentinelRankDictionary
-..summary:Sets the sentinel position..
-..signature:setSentinelPosition(dictionary, pos)
-..param.dictionary:The dictionary.
-...type:Class.RankDictionary
-..param.pos:The sentinel position.
-..include:seqan/index.h
-*/
-
-template <typename TRankDictionary, typename TSpec, typename TPos>
-inline void setSentinelPosition(SentinelRankDictionary<TRankDictionary, TSpec> & dict,
-                                TPos const & position)
-{
-    dict.sentinelPosition = position;
-}
+//
+//// ----------------------------------------------------------------------------
+//// Function getFibre()
+//// ----------------------------------------------------------------------------
+//
+///**
+//.Function.SentinelRankDictionary#getFibre:
+//..class:Class.SentinelRankDictionary
+//..summary:Returns a specific fibre of a dictionary.
+//..signature:getFibre(dictionary, fibreTag)
+//..class:Class.RankDictionary
+//..cat:Index
+//..param.dictionary:The dictionary holding the fibre.
+//...type:Class.RankDictionary
+//..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
+//...type:Tag.SentinelRankDictionary Fibres
+//..returns:A reference to the @Metafunction.Fibre@ object.
+//..include:seqan/index.h
+//*/
+//template <typename TRankDictionary, typename TSpec>
+//inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreRankDictionary>::Type &
+//getFibre(SentinelRankDictionary<TRankDictionary, TSpec> & dict, FibreRankDictionary)
+//{
+//    return dict.rankDictionary;
+//}
+//
+//template <typename TRankDictionary, typename TSpec>
+//inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreRankDictionary>::Type const &
+//getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dict, FibreRankDictionary)
+//{
+//    return dict.rankDictionary;
+//}
+//
+//template <typename TRankDictionary, typename TSpec>
+//inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreSentinelPosition>::Type &
+//getFibre(SentinelRankDictionary<TRankDictionary, TSpec> & dict, FibreSentinelPosition)
+//{
+//    return dict.sentinelPosition;
+//}
+//
+//template <typename TRankDictionary, typename TSpec>
+//inline typename Fibre<SentinelRankDictionary<TRankDictionary, TSpec>, FibreSentinelPosition>::Type const &
+//getFibre(SentinelRankDictionary<TRankDictionary, TSpec> const & dict, FibreSentinelPosition)
+//{
+//    return dict.sentinelPosition;
+//}
+//
+//// ----------------------------------------------------------------------------
+//// Function getSentinelSubstitute()
+//// ----------------------------------------------------------------------------
+//
+///**
+//.Function.SentinelRankDictionary#getSentinelSubstitute
+//..class:Class.SentinelRankDictionary
+//..summary:Returns the character used to substitute the sentinel sign.
+//..signature:getSentinelSubstitute(dictionary)
+//..param.dictionary:The dictionary.
+//...type:Class.RankDictionary
+//..include:seqan/index.h
+//*/
+//template <typename TRankDictionary, typename TSpec>
+//inline typename Value<TRankDictionary>::Type
+//getSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> const & dict /*tag*/)
+//{
+//    return dict.sentinelSubstitute;
+//}
+//
+//// ----------------------------------------------------------------------------
+//// Function setSentinelSubstitute()
+//// ----------------------------------------------------------------------------
+//
+///**
+//.Function.SentinelRankDictionary#setSentinelSubstitute
+//..class:Class.SentinelRankDictionary
+//..summary:Sets the character used to substitute the sentinel sign.
+//..signature:setSentinelSubstitute(dictionary, character)
+//..param.dictionary:The dictionary.
+//...type:Class.RankDictionary
+//..param.character:The sentinel substitute.
+//..include:seqan/index.h
+//*/
+//
+//template <typename TRankDictionary, typename TSpec, typename TChar>
+//inline void setSentinelSubstitute(SentinelRankDictionary<TRankDictionary, TSpec> & dict,
+//                                  TChar sentinelSubstitute)
+//{
+//    dict.sentinelSubstitute = sentinelSubstitute;
+//}
+//
+//// ----------------------------------------------------------------------------
+//// Function setSentinelPosition()
+//// ----------------------------------------------------------------------------
+//
+///**
+//.Function.SentinelRankDictionary#setSentinelPosition
+//..class:Class.SentinelRankDictionary
+//..summary:Sets the sentinel position..
+//..signature:setSentinelPosition(dictionary, pos)
+//..param.dictionary:The dictionary.
+//...type:Class.RankDictionary
+//..param.pos:The sentinel position.
+//..include:seqan/index.h
+//*/
+//
+//template <typename TRankDictionary, typename TSpec, typename TPos>
+//inline void setSentinelPosition(SentinelRankDictionary<TRankDictionary, TSpec> & dict,
+//                                TPos const & position)
+//{
+//    dict.sentinelPosition = position;
+//}
 
 // ----------------------------------------------------------------------------
 // Function getRank()

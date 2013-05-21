@@ -59,12 +59,12 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index)
     SEQAN_CALL_TEST(prefix_sum_table_get_alphabet_size);
     SEQAN_CALL_TEST(prefix_sum_table_get_character_position);
     SEQAN_CALL_TEST(prefix_sum_table_get_character);
-    SEQAN_CALL_TEST(prefix_sum_table_determine_sentinel_substitute);
+//    SEQAN_CALL_TEST(prefix_sum_table_determine_sentinel_substitute);
     SEQAN_CALL_TEST(prefix_sum_table_get_pivot_position);
     SEQAN_CALL_TEST(prefix_sum_table_prefix_sum);
     SEQAN_CALL_TEST(prefix_sum_table_get_value);
     SEQAN_CALL_TEST(prefix_sum_table_length);
-    SEQAN_CALL_TEST(prefix_sum_table_insert_sentinel_);
+//    SEQAN_CALL_TEST(prefix_sum_table_insert_sentinel_);
     SEQAN_CALL_TEST(prefix_sum_table_resize);
     SEQAN_CALL_TEST(prefix_sum_table_set_prefix_sum);
     SEQAN_CALL_TEST(prefix_sum_table_value);
@@ -120,7 +120,7 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index)
 
     SEQAN_CALL_TEST(test_fm_index_constructor);
     SEQAN_CALL_TEST(test_fm_index_clear);
-    SEQAN_CALL_TEST(test_fm_index_determine_sentinel_substitute_);
+//    SEQAN_CALL_TEST(test_fm_index_determine_sentinel_substitute_);
     SEQAN_CALL_TEST(test_fm_index_empty);
     SEQAN_CALL_TEST(test_fm_index_find_first_index_);
     SEQAN_CALL_TEST(test_fm_index_get_fibre);
