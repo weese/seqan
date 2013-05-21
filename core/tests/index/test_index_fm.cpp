@@ -45,11 +45,10 @@
 #include "test_index_fm_stree.h"
 
 // TODO(esiragusa): Move this stuff into test_index_fm_rank_dictionary tests.
-#include "test_index_fm_rank_support_string.h"
+#include "test_index_fm_rank_dictionary_levels.h"
 
 SEQAN_BEGIN_TESTSUITE(test_fm_index)
 {
-    // TODO(esiragusa): Move this stuff into test_index_fm_rank_dictionary tests.
 //    SEQAN_CALL_TEST(test_rss_sizeof);
 //    SEQAN_CALL_TEST(test_rss_resize);
     SEQAN_CALL_TEST(test_rss_getvalue);

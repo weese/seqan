@@ -77,6 +77,7 @@ target_link_libraries (test_index_drawing ${SEQAN_LIBRARIES})
 add_executable (test_index_fm
                 test_index_fm.cpp
                 test_index_fm.h
+		test_index_fm_rank_dictionary_levels.h
                 test_index_fm_compressed_sa_iterator.h
                 test_index_fm_compressed_sa.h
                 test_index_fm_prefix_sum_table.h
