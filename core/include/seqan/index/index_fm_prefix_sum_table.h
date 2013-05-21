@@ -568,7 +568,7 @@ inline TChar determineSentinelSubstitute(PrefixSumTable<TChar, TSpec> const & ps
     typedef typename Value<TPrefixSumTable>::Type           TValue;
     typedef typename Size<TPrefixSumTable>::Type            TSize;
 
-    TValue min = getPrefixSum(pst, length(pst) - 1);
+    TValue min = MaxValue<TValue>::VALUE;
     TSize pos = length(pst) - 1;
 
     for (TSize i = 0; i < length(pst) - 1; ++i)

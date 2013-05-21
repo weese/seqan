@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
+// Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 // LfTable is an object storing all necessary information for the LF-mapping.
 // To be more precise, the occurrence-table data structure as well as the
@@ -45,7 +46,7 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
-template <typename TOccTable, typename TPrefixSumTable>
+template <typename TText, typename TSpec>
 struct LfTable;
 
 // ============================================================================
@@ -66,56 +67,92 @@ struct LfTable;
 ..include:seqan/index_fm.h
 */
 
-struct FibreOccTable_;
-struct FibrePrefixSumTable_;
-struct FibreRankDictionary_;
-struct FibreSentinelPosition_;
+struct FibrePrefixSum_;
+struct FibreValues_;
+struct FibreSentinels_;
 
-typedef Tag<FibreOccTable_>         const FibreOccTable;
-typedef Tag<FibrePrefixSumTable_>   const FibrePrefixSumTable;
-typedef Tag<FibreRankDictionary_>   const FibreRankDictionary;
-typedef Tag<FibreSentinelPosition_> const FibreSentinelPosition;
+typedef Tag<FibrePrefixSum_>    const FibrePrefixSum;
+typedef Tag<FibreValues_>       const FibreValues;
+typedef Tag<FibreSentinels_>    const FibreSentinels;
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct Value<LfTable<TText, TSpec> >
+{
+    typedef typename Value<TText>::Type     Type;
+};
+
+template <typename TText, typename TSpec>
+struct Value<LfTable<TText, TSpec> const> :
+    public Value<LfTable<TText, TSpec> > {};
+
+template <typename TText, typename TSSetSpec, typename TSpec>
+struct Value<LfTable<StringSet<TText, TSSetSpec>, TSpec> >
+{
+    typedef typename Value<TText>::Type     Type;
+};
+
+template <typename TText, typename TSSetSpec, typename TSpec>
+struct Value<LfTable<StringSet<TText, TSSetSpec>, TSpec> const > :
+    public Value<LfTable<StringSet<TText, TSSetSpec>, TSpec> > {};
+
+// ----------------------------------------------------------------------------
 // Metafunction Fibre
 // ----------------------------------------------------------------------------
 
-template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TSpec>, FibrePrefixSum>
 {
-    typedef TOccTable Type;
+    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
+    typedef typename MakeUnsigned<TValue_>::Type            TUValue_;
+    typedef PrefixSumTable<TUValue_, TSpec>                 Type;
 };
 
-template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LfTable<TOccTable, TPrefixSumTable> const, FibreOccTable>
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TSpec> const, FibrePrefixSum>
 {
-    typedef TOccTable const Type;
+    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
+    typedef typename MakeUnsigned<TValue_>::Type            TUValue_;
+    typedef PrefixSumTable<TUValue_, TSpec> const           Type;
 };
 
-template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LfTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TSpec>, FibreValues>
 {
-    typedef TPrefixSumTable Type;
+    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
+    typedef RankDictionary<TwoLevels<TValue_, TSpec> >      Type;
 };
 
-template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LfTable<TOccTable, TPrefixSumTable> const, FibrePrefixSumTable>
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TSpec> const, FibreValues>
 {
-    typedef TPrefixSumTable const Type;
+    typedef typename Value<LfTable<TText, TSpec> >::Type        TValue_;
+    typedef RankDictionary<TwoLevels<TValue_, TSpec> > const    Type;
 };
 
-// ----------------------------------------------------------------------------
-// Metafunction Reference
-// ----------------------------------------------------------------------------
-
-template <typename TOccTable, typename TPrefixSumTable>
-struct Reference<LfTable<TOccTable, TPrefixSumTable> >
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TSpec>, FibreSentinels>
 {
-    typedef TPrefixSumTable & Type;
+    typedef typename Size<TText>::Type   Type;
+};
+
+template <typename TText, typename TSSetSpec, typename TSpec>
+struct Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreSentinels>
+{
+    typedef RankDictionary<TwoLevels<bool, TSpec> >         Type;
+};
+
+template <typename TText, typename TSSetSpec, typename TSpec>
+struct Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec> const, FibreSentinels>
+{
+    typedef RankDictionary<TwoLevels<bool, TSpec> > const   Type;
 };
 
 // ============================================================================
@@ -130,28 +167,29 @@ struct Reference<LfTable<TOccTable, TPrefixSumTable> >
 .Class.LfTable:
 ..cat:Index
 ..summary:LfTable is an object storing all necessary information for the LF-mapping.
-..signature:LfTable<TOccTable, TPrefixSumTable>
+..signature:LfTable<TText, TSpec>
 ..param.TOccTable:The occurrence table data structure.
 ...type:Spec.WaveletTree
 ..param.TPrefixSumTable:The specialisation tag.
 ...default:String
 ..include:seqan/Index.h
 */
-template <typename TOccTable, typename TPrefixSumTable>
+template <typename TText, typename TSpec>
 struct LfTable
 {
-    TOccTable occTable;
-    TPrefixSumTable prefixSumTable;
+    typename Fibre<LfTable, FibrePrefixSum>::Type   prefixSum;
+    typename Fibre<LfTable, FibreValues>::Type      values;
+    typename Fibre<LfTable, FibreSentinels>::Type   sentinels;
+    typename Value<LfTable>::Type                   sentinelSubstitute;
 
     LfTable() :
-        occTable(),
-        prefixSumTable()
+        sentinelSubstitute(0)
     {}
 
-    LfTable(TOccTable const & occTable, TPrefixSumTable const & prefixSumTable) :
-        occTable(occTable),
-        prefixSumTable(prefixSumTable)
-    {}
+//    LfTable(TText const & text)
+//    {
+//        createLFTable(text);
+//    }
 };
 
 // ============================================================================
@@ -159,50 +197,7 @@ struct LfTable
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function clear
-// ----------------------------------------------------------------------------
-
-/**
-.Function.LfTable#clear
-..class:Class.LfTable
-..summary:Clears the LF table.
-..signature:clear(lfTable)
-..param.lfTable:The LF table to be cleared.
-...type:Class.LfTable
-..include:seqan/index.h
-*/
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline void clear(LfTable<TOccTable, TPrefixSumTable> & lfTable)
-{
-    clear(lfTable.occTable);
-    clear(lfTable.prefixSumTable);
-}
-
-// ----------------------------------------------------------------------------
-// Function empty
-// ----------------------------------------------------------------------------
-
-/**
-.Function.LfTable#empty
-..class:Class.LfTable
-..summary:Clears the LF table.
-..signature:empty(lfTable)
-..param.lfTable:The LF table to be cleared.
-...type:Class.LfTable
-..returns:$true$ if the LF table is empty, $false$ otherwise.
-...type:nolink:$bool$
-..include:seqan/index.h
-*/
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline bool empty(LfTable<TOccTable, TPrefixSumTable> & lfTable)
-{
-    return empty(lfTable.occTable) && empty(lfTable.prefixSumTable);
-}
-
-// ----------------------------------------------------------------------------
-// Function getFibre
+// Function getFibre()
 // ----------------------------------------------------------------------------
 
 /**
@@ -219,36 +214,168 @@ inline bool empty(LfTable<TOccTable, TPrefixSumTable> & lfTable)
 ..include:seqan/index.h
 */
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type &
-getFibre(LfTable<TOccTable, TPrefixSumTable> & lfTable, FibrePrefixSumTable)
+template <typename TText, typename TSpec>
+inline typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type &
+getFibre(LfTable<TText, TSpec> & lfTable, FibrePrefixSum)
 {
-    return lfTable.prefixSumTable;
+    return lfTable.prefixSum;
 }
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type const &
-getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FibrePrefixSumTable)
+template <typename TText, typename TSpec>
+inline typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type const &
+getFibre(LfTable<TText, TSpec> const & lfTable, FibrePrefixSum)
 {
-    return lfTable.prefixSumTable;
+    return lfTable.prefixSum;
 }
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
-getFibre(LfTable<TOccTable, TPrefixSumTable> & lfTable, FibreOccTable)
+template <typename TText, typename TSpec>
+inline typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type &
+getFibre(LfTable<TText, TSpec> & lfTable, FibreValues)
 {
-    return lfTable.occTable;
+    return lfTable.values;
 }
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
-getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable)
+template <typename TText, typename TSpec>
+inline typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type const &
+getFibre(LfTable<TText, TSpec> const & lfTable, FibreValues)
 {
-    return lfTable.occTable;
+    return lfTable.values;
+}
+
+template <typename TText, typename TSpec>
+inline typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type &
+getFibre(LfTable<TText, TSpec> & lfTable, FibreSentinels)
+{
+    return lfTable.sentinels;
+}
+
+template <typename TText, typename TSpec>
+inline typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type const &
+getFibre(LfTable<TText, TSpec> const & lfTable, FibreSentinels)
+{
+    return lfTable.sentinels;
 }
 
 // ----------------------------------------------------------------------------
-// Function lfMapping
+// Function empty()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.LfTable#empty
+..class:Class.LfTable
+..summary:Clears the LF table.
+..signature:empty(lfTable)
+..param.lfTable:The LF table to be cleared.
+...type:Class.LfTable
+..returns:$true$ if the LF table is empty, $false$ otherwise.
+...type:nolink:$bool$
+..include:seqan/index.h
+*/
+
+template <typename TText, typename TSpec>
+inline bool empty(LfTable<TText, TSpec> const & lfTable)
+{
+    return empty(lfTable.values) &&
+           empty(lfTable.sentinels) &&
+           empty(lfTable.prefixSum);
+}
+
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.LfTable#clear
+..class:Class.LfTable
+..summary:Clears the LF table.
+..signature:clear(lfTable)
+..param.lfTable:The LF table to be cleared.
+...type:Class.LfTable
+..include:seqan/index.h
+*/
+
+template <typename TText, typename TSpec>
+inline void clear(LfTable<TText, TSpec> & lfTable)
+{
+    clear(lfTable.values);
+    _clearSentinels(lfTable);
+    clear(lfTable.prefixSum);
+    lfTable.sentinelSubstitute = 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function _clearSentinels()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+inline void _clearSentinels(LfTable<TText, TSpec> & lfTable)
+{
+    getFibre(lfTable, FibreSentinels()) = 0;
+}
+
+template <typename TText, typename TSSetSpec, typename TSpec>
+inline void _clearSentinels(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTable)
+{
+    clear(getFibre(lfTable, FibreSentinels()));
+}
+
+// ----------------------------------------------------------------------------
+// Function sentinelAt()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TPos>
+inline bool sentinelAt(LfTable<TText, TSpec> const & lfTable, TPos pos)
+{
+    return getFibre(lfTable, FibreSentinels()) == pos;
+}
+
+template <typename TText, typename TSSetSpec, typename TSpec, typename TPos>
+inline bool sentinelAt(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable, TPos pos)
+{
+    return getValue(getFibre(lfTable, FibreSentinels()), pos);
+}
+
+// ----------------------------------------------------------------------------
+// Function _getRank()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TPos, typename TValue>
+inline typename Size<typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type>::Type
+_getRank(LfTable<TText, TSpec> const & lfTable, TPos pos, TValue character)
+{
+    typedef LfTable<TText, TSpec> const                         TLfTable;
+    typedef typename Fibre<TLfTable, FibreValues>::Type         TValues;
+    typedef typename Size<TValues>::Type                        TSize;
+
+    TValues const & values = getFibre(lfTable, FibreValues());
+    TSize rank = getRank(values, pos, character);
+
+    // TODO(esiragusa): Make single sentinel case transparent.
+    if (ordEqual(lfTable.sentinelSubstitute, character) && pos >= getFibre(lfTable, FibreSentinels()))
+         --rank;
+
+    return rank;
+}
+
+template <typename TText, typename TSSetSpec, typename TSpec, typename TPos, typename TValue>
+inline typename Size<typename Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreValues>::Type>::Type
+_getRank(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable, TPos pos, TValue character)
+{
+    typedef LfTable<StringSet<TText, TSSetSpec>, TSpec> const   TLfTable;
+    typedef typename Fibre<TLfTable, FibreValues>::Type         TValues;
+    typedef typename Size<TValues>::Type                        TSize;
+
+    TValues const & values = getFibre(lfTable, FibreValues());
+    TSize rank = getRank(values, pos, character);
+
+    if (ordEqual(lfTable.sentinelSubstitute, character))
+        return rank - getRank(getFibre(lfTable, FibreSentinels()), pos);
+
+    return rank;
+}
+
+// ----------------------------------------------------------------------------
+// Function lfMapping()
 // ----------------------------------------------------------------------------
 
 /**
@@ -264,20 +391,185 @@ the sorted cyclic rotations of the original text, while F correspond to the firs
 ..include:seqan/index.h
 */
 
+// TODO(esiragusa): rename lfMapping() as getValue() or getFrontPos()?
 template <typename TLfTable, typename TPos>
 inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
 {
-    typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
-    typedef typename Value<TOccTable>::Type TChar;
+    typedef typename Fibre<TLfTable const, FibreValues>::Type       TValues;
+    typedef typename Fibre<TLfTable const, FibreSentinels>::Type    TSentinels;
+    typedef typename Fibre<TLfTable const, FibrePrefixSum>::Type    TPrefixSum;
+    typedef typename Value<TLfTable const>::Type                    TValue;
 
-    TChar c = getValue(lfTable.occTable, pos);
+    TValues const & values = getFibre(lfTable, FibreValues());
+    TPrefixSum const & prefixSum = getFibre(lfTable, FibrePrefixSum());
 
-    return getRank(getFibre(lfTable, FibreOccTable()), pos, c) +
-           getPrefixSum(lfTable.prefixSumTable, getCharacterPosition(lfTable.prefixSumTable, c)) - 1;
+    TValue c = getValue(values, pos);
+
+    return _getRank(lfTable, pos, c) + getPrefixSum(prefixSum, getCharacterPosition(prefixSum, c)) - 1;
 }
 
 // ----------------------------------------------------------------------------
-// Function open
+// Function _computeBwtLength()
+// ----------------------------------------------------------------------------
+
+// This function computes the length of the bwt string.
+template <typename TText>
+inline typename Size<TText>::Type
+_computeBwtLength(TText const & text)
+{
+    return length(text) + 1;
+}
+
+// This function computes the length of the bwt string.
+template <typename TText, typename TSSetSpec>
+inline typename Size<StringSet<TText, TSSetSpec> >::Type
+_computeBwtLength(StringSet<TText, TSSetSpec> const & text)
+{
+    return lengthSum(text) + countSequences(text);
+}
+
+// ----------------------------------------------------------------------------
+// Function _createBwt()
+// ----------------------------------------------------------------------------
+// This function computes the BWT of a text. Note that the sentinel sign is substituted and its position stored.
+
+template <typename TText, typename TSpec, typename TBwt, typename TOtherText, typename TSA>
+inline void
+_createBwt(LfTable<TText, TSpec> & lfTable, TBwt & bwt, TOtherText const & text, TSA const & sa)
+{
+    typedef typename GetValue<TSA>::Type                    TSAValue;
+    typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
+    typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
+
+    TSAIter saIt = begin(sa, Standard());
+    TSAIter saItEnd = end(sa, Standard());
+    TBwtIter bwtIt = begin(bwt, Standard());
+
+	assignValue(bwtIt, back(text));
+    ++bwtIt;
+
+    for (; saIt != saItEnd; ++saIt, ++bwtIt)
+    {
+        TSAValue pos = getValue(saIt);
+
+        if (pos != 0)
+        {
+            assignValue(bwtIt, getValue(text, pos - 1));
+        }
+        else
+        {
+            assignValue(bwtIt, lfTable.sentinelSubstitute);
+            lfTable.sentinels = bwtIt - begin(bwt, Standard());
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _createBwt()
+// ----------------------------------------------------------------------------
+// This function computes the BWT of a text. Note that the sentinel sign is substituted and its position stored.
+
+template <typename TText, typename TSSetSpec, typename TSpec, typename TBwt, typename TOtherText, typename TSA>
+inline void
+_createBwt(LfTable<StringSet<TText, TSSetSpec>, TSpec > & lfTable, TBwt & bwt, TOtherText const & text, TSA const & sa)
+{
+    typedef typename Value<TSA>::Type                       TSAValue;
+    typedef typename Size<TSA>::Type                        TSize;
+    typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
+    typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
+
+    TSize seqNum = countSequences(text);
+    TSize totalLen = lengthSum(text);
+
+    resize(lfTable.sentinels, seqNum + totalLen, Exact());
+    
+    TSAIter saIt = begin(sa, Standard());
+    TSAIter saItEnd = end(sa, Standard());
+    TBwtIter bwtItBeg = begin(bwt, Standard());
+    TBwtIter bwtIt = bwtItBeg;
+
+    // Fill the sentinel positions (they are all at the beginning of the bwt).
+    for (TSize i = 1; i <= seqNum; ++i, ++bwtIt)
+        assignValue(bwtIt, back(text[seqNum - i]));
+
+    // Compute the rest of the bwt.
+    for (; saIt != saItEnd; ++saIt, ++bwtIt)
+    {
+        TSAValue pos;    // = SA[i];
+        posLocalize(pos, getValue(saIt), stringSetLimits(text));
+        
+        if (getSeqOffset(pos) != 0)
+        {
+            assignValue(bwtIt, getValue(getValue(text, getSeqNo(pos)), getSeqOffset(pos) - 1));
+            setValue(lfTable.sentinels, bwtIt - bwtItBeg, false);
+        }
+        else
+        {
+            assignValue(bwtIt, lfTable.sentinelSubstitute);
+            setValue(lfTable.sentinels, bwtIt - bwtItBeg, true);
+        }
+    }
+
+    // Update the auxiliary RankDictionary of sentinel positions.
+    updateRanks(lfTable.sentinels);
+}
+
+// ----------------------------------------------------------------------------
+// Function _createRankDictionary()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TBwt, typename TPrefixSum>
+inline void
+_createRankDictionary(LfTable<TText, TSpec> & lfTable,
+                      TBwt const & bwt,
+                      TPrefixSum & /* prefixSum */)
+{
+    createRankDictionary(getFibre(lfTable, FibreValues()), bwt);
+}
+
+// TODO(esiragusa): Specialize _createRankDictionary() for WaveletTree.
+//template <typename TText, typename TSpec, typename TBwt, typename TPrefixSum>
+//inline void
+//_createRankDictionary(LfTable<TText, TSpec> & lfTable,
+//                      TBwt const & bwt,
+//                      TPrefixSum & prefixSum)
+//{
+//    createRankDictionary(getFibre(lfTable, FibreValues()), bwt, prefixSum);
+//}
+
+// ----------------------------------------------------------------------------
+// Function createLFTable()
+// ----------------------------------------------------------------------------
+
+// This function creates all table of the lf table given a text and a suffix array.
+template <typename TText, typename TSpec, typename TOtherText, typename TSA>
+inline void createLFTable(LfTable<TText, TSpec> & lfTable, TOtherText const & text, TSA const & sa)
+{
+    typedef LfTable<TText, TSpec>                                   TLfTable;
+    typedef typename Fibre<TLfTable, FibrePrefixSum>::Type          TPrefixSum;
+    typedef typename Fibre<TLfTable, FibreValues>::Type             TValues;
+    typedef typename Value<TLfTable>::Type                          TValue;
+    typedef String<TValue>                                          TBwt;
+
+    TPrefixSum & prefixSum = getFibre(lfTable, FibrePrefixSum());
+
+    createPrefixSumTable(prefixSum, text);
+
+    // TODO(esiragusa): Make a method _computeSentinelSubstitute(lfTable)
+    lfTable.sentinelSubstitute = determineSentinelSubstitute(prefixSum);
+
+    // TODO(esiragusa): Rename this to fillValues() / fillSentinels().
+    TBwt bwt;
+    resize(bwt, _computeBwtLength(text), Exact());
+    _createBwt(lfTable, bwt, text, sa);
+
+    _createRankDictionary(lfTable, bwt, prefixSum);
+
+    insertSentinels(prefixSum, countSequences(text));
+}
+
+// ----------------------------------------------------------------------------
+// Function open()
 // ----------------------------------------------------------------------------
 
 /**
@@ -298,20 +590,37 @@ inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
 ..include:seqan/index.h
 */
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fileName, int openMode)
+template <typename TText, typename TSpec>
+inline bool open(LfTable<TText, TSpec> & lfTable, const char * fileName, int openMode)
 {
-    if (!open(getFibre(lfTable, FibreOccTable()), fileName, openMode)) return false;
-    if (!open(getFibre(lfTable, FibrePrefixSumTable()), fileName, openMode)) return false;
+    String<char> name;
+
+    if (!open(getFibre(lfTable, FibrePrefixSum()), fileName, openMode)) return false;
+
+    name = fileName;
+    append(name, ".drv");
+    if (!open(getFibre(lfTable, FibreValues()), fileName, openMode)) return false;
+
+    name = fileName;
+    append(name, ".drp");
+    if (!open(getFibre(lfTable, FibreSentinels()), fileName, openMode)) return false;
+
+    name = fileName;
+    append(name, ".drs");
+    if (!open(lfTable.sentinelSubstitute, fileName, openMode)) return false;
 
     return true;
 }
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fileName)
+template <typename TText, typename TSpec>
+inline bool open(LfTable<TText, TSpec> & lfTable, const char * fileName)
 {
-    return open(lfTable, fileName, DefaultOpenMode<LfTable<TOccTable, TPrefixSumTable> >::VALUE);
+    return open(lfTable, fileName, DefaultOpenMode<LfTable<TText, TSpec> >::VALUE);
 }
+
+// ----------------------------------------------------------------------------
+// Function save()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.LfTable#save
@@ -331,19 +640,32 @@ inline bool open(LfTable<TOccTable, TPrefixSumTable> & lfTable, const char * fil
 ..include:seqan/index.h
 */
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline bool save(LfTable<TOccTable, TPrefixSumTable> const & lfTable, const char * fileName, int openMode)
+template <typename TText, typename TSpec>
+inline bool save(LfTable<TText, TSpec> const & lfTable, const char * fileName, int openMode)
 {
-    if (!save(getFibre(lfTable, FibreOccTable()), fileName, openMode)) return false;
-    if (!save(getFibre(lfTable, FibrePrefixSumTable()), fileName, openMode)) return false;
+    String<char> name;
+
+    if (!save(getFibre(lfTable, FibrePrefixSum()), fileName, openMode)) return false;
+
+    name = fileName;
+    append(name, ".drv");
+    if (!save(getFibre(lfTable, FibreValues()), fileName, openMode)) return false;
+
+    name = fileName;
+    append(name, ".drp");
+    if (!save(getFibre(lfTable, FibreSentinels()), fileName, openMode)) return false;
+
+    name = fileName;
+    append(name, ".drs");
+    if (!save(lfTable.sentinelSubstitute, fileName, openMode)) return false;
 
     return true;
 }
 
-template <typename TOccTable, typename TPrefixSumTable>
-inline bool save(LfTable<TOccTable, TPrefixSumTable> const & lfTable, const char * fileName)
+template <typename TText, typename TSpec>
+inline bool save(LfTable<TText, TSpec> const & lfTable, const char * fileName)
 {
-    return save(lfTable, fileName, DefaultOpenMode<LfTable<TOccTable, TPrefixSumTable> >::VALUE);
+    return save(lfTable, fileName, DefaultOpenMode<LfTable<TText, TSpec> >::VALUE);
 }
 
 }

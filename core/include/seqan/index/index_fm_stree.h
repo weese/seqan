@@ -167,7 +167,7 @@ struct EdgeLabel<Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec
 template <typename TText, typename TOccSpec, typename TIndexSpec>
 void _indexRequireTopDownIteration(Index<TText, FMIndex<TOccSpec, TIndexSpec> > & index)
 {
-    indexRequire(index, FibreSaLfTable());
+    indexRequire(index, FibreSALF());
 }
 
 // ----------------------------------------------------------------------------
@@ -221,7 +221,7 @@ inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TS
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     return (value(it).range.i1 + 1 >= value(it).range.i2 &&
-        isSentinelPosition(getFibre(getFibre(container(it), FibreLfTable()), FibreOccTable()), value(it).range.i1));
+        sentinelAt(getFibre(container(it), FibreLF()), value(it).range.i1));
 }
 
 // ----------------------------------------------------------------------------
@@ -235,17 +235,16 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
                            TChar c)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
-    typedef typename Fibre<TIndex, FibreLfTable>::Type          TLfTable;
-    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
-    typedef typename Fibre<TLfTable, FibreOccTable>::Type       TOccTable;
+    typedef typename Fibre<TIndex, FibreLF>::Type               TLF;
+    typedef typename Fibre<TLF, FibrePrefixSum>::Type           TPrefixSum;
+    typedef typename Fibre<TLF, FibreValues>::Type              TValues;
     typedef typename Value<TIndex>::Type                        TAlphabet;
     typedef typename ValueSize<TAlphabet>::Type                 TAlphabetSize;
     typedef typename Size<TIndex>::Type                         TSize;
 
     TIndex const & index = container(it);
-    TLfTable const & lfTable = getFibre(index, FibreLfTable());
-    TPrefixSumTable const & prefixSumTable = getFibre(lfTable, FibrePrefixSumTable());
-    TOccTable const & occTable = getFibre(lfTable, FibreOccTable());
+    TLF const & lfTable = getFibre(index, FibreLF());
+    TPrefixSum const & prefixSumTable = getFibre(lfTable, FibrePrefixSum());
 
     TAlphabetSize cPosition = getCharacterPosition(prefixSumTable, c);
 
@@ -257,8 +256,9 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
     else
     {
         TSize prefixSum = getPrefixSum(prefixSumTable, cPosition);
-        _range.i1 = prefixSum + getRank(occTable, vDesc.range.i1 - 1, c);
-        _range.i2 = prefixSum + getRank(occTable, vDesc.range.i2 - 1, c);
+        // TODO(esiragusa): Change this to getValue(lfTable) or something similar.
+        _range.i1 = prefixSum + _getRank(lfTable, vDesc.range.i1 - 1, c);
+        _range.i2 = prefixSum + _getRank(lfTable, vDesc.range.i2 - 1, c);
     }
 
     return _range.i1 + 1 <= _range.i2;
