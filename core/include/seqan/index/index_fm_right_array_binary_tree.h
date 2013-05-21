@@ -259,6 +259,15 @@ createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStruc
     _createRightArrayBinaryTreeImpl(it, pst);
 }
 
+template <typename TChar, typename TSpec, typename TText>
+inline void
+createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure,
+                           TText const & text)
+{
+    PrefixSumTable<TChar> pst(text);
+    createRightArrayBinaryTree(waveletTreeStructure, pst);
+}
+
 // ----------------------------------------------------------------------------
 // Function empty()
 // ----------------------------------------------------------------------------
