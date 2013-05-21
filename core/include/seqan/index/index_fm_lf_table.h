@@ -70,10 +70,12 @@ struct LfTable;
 struct FibrePrefixSum_;
 struct FibreValues_;
 struct FibreSentinels_;
+struct FibreTempBwt_;
 
 typedef Tag<FibrePrefixSum_>    const FibrePrefixSum;
 typedef Tag<FibreValues_>       const FibreValues;
 typedef Tag<FibreSentinels_>    const FibreSentinels;
+typedef Tag<FibreTempBwt_>      const FibreTempBwt;
 
 // ============================================================================
 // Metafunctions
@@ -153,6 +155,14 @@ template <typename TText, typename TSSetSpec, typename TSpec>
 struct Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec> const, FibreSentinels>
 {
     typedef RankDictionary<TwoLevels<bool, TSpec> > const   Type;
+};
+
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TSpec>, FibreTempBwt>
+{
+    typedef typename Value<LfTable<TText, TSpec> >::Type        TValue_;
+
+    typedef String<TValue_, External<ExternalConfigLarge<> > >  Type;
 };
 
 // ============================================================================
@@ -549,7 +559,7 @@ inline void createLFTable(LfTable<TText, TSpec> & lfTable, TOtherText const & te
     typedef typename Fibre<TLfTable, FibrePrefixSum>::Type          TPrefixSum;
     typedef typename Fibre<TLfTable, FibreValues>::Type             TValues;
     typedef typename Value<TLfTable>::Type                          TValue;
-    typedef String<TValue>                                          TBwt;
+    typedef typename Fibre<TLfTable, FibreTempBwt>::Type            TBwt;
 
     TPrefixSum & prefixSum = getFibre(lfTable, FibrePrefixSum());
 
