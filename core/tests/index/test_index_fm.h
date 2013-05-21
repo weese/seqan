@@ -194,9 +194,9 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
         unsigned pos = 0;
         for (unsigned i = 0; i < length(text); ++ i)
         {
-            TChar character = getValue(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), pos);
+            TChar character = getValue(getFibre(getFibre(fmiIndex, FibreLF()), FibreValues()), pos);
             SEQAN_ASSERT_EQ(character, text[length(text) - 1 - i]);
-            pos = lfMapping(getFibre(fmiIndex, FibreLfTable()), pos);
+            pos = lfMapping(getFibre(fmiIndex, FibreLF()), pos);
         }
 
         // checking the occurrence table
@@ -205,16 +205,16 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
         for (unsigned i = 0; i <  ValueSize<TChar>::VALUE; ++i)
             resize(occ[i], length(text) + 1, 0);
 
-        ++occ[ordValue(getValue(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), 0u))][0];
-        for (unsigned i = 1; i < length(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())); ++i)
+        ++occ[ordValue(getValue(getFibre(getFibre(fmiIndex, FibreLF()), FibreValues()), 0u))][0];
+        for (unsigned i = 1; i < length(getFibre(getFibre(fmiIndex, FibreLF()), FibreValues())); ++i)
         {
             for (unsigned j = 0; j <  ValueSize<TChar>::VALUE; ++j)
                 occ[j][i] = occ[j][i - 1];
 
-            TChar temp = getValue(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), i);
+            TChar temp = getValue(getFibre(getFibre(fmiIndex, FibreLF()), FibreValues()), i);
             ++occ[ordValue(temp)][i];
-            if (temp == getSentinelSubstitute(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())) &&
-                isSentinelPosition(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), i))
+            if (temp == getFibre(fmiIndex, FibreLF()).sentinelSubstitute &&
+                sentinelAt(getFibre(fmiIndex, FibreLF()), i))
                 --occ[ordValue(temp)][i];
         }
 
@@ -222,8 +222,8 @@ void fmIndexConstructor(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*
         for (TChar character = MinValue<TChar>::VALUE; counter < ValueSize<TChar>::VALUE; ++character)
         {
             ++counter;
-            for (unsigned i = 0; i < length(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable())); ++i)
-                SEQAN_ASSERT_EQ(getRank(getFibre(getFibre(fmiIndex, FibreLfTable()), FibreOccTable()), i, character), occ[ordValue(character)][i]);
+            for (unsigned i = 0; i < length(getFibre(getFibre(fmiIndex, FibreLF()), FibreValues())); ++i)
+                SEQAN_ASSERT_EQ(_getRank(getFibre(fmiIndex, FibreLF()), i, character), occ[ordValue(character)][i]);
         }
 
         // check the compressed suffix array
@@ -242,8 +242,8 @@ void fmIndexClear(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TOptimization> > TIndex;
 	//typedef typename Value<TText>::Type TChar;
-	//typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
-	//typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+	//typedef typename Fibre<TIndex, FibreLF>::Type TLfTable;
+	//typedef typename Fibre<TLfTable, FibrePrefixSum>::Type TPrefixSum;
 
 	//typedef Index<TText, IndexEsa<> > TIndexEsa;
 
@@ -260,8 +260,8 @@ void fmIndexClear(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
         clear(fmIndex);
 
         TIndex controlIndex;
-	    //SEQAN_ASSERT(getFibre(fmIndex, FibreLfTable()) == getFibre(controlIndex, FibreLfTable()));
-	    //SEQAN_ASSERT(getFibre(fmIndex, FibreLfTable()) == getFibre(controlIndex, FibreLfTable()));
+	    //SEQAN_ASSERT(getFibre(fmIndex, FibreLF()) == getFibre(controlIndex, FibreLF()));
+	    //SEQAN_ASSERT(getFibre(fmIndex, FibreLF()) == getFibre(controlIndex, FibreLF()));
 	    SEQAN_ASSERT(empty(fmIndex) == empty(controlIndex));
 	    SEQAN_ASSERT(empty(fmIndex) == empty(controlIndex));
     }
@@ -272,8 +272,8 @@ void _fmIndexDetermineSentinelSubstitute(Index<TText, FMIndex<TIndexSpec, TOptim
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TOptimization> > TIndex;
 	typedef typename Value<TText>::Type TChar;
-	typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
-	typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+	typedef typename Fibre<TIndex, FibreLF>::Type TLfTable;
+	typedef typename Fibre<TLfTable, FibrePrefixSum>::Type TPrefixSum;
 
 	//typedef Index<TText, IndexEsa<> > TIndexEsa;
 
@@ -286,7 +286,7 @@ void _fmIndexDetermineSentinelSubstitute(Index<TText, FMIndex<TIndexSpec, TOptim
 	for (unsigned i = 0; i < length(text); ++i)
 	    ++freq[ordValue(text[i])];
 	
-	TPrefixSumTable pst(text);
+	TPrefixSum pst(text);
 	TChar sentinelSub = determineSentinelSubstitute(pst);
 
 	for (unsigned i = 0; i < length(freq); ++i)
@@ -301,8 +301,8 @@ void fmIndexEmpty(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TOptimization> > TIndex;
 	//typedef typename Value<TText>::Type TChar;
-	//typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
-	//typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+	//typedef typename Fibre<TIndex, FibreLF>::Type TLfTable;
+	//typedef typename Fibre<TLfTable, FibrePrefixSum>::Type TPrefixSum;
 
 	//typedef Index<TText, IndexEsa<> > TIndexEsa;
 
@@ -327,8 +327,8 @@ void fmIndexFindFirstIndex_(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TOptimization> > TIndex;
 	//typedef typename Value<TText>::Type TChar;
-	//typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
-	//typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+	//typedef typename Fibre<TIndex, FibreLF>::Type TLfTable;
+	//typedef typename Fibre<TLfTable, FibrePrefixSum>::Type TPrefixSum;
 
 	typedef Index<TText, IndexEsa<> > TIndexEsa;
 
@@ -360,9 +360,9 @@ void fmIndexGetFibre(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
 
 	TIndex fmIndex(text, 100000u);
 
-    typename Fibre<TIndex, FibreLfTable>::Type & lfTable = getFibre(fmIndex, FibreLfTable());
-    resize(getFibre(lfTable, FibrePrefixSumTable()), 1000u);
-    SEQAN_ASSERT_EQ(length(getFibre(getFibre(fmIndex, FibreLfTable()), FibrePrefixSumTable())), 1000u);    
+    typename Fibre<TIndex, FibreLF>::Type & lfTable = getFibre(fmIndex, FibreLF());
+    resize(getFibre(lfTable, FibrePrefixSum()), 1000u);
+    SEQAN_ASSERT_EQ(length(getFibre(getFibre(fmIndex, FibreLF()), FibrePrefixSum())), 1000u);    
 }
 
 template <typename TText, typename TLfTable>
@@ -382,7 +382,7 @@ void lfTableLfMapping(StringSet<TText> /*tag*/, TLfTable &/*tag*/)
             unsigned pos = i;
             for (unsigned j = 0; j < length(text[length(text) - 1 - i]); ++j)
             {
-                TChar character = getValue(getFibre(lfTable, FibreOccTable()), pos);
+                TChar character = getValue(getFibre(lfTable, FibreValues()), pos);
                 SEQAN_ASSERT_EQ(character, text[length(text) - 1 - i][length(text[length(text) - 1 - i]) - 1 - j]);
                 pos = lfMapping(lfTable, pos);
             }
@@ -402,7 +402,7 @@ void lfTableLfMapping(TText /*tag*/, TLfTable &/*tag*/)
     unsigned pos = 0;
     for (unsigned i = 0; i < length(text); ++ i)
     {
-        SEQAN_ASSERT_EQ(getValue(getFibre(lfTable, FibreOccTable()), pos), text[length(text) - 1 - i]);
+        SEQAN_ASSERT_EQ(getValue(getFibre(lfTable, FibreValues()), pos), text[length(text) - 1 - i]);
         pos = lfMapping(lfTable, pos);
     }
 }
@@ -418,7 +418,7 @@ void fmIndexSearch(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
 
 	TIndex fmiIndex(text);
 	Finder<TIndex> fmiFinder(fmiIndex);
-	indexRequire(fmiIndex, FibreSaLfTable());
+	indexRequire(fmiIndex, FibreSALF());
 
 	TIndexEsa esaIndex(text);
 	Finder<TIndexEsa> esaFinder(esaIndex);
@@ -638,8 +638,8 @@ SEQAN_DEFINE_TEST(test_lf_table_lf_mapping)
 //         typedef Dna TChar;
 //         typedef String<TChar> TString;
 //         typedef WaveletTree<TString, FmiSentinelSubstituted<SingleSentinel<void> > > TOccTable;
-//         typedef PrefixSumTable<TChar> TPrefixSumTable;
-//         typedef LfTable<TOccTable, TPrefixSumTable> TLfTable;
+//         typedef PrefixSumTable<TChar> TPrefixSum;
+//         typedef LfTable<TOccTable, TPrefixSum> TLfTable;
 // 
 //         TLfTable tag;
 //         lfTableLfMapping(TString(), tag);
@@ -648,8 +648,8 @@ SEQAN_DEFINE_TEST(test_lf_table_lf_mapping)
 //         typedef Dna TChar;
 //         typedef StringSet<String<TChar> > TString;
 //         typedef WaveletTree<String<TChar>, FmiSentinelSubstituted<MultiSentinel<void> > > TOccTable;
-//         typedef PrefixSumTable<TChar> TPrefixSumTable;
-//         typedef LfTable<TOccTable, TPrefixSumTable> TLfTable;
+//         typedef PrefixSumTable<TChar> TPrefixSum;
+//         typedef LfTable<TOccTable, TPrefixSum> TLfTable;
 // 
 //         TLfTable tag;
 //         lfTableLfMapping(TString(), tag);
