@@ -39,6 +39,54 @@
 using namespace seqan;
 
 // ==========================================================================
+// Metafunctions
+// ==========================================================================
+
+namespace seqan {
+
+// --------------------------------------------------------------------------
+// Metafunction Fibre
+// --------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct Fibre<Index<TText, FMIndex<TL<void>, TSpec> >, FibreLF>
+{
+    typedef LfTable<TText, TL<TSpec> >   Type;
+};
+
+template <typename TText, typename TSpec>
+struct Fibre<LfTable<TText, TL<TSpec> >, FibreValues>
+{
+    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
+    typedef RankDictionary<TwoLevels<TValue_, void> >       Type;
+};
+
+//template <typename TText, typename TSpec>
+//struct Fibre<LfTable<TText, TL<TSpec> > const, FibreValues>
+//{
+//    typedef typename Value<LfTable<TText, TSpec> >::Type       TValue_;
+//    typedef RankDictionary<TwoLevels<TValue_, void> > const    Type;
+//};
+
+// --------------------------------------------------------------------------
+// Metafunction Size
+// --------------------------------------------------------------------------
+
+template <typename TSpec>
+struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
+{
+    typedef unsigned Type;
+};
+
+template <typename TSpec>
+struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
+{
+    typedef unsigned Type;
+};
+
+}
+
+// ==========================================================================
 // Classes
 // ==========================================================================
 
@@ -105,33 +153,35 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index, View<TPattern, TViewSpec> p
 
 int main(int argc, char const ** argv)
 {
-    typedef char                                        TAlphabet;
+    typedef Dna                                         TAlphabet;
     typedef String<TAlphabet>                           TText;
     typedef thrust::device_vector<TAlphabet>            TDeviceText;
-    typedef Index<TText, IndexEsa<> >                   TIndex;
-    typedef Index<TDeviceText, IndexEsa<> >             TDeviceIndex;
+    typedef FMIndex<>                                   TIndexSpec;
+    typedef Index<TText, TIndexSpec>                    TIndex;
+    typedef Index<TDeviceText, TIndexSpec>              TDeviceIndex;
 
     // Create text.
-    TText text("text");
+    TText text("ACGTACGTACGT");
 
     // Create index.
     TIndex index(text);
-    indexCreate(index, FibreSA());
-    indexCreate(index, FibreLcp());
-    indexCreate(index, FibreChildtab());
+//    indexCreate(index, FibreSA());
+//    indexCreate(index, FibreLcp());
+//    indexCreate(index, FibreChildtab());
+    indexCreate(index, FibreSALF());
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
 
     // Create a pattern.
-    TText pattern("ex");
+    TText pattern("TA");
     TDeviceText devicePattern;
     assign(devicePattern, pattern);
 
     // Find on GPU.
-    findCUDA<<< 1,1 >>>(toView(deviceIndex), toView(devicePattern));
-    cudaDeviceSynchronize();
+//    findCUDA<<< 1,1 >>>(toView(deviceIndex), toView(devicePattern));
+//    cudaDeviceSynchronize();
 
     return 0;
 }
