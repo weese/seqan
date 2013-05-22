@@ -44,8 +44,8 @@ namespace seqan {
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
 
-struct FibreLfTable_;
-typedef Tag<FibreLfTable_> const        FibreLfTable;
+struct FibreLF_;
+typedef Tag<FibreLF_> const     FibreLF;
 
 // ============================================================================
 // Tags
@@ -88,13 +88,13 @@ struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreSparseStri
 };
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLfTable>
+struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLF>
 {
     typedef TLfTable Type;
 };
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreLfTable>
+struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreLF>
 {
     typedef TLfTable Type;
 };
@@ -177,7 +177,7 @@ public:
     inline CompressedSA & operator=(CompressedSA const & other)
     {
         getFibre(*this, FibreSparseString()) = getFibre(other, FibreSparseString());
-        getFibre(*this, FibreLfTable()) = getFibre(other, FibreLfTable());
+        getFibre(*this, FibreLF()) = getFibre(other, FibreLF());
         return *this;
     }
 
@@ -227,7 +227,7 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 inline void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     clear(getFibre(compressedSA, FibreSparseString()));
-//    clear(getFibre(compressedSA, FibreLfTable()));
+//    clear(getFibre(compressedSA, FibreLF()));
 }
 
 // ----------------------------------------------------------------------------
@@ -241,7 +241,7 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 inline bool empty(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     return empty(getFibre(compressedSA, FibreSparseString()));
-    //    && empty(getFibre(compressedSA, FibreLfTable()));
+    //    && empty(getFibre(compressedSA, FibreLF()));
 }
 
 // ----------------------------------------------------------------------------
@@ -379,15 +379,15 @@ getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreSpars
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLfTable>::Type const &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreLfTable)
+inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLF>::Type const &
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLfTable>::Type &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreLfTable)
+inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLF>::Type &
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
 }
@@ -395,7 +395,7 @@ getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreLfTab
 // ----------------------------------------------------------------------------
 // Function setLfTable()
 // ----------------------------------------------------------------------------
-// NOTE(esiragusa): setLfTable() could be renamed as setFibre(csa, fibre, FibreLfTable()) or setHost(csa, fibre)
+// NOTE(esiragusa): setLfTable() could be renamed as setFibre(csa, fibre, FibreLF()) or setHost(csa, fibre)
 
 /**
 .Function.setLfTable
@@ -468,7 +468,7 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
 
     TPos counter = 0;
     for (; !getValue(indicators, pos); ++counter)
-        pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+        pos = lfMapping(getFibre(compressedSA, FibreLF()), pos);
 
     return _addGapDistance(getValue(values, getRank(indicators, pos) - 1), counter);
 }
@@ -485,7 +485,7 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos po
 
     TPos counter = 0;
     for (; !getValue(indicators, pos); ++counter)
-        pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+        pos = lfMapping(getFibre(compressedSA, FibreLF()), pos);
 
     return _addGapDistance(getValue(values, getRank(indicators, pos) - 1), counter);
 }
@@ -506,7 +506,7 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos po
 //
 //    if (getValue(indicators, pos)) return true;
 //
-//    pos = lfMapping(getFibre(compressedSA, FibreLfTable()), pos);
+//    pos = lfMapping(getFibre(compressedSA, FibreLF()), pos);
 //
 //    return false;
 //}
@@ -557,7 +557,7 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName, int openMode)
 {
     return save(getFibre(compressedSA, FibreSparseString()), fileName, openMode);
-//  save(getFibre(compressedSA, FibreLfTable()), fileName, openMode);
+//  save(getFibre(compressedSA, FibreLF()), fileName, openMode);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
