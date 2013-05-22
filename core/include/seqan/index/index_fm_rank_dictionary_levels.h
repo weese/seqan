@@ -137,7 +137,8 @@ struct Size<RankDictionary<TwoLevels<TValue, TSpec> > const> :
 template <typename TValue, typename TSpec>
 struct RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >
 {
-    static const unsigned VALUE = BitsPerValue<unsigned long>::VALUE / BitsPerValue<TValue>::VALUE;
+//    static const unsigned VALUE = BitsPerValue<unsigned long>::VALUE / BitsPerValue<TValue>::VALUE;
+    static const unsigned VALUE = BitsPerValue<unsigned>::VALUE / BitsPerValue<TValue>::VALUE;
 };
 
 // ----------------------------------------------------------------------------

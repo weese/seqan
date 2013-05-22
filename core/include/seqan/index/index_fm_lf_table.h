@@ -129,16 +129,16 @@ template <typename TText, typename TSpec>
 struct Fibre<LfTable<TText, TSpec>, FibreValues>
 {
     typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
-//    typedef RankDictionary<TwoLevels<TValue_, TSpec> >      Type;
-    typedef RankDictionary<WaveletTree<TValue_> >           Type;
+    typedef RankDictionary<TwoLevels<TValue_, TSpec> >      Type;
+//    typedef RankDictionary<WaveletTree<TValue_> >           Type;
 };
 
 template <typename TText, typename TSpec>
 struct Fibre<LfTable<TText, TSpec> const, FibreValues>
 {
     typedef typename Value<LfTable<TText, TSpec> >::Type        TValue_;
-//    typedef RankDictionary<TwoLevels<TValue_, TSpec> > const    Type;
-    typedef RankDictionary<WaveletTree<TValue_> > const         Type;
+    typedef RankDictionary<TwoLevels<TValue_, TSpec> > const    Type;
+//    typedef RankDictionary<WaveletTree<TValue_> > const         Type;
 };
 
 template <typename TText, typename TSpec>
