@@ -43,16 +43,16 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-// ==========================================================================
+// ============================================================================
 // Classes
-// ==========================================================================
+// ============================================================================
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre
+// Metafunction Fibre                                            [Device Index]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -88,7 +88,7 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreBwt>
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre for FMIndex
+// Metafunction Fibre                                          [Device FMIndex]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -102,17 +102,25 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
 
     typedef CompressedSA<TSparseString_, TLF_, TSpec>                                   Type;
 };
-
-template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreLF>
-{
-    typedef thrust::device_vector<TValue, TAlloc>                                       TText_;
-    typedef LfTable<TText_, TSpec>                                                      Type;
-};
+//
+//template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
+//struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreLF>
+//{
+//    typedef thrust::device_vector<TValue, TAlloc>                                       TText_;
+//    typedef LfTable<TText_, TSpec>                                                      Type;
+//};
+//
+//// TODO(esiragusa): Remove this TL specialization.
+//template <typename TValue, typename TAlloc, typename TSpec>
+//struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TL<TSpec>, TSpec> >, FibreLF>
+//{
+//    typedef thrust::device_vector<TValue, TAlloc>                                       TText_;
+//    typedef LfTable<TText_, TSpec>                                                      Type;
+//};
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre
+// Metafunction Fibre                                              [Index View]
 // ----------------------------------------------------------------------------
 
 //template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
@@ -145,8 +153,9 @@ struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreBwt>
     typedef View<typename Fibre<Index<TText, TSpec>, FibreBwt>::Type, TViewSpec> Type;
 };
 
+
 // ----------------------------------------------------------------------------
-// Metafunction FibreTextMember_
+// Metafunction FibreTextMember_                                   [Index View]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec>
@@ -154,6 +163,78 @@ struct FibreTextMember_<Index<View<TText, TViewSpec>, TSpec> >
 {
     typedef Index<View<TText, TViewSpec>, TSpec>        TIndex_;
     typedef typename Fibre<TIndex_, FibreText>::Type    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                            [FMIndex View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec>
+struct Fibre<Index<View<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, FibreSA>
+{
+    typedef Index<View<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >    TIndex_;
+
+    typedef typename SAValue<TIndex_>::Type                             TSAValue_;
+    typedef SparseString<View<String<TSAValue_> >, TSpec>               TSparseString_;
+
+    typedef typename Fibre<TIndex_, FibreLF>::Type                      TLF_;
+
+    typedef CompressedSA<TSparseString_, TLF_, TSpec>                   Type;
+};
+
+//template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec>
+//struct Fibre<Index<View<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, FibreLF>
+//{
+//    typedef View<typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF>::Type, TViewSpec> Type;
+//};
+//
+//// TODO(esiragusa): Remove this TL specialization.
+//template <typename TText, typename TViewSpec, typename TSpec>
+//struct Fibre<Index<View<TText, TViewSpec>, FMIndex<TL<TSpec>, TSpec> >, FibreLF>
+//{
+//    typedef View<typename Fibre<Index<TText, FMIndex<TL<TSpec>, TSpec> >, FibreLF>::Type, TViewSpec> Type;
+//};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                            [LfTable View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<LfTable<View<TText, TViewSpec>, TSpec>, FibrePrefixSum>
+{
+    typedef View<typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type>    Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<LfTable<View<TText, TViewSpec>, TSpec>, FibreValues>
+{
+    typedef View<typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type>    Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<LfTable<View<TText, TViewSpec>, TSpec>, FibreSentinels>
+{
+    typedef View<typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type>    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                     [PrefixSumTable View]
+// ----------------------------------------------------------------------------
+
+template <typename TChar, typename TSpec, typename TViewSpec>
+struct Fibre<View<PrefixSumTable<TChar, TSpec>, TViewSpec>, FibreEntries>
+{
+    typedef View<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                     [RankDictionary View]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct Fibre<View<RankDictionary<TSpec> >, FibreRanks>
+{
+    typedef View<typename Fibre<RankDictionary<TSpec>, FibreRanks>::Type>   Type;
 };
 
 // ============================================================================
@@ -240,12 +321,27 @@ SEQAN_FUNC bool indexRequire(Index<View<TText, TViewSpec>, TSpec> & index, Tag<T
     return supplied;
 }
 
+template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec, typename TFibre>
+SEQAN_FUNC bool indexRequire(Index<View<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & index, Tag<TFibre> const fibre)
+{
+    bool supplied = indexSupplied(index, fibre);
+    SEQAN_ASSERT_MSG(supplied, "Fibre must be supplied on a view.");
+    return supplied;
+}
+
 // ----------------------------------------------------------------------------
 // Function indexCreate()
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
 SEQAN_FUNC bool indexCreate(Index<View<TText, TViewSpec>, TSpec> & /* index */, Tag<TFibre> const /* fibre */)
+{
+    SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
+    return false;
+}
+
+template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec, typename TFibre>
+SEQAN_FUNC bool indexCreate(Index<View<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & /* index */, Tag<TFibre> const /* fibre */)
 {
     SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
     return false;
