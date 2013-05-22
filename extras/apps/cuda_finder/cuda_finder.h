@@ -86,13 +86,13 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index, View<TPattern, TViewSpec> p
     printf("repLength()=%ld\n", repLength(it));
     printf("goRight()=%d\n", goRight(it));
 
-    TEdgeLabel edgeLabel = parentEdgeLabel(it);
-    TRepresentative repr = representative(it);
+//    TEdgeLabel edgeLabel = parentEdgeLabel(it);
+//    TRepresentative repr = representative(it);
 
-    goRoot(it);
+//    goRoot(it);
 //    printf("goDown(pattern)=%d\n", goDown(it, pattern));
 
-    begin(repr, Standard());
+//    begin(repr, Standard());
 
 //    typedef typename Iterator<TRepresentative, Standard>::Type     TReprIt;
 //    TReprIt reprIt = begin(repr, Standard());
