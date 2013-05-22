@@ -179,17 +179,17 @@ void compressedSaGetFibre(TCompressedSA & /*tag*/)
 //    }
 //}
 
-template <typename TCompressedSA>
-void compressedSaSetLfTable(TCompressedSA & /*tag*/)
-{ 
-    TCompressedSA compressedSA;
-
-    CharString dummyLfTable;
-
-    setLfTable(compressedSA, dummyLfTable);
-
-    SEQAN_ASSERT(compressedSA.lfTable == &dummyLfTable);
-}
+//template <typename TCompressedSA>
+//void compressedSaSetLfTable(TCompressedSA & /*tag*/)
+//{ 
+//    TCompressedSA compressedSA;
+//
+//    CharString dummyLfTable;
+//
+//    setLfTable(compressedSA, dummyLfTable);
+//
+//    SEQAN_ASSERT(compressedSA.lfTable == &dummyLfTable);
+//}
 
 template <typename TIndex>
 void compressedSaValueAccess(TIndex & /*tag*/)
@@ -297,14 +297,14 @@ SEQAN_DEFINE_TEST(compressed_sa_get_fibre)
 //    _compressedSaGetNextPos(tag);
 //}
 
-SEQAN_DEFINE_TEST(compressed_sa_set_lf_table)
-{
-    using namespace seqan;
-
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
-
-    compressedSaSetLfTable(tag);
-}
+//SEQAN_DEFINE_TEST(compressed_sa_set_lf_table)
+//{
+//    using namespace seqan;
+//
+//    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+//
+//    compressedSaSetLfTable(tag);
+//}
 
 SEQAN_DEFINE_TEST(compressed_sa_value_access)
 {
