@@ -249,7 +249,7 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
     RankDictionary(TText const & text)
     {
         createRankDictionary(*this, text);
-    };
+    }
 };
 
 // ============================================================================
