@@ -636,7 +636,7 @@ struct CompareType<Dna, __uint8>
 
 void SEQAN_FUNC assign(Dna & target, __uint8 c_source)
 {
-    target.value = TranslateTableByteToDna_<>::VALUE[c_source];
+    target.value = translateByteToDna_<void>(c_source);
 }
 
 template <>
