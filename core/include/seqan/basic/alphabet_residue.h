@@ -647,7 +647,7 @@ struct CompareType<Dna, char>
 
 void SEQAN_FUNC assign(Dna & target, char c_source)
 {
-    target.value = TranslateTableAsciiToDna_<>().VALUE[(unsigned char)c_source];
+    target.value = translateAsciiToDna_<void>((unsigned char)c_source);
 }
 
 template <>
@@ -658,7 +658,7 @@ struct CompareType<Dna, Unicode>
 
 void SEQAN_FUNC assign(Dna & target, Unicode c_source)
 {
-    target.value = TranslateTableAsciiToDna_<>().VALUE[(unsigned char) c_source];
+    target.value = translateAsciiToDna_<void>((unsigned char)c_source);
 }
 
 template <>
