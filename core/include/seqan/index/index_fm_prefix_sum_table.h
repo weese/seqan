@@ -222,9 +222,7 @@ public:
     // Constructors
     // ------------------------------------------------------------------------
 
-    PrefixSumTable() :
-        entries()
-    {}
+    PrefixSumTable() {}
 
     template <typename TText>
     PrefixSumTable(TText const & text) :
@@ -247,20 +245,6 @@ public:
     inline TEntry const & operator[](TPos pos) const
     {
         return value(*this, pos);
-    }
-
-    // ------------------------------------------------------------------------
-    // Operator ==
-    // ------------------------------------------------------------------------
-
-    inline bool operator==(PrefixSumTable const & other)
-    {
-        return entries == other.entries;
-    }
-
-    inline bool operator==(PrefixSumTable const & other) const
-    {
-        return entries == other.entries;
     }
 };
 
