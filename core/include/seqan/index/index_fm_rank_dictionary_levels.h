@@ -247,7 +247,10 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
     // Constructors
     // ------------------------------------------------------------------------
 
-    RankDictionary() : _length(0) {};
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+    RankDictionary() {};
+
+//    RankDictionary() : _length(0) {};
 
     template <typename TText>
     RankDictionary(TText const & text)

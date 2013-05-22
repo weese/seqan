@@ -201,10 +201,13 @@ public:
     typename Size<TText>::Type                      bwtLength;
     unsigned                                        compressionFactor;
 
-    Index() :
-        bwtLength(0),
-        compressionFactor(10)
-    {}
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+    Index() {};
+
+//    Index() :
+//        bwtLength(0),
+//        compressionFactor(10)
+//    {}
 
     // TODO(esiragusa): Move compression factor inside CompressedSA.
     Index(TText & text, unsigned compressionFactor = 10) :

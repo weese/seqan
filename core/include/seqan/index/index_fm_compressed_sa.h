@@ -161,12 +161,17 @@ struct CompressedSA
 
     CompressedSA() :
         lfTable()
-    {}
+public:
+    TSparseString   sparseString;
+    // TODO(esiragusa): Change the lfTable pointer to a Member<>::Type metafunction.
+    Holder<TLfTable> lfTable;
 
-    template <typename TLfTable>
-    CompressedSA(TLfTable const & lfTable) :
-        lfTable(lfTable)
-    {}
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+//    CompressedSA() {};
+//
+//    CompressedSA(TLfTable const & lfTable) :
+//        lfTable(lfTable)
+//    {}
 
     template <typename TPos>
     inline typename Value<CompressedSA>::Type const operator[](TPos pos)

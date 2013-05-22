@@ -214,9 +214,10 @@ struct SparseString
     TFibreIndicators_       indicators;
     TSize                   _length;
 
-    SparseString() :
-        _length(0)
-    {};
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+//    SparseString() :
+//        _length(0)
+//    {};
 };
 
 // ==========================================================================

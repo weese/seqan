@@ -194,9 +194,12 @@ struct LfTable
     typename Fibre<LfTable, FibreSentinels>::Type   sentinels;
     typename Value<LfTable>::Type                   sentinelSubstitute;
 
-    LfTable() :
-        sentinelSubstitute(0)
-    {}
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+    LfTable() {}
+
+//    LfTable() :
+//        sentinelSubstitute(0)
+//    {}
 
 //    LfTable(TText const & text)
 //    {
