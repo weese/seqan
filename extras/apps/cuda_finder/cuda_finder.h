@@ -49,18 +49,27 @@ namespace seqan {
 // --------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
-struct Fibre<Index<TText, FMIndex<TL<void>, TSpec> >, FibreLF>
+struct Fibre<Index<TText, FMIndex<TL<TSpec>, TSpec> >, FibreTempSA>
 {
-    typedef LfTable<TText, TL<TSpec> >   Type;
+    typedef Index<TText, FMIndex<TL<TSpec>, TSpec> >                 TIndex_;
+    typedef typename SAValue<TIndex_>::Type                         TSAValue_;
+
+    typedef String<TSAValue_, typename DefaultIndexStringSpec<TText>::Type>     Type;
 };
 
-template <typename TText, typename TSpec>
-struct Fibre<LfTable<TText, TL<TSpec> >, FibreValues>
-{
-    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
-    typedef RankDictionary<TwoLevels<TValue_, void> >       Type;
-};
-
+//template <typename TText, typename TSpec>
+//struct Fibre<Index<TText, FMIndex<TL<TSpec>, TSpec> >, FibreLF>
+//{
+//    typedef LfTable<TText, TL<TSpec> >       Type;
+//};
+//
+//template <typename TText, typename TSpec>
+//struct Fibre<LfTable<TText, TL<TSpec> >, FibreValues>
+//{
+//    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
+//    typedef RankDictionary<TwoLevels<TValue_, TSpec> >      Type;
+//};
+//
 //template <typename TText, typename TSpec>
 //struct Fibre<LfTable<TText, TL<TSpec> > const, FibreValues>
 //{
@@ -156,7 +165,7 @@ int main(int argc, char const ** argv)
     typedef Dna                                         TAlphabet;
     typedef String<TAlphabet>                           TText;
     typedef thrust::device_vector<TAlphabet>            TDeviceText;
-    typedef FMIndex<>                                   TIndexSpec;
+    typedef FMIndex<TL<void> >                          TIndexSpec;
     typedef Index<TText, TIndexSpec>                    TIndex;
     typedef Index<TDeviceText, TIndexSpec>              TDeviceIndex;
 
@@ -170,14 +179,19 @@ int main(int argc, char const ** argv)
 //    indexCreate(index, FibreChildtab());
     indexCreate(index, FibreSALF());
 
+    typedef View<TText>                                     TTextView;
+    typedef Index<TTextView, TIndexSpec>                    TIndexView;
+
+    TIndexView indexView;
+
     // Copy index to device.
-    TDeviceIndex deviceIndex;
-    assign(deviceIndex, index);
+//    TDeviceIndex deviceIndex;
+//    assign(deviceIndex, index);
 
     // Create a pattern.
-    TText pattern("TA");
-    TDeviceText devicePattern;
-    assign(devicePattern, pattern);
+//    TText pattern("TA");
+//    TDeviceText devicePattern;
+//    assign(devicePattern, pattern);
 
     // Find on GPU.
 //    findCUDA<<< 1,1 >>>(toView(deviceIndex), toView(devicePattern));
