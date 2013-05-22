@@ -69,11 +69,7 @@ char const TranslateTableDna5ToIupac_<T>::VALUE[5] = {0x02, 0x04, 0x08, 0x01, 0x
 template <typename T = void>
 struct TranslateTableAsciiToDna_
 {
-    static unsigned char const VALUE[256];
-};
-
-template <typename T>
-unsigned char const TranslateTableAsciiToDna_<T>::VALUE[256] = 
+    unsigned char const VALUE[256] =
 {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //0
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //1
@@ -101,7 +97,7 @@ unsigned char const TranslateTableAsciiToDna_<T>::VALUE[256] =
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //14
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  //15
 };
-
+};
 
 template <typename T = void>
 struct TranslateTableAsciiToDna5_
