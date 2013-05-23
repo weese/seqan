@@ -174,13 +174,6 @@ public:
         lfTable(&lfTable)
     {}
 
-    inline CompressedSA & operator=(CompressedSA const & other)
-    {
-        getFibre(*this, FibreSparseString()) = getFibre(other, FibreSparseString());
-        getFibre(*this, FibreLF()) = getFibre(other, FibreLF());
-        return *this;
-    }
-
     template <typename TPos>
     inline TCompressedSaValue const operator[](TPos pos)
     {
