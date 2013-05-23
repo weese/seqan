@@ -188,6 +188,7 @@ struct Fibre<LfTable<View<TText, TViewSpec>, TSpec>, FibreSentinels>
     typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
 };
 
+// NOTE(esiragusa): StringSet specialization
 //template <typename TText, typename TSSetSpec, typename TViewSpec, typename TSpec>
 //struct Fibre<LfTable<View<StringSet<TText, TSSetSpec>, TViewSpec>, TSpec>, FibreSentinels>
 //{
@@ -418,6 +419,7 @@ view(LfTable<TText, TSpec> & lfTable)
     return lfTableView;
 }
 
+// NOTE(esiragusa): StringSet specialization
 //template <typename TText, typename TSSetSpec, typename TSpec>
 //LfTable<View<StringSet<TText, TSSetSpec> >, TSpec>
 //view(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTable)
