@@ -191,13 +191,14 @@ struct RankDictionaryBitMask_<__uint64>
 // Metafunction Fibre                                          [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-struct Fibre<RankDictionary<TSpec>, FibreRanks>
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>
 {
-    typedef RankDictionary<TSpec>                                           TRankDictionary_;
+    typedef TwoLevels<TValue, TSpec>                                        TRankDictionarySpec_;
+    typedef RankDictionary<TRankDictionarySpec_>                            TRankDictionary_;
     typedef typename RankDictionaryFibreSpec<TRankDictionary_>::Type        TRankDictionaryFibreSpec_;
 
-    typedef String<RankDictionaryEntry_<TSpec>, TRankDictionaryFibreSpec_>  Type;
+    typedef String<RankDictionaryEntry_<TRankDictionarySpec_>, TRankDictionaryFibreSpec_>   Type;
 };
 
 // ============================================================================
@@ -258,6 +259,24 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function getFibre()                                         [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+inline typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type &
+getFibre(RankDictionary<TwoLevels<TValue, TSpec> > & dict, FibreRanks)
+{
+    return dict.ranks;
+}
+
+template <typename TValue, typename TSpec>
+inline typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type const &
+getFibre(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, FibreRanks)
+{
+    return dict.ranks;
+}
 
 // ----------------------------------------------------------------------------
 // Function _toValuePos()                                      [RankDictionary]
