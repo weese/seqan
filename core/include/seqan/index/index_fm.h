@@ -201,7 +201,7 @@ template <typename TText, typename TOccSpec, typename TSpec>
 class Index<TText, FMIndex<TOccSpec, TSpec> >
 {
 public:
-    Holder<typename Fibre<Index, FibreText>::Type>  text;
+    typename FibreTextMember_<Index>::Type          text;
     typename Fibre<Index, FibreLF>::Type            lfTable;
     typename Fibre<Index, FibreSA>::Type            compressedSA;
 
@@ -324,6 +324,24 @@ typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type const &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreSA /*tag*/)
 {
     return index.compressedSA;
+}
+
+// ----------------------------------------------------------------------------
+// Function indexLF()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TOccSpec, typename TSpec>
+typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type &
+indexLF(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
+{
+    return getFibre(index, FibreLF());
+}
+
+template <typename TText, typename TOccSpec, typename TSpec>
+typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type const &
+indexLF(Index<TText, FMIndex<TOccSpec, TSpec> > const & index)
+{
+    return getFibre(index, FibreLF());
 }
 
 // ----------------------------------------------------------------------------
