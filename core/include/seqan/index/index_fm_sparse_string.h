@@ -313,7 +313,7 @@ getValue(SparseString<TFibreValues, TSpec> const & string, TPos pos)
 ///.Function.value.param.container.type:Class.SparseString
 template <typename TFibreValues, typename TSpec, typename TPos>
 inline typename Reference<SparseString<TFibreValues, TSpec> >::Type 
-value(SparseString<TFibreValues, TSpec>&string, TPos pos)
+value(SparseString<TFibreValues, TSpec> & string, TPos pos)
 {
     return getValue(string, pos);
 }
@@ -339,7 +339,7 @@ getFibre(SparseString<TFibreValues, TSpec> const & sparseString, FibreValues)
 
 template <typename TFibreValues, typename TSpec>
 inline typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type &
-getFibre(SparseString<TFibreValues, TSpec>&sparseString, FibreValues)
+getFibre(SparseString<TFibreValues, TSpec> & sparseString, FibreValues)
 {
     return sparseString.values;
 }
@@ -353,7 +353,7 @@ getFibre(SparseString<TFibreValues, TSpec> const & sparseString, FibreIndicators
 
 template <typename TFibreValues, typename TSpec>
 inline typename Fibre<SparseString<TFibreValues, TSpec>, FibreIndicators>::Type &
-getFibre(SparseString<TFibreValues, TSpec>&sparseString, FibreIndicators)
+getFibre(SparseString<TFibreValues, TSpec> & sparseString, FibreIndicators)
 {
     return sparseString.indicators;
 }
