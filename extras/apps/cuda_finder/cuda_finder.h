@@ -174,15 +174,18 @@ int main(int argc, char const ** argv)
 
     // Create index.
     TIndex index(text);
-//    indexCreate(index, FibreSA());
-//    indexCreate(index, FibreLcp());
-//    indexCreate(index, FibreChildtab());
     indexCreate(index, FibreSALF());
 
     typedef View<TText>                                     TTextView;
     typedef Index<TTextView, TIndexSpec>                    TIndexView;
 
-    TIndexView indexView;
+    TIndexView indexView = view(index);
+
+    for (unsigned i = 0; i < 4; i++)
+    {
+        std::cout << value(indexLF(index).prefixSum, i) << std::endl;
+        std::cout << value(indexLF(indexView).prefixSum, i) << std::endl;
+    }
 
     // Copy index to device.
 //    TDeviceIndex deviceIndex;
@@ -194,7 +197,7 @@ int main(int argc, char const ** argv)
 //    assign(devicePattern, pattern);
 
     // Find on GPU.
-//    findCUDA<<< 1,1 >>>(toView(deviceIndex), toView(devicePattern));
+//    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
 //    cudaDeviceSynchronize();
 
     return 0;
