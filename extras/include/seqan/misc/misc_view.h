@@ -291,7 +291,7 @@ resize(View<TObject, TSpec> & me, TSize new_length, Tag<TExpand>)
 
 template <typename TObject, typename TSpec, typename TContainer>
 void
-assign(View<TObject, TSpec> &view, TContainer const & cont)
+assign(View<TObject, TSpec> & view, TContainer const & cont)
 {
     view._begin = begin(cont, Standard());
     view._end = end(cont, Standard());
