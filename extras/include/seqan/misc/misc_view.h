@@ -275,14 +275,21 @@ length(View<TObject, TSpec> const & view)
 // it is, however, implemented for algorithms that get a sequence to work on
 // and need to make sure that it has a certain length
 
-template <typename TObject, typename TSpec, typename TSize, typename TExpand>
+template <typename TObject, typename TSpec, typename TSize, typename TValue, typename TExpand>
 inline typename Size< View<TObject, TSpec> >::Type
-resize(View<TObject, TSpec> & me, TSize new_length, Tag<TExpand>)
+resize(View<TObject, TSpec> & me, TSize new_length, TValue /* val */, Tag<TExpand>)
 {
     ignoreUnusedVariableWarning(new_length);
 
     SEQAN_ASSERT_EQ(new_length, (TSize)length(me));
     return length(me);
+}
+
+template <typename TObject, typename TSpec, typename TSize, typename TExpand>
+inline typename Size< View<TObject, TSpec> >::Type
+resize(View<TObject, TSpec> & me, TSize new_length, Tag<TExpand> tag)
+{
+    return resize(me, new_length, Nothing(), tag);
 }
 
 // ----------------------------------------------------------------------------
