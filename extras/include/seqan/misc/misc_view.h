@@ -196,7 +196,7 @@ struct IsSequence<View<TObject, TSpec> >:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// begin()
+// Function begin()
 // ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec>
@@ -216,7 +216,7 @@ begin(View<TObject, TSpec> const & view, Standard)
 }
 
 // ----------------------------------------------------------------------------
-// end()
+// Function end()
 // ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec>
@@ -236,7 +236,7 @@ end(View<TObject, TSpec> const & view, Standard)
 }
 
 // ----------------------------------------------------------------------------
-// value()
+// Function value()
 // ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec, typename TPos>
@@ -256,7 +256,7 @@ value(View<TObject, TSpec> const & view, TPos pos)
 }
 
 // ----------------------------------------------------------------------------
-// length()
+// Function length()
 // ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec>
@@ -268,7 +268,7 @@ length(View<TObject, TSpec> const & view)
 }
 
 // ----------------------------------------------------------------------------
-// resize()
+// Function resize()
 // ----------------------------------------------------------------------------
 
 // this function doesn't do anything as we are not allowed to change the host (only its elements)
@@ -286,7 +286,7 @@ resize(View<TObject, TSpec> & me, TSize new_length, Tag<TExpand>)
 }
 
 // ----------------------------------------------------------------------------
-// assign()
+// Function assign()
 // ----------------------------------------------------------------------------
 
 template <typename TObject, typename TSpec, typename TContainer>
@@ -298,19 +298,7 @@ assign(View<TObject, TSpec> &view, TContainer const & cont)
 }
 
 // ----------------------------------------------------------------------------
-// operator<<
-// ----------------------------------------------------------------------------
-
-template <typename TStream, typename TObject, typename TSpec>
-inline TStream &
-operator<<(TStream & target, View<TObject, TSpec> const & source)
-{
-    write(target, source);
-    return target;
-}
-
-// ----------------------------------------------------------------------------
-// view()
+// Function view()
 // ----------------------------------------------------------------------------
 
 template <typename TContainer>
@@ -334,7 +322,19 @@ view(thrust::device_vector<TObject, TAlloc> & container)
 #endif
 
 // ----------------------------------------------------------------------------
-// pipe interface
+// Operator<<
+// ----------------------------------------------------------------------------
+
+template <typename TStream, typename TObject, typename TSpec>
+inline TStream &
+operator<<(TStream & target, View<TObject, TSpec> const & source)
+{
+    write(target, source);
+    return target;
+}
+
+// ----------------------------------------------------------------------------
+// Pipe interface
 // ----------------------------------------------------------------------------
 
 //template < typename TObject,
@@ -359,8 +359,6 @@ view(thrust::device_vector<TObject, TAlloc> & container)
 //{
 //    assign(dest, src);
 //}
-
-
 
 }  // namespace seqan
 
