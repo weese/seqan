@@ -310,12 +310,12 @@ operator<<(TStream & target, View<TObject, TSpec> const & source)
 }
 
 // ----------------------------------------------------------------------------
-// toView()
+// view()
 // ----------------------------------------------------------------------------
 
 template <typename TContainer>
 View<TContainer>
-toView(TContainer & container)
+view(TContainer & container)
 {
     return View<TContainer>(container);
 }
@@ -323,7 +323,7 @@ toView(TContainer & container)
 #ifdef __CUDACC__
 template <typename TObject, typename TAlloc>
 View<thrust::device_vector<TObject, TAlloc> >
-toView(thrust::device_vector<TObject, TAlloc> & container)
+view(thrust::device_vector<TObject, TAlloc> & container)
 {
     typedef thrust::device_vector<TObject, TAlloc>    TContainer;
     return View<TContainer>(

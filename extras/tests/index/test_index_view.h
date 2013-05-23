@@ -116,7 +116,7 @@ SEQAN_DEFINE_TEST(test_index_view_basic)
     // Construct an index and its view.
     TIndex index(text);
     indexCreate(index, FibreSA());
-    TIndexView indexView = toView(index);
+    TIndexView indexView = view(index);
 
     // ----------------------------------------------------------------------
 

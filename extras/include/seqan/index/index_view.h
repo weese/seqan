@@ -348,42 +348,42 @@ SEQAN_FUNC bool indexCreate(Index<View<TText, TViewSpec>, FMIndex<TOccSpec, TSpe
 }
 
 // ----------------------------------------------------------------------------
-// Function toView()
+// Function view()
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
 Index<View<TText>, TSpec>
-toView(Index<TText, TSpec> & index)
+view(Index<TText, TSpec> & index)
 {
     Index<View<TText>, TSpec> indexView;
 
-    indexText(indexView) = toView(indexText(index));
+    indexText(indexView) = view(indexText(index));
 
     return indexView;
 }
 
 template <typename TText, typename TSpec>
 Index<View<TText>, IndexSa<TSpec> >
-toView(Index<TText, IndexSa<TSpec> > & index)
+view(Index<TText, IndexSa<TSpec> > & index)
 {
     Index<View<TText>, IndexSa<TSpec> > indexView;
 
-    indexText(indexView) = toView(indexText(index));
-    indexSA(indexView) = toView(indexSA(index));
+    indexText(indexView) = view(indexText(index));
+    indexSA(indexView) = view(indexSA(index));
 
     return indexView;
 }
 
 template <typename TText, typename TSpec>
 Index<View<TText>, IndexEsa<TSpec> >
-toView(Index<TText, IndexEsa<TSpec> > & index)
+view(Index<TText, IndexEsa<TSpec> > & index)
 {
     Index<View<TText>, IndexEsa<TSpec> > indexView;
 
-    indexText(indexView) = toView(indexText(index));
-    indexSA(indexView) = toView(indexSA(index));
-    indexLcp(indexView) = toView(indexLcp(index));
-    indexChildtab(indexView) = toView(indexChildtab(index));
+    indexText(indexView) = view(indexText(index));
+    indexSA(indexView) = view(indexSA(index));
+    indexLcp(indexView) = view(indexLcp(index));
+    indexChildtab(indexView) = view(indexChildtab(index));
     // TODO(esiragusa): View of cargo?
 
     return indexView;
