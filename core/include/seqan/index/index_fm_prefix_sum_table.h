@@ -585,9 +585,9 @@ resize(PrefixSumTable<TChar, TSpec> & pst, TSize size, Tag<TExpand> tag)
 
 template <typename TChar, typename TSpec, typename TSize, typename TValue, typename TExpand>
 inline typename Size<PrefixSumTable<TChar, TSpec> >::Type
-resize(PrefixSumTable<TChar, TSpec> & pst, TSize size, TValue value, Tag<TExpand> tag)
+resize(PrefixSumTable<TChar, TSpec> & pst, TSize size, TValue val, Tag<TExpand> tag)
 {
-    return resize(pst.entries, size, value, tag);
+    return resize(pst.entries, size, val, tag);
 }
 
 // ----------------------------------------------------------------------------
