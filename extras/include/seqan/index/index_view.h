@@ -138,7 +138,6 @@ struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreBwt>
     typedef View<typename Fibre<Index<TText, TSpec>, FibreBwt>::Type, TViewSpec> Type;
 };
 
-
 // ----------------------------------------------------------------------------
 // Metafunction FibreTextMember_                                   [Index View]
 // ----------------------------------------------------------------------------
@@ -186,8 +185,14 @@ struct Fibre<LfTable<View<TText, TViewSpec>, TSpec>, FibreValues>
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<LfTable<View<TText, TViewSpec>, TSpec>, FibreSentinels>
 {
-    typedef typename Fibre<LfTable<TText, View<TSpec, TViewSpec> >, FibreSentinels>::Type   Type;
+    typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
 };
+
+//template <typename TText, typename TSSetSpec, typename TViewSpec, typename TSpec>
+//struct Fibre<LfTable<View<StringSet<TText, TSSetSpec>, TViewSpec>, TSpec>, FibreSentinels>
+//{
+//    typedef typename Fibre<LfTable<StringSet<TText, TSSetSpec>, View<TSpec, TViewSpec> >, FibreSentinels>::Type   Type;
+//};
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                     [PrefixSumTable View]
@@ -203,11 +208,11 @@ struct Fibre<PrefixSumTable<TChar, View<TSpec, TViewSpec> >, FibreEntries>
 // Metafunction Fibre                                     [RankDictionary View]
 // ----------------------------------------------------------------------------
 
-//template <typename TValue, typename TSpec, typename TViewSpec>
-//struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec, TViewSpec> > >, FibreRanks>
-//{
-//    typedef View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type, TViewSpec>    Type;
-//};
+template <typename TValue, typename TSpec, typename TViewSpec>
+struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec, TViewSpec> > >, FibreRanks>
+{
+    typedef View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type, TViewSpec>    Type;
+};
 
 // ============================================================================
 // Functions
@@ -406,13 +411,26 @@ view(LfTable<TText, TSpec> & lfTable)
     LfTable<View<TText>, TSpec> lfTableView;
 
     getFibre(lfTableView, FibrePrefixSum()) = view(getFibre(lfTable, FibrePrefixSum()));
-
-//    getFibre(lfTableView, FibreValues()) = getFibre(lfTable, FibreValues());
-//    getFibre(lfTableView, FibreSentinels()) = view(getFibre(lfTable, FibreSentinels()));
+    getFibre(lfTableView, FibreValues()) = view(getFibre(lfTable, FibreValues()));
+    getFibre(lfTableView, FibreSentinels()) = getFibre(lfTable, FibreSentinels());
     lfTableView.sentinelSubstitute = lfTable.sentinelSubstitute;
 
     return lfTableView;
 }
+
+//template <typename TText, typename TSSetSpec, typename TSpec>
+//LfTable<View<StringSet<TText, TSSetSpec> >, TSpec>
+//view(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTable)
+//{
+//    LfTable<StringSet<TText, TSSetSpec>, TSpec> lfTableView;
+//
+//    getFibre(lfTableView, FibrePrefixSum()) = view(getFibre(lfTable, FibrePrefixSum()));
+//    getFibre(lfTableView, FibreValues()) = view(getFibre(lfTable, FibreValues()));
+//    getFibre(lfTableView, FibreSentinels()) = view(getFibre(lfTable, FibreSentinels()));
+//    lfTableView.sentinelSubstitute = lfTable.sentinelSubstitute;
+//
+//    return lfTableView;
+//}
 
 // ----------------------------------------------------------------------------
 // Function view()                                             [PrefixSumTable]
@@ -427,6 +445,21 @@ view(PrefixSumTable<TValue, TSpec> & pst)
     getFibre(pstView, FibreEntries()) = view(getFibre(pst, FibreEntries()));
 
     return pstView;
+}
+
+// ----------------------------------------------------------------------------
+// Function view()                                             [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+RankDictionary<TwoLevels<TValue, View<TSpec> > >
+view(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
+{
+    RankDictionary<TwoLevels<TValue, View<TSpec> > > dictView;
+
+    getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
+
+    return dictView;
 }
 
 // ----------------------------------------------------------------------------
