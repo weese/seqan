@@ -130,11 +130,12 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
 // Metafunction Fibre                                              [Index View]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
-struct Fibre<Index<View<TText, TViewSpec>, TSpec>, Tag<TFibre> const>
-{
-    typedef View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type, TViewSpec> Type;
-};
+// NOTE(esiragusa): This causes template resolution ambiguity.
+//template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
+//struct Fibre<Index<View<TText, TViewSpec>, TSpec>, Tag<TFibre> const>
+//{
+//    typedef View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type, TViewSpec> Type;
+//};
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreText>
@@ -152,6 +153,18 @@ template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreSA>
 {
     typedef View<typename Fibre<Index<TText, TSpec>, FibreSA>::Type, TViewSpec> Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreLcp>
+{
+    typedef View<typename Fibre<Index<TText, TSpec>, FibreLcp>::Type, TViewSpec> Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreChildtab>
+{
+    typedef View<typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type, TViewSpec> Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
