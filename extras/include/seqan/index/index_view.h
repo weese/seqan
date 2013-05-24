@@ -64,6 +64,16 @@ struct View<LfTable<TText, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction View                                             [CompressedSA]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct View<CompressedSA<TText, TSpec> >
+{
+    typedef CompressedSA<typename View<TText>::Type, TSpec>   Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction Device                                                  [Index]
 // ----------------------------------------------------------------------------
 
@@ -128,18 +138,18 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreBwt>
 // Metafunction Fibre                                          [Device FMIndex]
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
-template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreSA>
-{
-    typedef Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >     TIndex_;
-    typedef typename SAValue<TIndex_>::Type                                             TSAValue_;
-    typedef SparseString<thrust::device_vector<TSAValue_, TAlloc>, TSpec>               TSparseString_;
-    typedef typename Fibre<TIndex_, FibreLF>::Type                                      TLF_;
-
-    typedef CompressedSA<TSparseString_, TLF_, TSpec>                                   Type;
-};
-#endif
+//#ifdef __CUDACC__
+//template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
+//struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreSA>
+//{
+//    typedef Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >     TIndex_;
+//    typedef typename SAValue<TIndex_>::Type                                             TSAValue_;
+//    typedef SparseString<thrust::device_vector<TSAValue_, TAlloc>, TSpec>               TSparseString_;
+//    typedef typename Fibre<TIndex_, FibreLF>::Type                                      TLF_;
+//
+//    typedef CompressedSA<TSparseString_, TLF_, TSpec>                                   Type;
+//};
+//#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                          [Device LfTable]
@@ -263,15 +273,7 @@ struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> >
 template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
-    typedef Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >   TIndex_;
-
-    typedef typename SAValue<TIndex_>::Type                         TSAValue_;
-    typedef String<TSAValue_>                                       TSA_;
-    typedef SparseString<typename View<TSA_>::Type, TSpec>          TSparseString_;
-
-    typedef typename Fibre<TIndex_, FibreLF>::Type                  TLF_;
-
-    typedef CompressedSA<TSparseString_, TLF_, TSpec>               Type;
+    typedef typename View<typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA>::Type>::Type    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -321,6 +323,26 @@ template <typename TValue, typename TSpec, typename TViewSpec>
 struct Fibre<RankDictionary<TwoLevels<TValue, ContainerView<TSpec, TViewSpec> > >, FibreRanks>
 {
     typedef typename View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type>::Type    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                       [CompressedSA View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreSparseString>
+{
+    typedef typename Fibre<CompressedSA<TText, ContainerView<TSpec, TViewSpec> >, FibreSparseString>::Type  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                       [SparseString View]
+// ----------------------------------------------------------------------------
+
+template <typename TFibreValues, typename TSpec>
+struct Fibre<SparseString<TFibreValues, ContainerView<TSpec> >, FibreValues>
+{
+    typedef typename View<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type       Type;
 };
 
 // ============================================================================
@@ -506,7 +528,7 @@ view(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 
     indexText(indexView) = view(indexText(index));
     indexLF(indexView) = view(indexLF(index));
-//    indexSA(indexView) = indexSA(index);
+    indexSA(indexView) = view(indexSA(index));
 
     return indexView;
 }
@@ -578,14 +600,33 @@ view(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 // Function view()                                               [CompressedSA]
 // ----------------------------------------------------------------------------
 
-//template <typename TSparseString, typename TLfTable, typename TSpec>
-//CompressedSA<TSparseString, TLfTable, TSpec>
-//view(CompressedSA<TSparseString, TLfTable, TSpec> & sa)
-//{
-//    CompressedSA<TSparseString, TLfTable, TSpec> saView;
-//
-//    return saView;
-//}
+template <typename TText, typename TSpec>
+typename View<CompressedSA<TText, TSpec> >::Type
+view(CompressedSA<TText, TSpec> & sa)
+{
+    typename View<CompressedSA<TText, TSpec> >::Type saView;
+
+    getFibre(saView, FibreLF()) = view(getFibre(sa, FibreLF()));
+    getFibre(saView, FibreSparseString()) = view(getFibre(sa, FibreSparseString()));
+
+    return saView;
+}
+
+// ----------------------------------------------------------------------------
+// Function view()                                               [SparseString]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TSpec>
+SparseString<TString, ContainerView<TSpec> >
+view(SparseString<TString, TSpec> & sparseString)
+{
+    SparseString<TString, ContainerView<TSpec> > sparseStringView;
+
+    getFibre(sparseStringView, FibreValues()) = view(getFibre(sparseString, FibreValues()));
+    getFibre(sparseStringView, FibreIndicators()) = view(getFibre(sparseString, FibreIndicators()));
+
+    return sparseStringView;
+}
 
 }
 
