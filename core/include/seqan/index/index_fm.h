@@ -149,7 +149,9 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreTempSA>
     typedef Index<TText, FMIndex<TOccSpec, TSpec> >                 TIndex_;
     typedef typename SAValue<TIndex_>::Type                         TSAValue_;
 
-    typedef String<TSAValue_, External<ExternalConfigLarge<> > >    Type;
+    // TODO(esiragusa): Revert this to External, now it is causing problems on device code.
+//    typedef String<TSAValue_, External<ExternalConfigLarge<> > >    Type;
+    typedef String<TSAValue_, typename DefaultIndexStringSpec<TText>::Type>     Type;
 };
 
 // ----------------------------------------------------------------------------
