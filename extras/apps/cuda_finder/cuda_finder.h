@@ -108,11 +108,10 @@ struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
 // --------------------------------------------------------------------------
 
 #ifdef __CUDACC__
-template <typename TText, typename TViewSpec, typename TSpec, typename TPattern>
+template <typename TIndex, typename TPattern>
 __global__ void
-findCUDA(Index<View<TText, TViewSpec>, TSpec> index, View<TPattern, TViewSpec> pattern)
+findCUDA(TIndex index, TPattern pattern)
 {
-    typedef Index<View<TText, TViewSpec>, TSpec>        TIndex;
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
     typedef typename EdgeLabel<TIterator>::Type         TEdgeLabel;
     typedef typename Fibre<TIndex, FibreText>::Type     TTextFibre;
@@ -162,43 +161,48 @@ findCUDA(Index<View<TText, TViewSpec>, TSpec> index, View<TPattern, TViewSpec> p
 
 int main(int argc, char const ** argv)
 {
-    typedef Dna                                         TAlphabet;
-    typedef String<TAlphabet>                           TText;
-    typedef thrust::device_vector<TAlphabet>            TDeviceText;
-    typedef FMIndex<TL<void> >                          TIndexSpec;
+    typedef String<Dna>                                 TText;
+//    typedef FMIndex<TL<void> >                          TIndexSpec;
+    typedef IndexEsa<>                                  TIndexSpec;
     typedef Index<TText, TIndexSpec>                    TIndex;
-    typedef Index<TDeviceText, TIndexSpec>              TDeviceIndex;
+    typedef typename Device<TText>::Type                TDeviceText;
+    typedef typename Device<TIndex>::Type               TDeviceIndex;
+//    typedef typename View_<TDeviceIndex>::Type          TDeviceIndexView;
 
     // Create text.
     TText text("ACGTACGTACGT");
 
     // Create index.
     TIndex index(text);
-    indexCreate(index, FibreSALF());
 
-    typedef View<TText>                                     TTextView;
-    typedef Index<TTextView, TIndexSpec>                    TIndexView;
+    // Create Esa.
+    indexCreate(index, FibreSA());
+    indexCreate(index, FibreLcp());
+    indexCreate(index, FibreChildtab());
 
-    TIndexView indexView = view(index);
+    // Create FM.
+//    indexCreate(index, FibreSALF());
 
-    for (unsigned i = 0; i < 4; i++)
-    {
-        std::cout << value(indexLF(index).prefixSum, i) << std::endl;
-        std::cout << value(indexLF(indexView).prefixSum, i) << std::endl;
-    }
+//    typedef typename View_<TIndex>::Type  TIndexView;
+//    TIndexView indexView = view(index);
+//    for (unsigned i = 0; i < 4; i++)
+//    {
+//        std::cout << value(indexLF(index).prefixSum, i) << std::endl;
+//        std::cout << value(indexLF(indexView).prefixSum, i) << std::endl;
+//    }
 
     // Copy index to device.
-//    TDeviceIndex deviceIndex;
-//    assign(deviceIndex, index);
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
 
     // Create a pattern.
-//    TText pattern("TA");
-//    TDeviceText devicePattern;
-//    assign(devicePattern, pattern);
+    TText pattern("TA");
+    TDeviceText devicePattern;
+    assign(devicePattern, pattern);
 
     // Find on GPU.
-//    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
-//    cudaDeviceSynchronize();
+    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
+    cudaDeviceSynchronize();
 
     return 0;
 }
