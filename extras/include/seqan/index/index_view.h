@@ -52,6 +52,28 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Metafunction View_                                                   [Index]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct View_<Index<TText, TSpec> >
+{
+    typedef Index<typename View_<TText>::Type, TSpec>   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Device                                                  [Index]
+// ----------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TText, typename TSpec>
+struct Device<Index<TText, TSpec> >
+{
+    typedef Index<typename Device<TText>::Type, TSpec>  Type;
+};
+#endif
+
+// ----------------------------------------------------------------------------
 // Metafunction Fibre                                            [Device Index]
 // ----------------------------------------------------------------------------
 
@@ -108,11 +130,11 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
 // Metafunction Fibre                                              [Index View]
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
-//struct Fibre<Index<View<TText, TViewSpec>, TSpec>, Tag<TFibre> const>
-//{
-//    typedef View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type, TViewSpec> Type;
-//};
+template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
+struct Fibre<Index<View<TText, TViewSpec>, TSpec>, Tag<TFibre> const>
+{
+    typedef View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type, TViewSpec> Type;
+};
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<View<TText, TViewSpec>, TSpec>, FibreText>
