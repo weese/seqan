@@ -31,21 +31,13 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// This file contains Index class specializations for Views.
+// This file contains Index specializations for Views.
 // ==========================================================================
 
 #ifndef SEQAN_EXTRAS_INDEX_VIEW_H_
 #define SEQAN_EXTRAS_INDEX_VIEW_H_
 
 namespace seqan {
-
-// ============================================================================
-// Tags, Classes, Enums
-// ============================================================================
-
-// ============================================================================
-// Classes
-// ============================================================================
 
 // ============================================================================
 // Metafunctions
@@ -88,11 +80,12 @@ struct Device<Index<TText, TSpec> >
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
-template <typename TValue, typename TAlloc, typename TSpec, typename TFibre>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, Tag<TFibre> const>
-{
-    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>        Type;
-};
+// NOTE(esiragusa): This causes template resolution ambiguity.
+//template <typename TValue, typename TAlloc, typename TSpec, typename TFibre>
+//struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, Tag<TFibre> const>
+//{
+//    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>  Type;
+//};
 
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreText>
@@ -109,13 +102,25 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreRawText>
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSA>
 {
-    typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>     Type;
+    typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreLcp>
+{
+    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>    Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreChildtab>
+{
+    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>    Type;
 };
 
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreBwt>
 {
-    typedef thrust::device_vector<typename Value<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>       Type;
+    typedef thrust::device_vector<typename Value<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>   Type;
 };
 #endif
 
@@ -133,6 +138,63 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
     typedef typename Fibre<TIndex_, FibreLF>::Type                                      TLF_;
 
     typedef CompressedSA<TSparseString_, TLF_, TSpec>                                   Type;
+};
+#endif
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                          [Device LfTable]
+// ----------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibrePrefixSum>
+{
+    typedef thrust::device_vector<TValue, TAlloc>               TText_;
+    typedef typename Value<LfTable<TText_, TSpec> >::Type       TValue_;
+    typedef typename MakeUnsigned<TValue_>::Type                TUValue_;
+
+    typedef PrefixSumTable<TUValue_, Device<TSpec> >            Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
+{
+    typedef thrust::device_vector<TValue, TAlloc>               TText_;
+    typedef typename Value<LfTable<TText_, TSpec> >::Type       TValue_;
+
+    typedef RankDictionary<TwoLevels<TValue_, Device<TSpec> > > Type;
+};
+
+//template <typename TText, typename TViewSpec, typename TSpec>
+//struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSentinels>
+//{
+//    typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
+//};
+#endif
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                   [Device PrefixSumTable]
+// ----------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TChar, typename TSpec>
+struct Fibre<PrefixSumTable<TChar, Device<TSpec> >, FibreEntries>
+{
+    typedef thrust::device_vector<unsigned>         Type;
+};
+#endif
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                   [Device RankDictionary]
+// ----------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > >, FibreRanks>
+{
+    typedef TwoLevels<TValue, TSpec>                                            TRankDictionarySpec_;
+
+    typedef thrust::device_vector<RankDictionaryEntry_<TRankDictionarySpec_> >  Type;
 };
 #endif
 
@@ -228,11 +290,11 @@ struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
     typedef typename Fibre<LfTable<TText, ContainerView<TSpec, TViewSpec> >, FibreValues>::Type      Type;
 };
 
-template <typename TText, typename TViewSpec, typename TSpec>
-struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreSentinels>
-{
-    typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
-};
+//template <typename TText, typename TViewSpec, typename TSpec>
+//struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreSentinels>
+//{
+//    typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
+//};
 
 // NOTE(esiragusa): StringSet specialization
 //template <typename TText, typename TSSetSpec, typename TViewSpec, typename TSpec>
