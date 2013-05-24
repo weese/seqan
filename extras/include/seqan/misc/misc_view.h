@@ -134,6 +134,22 @@ struct View_
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction Device
+// ----------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TObject>
+struct Device
+{
+    typedef typename Value<TObject>::Type               TValue_;
+//    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
+    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     TDevice_;
+
+    typedef typename If<typename IsSimple<TObject>::Type, TObject, TDevice_>::Type      Type;
+};
+#endif
+
+// ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
 
