@@ -252,7 +252,7 @@ SEQAN_DEFINE_TEST(compressed_sa_clear_length_resize)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaClearLengthResize(tag);
 }
@@ -261,7 +261,7 @@ SEQAN_DEFINE_TEST(compressed_sa_empty)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaEmpty(tag);
 }
@@ -270,7 +270,7 @@ SEQAN_DEFINE_TEST(compressed_sa_create_compressed_sa)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaCreateCompressedSa(tag);
 }
@@ -279,7 +279,7 @@ SEQAN_DEFINE_TEST(compressed_sa_get_fibre)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaGetFibre(tag);
 }
