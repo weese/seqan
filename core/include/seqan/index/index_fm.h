@@ -296,28 +296,28 @@ inline bool empty(Index<TText, FMIndex<TOccSpec, TSpec> > const & index)
 */
 
 template <typename TText, typename TOccSpec, typename TSpec>
-typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type &
+SEQAN_FUNC typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > & index, FibreLF /*tag*/)
 {
     return index.lfTable;
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
-typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type const &
+SEQAN_FUNC typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type const &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreLF /*tag*/)
 {
     return index.lfTable;
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
-typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type &
+SEQAN_FUNC typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > & index, FibreSA /*tag*/)
 {
     return index.compressedSA;
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
-typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type const &
+SEQAN_FUNC typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA >::Type const &
 getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreSA /*tag*/)
 {
     return index.compressedSA;
@@ -328,14 +328,14 @@ getFibre(Index<TText, FMIndex<TOccSpec, TSpec> > const & index, FibreSA /*tag*/)
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TSpec>
-typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type &
+SEQAN_FUNC typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type &
 indexLF(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 {
     return getFibre(index, FibreLF());
 }
 
 template <typename TText, typename TOccSpec, typename TSpec>
-typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type const &
+SEQAN_FUNC typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF >::Type const &
 indexLF(Index<TText, FMIndex<TOccSpec, TSpec> > const & index)
 {
     return getFibre(index, FibreLF());
