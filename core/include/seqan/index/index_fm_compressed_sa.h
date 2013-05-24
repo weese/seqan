@@ -41,8 +41,11 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-class CompressedSA;
+template <typename TText, typename TSpec>
+struct CompressedSA;
+
+template <typename TText, typename TSpec>
+struct LfTable;
 
 struct FibreLF_;
 typedef Tag<FibreLF_> const     FibreLF;
@@ -75,62 +78,46 @@ typedef Tag<FibreSparseString_> const FibreSparseString;
 // Metafunction Fibre
 // ----------------------------------------------------------------------------
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>
+template <typename TText, typename TSpec>
+struct Fibre<CompressedSA<TText, TSpec>, FibreSparseString>
 {
-    typedef TSparseString Type;
+    // TODO(esiragusa): Change SparseString spec to be SparseString<TValue, TSpec>.
+    typedef typename SAValue<TText>::Type               TSAValue_;
+    typedef SparseString<String<TSAValue_>, TSpec>      Type;
 };
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreSparseString>
+template <typename TText, typename TSpec>
+struct Fibre<CompressedSA<TText, TSpec>, FibreLF>
 {
-    typedef TSparseString Type;
-};
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLF>
-{
-    typedef TLfTable Type;
-};
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreLF>
-{
-    typedef TLfTable Type;
+    typedef LfTable<TText, TSpec>   Type;
 };
 
 // ----------------------------------------------------------------------------
 // Metafunction Reference
 // ----------------------------------------------------------------------------
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Reference<CompressedSA<TSparseString, TLfTable, TSpec> >
+template <typename TText, typename TSpec>
+struct Reference<CompressedSA<TText, TSpec> >
 {
     // TODO(singer): We actually need a proxy here.
-    typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type Type;
+    typedef typename Value<CompressedSA<TText, TSpec> >::Type Type;
 };
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Reference<const CompressedSA<TSparseString, TLfTable, TSpec> >
+template <typename TText, typename TSpec>
+struct Reference<const CompressedSA<TText, TSpec> >
 {
     // TODO(singer): We actually need a proxy here.
-    typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type /*const*/ Type;
+    typedef typename Value<CompressedSA<TText, TSpec> >::Type /*const*/ Type;
 };
 
 // ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Value<CompressedSA<TSparseString, TLfTable, TSpec> >
+template <typename TText, typename TSpec>
+struct Value<CompressedSA<TText, TSpec> >
 {
-    typedef typename Value<TSparseString>::Type Type;
-};
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
-{
-    typedef typename Value<TSparseString>::Type const Type;
+    typedef typename Value<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type   Type;
 };
 
 // ============================================================================
@@ -145,7 +132,7 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 .Class.CompressedSA:
 ..cat:Index
 ..summary:A suffix array storing only a few suffix array entries and computing the remaining on demand.
-..signature:CompressedSA<TSparseString, TLfTable, TSpec>
+..signature:CompressedSA<TText, TSpec>
 ..param.TSparseString:The string containing specific suffix array entries.
 ...type:Class.SparseString
 ..param.TLfTable:The lfTable containg an occurrence table and a prefix sum table.
@@ -155,33 +142,30 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 ..remarks:The compressed suffix array can only be used with the FM index.
 ..include:seqan/index.h
 */
-// TODO(esiragusa): Remove <typename TSparseString, typename TLfTable> from CompressedSa
-template <typename TSparseString, typename TLfTable, typename TSpec>
-class CompressedSA
-{
-    typedef typename Value<typename Fibre<TSparseString, FibreValues>::Type>::Type  TCompressedSaValue;
 
-public:
-    TSparseString   sparseString;
+template <typename TText, typename TSpec>
+struct CompressedSA
+{
+    typename Fibre<CompressedSA, FibreSparseString>::Type   sparseString;
     // TODO(esiragusa): Change the lfTable pointer to a Member<>::Type metafunction.
-    TLfTable *      lfTable;
+    Holder<typename Fibre<CompressedSA, FibreLF>::Type>     lfTable;
 
     CompressedSA() :
         lfTable()
     {};
 
-    CompressedSA(TLfTable & lfTable) :
-        lfTable(&lfTable)
+    CompressedSA(TLfTable const & lfTable) :
+        lfTable(lfTable)
     {}
 
     template <typename TPos>
-    inline TCompressedSaValue const operator[](TPos pos)
+    inline typename Value<CompressedSA>::Type const operator[](TPos pos)
     {
         return value(*this, pos);
     }
 
     template <typename TPos>
-    inline TCompressedSaValue operator[](TPos pos) const
+    inline typename Value<CompressedSA>::Type operator[](TPos pos) const
     {
         return value(*this, pos);
     }
@@ -216,8 +200,8 @@ _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet)
 /**
 .Function.clear.param.object.type:Class.CompressedSA
 */
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+template <typename TText, typename TSpec>
+inline void clear(CompressedSA<TText, TSpec> & compressedSA)
 {
     clear(getFibre(compressedSA, FibreSparseString()));
 //    clear(getFibre(compressedSA, FibreLF()));
@@ -230,8 +214,8 @@ inline void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 /**
 .Function.empty.param.object.type:Class.CompressedSA
 */
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool empty(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+template <typename TText, typename TSpec>
+inline bool empty(CompressedSA<TText, TSpec> & compressedSA)
 {
     return empty(getFibre(compressedSA, FibreSparseString()));
     //    && empty(getFibre(compressedSA, FibreLF()));
@@ -252,14 +236,14 @@ inline bool empty(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 ...Remarks:pos should be convertible to Position<T>::Type for container-type T.
 ..include:seqan/index.h
 */
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos const & pos)
+template <typename TText, typename TSpec, typename TPos>
+inline bool entryStored(CompressedSA<TText, TSpec> const & compressedSA, TPos const & pos)
 {
     return entryStored(getFibre(compressedSA, FibreSparseString()), pos);
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos const & pos)
+template <typename TText, typename TSpec, typename TPos>
+inline bool entryStored(CompressedSA<TText, TSpec> & compressedSA, TPos const & pos)
 {
     return entryStored(getFibre(compressedSA, FibreSparseString()), pos);
 }
@@ -282,13 +266,13 @@ inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
 ..param:offset:Number of elements at the beginning which should contain the default value.
 ..include:seqan/index.h
 */
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression, typename TSize>
-void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+template <typename TText, typename TSpec, typename TSA, typename TCompression, typename TSize>
+void createCompressedSa(CompressedSA<TText, TSpec> & compressedSA,
                         TSA const & sa,
                         TCompression const compressionFactor, 
                         TSize offset)
 {
-    typedef CompressedSA<TSparseString, TLfTable, TSpec>            TCompressedSA;
+    typedef CompressedSA<TText, TSpec>                              TCompressedSA;
     typedef typename Size<TSA>::Type                                TSASize;
     typedef typename Fibre<TCompressedSA, FibreSparseString>::Type  TSparseSA;
     typedef typename Fibre<TSparseSA, FibreIndicators>::Type        TIndicators;
@@ -327,8 +311,8 @@ void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     }
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression>
-void createCompressedSa(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+template <typename TText, typename TSpec, typename TSA, typename TCompression>
+void createCompressedSa(CompressedSA<TText, TSpec> & compressedSA,
                         TSA const & completeSA,
                         TCompression const compressionFactor)
 {
@@ -357,30 +341,30 @@ Index< String<char> > index_esa("tobeornottobe");
 String<char> & text = getFibre(indexEsa, EsaText());
 */
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type const &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreSparseString)
+template <typename TText, typename TSpec>
+inline typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type const &
+getFibre(CompressedSA<TText, TSpec> const & compressedSA, FibreSparseString)
 {
     return compressedSA.sparseString;
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreSparseString)
+template <typename TText, typename TSpec>
+inline typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type &
+getFibre(CompressedSA<TText, TSpec> & compressedSA, FibreSparseString)
 {
     return compressedSA.sparseString;
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLF>::Type const &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreLF)
+template <typename TText, typename TSpec>
+inline typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type const &
+getFibre(CompressedSA<TText, TSpec> const & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreLF>::Type &
-getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreLF)
+template <typename TText, typename TSpec>
+inline typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type &
+getFibre(CompressedSA<TText, TSpec> & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
 }
@@ -393,15 +377,15 @@ getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreLF)
 /**
 .Function.setLfTable
 ..summary:Set the LfTable of the compressed suffix array.
-..signature:setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> compressedSa, TLfTable & lfTable)
-..param.CompressedSA<TSparseString, TLfTable, TSpec>:The compressed suffix array.
+..signature:setLfTable(CompressedSA<TText, TSpec> compressedSa, TLfTable & lfTable)
+..param.CompressedSA<TText, TSpec>:The compressed suffix array.
 ...type:Class.CompressedSA
 ..param.lfTable
 ...type:Class.LfTable
 ..include:seqan/index.h
 */
-template <typename TSparseString, typename TLfTable, typename TSpec>
-void setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TLfTable & lfTable)
+template <typename TText, typename TSpec, typename TLfTable>
+void setLfTable(CompressedSA<TText, TSpec> & compressedSA, TLfTable const & lfTable)
 {
     setValue(compressedSA.lfTable, lfTable);
 }
@@ -413,9 +397,9 @@ void setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TLf
 /**
 .Function.length.param.object.type:Class.CompressedSA
 */
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type>::Type
-length(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA)
+template <typename TText, typename TSpec>
+inline typename Size<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type
+length(CompressedSA<TText, TSpec> const & compressedSA)
 {
     return length(getFibre(compressedSA, FibreSparseString()));
 }
@@ -427,9 +411,9 @@ length(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA)
 /**
 .Function.resize.param.object.type:Class.CompressedSA
 */
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize, typename TExpand>
-inline typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type>::Type
-resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSize size, Tag<TExpand> tag)
+template <typename TText, typename TSpec, typename TSize, typename TExpand>
+inline typename Size<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type
+resize(CompressedSA<TText, TSpec> & compressedSA, TSize size, Tag<TExpand> tag)
 {
     return resize(getFibre(compressedSA, FibreSparseString()), size, tag);
 }
@@ -449,10 +433,11 @@ resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSize size, 
 ..remarks:Note that the compressed suffix array is read only. Therefore a const reference is return by
 this function.
 */
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline typename Value<TSparseString>::Type
-value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
+template <typename TText, typename TSpec, typename TPos>
+inline typename Value<CompressedSA<TText, TSpec> >::Type
+value(CompressedSA<TText, TSpec> & compressedSA, TPos pos)
 {
+    typedef typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type     TSparseString;
     typedef typename Fibre<TSparseString, FibreIndicators>::Type    TIndicators;
     typedef typename Fibre<TSparseString, FibreValues>::Type        TValues;
 
@@ -466,10 +451,11 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
     return _addGapDistance(getValue(values, getRank(indicators, pos) - 1), counter);
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-inline typename Value<TSparseString>::Type const
-value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos pos)
+template <typename TText, typename TSpec, typename TPos>
+inline typename Value<CompressedSA<TText, TSpec> >::Type const
+value(CompressedSA<TText, TSpec> const & compressedSA, TPos pos)
 {
+    typedef typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type     TSparseString;
     typedef typename Fibre<TSparseString, FibreIndicators>::Type    TIndicators;
     typedef typename Fibre<TSparseString, FibreValues>::Type        TValues;
 
@@ -490,8 +476,8 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos po
 // NOTE(esiragusa): getNextPos() does not seem to be used anywhere.
 // This functions computes the position in the suffix array of text[sa[pos] - 1]
 // iff the current position is not present in the compressed suffix array.
-//template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-//inline bool _getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
+//template <typename TText, typename TSpec, typename TPos>
+//inline bool _getNextPos(CompressedSA<TText, TSpec> const & compressedSA, TPos & pos)
 //{
 //    typedef typename Fibre<TSparseString, FibreIndicators>::Type TIndicators;
 //
@@ -513,16 +499,16 @@ value(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos po
 ..param.object:
 ...type:Class.CompressedSA
 */
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool open(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, const char * fileName, int openMode)
+template <typename TText, typename TSpec>
+inline bool open(CompressedSA<TText, TSpec> & compressedSA, const char * fileName, int openMode)
 {
     return open(getFibre(compressedSA, FibreSparseString()), fileName, openMode);
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool open(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, const char * fileName)
+template <typename TText, typename TSpec>
+inline bool open(CompressedSA<TText, TSpec> & compressedSA, const char * fileName)
 {
-    return open(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
+    return open(compressedSA, fileName, DefaultOpenMode<CompressedSA<TText, TSpec> >::VALUE);
 }
 
 // ----------------------------------------------------------------------------
@@ -546,17 +532,17 @@ inline bool open(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, co
 ..returns:A $bool$ which is $true$ on success.
 ..include:seqan/index.h
 */
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName, int openMode)
+template <typename TText, typename TSpec>
+inline bool save(CompressedSA<TText, TSpec> const & compressedSA, const char * fileName, int openMode)
 {
     return save(getFibre(compressedSA, FibreSparseString()), fileName, openMode);
 //  save(getFibre(compressedSA, FibreLF()), fileName, openMode);
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline bool save(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, const char * fileName)
+template <typename TText, typename TSpec>
+inline bool save(CompressedSA<TText, TSpec> const & compressedSA, const char * fileName)
 {
-    return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
+    return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TText, TSpec> >::VALUE);
 }
 
 }

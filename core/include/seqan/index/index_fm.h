@@ -140,15 +140,7 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLF>
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
-    typedef Index<TText, FMIndex<TOccSpec, TSpec> >     TIndex_;
-
-    // TODO(esiragusa): Change SparseString spec.
-    typedef typename SAValue<TIndex_>::Type             TSAValue_;
-    typedef SparseString<String<TSAValue_>, TSpec>      TSparseString_;
-
-    typedef typename Fibre<TIndex_, FibreLF>::Type      TLF_;
-
-    typedef CompressedSA<TSparseString_, TLF_, TSpec>   Type;
+    typedef CompressedSA<TText, TSpec>  Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
@@ -382,28 +374,6 @@ toSuffixPosition(Index<TText, FMIndex<TOccSpec, TIndexSpec > > const & index, TP
 }
 
 // ----------------------------------------------------------------------------
-// Function _indexCreateCompressedSA()
-// ----------------------------------------------------------------------------
-
-// This function computes the full and compressed suffix array. 
-// Note, in contrast to indexCreate(index, FibreSA()) the full suffix array is also computed.
-template <typename TText, typename TIndexSpec, typename TSpec, typename TSA>
-inline void _indexCreateCompressedSA(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, TText const & text, TSA const & sa)
-{
-    typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
-    typedef typename Fibre<TIndex, FibreSA>::Type       TCompressedSA;
-    typedef typename Size<TIndex>::Type                 TSize;
-
-    // Set the FMIndex LfTable as the CompressedSA LfTable.
-	TCompressedSA & compressedSA = getFibre(index, FibreSA());
-    setLfTable(compressedSA, getFibre(index, FibreLF()));
-
-    // Create the CompressedSA.
-    TSize numSentinel = countSequences(text);
-    createCompressedSa(compressedSA, sa, index.compressionFactor, numSentinel);
-}
-
-// ----------------------------------------------------------------------------
 // Function indexCreate()
 // ----------------------------------------------------------------------------
 
@@ -422,7 +392,8 @@ inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, Fibre
 {
     typedef Index<TText, FMIndex<TIndexSpec, TSpec> >   TIndex;
     typedef typename Fibre<TIndex, FibreTempSA>::Type   TTempSA;
-
+    typedef typename Size<TIndex>::Type                 TSize;
+    
     TText const & text = getFibre(index, FibreText());
 
     if (empty(text))
@@ -434,11 +405,15 @@ inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index, Fibre
     resize(tempSA, length(text), Exact());
     createSuffixArray(tempSA, text, Skew7());
 
-    // Create the compressed SA.
-    _indexCreateCompressedSA(index, text, tempSA);
-
-    // Create the lf table.
+    // Create the LF table.
     createLFTable(getFibre(index, FibreLF()), text, tempSA);
+
+    // Set the FMIndex LfTable as the CompressedSA LfTable.
+    setLfTable(getFibre(index, FibreSA()), getFibre(index, FibreLF()));
+
+    // Create the compressed SA.
+    TSize numSentinel = countSequences(text);
+    createCompressedSa(getFibre(index, FibreSA()), tempSA, index.compressionFactor, numSentinel);
 
     return true;
 }
