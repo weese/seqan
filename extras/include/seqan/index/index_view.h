@@ -138,18 +138,13 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreBwt>
 // Metafunction Fibre                                          [Device FMIndex]
 // ----------------------------------------------------------------------------
 
-//#ifdef __CUDACC__
-//template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
-//struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreSA>
-//{
-//    typedef Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >     TIndex_;
-//    typedef typename SAValue<TIndex_>::Type                                             TSAValue_;
-//    typedef SparseString<thrust::device_vector<TSAValue_, TAlloc>, TSpec>               TSparseString_;
-//    typedef typename Fibre<TIndex_, FibreLF>::Type                                      TLF_;
-//
-//    typedef CompressedSA<TSparseString_, TLF_, TSpec>                                   Type;
-//};
-//#endif
+#ifdef __CUDACC__
+template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreSA>
+{
+    typedef CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>      Type;
+};
+#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                          [Device LfTable]
@@ -202,11 +197,39 @@ struct Fibre<PrefixSumTable<TChar, Device<TSpec> >, FibreEntries>
 template <typename TValue, typename TSpec>
 struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > >, FibreRanks>
 {
-    typedef TwoLevels<TValue, TSpec>                                            TRankDictionarySpec_;
+    typedef TwoLevels<TValue, TSpec>        TRankDictionarySpec_;
 
     typedef thrust::device_vector<RankDictionaryEntry_<TRankDictionarySpec_> >  Type;
 };
 #endif
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                     [Device CompressedSA]
+// ----------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSparseString>
+{
+    typedef thrust::device_vector<TValue, TAlloc>       TText_;
+    typedef typename SAValue<TText_>::Type              TSAValue_;
+    typedef thrust::device_vector<TSAValue_, TAlloc>    TString_;
+
+    typedef SparseString<TString_, TSpec>               Type;
+};
+#endif
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre                                     [Device SparseString]
+// ----------------------------------------------------------------------------
+
+//#ifdef __CUDACC__
+//template <typename TValue, typename TAlloc, typename TSpec>
+//struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
+//{
+//    typedef thrust::device_vector<TValue, TAlloc>       Type;
+//};
+//#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                              [Index View]
@@ -626,6 +649,61 @@ view(SparseString<TString, TSpec> & sparseString)
     getFibre(sparseStringView, FibreIndicators()) = view(getFibre(sparseString, FibreIndicators()));
 
     return sparseStringView;
+}
+
+
+
+// ----------------------------------------------------------------------------
+// Function assign()                                                  [FMIndex]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TOccSpec, typename TSpec, typename TText2, typename TOccSpec2, typename TSpec2>
+inline void
+assign(Index<TText, FMIndex<TOccSpec, TSpec> > & index, Index<TText2, FMIndex<TOccSpec2, TSpec2> > & source)
+{
+    assign(indexText(index), indexText(source));
+    assign(indexSA(index), indexSA(source));
+    assign(indexLF(index), indexLF(source));
+}
+
+template <typename TText, typename TSpec, typename TText2, typename TSpec2>
+inline void
+assign(LfTable<TText, TSpec> & lfTable, LfTable<TText2, TSpec2> & source)
+{
+    assign(getFibre(lfTable, FibrePrefixSum()), getFibre(source, FibrePrefixSum()));
+    assign(getFibre(lfTable, FibreValues()), getFibre(source, FibreValues()));
+    assign(getFibre(lfTable, FibreSentinels()), getFibre(source, FibreSentinels()));
+    assign(lfTable.sentinelSubstitute, source.sentinelSubstitute);
+}
+
+template <typename TChar, typename TSpec, typename TChar2, typename TSpec2>
+inline void
+assign(PrefixSumTable<TChar, TSpec> & pst, PrefixSumTable<TChar2, TSpec2> & source)
+{
+    assign(getFibre(pst, FibreEntries()), getFibre(source, FibreEntries()));
+}
+
+template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
+inline void
+assign(RankDictionary<TwoLevels<TValue, TSpec> > & dict, RankDictionary<TwoLevels<TValue2, TSpec2> > & source)
+{
+    assign(getFibre(dict, FibreRanks()), getFibre(source, FibreRanks()));
+}
+
+template <typename TText, typename TSpec, typename TText2, typename TSpec2>
+inline void
+assign(CompressedSA<TText, TSpec> & sa, CompressedSA<TText2, TSpec2> & source)
+{
+    assign(getFibre(sa, FibreSparseString()), getFibre(source, FibreSparseString()));
+    assign(getFibre(sa, FibreLF()), getFibre(source, FibreLF()));
+}
+
+template <typename TValueString, typename TSpec, typename TValueString2, typename TSpec2>
+inline void
+assign(SparseString<TValueString, TSpec> & sparseString, SparseString<TValueString2, TSpec2> & source)
+{
+    assign(getFibre(sparseString, FibreValues()), getFibre(source, FibreValues()));
+    assign(getFibre(sparseString, FibreIndicators()), getFibre(source, FibreIndicators()));
 }
 
 }
