@@ -62,6 +62,16 @@ struct View<Index<TText, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction View                                                  [LfTable]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct View<LfTable<TText, TSpec> >
+{
+    typedef LfTable<typename View<TText>::Type, TSpec>   Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction Device                                                  [Index]
 // ----------------------------------------------------------------------------
 
@@ -134,43 +144,43 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
 //template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
 //struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, Tag<TFibre> const>
 //{
-//    typedef ContainerView<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type, TViewSpec> Type;
+//    typedef typename View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type>::Type     Type;
 //};
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreText>
 {
-    typedef ContainerView<TText, TViewSpec>  Type;
+    typedef typename View<TText>::Type  Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreRawText>
 {
-    typedef ContainerView<typename Fibre<Index<TText, TSpec>, FibreRawText>::Type, TViewSpec> Type;
+    typedef typename View<typename Fibre<Index<TText, TSpec>, FibreRawText>::Type>::Type    Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreSA>
 {
-    typedef ContainerView<typename Fibre<Index<TText, TSpec>, FibreSA>::Type, TViewSpec> Type;
+    typedef typename View<typename Fibre<Index<TText, TSpec>, FibreSA>::Type>::Type         Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreLcp>
 {
-    typedef ContainerView<typename Fibre<Index<TText, TSpec>, FibreLcp>::Type, TViewSpec> Type;
+    typedef typename View<typename Fibre<Index<TText, TSpec>, FibreLcp>::Type>::Type        Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreChildtab>
 {
-    typedef ContainerView<typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type, TViewSpec> Type;
+    typedef typename View<typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type>::Type   Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreBwt>
 {
-    typedef ContainerView<typename Fibre<Index<TText, TSpec>, FibreBwt>::Type, TViewSpec> Type;
+    typedef typename View<typename Fibre<Index<TText, TSpec>, FibreBwt>::Type>::Type        Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -180,8 +190,8 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreBwt>
 template <typename TText, typename TViewSpec, typename TSpec>
 struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> >
 {
-    typedef Index<ContainerView<TText, TViewSpec>, TSpec>        TIndex_;
-    typedef typename Fibre<TIndex_, FibreText>::Type    Type;
+    typedef Index<ContainerView<TText, TViewSpec>, TSpec>       TIndex_;
+    typedef typename Fibre<TIndex_, FibreText>::Type            Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -191,14 +201,15 @@ struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> >
 template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
-    typedef Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >    TIndex_;
+    typedef Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >   TIndex_;
 
-    typedef typename SAValue<TIndex_>::Type                             TSAValue_;
-    typedef SparseString<ContainerView<String<TSAValue_> >, TSpec>               TSparseString_;
+    typedef typename SAValue<TIndex_>::Type                         TSAValue_;
+    typedef String<TSAValue_>                                       TSA_;
+    typedef SparseString<typename View<TSA_>::Type, TSpec>          TSparseString_;
 
-    typedef typename Fibre<TIndex_, FibreLF>::Type                      TLF_;
+    typedef typename Fibre<TIndex_, FibreLF>::Type                  TLF_;
 
-    typedef CompressedSA<TSparseString_, TLF_, TSpec>                   Type;
+    typedef CompressedSA<TSparseString_, TLF_, TSpec>               Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -237,7 +248,7 @@ struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreSentinels>
 template <typename TChar, typename TSpec, typename TViewSpec>
 struct Fibre<PrefixSumTable<TChar, ContainerView<TSpec, TViewSpec> >, FibreEntries>
 {
-    typedef ContainerView<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type, TViewSpec>   Type;
+    typedef typename View<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type   Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -247,7 +258,7 @@ struct Fibre<PrefixSumTable<TChar, ContainerView<TSpec, TViewSpec> >, FibreEntri
 template <typename TValue, typename TSpec, typename TViewSpec>
 struct Fibre<RankDictionary<TwoLevels<TValue, ContainerView<TSpec, TViewSpec> > >, FibreRanks>
 {
-    typedef ContainerView<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type, TViewSpec>    Type;
+    typedef typename View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type>::Type    Type;
 };
 
 // ============================================================================
@@ -339,7 +350,8 @@ SEQAN_FUNC bool indexRequire(Index<ContainerView<TText, TViewSpec>, TSpec> & ind
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec, typename TFibre>
-SEQAN_FUNC bool indexRequire(Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & index, Tag<TFibre> const fibre)
+SEQAN_FUNC bool
+indexRequire(Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & index, Tag<TFibre> const fibre)
 {
     bool supplied = indexSupplied(index, fibre);
     SEQAN_ASSERT_MSG(supplied, "Fibre must be supplied on a view.");
@@ -362,7 +374,8 @@ SEQAN_FUNC bool indexCreate(Index<ContainerView<TText, TViewSpec>, TSpec> & /* i
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec, typename TFibre>
-SEQAN_FUNC bool indexCreate(Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & /* index */, Tag<TFibre> const /* fibre */)
+SEQAN_FUNC bool
+indexCreate(Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & /* index */, Tag<TFibre> const /* fibre */)
 {
     SEQAN_ASSERT_MSG(false, "Fibre cannot be created on a view.");
     return false;
@@ -389,10 +402,10 @@ SEQAN_FUNC bool indexCreate(Index<ContainerView<TText, TViewSpec>, FMIndex<TOccS
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
-Index<ContainerView<TText>, IndexSa<TSpec> >
+typename View<Index<TText, IndexSa<TSpec> > >::Type
 view(Index<TText, IndexSa<TSpec> > & index)
 {
-    Index<ContainerView<TText>, IndexSa<TSpec> > indexView;
+    typename View<Index<TText, IndexSa<TSpec> > >::Type indexView;
 
     indexText(indexView) = view(indexText(index));
     indexSA(indexView) = view(indexSA(index));
@@ -405,10 +418,10 @@ view(Index<TText, IndexSa<TSpec> > & index)
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
-Index<ContainerView<TText>, IndexEsa<TSpec> >
+typename View<Index<TText, IndexEsa<TSpec> > >::Type
 view(Index<TText, IndexEsa<TSpec> > & index)
 {
-    Index<ContainerView<TText>, IndexEsa<TSpec> > indexView;
+    typename View<Index<TText, IndexEsa<TSpec> > >::Type indexView;
 
     indexText(indexView) = view(indexText(index));
     indexSA(indexView) = view(indexSA(index));
@@ -424,10 +437,10 @@ view(Index<TText, IndexEsa<TSpec> > & index)
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TSpec>
-Index<ContainerView<TText>, FMIndex<TOccSpec, TSpec> >
+typename View<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type
 view(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 {
-    Index<ContainerView<TText>, FMIndex<TOccSpec, TSpec> > indexView;
+    typename View<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type indexView;
 
     indexText(indexView) = view(indexText(index));
     indexLF(indexView) = view(indexLF(index));
@@ -441,10 +454,10 @@ view(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
-LfTable<ContainerView<TText>, TSpec>
+typename View<LfTable<TText, TSpec> >::Type
 view(LfTable<TText, TSpec> & lfTable)
 {
-    LfTable<ContainerView<TText>, TSpec> lfTableView;
+    typename View<LfTable<TText, TSpec> >::Type lfTableView;
 
     getFibre(lfTableView, FibrePrefixSum()) = view(getFibre(lfTable, FibrePrefixSum()));
     getFibre(lfTableView, FibreValues()) = view(getFibre(lfTable, FibreValues()));
@@ -456,10 +469,10 @@ view(LfTable<TText, TSpec> & lfTable)
 
 // NOTE(esiragusa): StringSet specialization
 //template <typename TText, typename TSSetSpec, typename TSpec>
-//LfTable<ContainerView<StringSet<TText, TSSetSpec> >, TSpec>
+//typename View<LfTable<StringSet<TText, TSSetSpec>, TSpec> >::Type
 //view(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTable)
 //{
-//    LfTable<StringSet<TText, TSSetSpec>, TSpec> lfTableView;
+//    typename View<LfTable<StringSet<TText, TSSetSpec>, TSpec> >::Type lfTableView;
 //
 //    getFibre(lfTableView, FibrePrefixSum()) = view(getFibre(lfTable, FibrePrefixSum()));
 //    getFibre(lfTableView, FibreValues()) = view(getFibre(lfTable, FibreValues()));
