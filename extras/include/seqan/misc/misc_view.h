@@ -114,7 +114,8 @@ public:
     TGetValue
     operator[] (TPos pos) const
     {
-        return getValue(this, _begin + pos);
+        // TODO(esiragusa): There should be a getValue(view, pos)
+        return getValue(_begin + pos);
     }
 };
 
