@@ -52,13 +52,13 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction View_                                                   [Index]
+// Metafunction View                                                    [Index]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec>
-struct View_<Index<TText, TSpec> >
+struct View<Index<TText, TSpec> >
 {
-    typedef Index<typename View_<TText>::Type, TSpec>   Type;
+    typedef Index<typename View<TText>::Type, TSpec>   Type;
 };
 
 // ----------------------------------------------------------------------------

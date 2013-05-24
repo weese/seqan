@@ -180,7 +180,7 @@ int main(int argc, char const ** argv)
     // Create FM.
     indexCreate(index, FibreSALF());
 
-    typedef typename View_<TIndex>::Type  TIndexView;
+    typedef typename View<TIndex>::Type  TIndexView;
     TIndexView indexView = view(index);
 //    for (unsigned i = 0; i < 4; i++)
 //    {

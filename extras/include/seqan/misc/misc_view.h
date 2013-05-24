@@ -124,12 +124,12 @@ public:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction View_
+// Metafunction View
 // ----------------------------------------------------------------------------
 // TODO(esiragusa): Move generic View metafunction somewhere else.
 
 template <typename TObject>
-struct View_
+struct View
 {
     typedef typename If<typename IsSimple<TObject>::Type, TObject, ContainerView<TObject> >::Type    Type;
 };
