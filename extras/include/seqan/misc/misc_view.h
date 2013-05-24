@@ -107,20 +107,30 @@ public:
     TReference
     operator[] (TPos pos)
     {
-        return *(_begin + pos);
+        return value(*this, pos);
     }
 
     template <typename TPos>
     TGetValue
     operator[] (TPos pos) const
     {
-        return getValue(_begin + pos);
+        return getValue(this, _begin + pos);
     }
 };
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction View_
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+struct View_
+{
+    typedef typename If<typename IsSimple<TObject>::Type, TObject, View<TObject> >::Type    Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction Value
