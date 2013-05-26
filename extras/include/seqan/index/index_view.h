@@ -70,7 +70,37 @@ struct View<LfTable<TText, TSpec> >
 template <typename TText, typename TSpec>
 struct View<CompressedSA<TText, TSpec> >
 {
-    typedef CompressedSA<typename View<TText>::Type, TSpec>   Type;
+    typedef CompressedSA<typename View<TText>::Type, TSpec>     Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction View                                           [PrefixSumTable]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct View<PrefixSumTable<TValue, TSpec> >
+{
+    typedef PrefixSumTable<TValue, View<TSpec> >        Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction View                                           [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct View<RankDictionary<TwoLevels<TValue, TSpec> > >
+{
+    typedef RankDictionary<TwoLevels<TValue, View<TSpec> > >    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction View                                             [SparseString]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TSpec>
+struct View<SparseString<TString, TSpec> >
+{
+    typedef SparseString<TString, View<TSpec> >     Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -306,13 +336,13 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibrePrefixSum>
 {
-    typedef typename Fibre<LfTable<TText, View<TSpec> >, FibrePrefixSum>::Type   Type;
+    typedef typename View<typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type>::Type   Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
 {
-    typedef typename Fibre<LfTable<TText, View<TSpec> >, FibreValues>::Type      Type;
+    typedef typename View<typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type>::Type   Type;
 };
 
 //template <typename TText, typename TViewSpec, typename TSpec>
@@ -325,7 +355,7 @@ struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
 //template <typename TText, typename TSSetSpec, typename TViewSpec, typename TSpec>
 //struct Fibre<LfTable<ContainerView<StringSet<TText, TSSetSpec>, TViewSpec>, TSpec>, FibreSentinels>
 //{
-//    typedef typename Fibre<LfTable<StringSet<TText, TSSetSpec>, View<TSpec> >, FibreSentinels>::Type   Type;
+//    typedef typename View<typename Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreSentinels>::Type>::Type    Type;
 //};
 
 // ----------------------------------------------------------------------------
@@ -355,17 +385,17 @@ struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec> > >, FibreRanks>
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreSparseString>
 {
-    typedef typename Fibre<CompressedSA<TText, View<TSpec> >, FibreSparseString>::Type  Type;
+    typedef typename View<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type    Type;
 };
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                       [SparseString View]
 // ----------------------------------------------------------------------------
 
-template <typename TFibreValues, typename TSpec>
-struct Fibre<SparseString<TFibreValues, View<TSpec> >, FibreValues>
+template <typename TString, typename TSpec>
+struct Fibre<SparseString<TString, View<TSpec> >, FibreValues>
 {
-    typedef typename View<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type       Type;
+    typedef typename View<typename Fibre<SparseString<TString, TSpec>, FibreValues>::Type>::Type       Type;
 };
 
 // ============================================================================
@@ -594,10 +624,10 @@ view(LfTable<TText, TSpec> & lfTable)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-PrefixSumTable<TValue, View<TSpec> >
+typename View<PrefixSumTable<TValue, TSpec> >::Type
 view(PrefixSumTable<TValue, TSpec> & pst)
 {
-    PrefixSumTable<TValue, View<TSpec> > pstView;
+    typename View<PrefixSumTable<TValue, TSpec> >::Type pstView;
 
     getFibre(pstView, FibreEntries()) = view(getFibre(pst, FibreEntries()));
 
@@ -609,10 +639,10 @@ view(PrefixSumTable<TValue, TSpec> & pst)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-RankDictionary<TwoLevels<TValue, View<TSpec> > >
+typename View<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 view(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 {
-    RankDictionary<TwoLevels<TValue, View<TSpec> > > dictView;
+    typename View<RankDictionary<TwoLevels<TValue, TSpec> > >::Type dictView;
 
     getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
 
@@ -698,9 +728,9 @@ assign(CompressedSA<TText, TSpec> & sa, CompressedSA<TText2, TSpec2> & source)
     assign(getFibre(sa, FibreLF()), getFibre(source, FibreLF()));
 }
 
-template <typename TValueString, typename TSpec, typename TValueString2, typename TSpec2>
+template <typename TString, typename TSpec, typename TString2, typename TSpec2>
 inline void
-assign(SparseString<TValueString, TSpec> & sparseString, SparseString<TValueString2, TSpec2> & source)
+assign(SparseString<TString, TSpec> & sparseString, SparseString<TString2, TSpec2> & source)
 {
     assign(getFibre(sparseString, FibreValues()), getFibre(source, FibreValues()));
     assign(getFibre(sparseString, FibreIndicators()), getFibre(source, FibreIndicators()));
