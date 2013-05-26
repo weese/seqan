@@ -945,6 +945,7 @@ view(SparseString<TString, TSpec> & sparseString)
 
     getFibre(sparseStringView, FibreValues()) = view(getFibre(sparseString, FibreValues()));
     getFibre(sparseStringView, FibreIndicators()) = view(getFibre(sparseString, FibreIndicators()));
+    sparseStringView._length = sparseString._length;
 
     return sparseStringView;
 }
@@ -1002,6 +1003,7 @@ assign(SparseString<TString, TSpec> & sparseString, SparseString<TString2, TSpec
 {
     assign(getFibre(sparseString, FibreValues()), getFibre(source, FibreValues()));
     assign(getFibre(sparseString, FibreIndicators()), getFibre(source, FibreIndicators()));
+    assign(sparseString._length, source._length);
 }
 
 }
