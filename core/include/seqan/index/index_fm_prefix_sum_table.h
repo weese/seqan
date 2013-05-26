@@ -431,7 +431,7 @@ getCharacter(PrefixSumTable<TChar, TSpec> const & /*tag*/, TPos const pos)
 */
 
 template <typename TChar, typename TSpec, typename TPos>
-typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type
+SEQAN_FUNC typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type
 getPrefixSum(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 {
     return getValue(pst, pos);
@@ -454,14 +454,14 @@ getPrefixSum(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 */
 
 template <typename TChar, typename TSpec, typename TPos>
-inline typename GetValue<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type
+SEQAN_FUNC typename GetValue<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type
 getValue(PrefixSumTable<TChar, TSpec> & pst, TPos const pos)
 {
     return pst.entries[pos];
 }
 
 template <typename TChar, typename TSpec, typename TPos>
-inline typename GetValue<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type const
+SEQAN_FUNC typename GetValue<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type const
 getValue(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 {
     return pst.entries[pos];
@@ -487,14 +487,14 @@ getValue(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 */
 
 template <typename TChar, typename TSpec>
-inline typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type const &
+SEQAN_FUNC typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type const &
 getFibre(PrefixSumTable<TChar, TSpec> const & pst, FibreEntries const /*tag*/)
 {
     return pst.entries;
 }
 
 template <typename TChar, typename TSpec>
-inline typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type &
+SEQAN_FUNC typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type &
 getFibre(PrefixSumTable<TChar, TSpec> & pst, FibreEntries const /*tag*/)
 {
     return pst.entries;
@@ -542,14 +542,14 @@ length(PrefixSumTable<TChar, TSpec> const & pst)
 */
 
 template <typename TChar, typename TSpec, typename TPos>
-typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type &
+SEQAN_FUNC typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type &
 prefixSum(PrefixSumTable<TChar, TSpec> & pst, TPos const pos)
 {
     return value(pst, pos);
 }
 
 template <typename TChar, typename TSpec, typename TPos>
-typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type const &
+SEQAN_FUNC typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type const &
 prefixSum(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 {
     return value(pst, pos);
@@ -618,14 +618,14 @@ inline void setPrefixSum(PrefixSumTable<TChar, TSpec> & pst, TValue value, TPos 
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TSpec, typename TPos>
-inline typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type &
-value(PrefixSumTable<TChar, TSpec>&pst, TPos const pos)
+SEQAN_FUNC typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type &
+value(PrefixSumTable<TChar, TSpec> & pst, TPos const pos)
 {
     return pst.entries[pos];
 }
 
 template <typename TChar, typename TSpec, typename TPos>
-inline typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type const &
+SEQAN_FUNC typename Value<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type const &
 value(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 {
     return pst.entries[pos];
