@@ -300,7 +300,6 @@ template <typename TValue, typename TSpec, typename TPos>
 SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toValuePos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos pos)
 {
-    // TODO(esiragusa): Use bit shifts.
     return pos % RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
 }
 
@@ -312,7 +311,6 @@ template <typename TValue, typename TSpec, typename TPos>
 SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toBlockPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos pos)
 {
-    // TODO(esiragusa): Use bit shifts.
     return pos / RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
 }
 
@@ -324,7 +322,6 @@ template <typename TValue, typename TSpec, typename TBlockPos>
 inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TBlockPos blockPos)
 {
-    // TODO(esiragusa): Use bit shifts.
     return blockPos * RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
 }
 
@@ -555,14 +552,14 @@ getRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+SEQAN_FUNC TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
 //    SEQAN_ASSERT_LT(pos, length(dict));
     return _valueAt(dict, pos)[_toValuePos(dict, pos)];
 }
 
 template <typename TValue, typename TSpec, typename TPos>
-inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
+SEQAN_FUNC TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
 //    SEQAN_ASSERT_LT(pos, length(dict));
     return _valueAt(dict, pos)[_toValuePos(dict, pos)];

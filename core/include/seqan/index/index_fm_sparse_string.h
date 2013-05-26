@@ -261,7 +261,7 @@ SEQAN_FUNC bool empty(SparseString<TFibreValues, TSpec> const & string)
 }
 
 template <typename TFibreValues, typename TSpec, typename TPos>
-inline bool _isContained(SparseString<TFibreValues, TSpec> const & string, TPos const & pos)
+SEQAN_FUNC bool _isContained(SparseString<TFibreValues, TSpec> const & string, TPos const & pos)
 {
     return getValue(getFibre(string, FibreIndicators()), pos);
 }
@@ -287,7 +287,7 @@ assignValue(SparseString<TFibreValues, TSpec> & string, TPos pos, TValue value)
 
 ///.Function.getValue.param.container.type:Class.SparseString
 template <typename TFibreValues, typename TSpec, typename TPos>
-inline typename GetValue<SparseString<TFibreValues, TSpec> >::Type
+SEQAN_FUNC typename GetValue<SparseString<TFibreValues, TSpec> >::Type
 getValue(SparseString<TFibreValues, TSpec> & string, TPos pos)
 {
     if (_isContained(string, pos))
@@ -297,7 +297,7 @@ getValue(SparseString<TFibreValues, TSpec> & string, TPos pos)
 }
 
 template <typename TFibreValues, typename TSpec, typename TPos>
-inline typename GetValue<SparseString<TFibreValues, TSpec> const>::Type
+SEQAN_FUNC typename GetValue<SparseString<TFibreValues, TSpec> const>::Type
 getValue(SparseString<TFibreValues, TSpec> const & string, TPos pos)
 {
     if (_isContained(string, pos))
@@ -312,14 +312,14 @@ getValue(SparseString<TFibreValues, TSpec> const & string, TPos pos)
 
 ///.Function.value.param.container.type:Class.SparseString
 template <typename TFibreValues, typename TSpec, typename TPos>
-inline typename Reference<SparseString<TFibreValues, TSpec> >::Type 
+SEQAN_FUNC typename Reference<SparseString<TFibreValues, TSpec> >::Type 
 value(SparseString<TFibreValues, TSpec> & string, TPos pos)
 {
     return getValue(string, pos);
 }
 
 template <typename TFibreValues, typename TSpec, typename TPos>
-inline typename Reference<SparseString<TFibreValues, TSpec> >::Type
+SEQAN_FUNC typename Reference<SparseString<TFibreValues, TSpec> >::Type
 value(SparseString<TFibreValues, TSpec> const & string, TPos pos)
 {
     return getValue(string, pos);
