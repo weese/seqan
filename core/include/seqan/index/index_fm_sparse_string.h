@@ -254,7 +254,7 @@ inline void clear(SparseString<TFibreValues, TSpec> & string)
 
 ///.Function.empty.param.object.type:Class.SparseString
 template <typename TFibreValues, typename TSpec>
-inline bool empty(SparseString<TFibreValues, TSpec> const & string)
+SEQAN_FUNC bool empty(SparseString<TFibreValues, TSpec> const & string)
 {
 //    return empty(getFibre(string, FibreIndicators()));
     return length(string) == 0;
@@ -331,28 +331,28 @@ value(SparseString<TFibreValues, TSpec> const & string, TPos pos)
 
 ///.Function.getFibre.param.container.type:Class.CompressedSA
 template <typename TFibreValues, typename TSpec>
-inline typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type const &
+SEQAN_FUNC typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type const &
 getFibre(SparseString<TFibreValues, TSpec> const & sparseString, FibreValues)
 {
     return sparseString.values;
 }
 
 template <typename TFibreValues, typename TSpec>
-inline typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type &
+SEQAN_FUNC typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type &
 getFibre(SparseString<TFibreValues, TSpec> & sparseString, FibreValues)
 {
     return sparseString.values;
 }
 
 template <typename TFibreValues, typename TSpec>
-inline typename Fibre<SparseString<TFibreValues, TSpec>, FibreIndicators>::Type const &
+SEQAN_FUNC typename Fibre<SparseString<TFibreValues, TSpec>, FibreIndicators>::Type const &
 getFibre(SparseString<TFibreValues, TSpec> const & sparseString, FibreIndicators)
 {
     return sparseString.indicators;
 }
 
 template <typename TFibreValues, typename TSpec>
-inline typename Fibre<SparseString<TFibreValues, TSpec>, FibreIndicators>::Type &
+SEQAN_FUNC typename Fibre<SparseString<TFibreValues, TSpec>, FibreIndicators>::Type &
 getFibre(SparseString<TFibreValues, TSpec> & sparseString, FibreIndicators)
 {
     return sparseString.indicators;
@@ -364,7 +364,7 @@ getFibre(SparseString<TFibreValues, TSpec> & sparseString, FibreIndicators)
 
 ///.Function.length.param.object.type:Class.SparseString
 template <typename TFibreValues, typename TSpec>
-inline typename Size<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type
+SEQAN_FUNC typename Size<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type
 length(SparseString<TFibreValues, TSpec> const & string)
 {
     return string._length;

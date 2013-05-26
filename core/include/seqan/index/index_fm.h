@@ -440,13 +440,13 @@ inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index)
 ...type:Tag.FM Index Fibres
 */
 template <typename TText, typename TIndexSpec, typename TSpec>
-inline bool indexSupplied(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, FibreSALF const)
+SEQAN_FUNC bool indexSupplied(Index<TText, FMIndex<TIndexSpec, TSpec > > & index, FibreSALF const)
 {
     return !(empty(getFibre(index, FibreSA())) || empty(getFibre(index, FibreLF())));
 }
 
 template <typename TText, typename TIndexSpec, typename TSpec>
-inline bool indexSupplied(Index<TText, FMIndex<TIndexSpec, TSpec > > const & index, FibreSALF const)
+SEQAN_FUNC bool indexSupplied(Index<TText, FMIndex<TIndexSpec, TSpec > > const & index, FibreSALF const)
 {
     return !(empty(getFibre(index, FibreSA())) || empty(getFibre(index, FibreLF())));
 }

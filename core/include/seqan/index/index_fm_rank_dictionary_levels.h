@@ -666,7 +666,7 @@ inline void clear(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline bool empty(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
+SEQAN_FUNC bool empty(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
 {
     return empty(dict.ranks);
 }

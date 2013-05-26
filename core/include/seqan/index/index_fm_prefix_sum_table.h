@@ -519,7 +519,7 @@ actually occurring in the original text are accounted for when calling length.
 */
 
 template <typename TChar, typename TSpec>
-inline typename Size<PrefixSumTable<TChar, TSpec> >::Type
+SEQAN_FUNC typename Size<PrefixSumTable<TChar, TSpec> >::Type
 length(PrefixSumTable<TChar, TSpec> const & pst)
 {
     return length(pst.entries);

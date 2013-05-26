@@ -230,42 +230,42 @@ struct LfTable
 */
 
 template <typename TText, typename TSpec>
-inline typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type &
+SEQAN_FUNC typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type &
 getFibre(LfTable<TText, TSpec> & lfTable, FibrePrefixSum)
 {
     return lfTable.prefixSum;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type const &
+SEQAN_FUNC typename Fibre<LfTable<TText, TSpec>, FibrePrefixSum>::Type const &
 getFibre(LfTable<TText, TSpec> const & lfTable, FibrePrefixSum)
 {
     return lfTable.prefixSum;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type &
+SEQAN_FUNC typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type &
 getFibre(LfTable<TText, TSpec> & lfTable, FibreValues)
 {
     return lfTable.values;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type const &
+SEQAN_FUNC typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type const &
 getFibre(LfTable<TText, TSpec> const & lfTable, FibreValues)
 {
     return lfTable.values;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type &
+SEQAN_FUNC typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type &
 getFibre(LfTable<TText, TSpec> & lfTable, FibreSentinels)
 {
     return lfTable.sentinels;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type const &
+SEQAN_FUNC typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type const &
 getFibre(LfTable<TText, TSpec> const & lfTable, FibreSentinels)
 {
     return lfTable.sentinels;

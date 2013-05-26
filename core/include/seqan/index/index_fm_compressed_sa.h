@@ -230,7 +230,7 @@ inline void clear(CompressedSA<TText, TSpec> & compressedSA)
 .Function.empty.param.object.type:Class.CompressedSA
 */
 template <typename TText, typename TSpec>
-inline bool empty(CompressedSA<TText, TSpec> & compressedSA)
+SEQAN_FUNC bool empty(CompressedSA<TText, TSpec> & compressedSA)
 {
     return empty(getFibre(compressedSA, FibreSparseString()));
     //    && empty(getFibre(compressedSA, FibreLF()));
@@ -357,28 +357,28 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 template <typename TText, typename TSpec>
-inline typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type const &
+SEQAN_FUNC typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type const &
 getFibre(CompressedSA<TText, TSpec> const & compressedSA, FibreSparseString)
 {
     return compressedSA.sparseString;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type &
+SEQAN_FUNC typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type &
 getFibre(CompressedSA<TText, TSpec> & compressedSA, FibreSparseString)
 {
     return compressedSA.sparseString;
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type const &
+SEQAN_FUNC typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type const &
 getFibre(CompressedSA<TText, TSpec> const & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type &
+SEQAN_FUNC typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type &
 getFibre(CompressedSA<TText, TSpec> & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);

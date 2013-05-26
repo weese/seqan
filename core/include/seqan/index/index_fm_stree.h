@@ -53,31 +53,36 @@ struct VertexFmi
     TSize       repLen;
     TAlphabet   lastChar;
 
+    SEQAN_FUNC
     VertexFmi() :
         range(0, 0),
         repLen(0),
         lastChar(0)
     {}
 
+    SEQAN_FUNC
     VertexFmi(MinimalCtor) :
         range(0, 0),
         repLen(0),
         lastChar(0)
     {}
 
+    SEQAN_FUNC
     VertexFmi(Pair<TSize> newCurrentRange, TSize newRepLen, TAlphabet newChar) :
         range(newCurrentRange),
         repLen(newRepLen),
         lastChar(newChar)
     {}
 
+    SEQAN_FUNC
     VertexFmi(VertexFmi const & other) :
         range(other.range),
         repLen(other.repLen),
         lastChar(other.lastChar)
     {}
 
-    inline VertexFmi &
+    SEQAN_FUNC
+    VertexFmi &
     operator = (VertexFmi const & _origin)
     {
         range = _origin.range;
@@ -165,7 +170,7 @@ struct EdgeLabel<Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec>
-void _indexRequireTopDownIteration(Index<TText, FMIndex<TOccSpec, TIndexSpec> > & index)
+SEQAN_FUNC void _indexRequireTopDownIteration(Index<TText, FMIndex<TOccSpec, TIndexSpec> > & index)
 {
     indexRequire(index, FibreSALF());
 }
