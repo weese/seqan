@@ -205,7 +205,7 @@ begin(Index<TText, FMIndex<TOccSpec, TIndexSpec> > const & index, TSpec const /*
 // ----------------------------------------------------------------------------
 
 template <typename TAlphabet, typename TSize>
-inline bool _isRoot(VertexFmi<TAlphabet, TSize> const & value)
+SEQAN_FUNC bool _isRoot(VertexFmi<TAlphabet, TSize> const & value)
 {
     return _isSizeInval(value.range.i2);
 }
@@ -215,15 +215,17 @@ inline bool _isRoot(VertexFmi<TAlphabet, TSize> const & value)
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
-                    VSTreeIteratorTraits<TDfsOrder, False> const)
+SEQAN_FUNC bool
+_isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
+        VSTreeIteratorTraits<TDfsOrder, False> const)
 {
     return _isLeaf(it, VSTreeIteratorTraits<TDfsOrder, True>());
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
-                    VSTreeIteratorTraits<TDfsOrder, True> const)
+SEQAN_FUNC bool
+_isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
+        VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     return (value(it).range.i1 + 1 >= value(it).range.i2 &&
         sentinelAt(getFibre(container(it), FibreLF()), value(it).range.i1));
@@ -234,10 +236,11 @@ inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TS
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TChar>
-inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > const & it,
-                           typename VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type const & vDesc,
-                           Pair<typename Size<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type> & _range,
-                           TChar c)
+SEQAN_FUNC bool
+_getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > const & it,
+               typename VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type const & vDesc,
+               Pair<typename Size<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type> & _range,
+               TChar c)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
     typedef typename Fibre<TIndex, FibreLF>::Type               TLF;
@@ -274,7 +277,8 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TChar>
-inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it, TChar c)
+SEQAN_FUNC bool
+_goDownChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it, TChar c)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
     typedef Pair<typename Size<TIndex>::Type>                   TRange;
@@ -301,15 +305,17 @@ inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTre
 
 // TODO(esiragusa): Implement this.
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _goDown(Iter<Index<TText, FMIndex<TOccSpec,TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-                    VSTreeIteratorTraits<TDfsOrder, False> const)
+SEQAN_FUNC bool
+_goDown(Iter<Index<TText, FMIndex<TOccSpec,TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
+        VSTreeIteratorTraits<TDfsOrder, False> const)
 {
     return _goDown(it, VSTreeIteratorTraits<TDfsOrder, True>());
 }
 
 template <typename TText, typename TOccSpec, typename TSpec, typename TIndexSpec, typename TDfsOrder>
-inline bool _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-                    VSTreeIteratorTraits<TDfsOrder, True> const)
+SEQAN_FUNC bool
+_goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
+        VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >    TIndex;
     typedef typename Value<TIndex>::Type                    TAlphabet;
@@ -358,9 +364,10 @@ inline bool _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<To
 //}
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TString, typename TSize>
-inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > &it,
-                          TString const & string,
-                          TSize & lcp)
+SEQAN_FUNC bool
+_goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > &it,
+              TString const & string,
+              TSize & lcp)
 {
     typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
@@ -379,15 +386,17 @@ inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VST
 
 // TODO(esiragusa): Implement this.
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-                     VSTreeIteratorTraits<TDfsOrder, False> const)
+SEQAN_FUNC bool
+_goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
+         VSTreeIteratorTraits<TDfsOrder, False> const)
 {
     return _goRight(it, VSTreeIteratorTraits<TDfsOrder, True>());
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-                     VSTreeIteratorTraits<TDfsOrder, True> const)
+SEQAN_FUNC bool
+_goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
+         VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
     typedef typename Value<TIndex>::Type                        TAlphabet;
@@ -418,7 +427,8 @@ inline bool _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<T
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-bool _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it)
+SEQAN_FUNC bool
+_goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it)
 {
     if (!isRoot(it))
     {
@@ -432,7 +442,8 @@ bool _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSp
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-bool _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
+inline bool
+_goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
 {
     if (!isRoot(it))
     {
@@ -468,7 +479,8 @@ nodeUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree< TopDown< Paren
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-inline void _historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > & it)
+SEQAN_FUNC void
+_historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > & it)
 {
     it._parentDesc = value(it);
 }
@@ -492,7 +504,7 @@ _historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<
 // ----------------------------------------------------------------------------
 
 template <typename TIndex, typename TAlphabet, typename TSize>
-inline typename Size<TIndex>::Type
+SEQAN_FUNC typename Size<TIndex>::Type
 repLength(TIndex const &, VertexFmi<TAlphabet, TSize> const & vDesc)
 {
     return vDesc.repLen;
@@ -503,7 +515,7 @@ repLength(TIndex const &, VertexFmi<TAlphabet, TSize> const & vDesc)
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-inline typename EdgeLabel<Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > >::Type
+SEQAN_FUNC typename EdgeLabel<Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > >::Type
 parentEdgeLabel(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > const & it)
 {
     return value(it).lastChar;
@@ -514,7 +526,7 @@ parentEdgeLabel(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDo
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-inline typename Value<Index<TText, FMIndex<TOccSpec, TIndexSpec > > >::Type
+SEQAN_FUNC typename Value<Index<TText, FMIndex<TOccSpec, TIndexSpec > > >::Type
 parentEdgeFirstChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > const & it)
 {
     return value(it).lastChar;

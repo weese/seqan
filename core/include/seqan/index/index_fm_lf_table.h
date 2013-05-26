@@ -346,7 +346,7 @@ inline void _clearSentinels(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTabl
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec, typename TPos>
-inline bool sentinelAt(LfTable<TText, TSpec> const & lfTable, TPos pos)
+SEQAN_FUNC bool sentinelAt(LfTable<TText, TSpec> const & lfTable, TPos pos)
 {
     return getFibre(lfTable, FibreSentinels()) == pos;
 }
