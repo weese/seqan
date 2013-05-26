@@ -380,13 +380,13 @@ unsigned getAlphabetSize(PrefixSumTable<TChar, TSpec> const & pst)
 
 // TODO(esiragusa): Remove TDummy specialization.
 template <typename TDummy, typename TChar>
-inline unsigned getCharacterPosition(TDummy const & /*tag*/, TChar character)
+SEQAN_FUNC unsigned getCharacterPosition(TDummy const & /*tag*/, TChar character)
 {
     return ordValue(character);
 }
 
 template <typename TChar, typename TSpec, typename TChar2>
-inline unsigned getCharacterPosition(PrefixSumTable<TChar, TSpec> const & /*tag*/, TChar2 character)
+SEQAN_FUNC unsigned getCharacterPosition(PrefixSumTable<TChar, TSpec> const & /*tag*/, TChar2 character)
 {
     return ordValue(static_cast<TChar>(character));
 }
