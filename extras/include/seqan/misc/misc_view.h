@@ -162,10 +162,8 @@ struct Value<ContainerView<TContainer, TSpec> >
 };
 
 template <typename TContainer, typename TSpec>
-struct Value<ContainerView<TContainer, TSpec> const>
-{
-    typedef typename Value<TContainer>::Type Type;
-};
+struct Value<ContainerView<TContainer, TSpec> const> :
+    public Value<ContainerView<TContainer const, TSpec> > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction Iterator
