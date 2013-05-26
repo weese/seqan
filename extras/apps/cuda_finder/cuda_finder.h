@@ -162,42 +162,32 @@ findCUDA(TIndex index, TPattern pattern)
 int main(int argc, char const ** argv)
 {
     typedef String<Dna>                                 TText;
+//    typedef Index<TText, IndexEsa<> >                   TIndex;
     typedef Index<TText, FMIndex<> >                    TIndex;
     typedef typename Device<TText>::Type                TDeviceText;
     typedef typename Device<TIndex>::Type               TDeviceIndex;
 
-    // Create text.
     TText text("ACGTACGTACGT");
-
-    // Create index.
     TIndex index(text);
 
-    // Create Esa.
+    // Create Esa index.
 //    indexCreate(index, FibreSA());
 //    indexCreate(index, FibreLcp());
 //    indexCreate(index, FibreChildtab());
 
-    // Create FM.
+    // Create FM index.
     indexCreate(index, FibreSALF());
 
-    typedef typename View<TIndex>::Type  TIndexView;
-    TIndexView indexView = view(index);
-//    for (unsigned i = 0; i < 4; i++)
-//    {
-//        std::cout << value(indexLF(index).prefixSum, i) << std::endl;
-//        std::cout << value(indexLF(indexView).prefixSum, i) << std::endl;
-//    }
-
     // Copy index to device.
-//    TDeviceIndex deviceIndex;
-//    assign(deviceIndex, index);
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
 
     // Create a pattern.
-//    TText pattern("TA");
-//    TDeviceText devicePattern;
-//    assign(devicePattern, pattern);
+    TText pattern("TA");
+    TDeviceText devicePattern;
+    assign(devicePattern, pattern);
 
-    // Find on GPU.
+//    // Find on GPU.
 //    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
 //    cudaDeviceSynchronize();
 
