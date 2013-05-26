@@ -416,6 +416,15 @@ struct ConstParameter_<T const [I]>
 
 //____________________________________________________________________________
 
+template <typename TObject, typename TSpec>
+struct Member;
+
+template <typename TObject, typename TSpec>
+struct Member<TObject const, TSpec> :
+    Member<TObject, TSpec> {};
+
+//____________________________________________________________________________
+
 /**
 .Internal.Pointer_:
 ..cat:Metafunctions

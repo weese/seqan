@@ -462,6 +462,15 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	};
 
 //////////////////////////////////////////////////////////////////////////////
+// type of the text member
+
+    template <typename TText, typename TSpec>
+    struct Member<Index<TText, TSpec>, FibreText>
+    {
+        typedef Holder<typename Fibre<Index<TText, TSpec>, FibreText>::Type>    Type;
+    };
+
+//////////////////////////////////////////////////////////////////////////////
 // concatenated text
 
 	template < typename TText, typename TSpec >
@@ -599,11 +608,11 @@ String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TText, typename TSpec>
-	inline Holder<TText> & _dataHost(Index<TText, TSpec> &index) {
+	inline Reference<Member<Index<TText, TSpec>, FibreText> > _dataHost(Index<TText, TSpec> & index) {
 		return index.text;
 	}
 	template <typename TText, typename TSpec>
-	inline Holder<TText> const & _dataHost(Index<TText, TSpec> const &index) {
+	inline Reference<Member<Index<TText, TSpec>, FibreText> const> & _dataHost(Index<TText, TSpec> const &index) {
 		return index.text;
 	}
 

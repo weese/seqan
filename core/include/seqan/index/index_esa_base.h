@@ -256,13 +256,13 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 	template < typename TText, typename TSpec >
 	class Index<TText, IndexEsa<TSpec> > {
 	public:
-		Holder<typename Fibre<Index, EsaText>::Type>	text;
-		typename Fibre<Index, EsaSA>::Type				sa;			// suffix array 
-		typename Fibre<Index, EsaLcp>::Type			lcp;		// longest-common-prefix table
-		typename Fibre<Index, EsaLcpe>::Type			lcpe;		// extended lcp table
-		typename Fibre<Index, EsaChildtab>::Type		childtab;	// child table (tree topology)
-		typename Fibre<Index, EsaBwt>::Type			bwt;		// burrows-wheeler table
-		typename Cargo<Index>::Type						cargo;		// user-defined cargo
+        typename Member<Index, EsaText>::Type       text;
+		typename Fibre<Index, EsaSA>::Type          sa;			// suffix array 
+		typename Fibre<Index, EsaLcp>::Type         lcp;		// longest-common-prefix table
+		typename Fibre<Index, EsaLcpe>::Type        lcpe;		// extended lcp table
+		typename Fibre<Index, EsaChildtab>::Type    childtab;	// child table (tree topology)
+		typename Fibre<Index, EsaBwt>::Type         bwt;		// burrows-wheeler table
+		typename Cargo<Index>::Type                 cargo;		// user-defined cargo
 
 		Index() {}
 

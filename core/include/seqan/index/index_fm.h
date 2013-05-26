@@ -193,7 +193,7 @@ template <typename TText, typename TOccSpec, typename TSpec>
 class Index<TText, FMIndex<TOccSpec, TSpec> >
 {
 public:
-    typename FibreTextMember_<Index>::Type          text;
+    typename Member<Index, FibreText>::Type         text;
     typename Fibre<Index, FibreLF>::Type            lfTable;
     typename Fibre<Index, FibreSA>::Type            compressedSA;
 
