@@ -211,11 +211,11 @@ struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > >, FibreRanks>
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSparseString>
 {
-    typedef thrust::device_vector<TValue, TAlloc>       TText_;
-    typedef typename SAValue<TText_>::Type              TSAValue_;
-    typedef thrust::device_vector<TSAValue_, TAlloc>    TString_;
+    typedef thrust::device_vector<TValue/*, TAlloc*/>       TText_;
+    typedef typename SAValue<TText_>::Type                  TSAValue_;
+    typedef thrust::device_vector<TSAValue_/*, TAlloc*/>    TString_;
 
-    typedef SparseString<TString_, TSpec>               Type;
+    typedef SparseString<TString_, TSpec>                   Type;
 };
 #endif
 
