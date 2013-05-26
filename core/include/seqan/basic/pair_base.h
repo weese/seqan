@@ -132,6 +132,7 @@ struct Pair
     // Constructors
     // ------------------------------------------------------------------------
 
+    SEQAN_FUNC
     Pair() : i1(T1()), i2(T2()) {}
 
     template <typename T1_, typename T2_>
