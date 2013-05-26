@@ -47,15 +47,14 @@ namespace seqan {
 // Dna and Dna5
 // --------------------------------------------------------------------------
 
-template <typename T = void>
-struct TranslateTableDna5ToAscii_
-{
-    static char const VALUE[5];
-};
-
 template <typename T>
-char const TranslateTableDna5ToAscii_<T>::VALUE[5] = {'A', 'C', 'G', 'T', 'N'};
+SEQAN_FUNC char
+translateDna5ToAscii_(unsigned char c)
+{
+    char const VALUE[5] = {'A', 'C', 'G', 'T', 'N'};
 
+    return VALUE[c];
+};
 
 template <typename T = void>
 struct TranslateTableDna5ToIupac_

@@ -593,13 +593,13 @@ struct BitsPerValue<SimpleType<TValue, Finite<SIZE> > >
 void SEQAN_FUNC assign(char & c_target, 
                    Dna const & source)
 {
-    c_target = TranslateTableDna5ToAscii_<>::VALUE[source.value];
+    c_target = translateDna5ToAscii_<void>(source.value);
 }
 
 void SEQAN_FUNC assign(char & c_target, 
                    Dna5 const & source)
 {
-    c_target = TranslateTableDna5ToAscii_<>::VALUE[source.value];
+    c_target = translateDna5ToAscii_<void>(source.value);
 }
 
 void SEQAN_FUNC assign(char& target,
