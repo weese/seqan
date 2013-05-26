@@ -306,13 +306,13 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibrePrefixSum>
 {
-    typedef typename Fibre<LfTable<TText, ContainerView<TSpec, TViewSpec> >, FibrePrefixSum>::Type   Type;
+    typedef typename Fibre<LfTable<TText, View<TSpec> >, FibrePrefixSum>::Type   Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
 {
-    typedef typename Fibre<LfTable<TText, ContainerView<TSpec, TViewSpec> >, FibreValues>::Type      Type;
+    typedef typename Fibre<LfTable<TText, View<TSpec> >, FibreValues>::Type      Type;
 };
 
 //template <typename TText, typename TViewSpec, typename TSpec>
@@ -325,15 +325,15 @@ struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
 //template <typename TText, typename TSSetSpec, typename TViewSpec, typename TSpec>
 //struct Fibre<LfTable<ContainerView<StringSet<TText, TSSetSpec>, TViewSpec>, TSpec>, FibreSentinels>
 //{
-//    typedef typename Fibre<LfTable<StringSet<TText, TSSetSpec>, ContainerView<TSpec, TViewSpec> >, FibreSentinels>::Type   Type;
+//    typedef typename Fibre<LfTable<StringSet<TText, TSSetSpec>, View<TSpec> >, FibreSentinels>::Type   Type;
 //};
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                     [PrefixSumTable View]
 // ----------------------------------------------------------------------------
 
-template <typename TChar, typename TSpec, typename TViewSpec>
-struct Fibre<PrefixSumTable<TChar, ContainerView<TSpec, TViewSpec> >, FibreEntries>
+template <typename TChar, typename TSpec>
+struct Fibre<PrefixSumTable<TChar, View<TSpec> >, FibreEntries>
 {
     typedef typename View<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type   Type;
 };
@@ -342,8 +342,8 @@ struct Fibre<PrefixSumTable<TChar, ContainerView<TSpec, TViewSpec> >, FibreEntri
 // Metafunction Fibre                                     [RankDictionary View]
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec, typename TViewSpec>
-struct Fibre<RankDictionary<TwoLevels<TValue, ContainerView<TSpec, TViewSpec> > >, FibreRanks>
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec> > >, FibreRanks>
 {
     typedef typename View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type>::Type    Type;
 };
@@ -355,7 +355,7 @@ struct Fibre<RankDictionary<TwoLevels<TValue, ContainerView<TSpec, TViewSpec> > 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreSparseString>
 {
-    typedef typename Fibre<CompressedSA<TText, ContainerView<TSpec, TViewSpec> >, FibreSparseString>::Type  Type;
+    typedef typename Fibre<CompressedSA<TText, View<TSpec> >, FibreSparseString>::Type  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -363,7 +363,7 @@ struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreSparseSt
 // ----------------------------------------------------------------------------
 
 template <typename TFibreValues, typename TSpec>
-struct Fibre<SparseString<TFibreValues, ContainerView<TSpec> >, FibreValues>
+struct Fibre<SparseString<TFibreValues, View<TSpec> >, FibreValues>
 {
     typedef typename View<typename Fibre<SparseString<TFibreValues, TSpec>, FibreValues>::Type>::Type       Type;
 };
@@ -594,10 +594,10 @@ view(LfTable<TText, TSpec> & lfTable)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-PrefixSumTable<TValue, ContainerView<TSpec> >
+PrefixSumTable<TValue, View<TSpec> >
 view(PrefixSumTable<TValue, TSpec> & pst)
 {
-    PrefixSumTable<TValue, ContainerView<TSpec> > pstView;
+    PrefixSumTable<TValue, View<TSpec> > pstView;
 
     getFibre(pstView, FibreEntries()) = view(getFibre(pst, FibreEntries()));
 
@@ -609,10 +609,10 @@ view(PrefixSumTable<TValue, TSpec> & pst)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-RankDictionary<TwoLevels<TValue, ContainerView<TSpec> > >
+RankDictionary<TwoLevels<TValue, View<TSpec> > >
 view(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 {
-    RankDictionary<TwoLevels<TValue, ContainerView<TSpec> > > dictView;
+    RankDictionary<TwoLevels<TValue, View<TSpec> > > dictView;
 
     getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
 
@@ -640,10 +640,10 @@ view(CompressedSA<TText, TSpec> & sa)
 // ----------------------------------------------------------------------------
 
 template <typename TString, typename TSpec>
-SparseString<TString, ContainerView<TSpec> >
+SparseString<TString, View<TSpec> >
 view(SparseString<TString, TSpec> & sparseString)
 {
-    SparseString<TString, ContainerView<TSpec> > sparseStringView;
+    SparseString<TString, View<TSpec> > sparseStringView;
 
     getFibre(sparseStringView, FibreValues()) = view(getFibre(sparseString, FibreValues()));
     getFibre(sparseStringView, FibreIndicators()) = view(getFibre(sparseString, FibreIndicators()));
