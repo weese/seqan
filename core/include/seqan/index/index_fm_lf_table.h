@@ -285,7 +285,14 @@ getFibre(LfTable<TText, TSpec> const & lfTable, FibreSentinels)
 */
 
 template <typename TText, typename TSpec>
-inline bool empty(LfTable<TText, TSpec> const & lfTable)
+SEQAN_FUNC bool empty(LfTable<TText, TSpec> const & lfTable)
+{
+    return empty(lfTable.values) &&
+           empty(lfTable.prefixSum);
+}
+
+template <typename TText, typename TSSetSpec, typename TSpec>
+inline bool empty(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable)
 {
     return empty(lfTable.values) &&
            empty(lfTable.sentinels) &&
