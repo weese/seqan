@@ -93,6 +93,16 @@ struct Fibre<CompressedSA<TText, TSpec>, FibreLF>
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction Member
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct Member<CompressedSA<TText, TSpec>, FibreLF>
+{
+    typedef Holder<typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type>   Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction Reference
 // ----------------------------------------------------------------------------
 
@@ -147,8 +157,7 @@ template <typename TText, typename TSpec>
 struct CompressedSA
 {
     typename Fibre<CompressedSA, FibreSparseString>::Type   sparseString;
-    // TODO(esiragusa): Change the lfTable pointer to a Member<>::Type metafunction.
-    Holder<typename Fibre<CompressedSA, FibreLF>::Type>     lfTable;
+    typename Member<CompressedSA, FibreLF>::Type            lfTable;
 
     CompressedSA() :
         lfTable()
