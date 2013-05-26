@@ -124,13 +124,13 @@ findCUDA(TIndex index, TPattern pattern)
     for (unsigned i = 0; i < length(indexSA(index)); ++i)
         printf("%ld\n", indexSA(index)[i]);
 
-    printf("lengthLcp=%ld\n", length(indexLcp(index)));
-    for (unsigned i = 0; i < length(indexLcp(index)); ++i)
-        printf("%ld\n", indexLcp(index)[i]);
-
-    printf("lengthChildtab=%ld\n", length(indexChildtab(index)));
-    for (unsigned i = 0; i < length(indexChildtab(index)); ++i)
-        printf("%ld\n", indexChildtab(index)[i]);
+//    printf("lengthLcp=%ld\n", length(indexLcp(index)));
+//    for (unsigned i = 0; i < length(indexLcp(index)); ++i)
+//        printf("%ld\n", indexLcp(index)[i]);
+//
+//    printf("lengthChildtab=%ld\n", length(indexChildtab(index)));
+//    for (unsigned i = 0; i < length(indexChildtab(index)); ++i)
+//        printf("%ld\n", indexChildtab(index)[i]);
 
     TIterator it(index);
 
@@ -187,9 +187,9 @@ int main(int argc, char const ** argv)
     TDeviceText devicePattern;
     assign(devicePattern, pattern);
 
-//    // Find on GPU.
-//    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
-//    cudaDeviceSynchronize();
+    // Find on GPU.
+    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
+    cudaDeviceSynchronize();
 
     return 0;
 }
