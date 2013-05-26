@@ -261,6 +261,17 @@ struct WordSize_ {};
 
 // The compiler-dependent implementations of _popCountImpl() follow.
 
+#if defined(__CUDA_ARCH__)
+
+template <typename TWord>
+SEQAN_FUNC unsigned
+_popCountImpl(TWord const & word, WordSize_<32> const & /*tag*/)
+{
+    return __popc(static_cast<__uint32>(word));
+}
+
+#else   // #if defined(__CUDA_ARCH__)
+
 #if defined(_MSC_VER) && (_MSC_VER <= 1400)  // MSVC <= 2005, no intrinsic.
 
 template <typename TWord, unsigned NUM_BITS>
@@ -353,8 +364,10 @@ _popCountImpl(TWord word, WordSize_<8> const & /*tag*/)
 
 #endif    // GCC or CLANG
 
+#endif    // #if !defined(__CUDA_ARCH__)
+
 template <typename TWord>
-inline unsigned
+SEQAN_FUNC unsigned
 popCount(TWord word)
 {
     return _popCountImpl(word, WordSize_<BitsPerValue<TWord>::VALUE>());
