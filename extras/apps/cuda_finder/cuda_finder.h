@@ -135,14 +135,20 @@ findCUDA(TIndex index, TPattern pattern)
     TIterator it(index);
 
     printf("isRoot()=%d\n", isRoot(it));
-    printf("countOccurrences()=%ld\n", countOccurrences(it));
-    printf("isLeaf()=%d\n", isLeaf(it));
-    printf("repLength()=%ld\n", repLength(it));
-    printf("goDown()=%d\n", goDown(it));
     printf("repLength()=%ld\n", repLength(it));
     printf("countOccurrences()=%ld\n", countOccurrences(it));
-    printf("parentEdgeLabel()=%c\n", static_cast<char>(parentEdgeLabel(it)));
-//    printf("goRight()=%d\n", goRight(it));
+
+    if (goDown(it))
+    {
+        do
+        {
+            printf("repLength()=%ld\n", repLength(it));
+            printf("parentEdgeLabel()=%c\n", static_cast<char>(parentEdgeLabel(it)));
+            printf("countOccurrences()=%ld\n", countOccurrences(it));
+            printf("isLeaf()=%d\n", isLeaf(it));
+        }
+        while (goRight(it));
+    }
 
 //    TEdgeLabel edgeLabel = parentEdgeLabel(it);
 //    TRepresentative repr = representative(it);
