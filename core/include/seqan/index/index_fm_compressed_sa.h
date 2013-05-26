@@ -174,13 +174,15 @@ public:
 //    {}
 
     template <typename TPos>
-    inline typename Value<CompressedSA>::Type const operator[](TPos pos)
+    SEQAN_FUNC typename Value<CompressedSA>::Type const
+    operator[](TPos pos)
     {
         return value(*this, pos);
     }
 
     template <typename TPos>
-    inline typename Value<CompressedSA>::Type operator[](TPos pos) const
+    SEQAN_FUNC typename Value<CompressedSA>::Type
+    operator[](TPos pos) const
     {
         return value(*this, pos);
     }
@@ -195,14 +197,14 @@ public:
 // ----------------------------------------------------------------------------
 
 template <typename TPos, typename TOffSet>
-inline TPos
+SEQAN_FUNC TPos
 _addGapDistance(TPos const & value, TOffSet const & offSet)
 {
     return value + offSet;
 }
 
 template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
-inline Pair<TSeqId, TPos>
+SEQAN_FUNC Pair<TSeqId, TPos>
 _addGapDistance(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet)
 {
     return Pair<TSeqId, TPos>(value.i1, value.i2 + offSet);
@@ -413,7 +415,7 @@ void setLfTable(CompressedSA<TText, TSpec> & compressedSA, TLfTable const & lfTa
 .Function.length.param.object.type:Class.CompressedSA
 */
 template <typename TText, typename TSpec>
-inline typename Size<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type
+SEQAN_FUNC typename Size<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type
 length(CompressedSA<TText, TSpec> const & compressedSA)
 {
     return length(getFibre(compressedSA, FibreSparseString()));
@@ -449,7 +451,7 @@ resize(CompressedSA<TText, TSpec> & compressedSA, TSize size, Tag<TExpand> tag)
 this function.
 */
 template <typename TText, typename TSpec, typename TPos>
-inline typename Value<CompressedSA<TText, TSpec> >::Type
+SEQAN_FUNC typename Value<CompressedSA<TText, TSpec> >::Type
 value(CompressedSA<TText, TSpec> & compressedSA, TPos pos)
 {
     typedef typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type     TSparseString;
@@ -467,7 +469,7 @@ value(CompressedSA<TText, TSpec> & compressedSA, TPos pos)
 }
 
 template <typename TText, typename TSpec, typename TPos>
-inline typename Value<CompressedSA<TText, TSpec> >::Type const
+SEQAN_FUNC typename Value<CompressedSA<TText, TSpec> >::Type const
 value(CompressedSA<TText, TSpec> const & compressedSA, TPos pos)
 {
     typedef typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type     TSparseString;
