@@ -182,14 +182,14 @@ public:
     // ----------------------------------------------------------------------
 
     template <typename TPos>
-    inline typename Reference<String>::Type
+    SEQAN_FUNC typename Reference<String>::Type
     operator[] (TPos pos)
     {
         return value(*this, pos);
     }
 
     template <typename TPos>
-    inline typename Reference<String const>::Type
+    SEQAN_FUNC typename Reference<String const>::Type
     operator[] (TPos pos) const
     {
         return value(*this, pos);
