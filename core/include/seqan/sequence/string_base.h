@@ -496,7 +496,7 @@ length(String<TValue, TSpec> const & me)
 ///.Function.empty.class:Class.String
 
 template <typename TValue, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 empty(String<TValue, TSpec> const & me)
 {
     SEQAN_CHECKPOINT;
