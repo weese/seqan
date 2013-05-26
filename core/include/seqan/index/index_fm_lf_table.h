@@ -362,7 +362,7 @@ inline bool sentinelAt(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTab
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec, typename TPos, typename TValue>
-inline typename Size<typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type>::Type
+SEQAN_FUNC typename Size<typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type>::Type
 _getRank(LfTable<TText, TSpec> const & lfTable, TPos pos, TValue character)
 {
     typedef LfTable<TText, TSpec> const                         TLfTable;
@@ -415,7 +415,8 @@ the sorted cyclic rotations of the original text, while F correspond to the firs
 
 // TODO(esiragusa): rename lfMapping() as getValue() or getFrontPos()?
 template <typename TLfTable, typename TPos>
-inline TPos lfMapping(TLfTable const & lfTable, TPos pos)
+SEQAN_FUNC TPos
+lfMapping(TLfTable const & lfTable, TPos pos)
 {
     typedef typename Fibre<TLfTable const, FibreValues>::Type       TValues;
     typedef typename Fibre<TLfTable const, FibreSentinels>::Type    TSentinels;
