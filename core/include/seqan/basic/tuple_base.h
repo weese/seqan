@@ -91,7 +91,7 @@ struct Tuple
     // TODO(holtgrew): Return Value<>::Type?
 
     template <typename TPos>
-    inline typename StoredTupleValue_<TValue>::Type &
+    SEQAN_FUNC typename StoredTupleValue_<TValue>::Type &
     operator[](TPos k)
     {
         SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
@@ -100,7 +100,7 @@ struct Tuple
     }
 
     template <typename TPos>
-    inline typename StoredTupleValue_<TValue>::Type const &
+    SEQAN_FUNC typename StoredTupleValue_<TValue>::Type const &
     operator[](TPos k) const
     {
         SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
