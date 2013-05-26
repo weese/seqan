@@ -50,7 +50,13 @@ namespace seqan {
 template <typename TText, typename TSpec>
 struct View<Index<TText, TSpec> >
 {
-    typedef Index<typename View<TText>::Type, TSpec>   Type;
+    typedef Index<typename View<TText>::Type, TSpec>        Type;
+};
+
+template <typename TText, typename TSpec>
+struct View<Index<TText, TSpec> const>
+{
+    typedef Index<typename View<TText>::Type, TSpec> const  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -60,7 +66,13 @@ struct View<Index<TText, TSpec> >
 template <typename TText, typename TSpec>
 struct View<LfTable<TText, TSpec> >
 {
-    typedef LfTable<typename View<TText>::Type, TSpec>   Type;
+    typedef LfTable<typename View<TText>::Type, TSpec>          Type;
+};
+
+template <typename TText, typename TSpec>
+struct View<LfTable<TText, TSpec> const>
+{
+    typedef LfTable<typename View<TText>::Type, TSpec> const    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -70,7 +82,13 @@ struct View<LfTable<TText, TSpec> >
 template <typename TText, typename TSpec>
 struct View<CompressedSA<TText, TSpec> >
 {
-    typedef CompressedSA<typename View<TText>::Type, TSpec>     Type;
+    typedef CompressedSA<typename View<TText>::Type, TSpec>         Type;
+};
+
+template <typename TText, typename TSpec>
+struct View<CompressedSA<TText, TSpec> const>
+{
+    typedef CompressedSA<typename View<TText>::Type, TSpec> const   Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -83,6 +101,12 @@ struct View<PrefixSumTable<TValue, TSpec> >
     typedef PrefixSumTable<TValue, View<TSpec> >        Type;
 };
 
+template <typename TValue, typename TSpec>
+struct View<PrefixSumTable<TValue, TSpec> const>
+{
+    typedef PrefixSumTable<TValue, View<TSpec> > const  Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction View                                           [RankDictionary]
 // ----------------------------------------------------------------------------
@@ -90,7 +114,13 @@ struct View<PrefixSumTable<TValue, TSpec> >
 template <typename TValue, typename TSpec>
 struct View<RankDictionary<TwoLevels<TValue, TSpec> > >
 {
-    typedef RankDictionary<TwoLevels<TValue, View<TSpec> > >    Type;
+    typedef RankDictionary<TwoLevels<TValue, View<TSpec> > >        Type;
+};
+
+template <typename TValue, typename TSpec>
+struct View<RankDictionary<TwoLevels<TValue, TSpec> > const>
+{
+    typedef RankDictionary<TwoLevels<TValue, View<TSpec> > > const  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -100,7 +130,13 @@ struct View<RankDictionary<TwoLevels<TValue, TSpec> > >
 template <typename TString, typename TSpec>
 struct View<SparseString<TString, TSpec> >
 {
-    typedef SparseString<TString, View<TSpec> >     Type;
+    typedef SparseString<TString, View<TSpec> >         Type;
+};
+
+template <typename TString, typename TSpec>
+struct View<SparseString<TString, TSpec> const>
+{
+    typedef SparseString<TString, View<TSpec> > const   Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -111,7 +147,13 @@ struct View<SparseString<TString, TSpec> >
 template <typename TText, typename TSpec>
 struct Device<Index<TText, TSpec> >
 {
-    typedef Index<typename Device<TText>::Type, TSpec>  Type;
+    typedef Index<typename Device<TText>::Type, TSpec>          Type;
+};
+
+template <typename TText, typename TSpec>
+struct Device<Index<TText, TSpec> const>
+{
+    typedef Index<typename Device<TText>::Type, TSpec> const    Type;
 };
 #endif
 
@@ -127,11 +169,23 @@ struct Device<Index<TText, TSpec> >
 //    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>  Type;
 //};
 
+// ----------------------------------------------------------------------------
+// Metafunction FibreText                                        [Device Index]
+// ----------------------------------------------------------------------------
+
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreText>
 {
     typedef thrust::device_vector<TValue, TAlloc>    Type;
 };
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreText> :
+    public Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreText> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreRawText                                     [Device Index]
+// ----------------------------------------------------------------------------
 
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreRawText>
@@ -140,10 +194,28 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreRawText>
 };
 
 template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreRawText> :
+    public Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreRawText> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreSA                                          [Device Index]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSA>
 {
     typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> Type;
 };
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreSA>
+{
+    typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> const   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreLcp                                         [Device Index]
+// ----------------------------------------------------------------------------
 
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreLcp>
@@ -152,20 +224,46 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreLcp>
 };
 
 template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreLcp>
+{
+    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> const  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreChildtab                                    [Device Index]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreChildtab>
 {
     typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>    Type;
 };
 
 template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreChildtab>
+{
+    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> const  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreBwt                                         [Device Index]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreBwt>
 {
     typedef thrust::device_vector<typename Value<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>   Type;
 };
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreBwt>
+{
+    typedef thrust::device_vector<typename Value<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> const Type;
+};
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                          [Device FMIndex]
+// Metafunction FibreSA                                        [Device FMIndex]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -174,10 +272,16 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
 {
     typedef CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>      Type;
 };
+
+template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
+struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> > const, FibreSA>
+{
+    typedef CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec> const    Type;
+};
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                          [Device LfTable]
+// Metafunction FibrePrefixSum                                 [Device LfTable]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -192,6 +296,20 @@ struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibrePrefixS
 };
 
 template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibrePrefixSum>
+{
+    typedef thrust::device_vector<TValue, TAlloc>               TText_;
+    typedef typename Value<LfTable<TText_, TSpec> >::Type       TValue_;
+    typedef typename MakeUnsigned<TValue_>::Type                TUValue_;
+
+    typedef PrefixSumTable<TUValue_, Device<TSpec> > const      Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreValues                                    [Device LfTable]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
 {
     typedef thrust::device_vector<TValue, TAlloc>               TText_;
@@ -199,6 +317,19 @@ struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
 
     typedef RankDictionary<TwoLevels<TValue_, Device<TSpec> > > Type;
 };
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreValues>
+{
+    typedef thrust::device_vector<TValue, TAlloc>                       TText_;
+    typedef typename Value<LfTable<TText_, TSpec> >::Type               TValue_;
+
+    typedef RankDictionary<TwoLevels<TValue_, Device<TSpec> > > const   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreSentinels                                 [Device LfTable]
+// ----------------------------------------------------------------------------
 
 //template <typename TText, typename TViewSpec, typename TSpec>
 //struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSentinels>
@@ -208,7 +339,7 @@ struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                   [Device PrefixSumTable]
+// Metafunction FibreEntries                            [Device PrefixSumTable]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -217,10 +348,16 @@ struct Fibre<PrefixSumTable<TChar, Device<TSpec> >, FibreEntries>
 {
     typedef thrust::device_vector<unsigned>         Type;
 };
+
+template <typename TChar, typename TSpec>
+struct Fibre<PrefixSumTable<TChar, Device<TSpec> > const, FibreEntries>
+{
+    typedef thrust::device_vector<unsigned> const   Type;
+};
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                   [Device RankDictionary]
+// Metafunction FibreRanks                              [Device RankDictionary]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -231,10 +368,18 @@ struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > >, FibreRanks>
 
     typedef thrust::device_vector<RankDictionaryEntry_<TRankDictionarySpec_> >  Type;
 };
+
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > > const, FibreRanks>
+{
+    typedef TwoLevels<TValue, TSpec>        TRankDictionarySpec_;
+
+    typedef thrust::device_vector<RankDictionaryEntry_<TRankDictionarySpec_> > const    Type;
+};
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                     [Device CompressedSA]
+// Metafunction FibreSparseString                         [Device CompressedSA]
 // ----------------------------------------------------------------------------
 
 #ifdef __CUDACC__
@@ -246,6 +391,16 @@ struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSp
     typedef thrust::device_vector<TSAValue_/*, TAlloc*/>    TString_;
 
     typedef SparseString<TString_, TSpec>                   Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreSparseString>
+{
+    typedef thrust::device_vector<TValue/*, TAlloc*/>       TText_;
+    typedef typename SAValue<TText_>::Type                  TSAValue_;
+    typedef thrust::device_vector<TSAValue_/*, TAlloc*/>    TString_;
+
+    typedef SparseString<TString_, TSpec> const             Type;
 };
 #endif
 
@@ -272,11 +427,23 @@ struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSp
 //    typedef typename View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type>::Type     Type;
 //};
 
+// ----------------------------------------------------------------------------
+// Metafunction FibreText                                          [Index View]
+// ----------------------------------------------------------------------------
+
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreText>
 {
     typedef typename View<TText>::Type  Type;
 };
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreText> :
+    public Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreText> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreRawText                                       [Index View]
+// ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreRawText>
@@ -285,10 +452,28 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreRawText>
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreRawText> :
+    public Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreRawText> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreSA                                            [Index View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreSA>
 {
     typedef typename View<typename Fibre<Index<TText, TSpec>, FibreSA>::Type>::Type         Type;
 };
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreSA>
+{
+    typedef typename View<typename Fibre<Index<TText, TSpec> const, FibreSA>::Type>::Type   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreLcp                                           [Index View]
+// ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreLcp>
@@ -297,15 +482,41 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreLcp>
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreLcp>
+{
+    typedef typename View<typename Fibre<Index<TText, TSpec> const, FibreLcp>::Type>::Type  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreChildtab                                      [Index View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreChildtab>
 {
     typedef typename View<typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type>::Type   Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreChildtab>
+{
+    typedef typename View<typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type>::Type Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreBwt                                           [Index View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreBwt>
 {
     typedef typename View<typename Fibre<Index<TText, TSpec>, FibreBwt>::Type>::Type        Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreBwt>
+{
+    typedef typename View<typename Fibre<Index<TText, TSpec> const, FibreBwt>::Type>::Type  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -319,8 +530,15 @@ struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> >
     typedef typename Fibre<TIndex_, FibreText>::Type            Type;
 };
 
+template <typename TText, typename TViewSpec, typename TSpec>
+struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> const>
+{
+    typedef Index<ContainerView<TText, TViewSpec>, TSpec> const TIndex_;
+    typedef typename Fibre<TIndex_, FibreText>::Type            Type;
+};
+
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                            [FMIndex View]
+// Metafunction FibreSA                                          [FMIndex View]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec>
@@ -329,8 +547,14 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> >, 
     typedef typename View<typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA>::Type>::Type    Type;
 };
 
+template <typename TText, typename TViewSpec, typename TOccSpec, typename TSpec>
+struct Fibre<Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > const, FibreSA>
+{
+    typedef typename View<typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibreSA>::Type>::Type   Type;
+};
+
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                            [LfTable View]
+// Metafunction FibrePrefixSum                                   [LfTable View]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec>
@@ -340,10 +564,30 @@ struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibrePrefixSum>
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec> const, FibrePrefixSum>
+{
+    typedef typename View<typename Fibre<LfTable<TText, TSpec> const, FibrePrefixSum>::Type>::Type  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreValues                                      [LfTable View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
 struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
 {
     typedef typename View<typename Fibre<LfTable<TText, TSpec>, FibreValues>::Type>::Type   Type;
 };
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec> const, FibreValues>
+{
+    typedef typename View<typename Fibre<LfTable<TText, TSpec> const, FibreValues>::Type>::Type     Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreSentinels                                   [LfTable View]
+// ----------------------------------------------------------------------------
 
 //template <typename TText, typename TViewSpec, typename TSpec>
 //struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreSentinels>
@@ -359,13 +603,19 @@ struct Fibre<LfTable<ContainerView<TText, TViewSpec>, TSpec>, FibreValues>
 //};
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                     [PrefixSumTable View]
+// Metafunction FibreEntries                              [PrefixSumTable View]
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TSpec>
 struct Fibre<PrefixSumTable<TChar, View<TSpec> >, FibreEntries>
 {
     typedef typename View<typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type>::Type   Type;
+};
+
+template <typename TChar, typename TSpec>
+struct Fibre<PrefixSumTable<TChar, View<TSpec> > const, FibreEntries>
+{
+    typedef typename View<typename Fibre<PrefixSumTable<TChar, TSpec> const, FibreEntries>::Type>::Type     Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -378,6 +628,12 @@ struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec> > >, FibreRanks>
     typedef typename View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type>::Type    Type;
 };
 
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec> > > const, FibreRanks>
+{
+    typedef typename View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> > const, FibreRanks>::Type>::Type  Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                       [CompressedSA View]
 // ----------------------------------------------------------------------------
@@ -388,6 +644,12 @@ struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreSparseSt
     typedef typename View<typename Fibre<CompressedSA<TText, TSpec>, FibreSparseString>::Type>::Type    Type;
 };
 
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec> const, FibreSparseString>
+{
+    typedef typename View<typename Fibre<CompressedSA<TText, TSpec> const, FibreSparseString>::Type>::Type  Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                       [SparseString View]
 // ----------------------------------------------------------------------------
@@ -396,6 +658,12 @@ template <typename TString, typename TSpec>
 struct Fibre<SparseString<TString, View<TSpec> >, FibreValues>
 {
     typedef typename View<typename Fibre<SparseString<TString, TSpec>, FibreValues>::Type>::Type       Type;
+};
+
+template <typename TString, typename TSpec>
+struct Fibre<SparseString<TString, View<TSpec> > const, FibreValues>
+{
+    typedef typename View<typename Fibre<SparseString<TString, TSpec> const, FibreValues>::Type>::Type  Type;
 };
 
 // ============================================================================
