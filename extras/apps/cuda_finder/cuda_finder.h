@@ -121,8 +121,8 @@ findCUDA(TIndex index, TPattern pattern)
     printf("index=%i\n", idx);
 
     printf("lengthSA=%ld\n", length(indexSA(index)));
-    for (unsigned i = 0; i < length(indexSA(index)); ++i)
-        printf("%ld\n", indexSA(index)[i]);
+//    for (unsigned i = 0; i < length(indexSA(index)); ++i)
+//        printf("%ld\n", indexSA(index)[i]);
 
 //    printf("lengthLcp=%ld\n", length(indexLcp(index)));
 //    for (unsigned i = 0; i < length(indexLcp(index)); ++i)
@@ -140,7 +140,9 @@ findCUDA(TIndex index, TPattern pattern)
     printf("repLength()=%ld\n", repLength(it));
     printf("goDown()=%d\n", goDown(it));
     printf("repLength()=%ld\n", repLength(it));
-    printf("goRight()=%d\n", goRight(it));
+    printf("countOccurrences()=%ld\n", countOccurrences(it));
+    printf("parentEdgeLabel()=%c\n", static_cast<char>(parentEdgeLabel(it)));
+//    printf("goRight()=%d\n", goRight(it));
 
 //    TEdgeLabel edgeLabel = parentEdgeLabel(it);
 //    TRepresentative repr = representative(it);
