@@ -72,7 +72,7 @@ template <typename TText, typename TSpec>
 class Index<TText, IndexSa<TSpec> >
 {
 public:
-    Holder<typename Fibre<Index, EsaText>::Type>    text;
+    typename Member<Index, FibreText>::Type         text;
     typename Fibre<Index, EsaSA>::Type              sa;
     typename Cargo<Index>::Type                     cargo;  // user-defined cargo
 
