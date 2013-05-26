@@ -55,8 +55,6 @@ class ContainerView
 {
 public:
     typedef typename Iterator<ContainerView, Standard>::Type        TIterator;
-    typedef typename Reference<TIterator>::Type                     TReference;
-    typedef typename GetValue<TIterator>::Type                      TGetValue;
 
     TIterator _begin;
     TIterator _end;
@@ -104,18 +102,18 @@ public:
 
     template <typename TPos>
     SEQAN_FUNC
-    TReference
+    typename Reference<ContainerView>::Type
     operator[] (TPos pos)
     {
         return value(*this, pos);
     }
 
     template <typename TPos>
-    TGetValue
+    SEQAN_FUNC
+    typename GetValue<ContainerView>::Type
     operator[] (TPos pos) const
     {
-        // TODO(esiragusa): There should be a getValue(view, pos)
-        return getValue(_begin + pos);
+        return getValue(*this, pos);
     }
 };
 
@@ -166,6 +164,26 @@ struct Value<ContainerView<TContainer, TSpec> const> :
     public Value<ContainerView<TContainer const, TSpec> > {};
 
 // ----------------------------------------------------------------------------
+// Metafunction GetValue
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct GetValue<ContainerView<TContainer, TSpec> >
+{
+    typedef ContainerView<TContainer, TSpec>                        TContainerView_;
+    typedef typename Iterator<TContainerView_, Standard>::Type      TIterator_;
+    typedef typename GetValue<TIterator_>::Type                     Type;
+};
+
+template <typename TContainer, typename TSpec>
+struct GetValue<ContainerView<TContainer, TSpec> const>
+{
+    typedef ContainerView<TContainer, TSpec> const                  TContainerView_;
+    typedef typename Iterator<TContainerView_, Standard>::Type      TIterator_;
+    typedef typename GetValue<TIterator_>::Type                     Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction Iterator
 // ----------------------------------------------------------------------------
 
@@ -181,14 +199,14 @@ struct Iterator<ContainerView<TContainer, TSpec> const, Standard>:
 template <typename TContainer, typename TAlloc, typename TSpec>
 struct Iterator<ContainerView<thrust::device_vector<TContainer, TAlloc>, TSpec>, Standard>
 {
-    typedef typename thrust::device_vector<TContainer, TAlloc>::pointer            TIterator_;
+    typedef typename thrust::device_vector<TContainer, TAlloc>::pointer         TIterator_;
     typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
 };
 
 template <typename TContainer, typename TAlloc, typename TSpec>
 struct Iterator<ContainerView<thrust::device_vector<TContainer, TAlloc>, TSpec> const, Standard>
 {
-    typedef typename thrust::device_vector<TContainer const, TAlloc>::pointer      TIterator_;
+    typedef typename thrust::device_vector<TContainer const, TAlloc>::pointer   TIterator_;
     typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
 };
 #endif
@@ -210,7 +228,7 @@ struct Difference<ContainerView<TContainer, TSpec> >
 template <typename TContainer, typename TSpec>
 struct Size<ContainerView<TContainer, TSpec> >
 {
-    typedef typename Difference<TContainer>::Type          TDifference;
+    typedef typename Difference<TContainer>::Type       TDifference;
     typedef typename MakeUnsigned<TDifference>::Type    Type;
 };
 
@@ -284,6 +302,26 @@ typename Reference<ContainerView<TContainer, TSpec> const>::Type
 value(ContainerView<TContainer, TSpec> const & view, TPos pos)
 {
     return *(view._begin + pos);
+}
+
+// ----------------------------------------------------------------------------
+// Function getValue()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec, typename TPos>
+SEQAN_FUNC
+typename GetValue<ContainerView<TContainer, TSpec> >::Type
+getValue(ContainerView<TContainer, TSpec> & view, TPos pos)
+{
+    return getValue(view._begin + pos);
+}
+
+template <typename TContainer, typename TSpec, typename TPos>
+SEQAN_FUNC
+typename GetValue<ContainerView<TContainer, TSpec> const>::Type
+getValue(ContainerView<TContainer, TSpec> const & view, TPos pos)
+{
+    return getValue(view._begin + pos);
 }
 
 // ----------------------------------------------------------------------------
