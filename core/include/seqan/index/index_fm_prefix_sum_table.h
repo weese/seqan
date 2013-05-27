@@ -93,6 +93,7 @@ struct GetValue<PrefixSumTable<TChar, TSpec> const>
 // ----------------------------------------------------------------------------
 // Metafunction Fibre
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): It should be possible to deduce the text size.
 
 template <typename TChar, typename TSpec>
 struct Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>
