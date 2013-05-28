@@ -78,4 +78,12 @@
 
 #include <seqan/index/index_view.h>
 
+// ===========================================================================
+// Device Indices.
+// ===========================================================================
+
+#ifdef __CUDACC__
+#include <seqan/index/index_device.h>
+#endif
+
 #endif  // EXTRAS_INCLUDE_SEQAN_INDEX_H_
