@@ -115,7 +115,7 @@ struct GetValue<thrust::device_vector<TChar, TAlloc> >
 };
 
 template <typename TChar, typename TAlloc>
-struct GetValue<thrust::device_vector<TChar,  TAlloc> const>
+struct GetValue<thrust::device_vector<TChar, TAlloc> const>
 {
     typedef typename thrust::device_vector<TChar, TAlloc>::const_reference Type;
 };
@@ -136,7 +136,7 @@ struct Reference<thrust::device_vector<TChar, TAlloc> >
 template <typename TChar,  typename TAlloc>
 struct Reference<thrust::device_vector<TChar, TAlloc> const>
 {
-    typedef typename thrust::device_vector<TChar,  TAlloc>::const_reference Type;
+    typedef typename thrust::device_vector<TChar, TAlloc>::const_reference Type;
 };
 
 template <typename TValue>
@@ -177,14 +177,14 @@ struct Iterator<thrust::device_vector<TChar, TAlloc> const, Rooted>
 template <typename TChar,  typename TAlloc>
 struct Iterator<thrust::device_vector<TChar, TAlloc>, Standard >
 {
-	typedef typename thrust::device_vector<TChar,  TAlloc>::iterator Type;
-    // typedef Iter<thrust::device_vector<TChar,  TAlloc>, StdIteratorAdaptor > Type;
+	typedef typename thrust::device_vector<TChar, TAlloc>::iterator Type;
+    // typedef Iter<thrust::device_vector<TChar, TAlloc>, StdIteratorAdaptor > Type;
 };
 
 template <typename TChar,  typename TAlloc>
-struct Iterator<thrust::device_vector<TChar,  TAlloc> const, Standard>
+struct Iterator<thrust::device_vector<TChar, TAlloc> const, Standard>
 {
-	typedef typename thrust::device_vector<TChar,  TAlloc>::const_iterator Type;
+	typedef typename thrust::device_vector<TChar, TAlloc>::const_iterator Type;
     // typedef Iter<thrust::device_vector<TChar, TAlloc> const, StdIteratorAdaptor > Type;
 };
 
@@ -198,12 +198,12 @@ struct Iterator<thrust::device_vector<TChar,  TAlloc> const, Standard>
 template <typename TChar,  typename TAlloc>
 struct Position<thrust::device_vector<TChar, TAlloc> >
 {
-    typedef typename thrust::device_vector<TChar,  TAlloc>::size_type Type;
+    typedef typename thrust::device_vector<TChar, TAlloc>::size_type Type;
 };
 
 template <typename TChar,  typename TAlloc>
-struct Position<thrust::device_vector<TChar,  TAlloc> const>
-        : Position<thrust::device_vector<TChar,  TAlloc> > {};
+struct Position<thrust::device_vector<TChar, TAlloc> const>
+        : Position<thrust::device_vector<TChar, TAlloc> > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction Size
@@ -282,17 +282,17 @@ getObjectId(thrust::device_vector<TChar, TAlloc> const & me)
 ///.Function.begin.class:Adaption.thrust::device_vector
 
 template <typename TChar,  typename TAlloc>
-inline typename Iterator<thrust::device_vector<TChar,  TAlloc>, Standard>::Type
-begin(thrust::device_vector<TChar,  TAlloc> & me, Standard)
+inline typename Iterator<thrust::device_vector<TChar, TAlloc>, Standard>::Type
+begin(thrust::device_vector<TChar, TAlloc> & me, Standard)
 {
-    return typename Iterator<thrust::device_vector<TChar,  TAlloc>, Standard>::Type(me.begin());
+    return typename Iterator<thrust::device_vector<TChar, TAlloc>, Standard>::Type(me.begin());
 }
 
 template <typename TChar,  typename TAlloc>
-inline typename Iterator<thrust::device_vector<TChar,  TAlloc> const, Standard>::Type
+inline typename Iterator<thrust::device_vector<TChar, TAlloc> const, Standard>::Type
 begin(thrust::device_vector<TChar, TAlloc> const & me, Standard)
 {
-    return typename Iterator<thrust::device_vector<TChar,  TAlloc> const, Standard>::Type(me.begin());
+    return typename Iterator<thrust::device_vector<TChar, TAlloc> const, Standard>::Type(me.begin());
 }
 
 // ----------------------------------------------------------------------------
@@ -304,16 +304,16 @@ begin(thrust::device_vector<TChar, TAlloc> const & me, Standard)
 
 template <typename TChar, typename TAlloc>
 inline typename Iterator<thrust::device_vector<TChar, TAlloc>, Standard>::Type
-end(thrust::device_vector<TChar,  TAlloc> & me, Standard)
+end(thrust::device_vector<TChar, TAlloc> & me, Standard)
 {
     return typename Iterator<thrust::device_vector<TChar, TAlloc>, Standard>::Type(me.end());
 }
 
 template <typename TChar,  typename TAlloc>
-inline typename Iterator<thrust::device_vector<TChar,  TAlloc> const, Standard>::Type
-end(thrust::device_vector<TChar,  TAlloc> const & me, Standard)
+inline typename Iterator<thrust::device_vector<TChar, TAlloc> const, Standard>::Type
+end(thrust::device_vector<TChar, TAlloc> const & me, Standard)
 {
-    return typename Iterator<thrust::device_vector<TChar,  TAlloc> const, Standard>::Type(me.end());
+    return typename Iterator<thrust::device_vector<TChar, TAlloc> const, Standard>::Type(me.end());
 }
 
 // ----------------------------------------------------------------------------
@@ -325,13 +325,13 @@ end(thrust::device_vector<TChar,  TAlloc> const & me, Standard)
 
 template <typename TChar,  typename TAlloc, typename TPos>
 inline typename GetValue<thrust::device_vector<TChar, TAlloc> >::Type
-value(thrust::device_vector<TChar,  TAlloc> & me, TPos pos)
+value(thrust::device_vector<TChar, TAlloc> & me, TPos pos)
 {
     return me[pos];
 }
 
 template <typename TChar,  typename TAlloc, typename TPos>
-inline typename GetValue<thrust::device_vector<TChar,  TAlloc> const>::Type
+inline typename GetValue<thrust::device_vector<TChar, TAlloc> const>::Type
 value(thrust::device_vector<TChar, TAlloc> const & me, TPos pos)
 {
     return me[pos];
@@ -444,28 +444,28 @@ back(thrust::device_vector<TChar, TAlloc> const & list)
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target, TSource & source)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source)
 {
     assign(target, source, Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target, TSource const & source)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source)
 {
     assign(target, source, Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target, TSource & source, TSize limit)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, TSize limit)
 {
     assign(target, source, limit, Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target, TSource const & source, TSize limit)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, TSize limit)
 {
     assign(target, source, limit, Generous());
 }
@@ -480,6 +480,7 @@ assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, Generous
 {
     target.assign(begin(source, Standard()), end(source, Standard()));
 }
+
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
 assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Generous)
@@ -487,12 +488,11 @@ assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Ge
     target.assign(begin(source, Standard()), end(source, Standard()));
 }
 
-
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign_std_vector_Generous_impl(thrust::device_vector<TChar,  TAlloc> & target,
+assign_std_vector_Generous_impl(thrust::device_vector<TChar, TAlloc> & target,
                                 TSource & source,
-                                typename Size<thrust::device_vector<TChar,  TAlloc> >::Type limit)
+                                typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit)
 {
     typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
     typename Size<TSource const>::Type source_length = length(source);
@@ -505,7 +505,7 @@ assign_std_vector_Generous_impl(thrust::device_vector<TChar,  TAlloc> & target,
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target,
+assign(thrust::device_vector<TChar, TAlloc> & target,
        TSource & source,
        typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
        Generous)
@@ -529,14 +529,14 @@ assign(thrust::device_vector<TChar, TAlloc> & target,
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target, TSource & source, Limit)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, Limit)
 {
     assign(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target, TSource const & source, Limit)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Limit)
 {
     assign(target, source, target.capacity(), Generous());
 }
@@ -558,9 +558,9 @@ assign(thrust::device_vector<TChar, TAlloc> & target,
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar,  TAlloc> & target,
+assign(thrust::device_vector<TChar, TAlloc> & target,
        TSource const & source,
-       typename Size<thrust::device_vector<TChar,  TAlloc> >::Type limit,
+       typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
        Limit)
 {
     if (limit > target.capacity())
@@ -580,7 +580,7 @@ assign(thrust::device_vector<TChar,  TAlloc> & target,
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-append(thrust::device_vector<TChar,  TAlloc> & target, TSource const & source, Generous)
+append(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Generous)
 {
     target.insert(target.end(), begin(source, Standard()), end(source, Standard()));
 }
@@ -617,7 +617,7 @@ append(thrust::device_vector<TChar, TAlloc> & target,
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-append(thrust::device_vector<TChar,  TAlloc> & target, TSource const & source, Limit)
+append(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Limit)
 {
     append(target, source, target.capacity(), Generous());
 }
@@ -653,7 +653,7 @@ appendValue(thrust::device_vector<TChar, TAlloc> & me, TValue const & _value, TT
 
 template <typename TChar, typename TAlloc, typename TValue>
 inline void
-appendValue(thrust::device_vector<TChar,  TAlloc> & me, TValue const & _value, Limit)
+appendValue(thrust::device_vector<TChar, TAlloc> & me, TValue const & _value, Limit)
 {
     if (capacity(me) > length(me)) me.push_back(_value);
 }
@@ -728,7 +728,7 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-replace(thrust::device_vector<TChar,  TAlloc> & target,
+replace(thrust::device_vector<TChar, TAlloc> & target,
         typename Position<thrust::device_vector<TChar, TAlloc> >::Type pos_begin,
         typename Position<thrust::device_vector<TChar, TAlloc> >::Type pos_end,
         TSource const & source,
@@ -740,8 +740,8 @@ replace(thrust::device_vector<TChar,  TAlloc> & target,
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
 replace(thrust::device_vector<TChar, TAlloc> & target,
-        typename Position<thrust::device_vector<TChar,  TAlloc> >::Type pos_begin,
-        typename Position<thrust::device_vector<TChar,  TAlloc> >::Type pos_end,
+        typename Position<thrust::device_vector<TChar, TAlloc> >::Type pos_begin,
+        typename Position<thrust::device_vector<TChar, TAlloc> >::Type pos_end,
         TSource const & source,
         typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
         Limit)
@@ -807,7 +807,7 @@ reserve(thrust::device_vector<TChar, TAlloc> & seq, TSize new_capacity, Insist c
 
 template <typename TChar,  typename TAlloc, typename TSize>
 inline typename Size<thrust::device_vector<TChar, TAlloc> >::Type
-reserve(thrust::device_vector<TChar,  TAlloc> & seq, TSize new_capacity, Limit const &)
+reserve(thrust::device_vector<TChar, TAlloc> & seq, TSize new_capacity, Limit const &)
 {
     // do nothing
     return _capacityReturned(seq, new_capacity, Limit());
@@ -819,7 +819,7 @@ reserve(thrust::device_vector<TChar,  TAlloc> & seq, TSize new_capacity, Limit c
 
 ///.Function.resize.param.object.type:Adaption.thrust::device_vector
 template <typename TChar,  typename TAlloc, typename TSize, typename TExpand>
-inline typename Size<thrust::device_vector<TChar,  TAlloc> >::Type
+inline typename Size<thrust::device_vector<TChar, TAlloc> >::Type
 resize(thrust::device_vector<TChar, TAlloc> & me, TSize new_length, Tag<TExpand> const &)
 {
     me.resize(new_length);
@@ -831,7 +831,7 @@ resize(thrust::device_vector<TChar, TAlloc> & me, TSize new_length, Tag<TExpand>
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TAlloc, typename TSize, typename TExpand>
-inline typename Size<thrust::device_vector<TChar,  TAlloc> >::Type
+inline typename Size<thrust::device_vector<TChar, TAlloc> >::Type
 fill(thrust::device_vector<TChar, TAlloc> & me, TSize new_length, TChar const & val, Tag<TExpand> const &)
 {
     me.resize(new_length, val);
