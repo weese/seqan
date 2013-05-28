@@ -146,6 +146,12 @@ struct Device
 
     typedef typename If<typename IsSimple<TObject>::Type, TObject, TDevice_>::Type      Type;
 };
+
+template <typename TObject>
+struct Device<TObject const>
+{
+    typedef typename Device<TObject>::Type const    Type;
+};
 #endif
 
 // ----------------------------------------------------------------------------
