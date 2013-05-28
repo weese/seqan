@@ -50,12 +50,10 @@
 #include <seqan/basic_extras.h>
 
 // ===========================================================================
-// Thrust vectors.
+// Adaption of thrust::device_vector.
 // ===========================================================================
 
 #ifdef __CUDACC__
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
 #include <seqan/sequence/adapt_thrust_vector.h>
 #endif
 
