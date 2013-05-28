@@ -260,13 +260,11 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreBwt
 {
     typedef thrust::device_vector<typename Value<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> const Type;
 };
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction FibreSA                                        [Device FMIndex]
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
 template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
@@ -278,13 +276,11 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpe
 {
     typedef CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec> const    Type;
 };
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction FibrePrefixSum                                 [Device LfTable]
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibrePrefixSum>
 {
@@ -336,13 +332,11 @@ struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreV
 //{
 //    typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
 //};
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction FibreEntries                            [Device PrefixSumTable]
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
 template <typename TChar, typename TSpec>
 struct Fibre<PrefixSumTable<TChar, Device<TSpec> >, FibreEntries>
 {
@@ -354,13 +348,11 @@ struct Fibre<PrefixSumTable<TChar, Device<TSpec> > const, FibreEntries>
 {
     typedef thrust::device_vector<unsigned> const   Type;
 };
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction FibreRanks                              [Device RankDictionary]
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
 template <typename TValue, typename TSpec>
 struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > >, FibreRanks>
 {
@@ -376,13 +368,11 @@ struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > > const, FibreRank
 
     typedef thrust::device_vector<RankDictionaryEntry_<TRankDictionarySpec_> > const    Type;
 };
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction FibreSparseString                         [Device CompressedSA]
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
 template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSparseString>
 {
@@ -402,19 +392,17 @@ struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec> const, F
 
     typedef SparseString<TString_, TSpec> const             Type;
 };
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                     [Device SparseString]
 // ----------------------------------------------------------------------------
 
-//#ifdef __CUDACC__
 //template <typename TValue, typename TAlloc, typename TSpec>
 //struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
 //{
 //    typedef thrust::device_vector<TValue, TAlloc>       Type;
 //};
-//#endif
+#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction Fibre                                              [Index View]
