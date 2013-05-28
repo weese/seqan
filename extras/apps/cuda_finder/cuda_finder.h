@@ -45,39 +45,6 @@ using namespace seqan;
 namespace seqan {
 
 // --------------------------------------------------------------------------
-// Metafunction Fibre
-// --------------------------------------------------------------------------
-
-//template <typename TText, typename TSpec>
-//struct Fibre<Index<TText, FMIndex<TL<TSpec>, TSpec> >, FibreTempSA>
-//{
-//    typedef Index<TText, FMIndex<TL<TSpec>, TSpec> >                 TIndex_;
-//    typedef typename SAValue<TIndex_>::Type                         TSAValue_;
-//
-//    typedef String<TSAValue_, typename DefaultIndexStringSpec<TText>::Type>     Type;
-//};
-
-//template <typename TText, typename TSpec>
-//struct Fibre<Index<TText, FMIndex<TL<TSpec>, TSpec> >, FibreLF>
-//{
-//    typedef LfTable<TText, TL<TSpec> >       Type;
-//};
-//
-//template <typename TText, typename TSpec>
-//struct Fibre<LfTable<TText, TL<TSpec> >, FibreValues>
-//{
-//    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
-//    typedef RankDictionary<TwoLevels<TValue_, TSpec> >      Type;
-//};
-//
-//template <typename TText, typename TSpec>
-//struct Fibre<LfTable<TText, TL<TSpec> > const, FibreValues>
-//{
-//    typedef typename Value<LfTable<TText, TSpec> >::Type       TValue_;
-//    typedef RankDictionary<TwoLevels<TValue_, void> > const    Type;
-//};
-
-// --------------------------------------------------------------------------
 // Metafunction Size
 // --------------------------------------------------------------------------
 
@@ -120,7 +87,7 @@ findCUDA(TIndex index, TPattern pattern)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-    printf("lengthSA=%ld\n", length(indexSA(index)));
+//    printf("lengthSA=%ld\n", length(indexSA(index)));
 //    for (unsigned i = 0; i < length(indexSA(index)); ++i)
 //        printf("%ld\n", indexSA(index)[i]);
 
@@ -169,13 +136,13 @@ findCUDA(TIndex index, TPattern pattern)
 
 int main(int argc, char const ** argv)
 {
-    typedef String<Dna>                                 TText;
-//    typedef Index<TText, IndexEsa<> >                   TIndex;
-    typedef Index<TText, FMIndex<> >                    TIndex;
-    typedef typename Device<TText>::Type                TDeviceText;
+    typedef String<Dna>                                 TString;
+//    typedef Index<TString, IndexEsa<> >                 TIndex;
+    typedef Index<TString, FMIndex<> >                  TIndex;
+    typedef typename Device<TString>::Type              TDeviceString;
     typedef typename Device<TIndex>::Type               TDeviceIndex;
 
-    TText text("ACGTACGTACGT");
+    TString text("ACGTACGTACGT");
     TIndex index(text);
 
     // Create Esa index.
@@ -190,10 +157,23 @@ int main(int argc, char const ** argv)
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
 
+//    printf("lengthSA=%ld\n", length(indexSA(deviceIndex)));
+//    for (unsigned i = 0; i < length(indexSA(deviceIndex)); ++i)
+//        printf("%ld\n", indexSA(deviceIndex)[i]);
+
     // Create a pattern.
-    TText pattern("TA");
-    TDeviceText devicePattern;
+    TString pattern("TA");
+    TDeviceString devicePattern;
     assign(devicePattern, pattern);
+
+    typedef StringSet<TString, Owner<ConcatDirect<> > >     TStringSet;
+    typedef typename Device<TStringSet>::Type               TDeviceStringSet;
+
+//    TStringSet sset;
+//    appendValue(sset, pattern);
+
+    TDeviceStringSet deviceSset;
+    appendValue(deviceSset, devicePattern);
 
     // Find on GPU.
     findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
