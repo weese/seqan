@@ -400,16 +400,16 @@ clear(thrust::device_vector<TChar, TAlloc> & me)
 ///.Function.front.param.container.type:Adaption.thrust::device_vector
 ///.Function.front.class:Adaption.thrust::device_vector
 
-template <typename TChar>
-inline typename Reference<thrust::device_vector<TChar> >::Type
-front(thrust::device_vector<TChar> & list)
+template <typename TChar, typename TAlloc>
+inline typename Reference<thrust::device_vector<TChar, TAlloc> >::Type
+front(thrust::device_vector<TChar, TAlloc> & list)
 {
     return list.front();
 }
 
-template <typename TChar>
-inline typename Reference<thrust::device_vector<TChar> const>::Type
-front(thrust::device_vector<TChar> const & list)
+template <typename TChar, typename TAlloc>
+inline typename Reference<thrust::device_vector<TChar, TAlloc> const>::Type
+front(thrust::device_vector<TChar, TAlloc> const & list)
 {
     return list.front();
 }
@@ -421,16 +421,16 @@ front(thrust::device_vector<TChar> const & list)
 ///.Function.back.param.container.type:Adaption.thrust::device_vector
 ///.Function.back.class:Adaption.thrust::device_vector
 
-template <typename TChar>
-inline typename Reference<thrust::device_vector<TChar> >::Type
-back(thrust::device_vector<TChar> & list)
+template <typename TChar, typename TAlloc>
+inline typename Reference<thrust::device_vector<TChar, TAlloc> >::Type
+back(thrust::device_vector<TChar, TAlloc> & list)
 {
     return list.back();
 }
 
-template <typename TChar>
-inline typename Reference<thrust::device_vector<TChar> const>::Type
-back(thrust::device_vector<TChar> const & list)
+template <typename TChar, typename TAlloc>
+inline typename Reference<thrust::device_vector<TChar, TAlloc> const>::Type
+back(thrust::device_vector<TChar, TAlloc> const & list)
 {
     return list.back();
 }
