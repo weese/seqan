@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: David Weese <david.weese@fu-berlin.de>
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_MISC_VIEW_H
-#define SEQAN_HEADER_MISC_VIEW_H
+#ifndef SEQAN_HEADER_MISC_VIEW_CONCAT_DIRECT_H
+#define SEQAN_HEADER_MISC_VIEW_CONCAT_DIRECT_H
 
 namespace seqan {
 
@@ -47,11 +46,11 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Class ContainerView
+// Class ConcatDirect ContainerView
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec = void>
-class ContainerView
+template <typename TContainer, typename TSpec>
+class ContainerView<TContainer, ConcatDirect<TSpec> >
 {
 public:
     typedef typename Iterator<ContainerView, Standard>::Type        TIterator;
@@ -122,122 +121,28 @@ public:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction View
-// ----------------------------------------------------------------------------
-
-template <typename TObject>
-struct View
-{
-    typedef typename If<typename IsSimple<TObject>::Type, TObject, ContainerView<TObject> >::Type    Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction Device
-// ----------------------------------------------------------------------------
-// TODO(esiragusa): Move Device metafunction somewhere else.
-
-#ifdef __CUDACC__
-template <typename TObject>
-struct Device
-{
-    typedef typename Value<TObject>::Type               TValue_;
-//    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
-    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     TDevice_;
-
-    typedef typename If<typename IsSimple<TObject>::Type, TObject, TDevice_>::Type      Type;
-};
-#endif
-
-// ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec>
-struct Value<ContainerView<TContainer, TSpec> >
-{
-    typedef typename Value<TContainer>::Type Type;
-};
-
-template <typename TContainer, typename TSpec>
-struct Value<ContainerView<TContainer, TSpec> const> :
-    public Value<ContainerView<TContainer const, TSpec> > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction GetValue
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-struct GetValue<ContainerView<TContainer, TSpec> >
-{
-    typedef ContainerView<TContainer, TSpec>                        TContainerView_;
-    typedef typename Iterator<TContainerView_, Standard>::Type      TIterator_;
-    typedef typename GetValue<TIterator_>::Type                     Type;
-};
-
-template <typename TContainer, typename TSpec>
-struct GetValue<ContainerView<TContainer, TSpec> const>
-{
-    typedef ContainerView<TContainer, TSpec> const                  TContainerView_;
-    typedef typename Iterator<TContainerView_, Standard>::Type      TIterator_;
-    typedef typename GetValue<TIterator_>::Type                     Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction Iterator
 // ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec>
-struct Iterator<ContainerView<TContainer, TSpec>, Standard>:
-    public Iterator<TContainer, Standard> {};
-
-template <typename TContainer, typename TSpec>
-struct Iterator<ContainerView<TContainer, TSpec> const, Standard>:
-    public Iterator<TContainer const, Standard> {};
-
-#ifdef __CUDACC__
-template <typename TContainer, typename TAlloc, typename TSpec>
-struct Iterator<ContainerView<thrust::device_vector<TContainer, TAlloc>, TSpec>, Standard>
-{
-    typedef typename thrust::device_vector<TContainer, TAlloc>::pointer         TIterator_;
-    typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
-};
-
-template <typename TContainer, typename TAlloc, typename TSpec>
-struct Iterator<ContainerView<thrust::device_vector<TContainer, TAlloc>, TSpec> const, Standard>
-{
-    typedef typename thrust::device_vector<TContainer const, TAlloc>::pointer   TIterator_;
-    typedef typename thrust::detail::pointer_traits<TIterator_>::raw_pointer    Type;
-};
-#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction Difference
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-struct Difference<ContainerView<TContainer, TSpec> >
-{
-    typedef typename Difference<TContainer>::Type Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction Size
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-struct Size<ContainerView<TContainer, TSpec> >
-{
-    typedef typename Difference<TContainer>::Type       TDifference;
-    typedef typename MakeUnsigned<TDifference>::Type    Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction IsSequence
 // ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec>
-struct IsSequence<ContainerView<TContainer, TSpec> >:
-    public IsSequence<TContainer> {};
 
 // ============================================================================
 // Functions
@@ -249,16 +154,16 @@ struct IsSequence<ContainerView<TContainer, TSpec> >:
 
 template <typename TContainer, typename TSpec>
 SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, TSpec>, Standard>::Type
-begin(ContainerView<TContainer, TSpec> & view, Standard)
+typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> >, Standard>::Type
+begin(ContainerView<TContainer, ConcatDirect<TSpec> > & view, Standard)
 {
     return view._begin;
 }
 
 template <typename TContainer, typename TSpec>
 SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, TSpec> const, Standard>::Type
-begin(ContainerView<TContainer, TSpec> const & view, Standard)
+typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> > const, Standard>::Type
+begin(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, Standard)
 {
     return view._begin;
 }
@@ -269,16 +174,16 @@ begin(ContainerView<TContainer, TSpec> const & view, Standard)
 
 template <typename TContainer, typename TSpec>
 SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, TSpec>, Standard>::Type
-end(ContainerView<TContainer, TSpec> & view, Standard)
+typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> >, Standard>::Type
+end(ContainerView<TContainer, ConcatDirect<TSpec> > & view, Standard)
 {
     return view._end;
 }
 
 template <typename TContainer, typename TSpec>
 SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, TSpec> const, Standard>::Type
-end(ContainerView<TContainer, TSpec> const & view, Standard)
+typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> > const, Standard>::Type
+end(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, Standard)
 {
     return view._end;
 }
@@ -289,16 +194,16 @@ end(ContainerView<TContainer, TSpec> const & view, Standard)
 
 template <typename TContainer, typename TSpec, typename TPos>
 SEQAN_FUNC
-typename Reference<ContainerView<TContainer, TSpec> >::Type
-value(ContainerView<TContainer, TSpec> & view, TPos pos)
+typename Reference<ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
+value(ContainerView<TContainer, ConcatDirect<TSpec> > & view, TPos pos)
 {
     return *(view._begin + pos);
 }
 
 template <typename TContainer, typename TSpec, typename TPos>
 SEQAN_FUNC
-typename Reference<ContainerView<TContainer, TSpec> const>::Type
-value(ContainerView<TContainer, TSpec> const & view, TPos pos)
+typename Reference<ContainerView<TContainer, ConcatDirect<TSpec> > const>::Type
+value(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, TPos pos)
 {
     return *(view._begin + pos);
 }
@@ -309,16 +214,16 @@ value(ContainerView<TContainer, TSpec> const & view, TPos pos)
 
 template <typename TContainer, typename TSpec, typename TPos>
 SEQAN_FUNC
-typename GetValue<ContainerView<TContainer, TSpec> >::Type
-getValue(ContainerView<TContainer, TSpec> & view, TPos pos)
+typename GetValue<ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
+getValue(ContainerView<TContainer, ConcatDirect<TSpec> > & view, TPos pos)
 {
     return getValue(view._begin + pos);
 }
 
 template <typename TContainer, typename TSpec, typename TPos>
 SEQAN_FUNC
-typename GetValue<ContainerView<TContainer, TSpec> const>::Type
-getValue(ContainerView<TContainer, TSpec> const & view, TPos pos)
+typename GetValue<ContainerView<TContainer, ConcatDirect<TSpec> > const>::Type
+getValue(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, TPos pos)
 {
     return getValue(view._begin + pos);
 }
@@ -329,8 +234,8 @@ getValue(ContainerView<TContainer, TSpec> const & view, TPos pos)
 
 template <typename TContainer, typename TSpec>
 SEQAN_FUNC
-typename Difference<ContainerView<TContainer, TSpec> >::Type
-length(ContainerView<TContainer, TSpec> const & view)
+typename Difference<ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
+length(ContainerView<TContainer, ConcatDirect<TSpec> > const & view)
 {
     return view._end - view._begin;
 }
@@ -344,8 +249,8 @@ length(ContainerView<TContainer, TSpec> const & view)
 // and need to make sure that it has a certain length
 
 template <typename TContainer, typename TSpec, typename TSize, typename TValue, typename TExpand>
-inline typename Size< ContainerView<TContainer, TSpec> >::Type
-resize(ContainerView<TContainer, TSpec> & me, TSize new_length, TValue /* val */, Tag<TExpand>)
+inline typename Size< ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
+resize(ContainerView<TContainer, ConcatDirect<TSpec> > & me, TSize new_length, TValue /* val */, Tag<TExpand>)
 {
     ignoreUnusedVariableWarning(new_length);
 
@@ -354,8 +259,8 @@ resize(ContainerView<TContainer, TSpec> & me, TSize new_length, TValue /* val */
 }
 
 template <typename TContainer, typename TSpec, typename TSize, typename TExpand>
-inline typename Size< ContainerView<TContainer, TSpec> >::Type
-resize(ContainerView<TContainer, TSpec> & me, TSize new_length, Tag<TExpand> tag)
+inline typename Size< ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
+resize(ContainerView<TContainer, ConcatDirect<TSpec> > & me, TSize new_length, Tag<TExpand> tag)
 {
     return resize(me, new_length, Nothing(), tag);
 }
@@ -366,7 +271,7 @@ resize(ContainerView<TContainer, TSpec> & me, TSize new_length, Tag<TExpand> tag
 
 template <typename TContainer, typename TSpec, typename TOtherContainer>
 void
-assign(ContainerView<TContainer, TSpec> & view, TOtherContainer const & cont)
+assign(ContainerView<TContainer, ConcatDirect<TSpec> > & view, TOtherContainer const & cont)
 {
     view._begin = begin(cont, Standard());
     view._end = end(cont, Standard());
@@ -376,65 +281,26 @@ assign(ContainerView<TContainer, TSpec> & view, TOtherContainer const & cont)
 // Function view()
 // ----------------------------------------------------------------------------
 
-template <typename TContainer>
-ContainerView<TContainer>
-view(TContainer & container)
-{
-    return ContainerView<TContainer>(container);
-}
-
-#ifdef __CUDACC__
-template <typename TContainer, typename TAlloc>
-ContainerView<thrust::device_vector<TContainer, TAlloc> >
-view(thrust::device_vector<TContainer, TAlloc> & container)
-{
-    typedef thrust::device_vector<TContainer, TAlloc>    TDeviceContainer;
-    return ContainerView<TDeviceContainer>(
-            thrust::raw_pointer_cast(container.data()),
-            thrust::raw_pointer_cast(&container[container.size()])
-    );
-}
-#endif
-
-// ----------------------------------------------------------------------------
-// Operator<<
-// ----------------------------------------------------------------------------
-
-template <typename TStream, typename TContainer, typename TSpec>
-inline TStream &
-operator<<(TStream & target, ContainerView<TContainer, TSpec> const & source)
-{
-    write(target, source);
-    return target;
-}
-
-// ----------------------------------------------------------------------------
-// Pipe interface
-// ----------------------------------------------------------------------------
-
-//template < typename TContainer,
-//           typename TSpec,
-//           typename TInput,
-//           typename TPipeSpec >
-//inline void assign(ContainerView<TContainer, TSpec> &dest, Pipe<TInput, TPipeSpec> &src)
+//template <typename TContainer>
+//ContainerView<TContainer>
+//view(TContainer & container)
 //{
-//    typedef typename Iterator<ContainerView<TContainer, TSpec>, Standard>::Type TDestIter;
-//    resize(dest, length(src));
-//    beginRead(src);
-//    for (TDestIter _cur = begin(dest, Standard()), _end = end(dest, Standard()); _cur != _end; ++_cur, ++src)
-//        *_cur = *src;
-//    endRead(src);
+//    return ContainerView<TContainer>(container);
 //}
 //
-//template < typename TContainer,
-//           typename TSpec,
-//           typename TInput,
-//           typename TPipeSpec >
-//inline void operator << (ContainerView<TContainer, TSpec> &dest, Pipe<TInput, TPipeSpec> &src)
+//#ifdef __CUDACC__
+//template <typename TContainer, typename TAlloc>
+//ContainerView<thrust::device_vector<TContainer, TAlloc> >
+//view(thrust::device_vector<TContainer, TAlloc> & container)
 //{
-//    assign(dest, src);
+//    typedef thrust::device_vector<TContainer, TAlloc>    TDeviceContainer;
+//    return ContainerView<TDeviceContainer>(
+//            thrust::raw_pointer_cast(container.data()),
+//            thrust::raw_pointer_cast(&container[container.size()])
+//    );
 //}
+//#endif
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_MISC_VIEW_H
+#endif  // #ifndef SEQAN_HEADER_MISC_VIEW_CONCAT_DIRECT_H
