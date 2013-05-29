@@ -128,8 +128,21 @@ public:
 template <typename TObject>
 struct View
 {
-    typedef typename If<typename IsSimple<TObject>::Type, TObject, ContainerView<TObject> >::Type    Type;
+    typedef ContainerView<TObject>  Type;
 };
+
+template <typename TObject>
+struct View<TObject const>
+{
+    typedef typename View<TObject>::Type const  Type;
+};
+
+// NOTE(esiragusa): Is this trick necessary?
+//template <typename TObject>
+//struct View
+//{
+//    typedef typename If<typename IsSimple<TObject>::Type, TObject, ContainerView<TObject> >::Type    Type;
+//};
 
 // ----------------------------------------------------------------------------
 // Metafunction Device
