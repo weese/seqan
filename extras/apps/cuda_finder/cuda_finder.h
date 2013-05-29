@@ -42,12 +42,11 @@ using namespace seqan;
 // Metafunctions
 // ==========================================================================
 
-namespace seqan {
-
 // --------------------------------------------------------------------------
 // Metafunction Size
 // --------------------------------------------------------------------------
 
+namespace seqan {
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
 {
@@ -59,12 +58,7 @@ struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
 {
     typedef unsigned Type;
 };
-
 }
-
-// ==========================================================================
-// Classes
-// ==========================================================================
 
 // ==========================================================================
 // Functions
@@ -131,15 +125,65 @@ findCUDA(TIndex index, TPattern pattern)
 #endif
 
 // --------------------------------------------------------------------------
-// Function main()
+// Function testInfix()
 // --------------------------------------------------------------------------
 
-int main(int argc, char const ** argv)
+template <typename TAlphabet>
+void testInfix()
 {
-    typedef String<Dna>                                 TString;
-//    typedef Index<TString, IndexEsa<> >                 TIndex;
-    typedef Index<TString, FMIndex<> >                  TIndex;
+    typedef String<TAlphabet>                           TString;
+    typedef typename View<TString>::Type                TStringView;
+    typedef typename Infix<TString>::Type               TStringInfix;
+    typedef typename Infix<TStringView>::Type           TStringViewInfix;
+
+    TString s = "AAACCCGGGTTT";
+    TStringInfix sInfix = infix(s, 3, 6);
+
+    TStringView sView = view(s);
+    TStringViewInfix sViewInfix = infix(sView, 3, 6);
+
+    SEQAN_ASSERT(isEqual(sInfix, sViewInfix));
+}
+
+// --------------------------------------------------------------------------
+// Function testStringSet()
+// --------------------------------------------------------------------------
+
+template <typename TAlphabet>
+void testStringSet()
+{
+    typedef String<TAlphabet>                           TString;
+    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
+    typedef typename View<TString>::Type                TStringView;
+    typedef typename View<TStringSet>::Type             TStringSetView;
     typedef typename Device<TString>::Type              TDeviceString;
+    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
+
+    TStringSet ss;
+    appendValue(ss, "AAAAAAAA");
+    appendValue(ss, "CCCCCCC");
+    appendValue(ss, "GGGGGGGGGGGGGG");
+    appendValue(ss, "T");
+
+    TStringSetView ssView = view(ss);
+
+    SEQAN_ASSERT_EQ(length(ss), length(ssView));
+    for (unsigned i = 0; i < length(ss); ++i)
+        SEQAN_ASSERT(isEqual(ss[i], ssView[i]))
+}
+
+// --------------------------------------------------------------------------
+// Function testIndex()
+// --------------------------------------------------------------------------
+
+template <typename TAlphabet, typename TIndexSpec>
+void testIndex()
+{
+    typedef String<TAlphabet>                           TString;
+    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
+    typedef Index<TString, TIndexSpec>                  TIndex;
+    typedef typename Device<TString>::Type              TDeviceString;
+    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
     typedef typename Device<TIndex>::Type               TDeviceIndex;
 
     TString text("ACGTACGTACGT");
@@ -150,8 +194,8 @@ int main(int argc, char const ** argv)
 //    indexCreate(index, FibreLcp());
 //    indexCreate(index, FibreChildtab());
 
-    // Create FM index.
-    indexCreate(index, FibreSALF());
+    // Create index.
+    indexCreate(index);
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
@@ -166,18 +210,18 @@ int main(int argc, char const ** argv)
     TDeviceString devicePattern;
     assign(devicePattern, pattern);
 
-    typedef StringSet<TString, Owner<ConcatDirect<> > >     TStringSet;
-    typedef typename Device<TStringSet>::Type               TDeviceStringSet;
-
-//    TStringSet sset;
-//    appendValue(sset, pattern);
-
-    TDeviceStringSet deviceSset;
-    appendValue(deviceSset, devicePattern);
-
     // Find on GPU.
     findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
     cudaDeviceSynchronize();
-
-    return 0;
 }
+
+// --------------------------------------------------------------------------
+// Function main()
+// --------------------------------------------------------------------------
+
+int main(int argc, char const ** argv)
+{
+    testInfix<Dna>();
+    testStringSet<Dna>();
+    testIndex<Dna, FMIndex<> >();
+};
