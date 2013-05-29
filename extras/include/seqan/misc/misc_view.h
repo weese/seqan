@@ -245,6 +245,20 @@ template <typename TContainer, typename TSpec>
 struct IsSequence<ContainerView<TContainer, TSpec> >:
     public IsSequence<TContainer> {};
 
+// ----------------------------------------------------------------------------
+// Metafunction Infix
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct Infix<ContainerView<TContainer, TSpec> >
+{
+    typedef ContainerView<TContainer, TSpec>    Type;
+};
+
+template <typename TContainer, typename TSpec>
+struct Infix<ContainerView<TContainer, TSpec> const> :
+    Infix<ContainerView<TContainer, TSpec> > {};
+
 // ============================================================================
 // Functions
 // ============================================================================
@@ -367,12 +381,37 @@ resize(ContainerView<TContainer, TSpec> & me, TSize new_length, Tag<TExpand> tag
 }
 
 // ----------------------------------------------------------------------------
+// Function infix()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec, typename TPosBegin, typename TPosEnd>
+SEQAN_FUNC typename Infix<ContainerView<TContainer, TSpec> >::Type
+infix(ContainerView<TContainer, TSpec> & view, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return typename Infix<ContainerView<TContainer, TSpec> >::Type(view._begin + pos_begin, view._begin + pos_end);
+}
+
+template <typename TContainer, typename TSpec, typename TPosBegin, typename TPosEnd>
+SEQAN_FUNC typename Infix<ContainerView<TContainer, TSpec> const>::Type
+infix(ContainerView<TContainer, TSpec> const & view, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return typename Infix<ContainerView<TContainer, TSpec> const>::Type(view._begin + pos_begin, view._begin + pos_end);
+}
+
+// TODO(esiragusa): infix of view pointer?
+//template <typename T, typename TPosBegin, typename TPosEnd>
+//inline typename Infix<T *>::Type
+//infix(T * t, TPosBegin pos_begin, TPosEnd pos_end)
+//{
+//    return typename Infix<T *>::Type (t, pos_begin, pos_end);
+//}
+
+// ----------------------------------------------------------------------------
 // Function assign()
 // ----------------------------------------------------------------------------
 
 template <typename TContainer, typename TSpec, typename TOtherContainer>
-void
-assign(ContainerView<TContainer, TSpec> & view, TOtherContainer const & cont)
+inline void assign(ContainerView<TContainer, TSpec> & view, TOtherContainer const & cont)
 {
     view._begin = begin(cont, Standard());
     view._end = end(cont, Standard());
@@ -383,7 +422,7 @@ assign(ContainerView<TContainer, TSpec> & view, TOtherContainer const & cont)
 // ----------------------------------------------------------------------------
 
 template <typename TContainer>
-ContainerView<TContainer>
+inline ContainerView<TContainer>
 view(TContainer & container)
 {
     return ContainerView<TContainer>(container);
@@ -391,7 +430,7 @@ view(TContainer & container)
 
 #ifdef __CUDACC__
 template <typename TContainer, typename TAlloc>
-ContainerView<thrust::device_vector<TContainer, TAlloc> >
+inline ContainerView<thrust::device_vector<TContainer, TAlloc> >
 view(thrust::device_vector<TContainer, TAlloc> & container)
 {
     typedef thrust::device_vector<TContainer, TAlloc>    TDeviceContainer;
