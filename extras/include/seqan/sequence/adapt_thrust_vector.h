@@ -677,17 +677,17 @@ replace(thrust::device_vector<TChar, TAlloc> & target,
     typename Size<thrust::device_vector<TChar, TAlloc> >::Type target_size = pos_end-pos_begin;
     typename Size<thrust::device_vector<TChar, TAlloc> >::Type source_size =length(source);
 
-    if(target_size >= source_size)
-        {
-            copy(source.begin(),source.end(), target.begin()+pos_begin);
-            if( target_size > source_size )
-                target.erase(target.begin()+pos_begin+source_size,target.begin()+pos_end);
-        }
+    if (target_size >= source_size)
+    {
+        copy(source.begin(),source.end(), target.begin()+pos_begin);
+        if (target_size > source_size)
+            target.erase(target.begin()+pos_begin+source_size,target.begin()+pos_end);
+    }
     else
-        {
-            copy(source.begin(),source.begin()+target_size,target.begin()+pos_begin);
-            target.insert(target.begin()+pos_end,source.begin()+target_size,source.end());
-        }
+    {
+        copy(source.begin(),source.begin()+target_size,target.begin()+pos_begin);
+        target.insert(target.begin()+pos_end,source.begin()+target_size,source.end());
+    }
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
