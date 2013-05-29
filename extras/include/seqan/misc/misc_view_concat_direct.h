@@ -38,93 +38,36 @@
 namespace seqan {
 
 // ============================================================================
-// Forwards
-// ============================================================================
-
-// ============================================================================
-// Tags, Classes, Enums
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// Class ConcatDirect ContainerView
-// ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec>
-class ContainerView<TContainer, ConcatDirect<TSpec> >
-{
-public:
-    typedef typename Iterator<ContainerView, Standard>::Type        TIterator;
-
-    TIterator _begin;
-    TIterator _end;
-
-    // ------------------------------------------------------------------------
-    // ContainerView Constructors
-    // ------------------------------------------------------------------------
-
-    SEQAN_FUNC
-    ContainerView() {}
-
-    template <typename TOtherContainer>
-    SEQAN_FUNC
-    ContainerView(TOtherContainer & cont):
-        _begin(begin(cont, Standard())),
-        _end(end(cont, Standard())) {}
-
-    template <typename TOtherContainer>
-    SEQAN_FUNC
-    ContainerView(TOtherContainer const & cont):
-        _begin(begin(cont, Standard())),
-        _end(end(cont, Standard())) {}
-
-    SEQAN_FUNC
-    ContainerView(TIterator const & begin, TIterator const & end):
-        _begin(begin),
-        _end(end) {}
-
-    // ------------------------------------------------------------------------
-    // Operator =
-    // ------------------------------------------------------------------------
-
-    template <typename TOtherContainer>
-    SEQAN_FUNC
-    ContainerView &
-    operator= (TOtherContainer & other)
-    {
-        assign(*this, other);
-        return *this;
-    }
-
-    // ------------------------------------------------------------------------
-    // Operator []
-    // ------------------------------------------------------------------------
-
-    template <typename TPos>
-    SEQAN_FUNC
-    typename Reference<ContainerView>::Type
-    operator[] (TPos pos)
-    {
-        return value(*this, pos);
-    }
-
-    template <typename TPos>
-    SEQAN_FUNC
-    typename GetValue<ContainerView>::Type
-    operator[] (TPos pos) const
-    {
-        return getValue(*this, pos);
-    }
-};
-
-// ============================================================================
 // Metafunctions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction Device
+// Metafunction View                                                [StringSet]
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Move Device metafunction somewhere else.
+// TODO(esiragusa): Generic const version?
+
+template <typename TString, typename TSpec>
+struct View<StringSet<TString, TSpec> >
+{
+    typedef StringSet<typename View<TString>::Type, TSpec>      Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction StringSetLimits                                [StringSet View]
+// ----------------------------------------------------------------------------
 // NOTE(esiragusa): Generic const version refers to this non-const one.
+
+template <typename TString, typename TSpec>
+struct StringSetLimits<StringSet<ContainerView<TString>, TSpec> >
+{
+    typedef typename View<typename StringSetLimits<StringSet<TString, TSpec> >::Type>::Type     Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Device                                              [StringSet]
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): Generic const version refers to this non-const one.
+// TODO(esiragusa): Move Device metafunction somewhere else.
 
 #ifdef __CUDACC__
 template <typename TString, typename TSpec>
@@ -135,10 +78,10 @@ struct Device<StringSet<TString, TSpec> >
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction StringSetLimits
+// Metafunction StringSetLimits                              [Device StringSet]
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Move StringSetLimits metafunction somewhere else.
 // NOTE(esiragusa): Generic const version refers to this non-const one.
+// TODO(esiragusa): Move StringSetLimits metafunction somewhere else.
 
 #ifdef __CUDACC__
 template <typename TValue, typename TAlloc, typename TSpec>
@@ -150,186 +93,44 @@ struct StringSetLimits<StringSet<thrust::device_vector<TValue, TAlloc>, TSpec> >
 };
 #endif
 
-// ----------------------------------------------------------------------------
-// Metafunction Value
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// Metafunction GetValue
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// Metafunction Iterator
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// Metafunction Difference
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// Metafunction Size
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// Metafunction IsSequence
-// ----------------------------------------------------------------------------
-
 // ============================================================================
 // Functions
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// Function begin()
-// ----------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Function _initStringSetLimits                [ConcatDirect StringSet View]
+// --------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> >, Standard>::Type
-begin(ContainerView<TContainer, ConcatDirect<TSpec> > & view, Standard)
-{
-    return view._begin;
-}
-
-template <typename TContainer, typename TSpec>
-SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> > const, Standard>::Type
-begin(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, Standard)
-{
-    return view._begin;
-}
+template <typename TString, typename TSpec>
+inline void _initStringSetLimits(StringSet<ContainerView<TString>, Owner<ConcatDirect<TSpec> > > & /* me */) {}
 
 // ----------------------------------------------------------------------------
-// Function end()
+// Function view()                                     [ConcatDirect StringSet]
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> >, Standard>::Type
-end(ContainerView<TContainer, ConcatDirect<TSpec> > & view, Standard)
+template <typename TString, typename TSpec>
+typename View<StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type
+view(StringSet<TString, Owner<ConcatDirect<TSpec> > > & stringSet)
 {
-    return view._end;
-}
+    typename View<StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type stringSetView;
 
-template <typename TContainer, typename TSpec>
-SEQAN_FUNC
-typename Iterator<ContainerView<TContainer, ConcatDirect<TSpec> > const, Standard>::Type
-end(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, Standard)
-{
-    return view._end;
+    concat(stringSetView) = view(concat(stringSet));
+    stringSetLimits(stringSetView) = view(stringSetLimits(stringSet));
+
+    return stringSetView;
 }
 
 // ----------------------------------------------------------------------------
-// Function value()
+// Function assign()                                   [ConcatDirect StringSet]
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec, typename TPos>
-SEQAN_FUNC
-typename Reference<ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
-value(ContainerView<TContainer, ConcatDirect<TSpec> > & view, TPos pos)
+template <typename TString, typename TSpec, typename TString2, typename TSpec2>
+void assign(StringSet<TString, Owner<ConcatDirect<TSpec> > > & stringSet,
+            StringSet<TString2, Owner<ConcatDirect<TSpec2> > > & other)
 {
-    return *(view._begin + pos);
+    assign(concat(stringSet), concat(other));
+    assign(stringSetLimits(stringSet), stringSetLimits(other));
 }
-
-template <typename TContainer, typename TSpec, typename TPos>
-SEQAN_FUNC
-typename Reference<ContainerView<TContainer, ConcatDirect<TSpec> > const>::Type
-value(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, TPos pos)
-{
-    return *(view._begin + pos);
-}
-
-// ----------------------------------------------------------------------------
-// Function getValue()
-// ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec, typename TPos>
-SEQAN_FUNC
-typename GetValue<ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
-getValue(ContainerView<TContainer, ConcatDirect<TSpec> > & view, TPos pos)
-{
-    return getValue(view._begin + pos);
-}
-
-template <typename TContainer, typename TSpec, typename TPos>
-SEQAN_FUNC
-typename GetValue<ContainerView<TContainer, ConcatDirect<TSpec> > const>::Type
-getValue(ContainerView<TContainer, ConcatDirect<TSpec> > const & view, TPos pos)
-{
-    return getValue(view._begin + pos);
-}
-
-// ----------------------------------------------------------------------------
-// Function length()
-// ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec>
-SEQAN_FUNC
-typename Difference<ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
-length(ContainerView<TContainer, ConcatDirect<TSpec> > const & view)
-{
-    return view._end - view._begin;
-}
-
-// ----------------------------------------------------------------------------
-// Function resize()
-// ----------------------------------------------------------------------------
-
-// this function doesn't do anything as we are not allowed to change the host (only its elements)
-// it is, however, implemented for algorithms that get a sequence to work on
-// and need to make sure that it has a certain length
-
-template <typename TContainer, typename TSpec, typename TSize, typename TValue, typename TExpand>
-inline typename Size< ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
-resize(ContainerView<TContainer, ConcatDirect<TSpec> > & me, TSize new_length, TValue /* val */, Tag<TExpand>)
-{
-    ignoreUnusedVariableWarning(new_length);
-
-    SEQAN_ASSERT_EQ(new_length, (TSize)length(me));
-    return length(me);
-}
-
-template <typename TContainer, typename TSpec, typename TSize, typename TExpand>
-inline typename Size< ContainerView<TContainer, ConcatDirect<TSpec> > >::Type
-resize(ContainerView<TContainer, ConcatDirect<TSpec> > & me, TSize new_length, Tag<TExpand> tag)
-{
-    return resize(me, new_length, Nothing(), tag);
-}
-
-// ----------------------------------------------------------------------------
-// Function assign()
-// ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec, typename TOtherContainer>
-void
-assign(ContainerView<TContainer, ConcatDirect<TSpec> > & view, TOtherContainer const & cont)
-{
-    view._begin = begin(cont, Standard());
-    view._end = end(cont, Standard());
-}
-
-// ----------------------------------------------------------------------------
-// Function view()
-// ----------------------------------------------------------------------------
-
-//template <typename TContainer>
-//ContainerView<TContainer>
-//view(TContainer & container)
-//{
-//    return ContainerView<TContainer>(container);
-//}
-//
-//#ifdef __CUDACC__
-//template <typename TContainer, typename TAlloc>
-//ContainerView<thrust::device_vector<TContainer, TAlloc> >
-//view(thrust::device_vector<TContainer, TAlloc> & container)
-//{
-//    typedef thrust::device_vector<TContainer, TAlloc>    TDeviceContainer;
-//    return ContainerView<TDeviceContainer>(
-//            thrust::raw_pointer_cast(container.data()),
-//            thrust::raw_pointer_cast(&container[container.size()])
-//    );
-//}
-//#endif
 
 }  // namespace seqan
 
