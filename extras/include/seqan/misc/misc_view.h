@@ -150,14 +150,23 @@ struct View<TObject const>
 // TODO(esiragusa): Move Device metafunction somewhere else.
 
 #ifdef __CUDACC__
+// NOTE(esiragusa): Is this trick necessary?
+//template <typename TObject>
+//struct Device
+//{
+//    typedef typename Value<TObject>::Type               TValue_;
+////    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
+//    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     TDevice_;
+//
+//    typedef typename If<typename IsSimple<TObject>::Type, TObject, TDevice_>::Type      Type;
+//};
+
 template <typename TObject>
 struct Device
 {
     typedef typename Value<TObject>::Type               TValue_;
 //    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
-    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     TDevice_;
-
-    typedef typename If<typename IsSimple<TObject>::Type, TObject, TDevice_>::Type      Type;
+    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     Type;
 };
 
 template <typename TObject>
