@@ -169,7 +169,7 @@ void testStringSet()
 
     SEQAN_ASSERT_EQ(length(ss), length(ssView));
     for (unsigned i = 0; i < length(ss); ++i)
-        SEQAN_ASSERT(isEqual(ss[i], ssView[i]))
+        SEQAN_ASSERT(isEqual(ss[i], ssView[i]));
 }
 
 // --------------------------------------------------------------------------
