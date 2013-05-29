@@ -99,7 +99,7 @@ public:
 
     StringSet()
     {
-        appendValue(limits, 0);
+        _initStringSetLimits(*this);
     }
 
     // ----------------------------------------------------------------------
@@ -248,6 +248,16 @@ inline void assignValue(
         while (pos < size)
             me.limits[++pos] += delta;
     }
+}
+
+// --------------------------------------------------------------------------
+// Function _initStringSetLimits
+// --------------------------------------------------------------------------
+
+template <typename TString, typename TSpec>
+inline void _initStringSetLimits(StringSet<TString, Owner<ConcatDirect<TSpec> > > & me)
+{
+    appendValue(me.limits, 0);
 }
 
 // --------------------------------------------------------------------------
