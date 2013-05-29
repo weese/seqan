@@ -161,8 +161,9 @@ struct CompressedSA
 
     CompressedSA() :
         lfTable()
-    {};
+    {}
 
+    template <typename TLfTable>
     CompressedSA(TLfTable const & lfTable) :
         lfTable(lfTable)
     {}
