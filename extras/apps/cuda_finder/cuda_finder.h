@@ -81,26 +81,18 @@ findCUDA(TIndex index, TPattern pattern)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-//    printf("lengthSA=%ld\n", length(indexSA(index)));
-//    for (unsigned i = 0; i < length(indexSA(index)); ++i)
-//        printf("%ld\n", indexSA(index)[i]);
-
-//    printf("lengthLcp=%ld\n", length(indexLcp(index)));
-//    for (unsigned i = 0; i < length(indexLcp(index)); ++i)
-//        printf("%ld\n", indexLcp(index)[i]);
-//
-//    printf("lengthChildtab=%ld\n", length(indexChildtab(index)));
-//    for (unsigned i = 0; i < length(indexChildtab(index)); ++i)
-//        printf("%ld\n", indexChildtab(index)[i]);
-
+    // Instantiate an iterator of the prefix trie.
     TIterator it(index);
 
+    // At root.
     printf("isRoot()=%d\n", isRoot(it));
     printf("repLength()=%ld\n", repLength(it));
     printf("countOccurrences()=%ld\n", countOccurrences(it));
 
+    // Visit the leftmost children of the root.
     if (goDown(it))
     {
+        // Visit all the siblings at depth one.
         do
         {
             printf("repLength()=%ld\n", repLength(it));
@@ -110,17 +102,6 @@ findCUDA(TIndex index, TPattern pattern)
         }
         while (goRight(it));
     }
-
-//    TEdgeLabel edgeLabel = parentEdgeLabel(it);
-//    TRepresentative repr = representative(it);
-
-//    goRoot(it);
-//    printf("goDown(pattern)=%d\n", goDown(it, pattern));
-
-//    begin(repr, Standard());
-
-//    typedef typename Iterator<TRepresentative, Standard>::Type     TReprIt;
-//    TReprIt reprIt = begin(repr, Standard());
 }
 #endif
 
@@ -189,21 +170,12 @@ void testIndex()
     TString text("ACGTACGTACGT");
     TIndex index(text);
 
-    // Create Esa index.
-//    indexCreate(index, FibreSA());
-//    indexCreate(index, FibreLcp());
-//    indexCreate(index, FibreChildtab());
-
     // Create index.
     indexCreate(index);
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
-
-//    printf("lengthSA=%ld\n", length(indexSA(deviceIndex)));
-//    for (unsigned i = 0; i < length(indexSA(deviceIndex)); ++i)
-//        printf("%ld\n", indexSA(deviceIndex)[i]);
 
     // Create a pattern.
     TString pattern("TA");
