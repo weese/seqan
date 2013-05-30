@@ -81,7 +81,7 @@ findCUDA(TIndex index, TPattern pattern)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-    // Instantiate an iterator of the prefix trie.
+    // Instantiate a virtual suffix tree iterator.
     TIterator it(index);
 
     // At root.
@@ -103,7 +103,7 @@ findCUDA(TIndex index, TPattern pattern)
         while (goRight(it));
     }
 
-    // Restart from root
+    // Restart from root.
     goRoot(it);
     printf("goRoot()\n");
 
@@ -177,11 +177,14 @@ void testIndex()
     typedef typename Device<TStringSet>::Type           TDeviceStringSet;
     typedef typename Device<TIndex>::Type               TDeviceIndex;
 
+    // Instantiate an index over a text.
     TString text("ACGTACGTACGT");
     TIndex index(text);
 
-    // Create index.
+    // Create the index on the reversed text.
+    reverse(text);
     indexCreate(index);
+    reverse(text);
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
