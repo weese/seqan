@@ -29,6 +29,8 @@ class FileNameSource(object):
                 yield os.path.abspath(p)
             for root, subFolders, files in os.walk(p):
                 for f in files:
+                    if f.startswith('.'):
+                        continue
                     if not any([f.endswith(s) for s in self.extensions]):
                         continue
                     if any([f.startswith(s) for s in self.ignore]):
@@ -60,15 +62,23 @@ def doMain(args):
         lex = lexer.Lexer(dox_tokens.LEXER_TOKENS, skip_whitespace=False)
         for comment in the_file.comments:
             # TODO(holtgrew): Also give offset.
-            lex.input(comment.text, filename, comment.line, comment.col)
+            lex.input(comment.text, filename, comment.line, comment.col, comment.offset_col)
             parser = dox_parser.Parser()
-            parser.parse(lex)
+            try:
+                parser.parse(lex)
+            except dox_parser.ParserError, e:
+                dox_parser.printParserError(e)
+                return 1
             master_doc.merge(parser.documentation)
     # Generate documentation.
     logging.basicConfig(format='%(message)s', level=logging.DEBUG)
     logger = logging.getLogger()
     processor = proc_doc.DocProcessor(logger=logger, include_dir=args.base_dir)
-    doc_proc = processor.run(master_doc)
+    try:
+        doc_proc = processor.run(master_doc)
+    except dox_parser.ParserError, e:
+        dox_parser.printParserError(e)
+        return 1
     html_writer = write_html.HtmlWriter(doc_proc, args)
     html_writer.generateFor()
     return 0

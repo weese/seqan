@@ -17,6 +17,7 @@ import xml.sax.saxutils
 
 import inc_mgr
 import sig_parser
+import dox_parser
 import dox_tokens
 import raw_doc
 
@@ -264,7 +265,7 @@ class ProcEntry(object):
         if not self._location:
             path = '<none>'
             line = -1
-            if self.raw_entry.name:
+            if self.raw_entry.name and self.raw_entry.name.tokens:
                 line = self.raw_entry.name.tokens[0].lineno
                 path = self.raw_entry.name.tokens[0].file_name
             self._location = (path, line)
@@ -732,8 +733,9 @@ class RawTextToTextNodeConverter(object):
             else:  # not closing current
                 self.tokens_cmd.append(token)
         else:  # no command active, open
-            assert token.type in self.command_pairs.keys(), \
-                'Must be open command.'
+            if not token.type in self.command_pairs.keys():
+                expected = map(dox_tokens.transToken, self.command_pairs.keys())
+                raise dox_parser.ParserError(token, 'Unexpected token.  Must be one of %s' % expected)
             self.current_cmd = token.type
 
     def handleCommandClosing(self):
@@ -1272,7 +1274,7 @@ class DocProcessor(object):
         # Now, build list of all extending concepts into c.all_extending.
         for c in concepts:
             for name in c.all_extended:
-                doc.top_level_entries[name].all_extending.add(name)
+                doc.top_level_entries[name].all_extending.add(c.name)
         # Process classes: All extended and all extending classes.
         classes = [x for x in doc.top_level_entries.values()
                    if x.kind == 'class']
@@ -1290,7 +1292,7 @@ class DocProcessor(object):
         for c in classes:
             for name in c.all_extended:
                 doc.top_level_entries[name].all_extending.add(c.name)
-        # Build list of all implementing classes for all concepts.
+        # Build list of all direct implementing classes for all concepts.
         for cl in classes:
             for name in cl.implements:
                 if '\u0001' in name:
@@ -1303,8 +1305,13 @@ class DocProcessor(object):
             for name in co.all_implementing:
                 cl = doc.top_level_entries[name]
                 cl.all_implemented.add(co.name)
-            
-        
+                cl.all_implemented.update(co.all_extended)  # inheritance
+        # Update list of all implementing classes for all concepts (transitive)
+        for cl in classes:
+            for name in cl.all_implemented:
+                co = doc.top_level_entries[name]
+                co.all_implementing.add(cl.name)
+
     def log(self, msg, *args, **kwargs):
         """Print the given message to the configured logger if any.
         """
