@@ -84,6 +84,9 @@ findCUDA(TIndex index, TPattern pattern)
     // Instantiate an iterator of the prefix trie.
     TIterator it(index);
 
+// NOTE(esiragusa): This doesn't work yet!
+//    printf("goDown(pattern)=%d\n", goDown(it, pattern));
+
     // At root.
     printf("isRoot()=%d\n", isRoot(it));
     printf("repLength()=%ld\n", repLength(it));
@@ -176,6 +179,10 @@ void testIndex()
     // Copy index to device.
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
+
+//    printf("lengthSA=%ld\n", length(indexSA(deviceIndex)));
+//    for (unsigned i = 0; i < length(indexSA(deviceIndex)); ++i)
+//        printf("%ld\n", indexSA(deviceIndex)[i]);
 
     // Create a pattern.
     TString pattern("TA");
