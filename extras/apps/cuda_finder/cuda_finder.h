@@ -84,9 +84,6 @@ findCUDA(TIndex index, TPattern pattern)
     // Instantiate an iterator of the prefix trie.
     TIterator it(index);
 
-// NOTE(esiragusa): This doesn't work yet!
-//    printf("goDown(pattern)=%d\n", goDown(it, pattern));
-
     // At root.
     printf("isRoot()=%d\n", isRoot(it));
     printf("repLength()=%ld\n", repLength(it));
@@ -105,6 +102,16 @@ findCUDA(TIndex index, TPattern pattern)
         }
         while (goRight(it));
     }
+
+    // Restart from root
+    goRoot(it);
+    printf("goRoot()\n");
+
+    // Search the pattern.
+    printf("goDown(pattern)=%d\n", goDown(it, pattern));
+    printf("repLength()=%ld\n", repLength(it));
+    printf("countOccurrences()=%ld\n", countOccurrences(it));
+    printf("isLeaf()=%d\n", isLeaf(it));
 }
 #endif
 
