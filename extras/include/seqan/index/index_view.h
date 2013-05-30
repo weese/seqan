@@ -636,6 +636,7 @@ view(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
     typename View<RankDictionary<TwoLevels<TValue, TSpec> > >::Type dictView;
 
     getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
+    dictView._length = dict._length;
 
     return dictView;
 }
