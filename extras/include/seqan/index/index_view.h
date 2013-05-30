@@ -130,13 +130,13 @@ struct View<RankDictionary<TwoLevels<TValue, TSpec> > const>
 template <typename TString, typename TSpec>
 struct View<SparseString<TString, TSpec> >
 {
-    typedef SparseString<TString, View<TSpec> >         Type;
+    typedef SparseString<ContainerView<TString>, TSpec>         Type;
 };
 
 template <typename TString, typename TSpec>
 struct View<SparseString<TString, TSpec> const>
 {
-    typedef SparseString<TString, View<TSpec> > const   Type;
+    typedef SparseString<ContainerView<TString>, TSpec> const   Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -388,13 +388,13 @@ struct Member<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreLF>
 // ----------------------------------------------------------------------------
 
 template <typename TString, typename TSpec>
-struct Fibre<SparseString<TString, View<TSpec> >, FibreIndicators>
+struct Fibre<SparseString<ContainerView<TString>, TSpec>, FibreIndicators>
 {
     typedef typename View<typename Fibre<SparseString<TString, TSpec>, FibreIndicators>::Type>::Type        Type;
 };
 
 template <typename TString, typename TSpec>
-struct Fibre<SparseString<TString, View<TSpec> > const, FibreIndicators>
+struct Fibre<SparseString<ContainerView<TString>, TSpec> const, FibreIndicators>
 {
     typedef typename View<typename Fibre<SparseString<TString, TSpec> const, FibreIndicators>::Type>::Type  Type;
 };
@@ -404,13 +404,13 @@ struct Fibre<SparseString<TString, View<TSpec> > const, FibreIndicators>
 // ----------------------------------------------------------------------------
 
 template <typename TString, typename TSpec>
-struct Fibre<SparseString<TString, View<TSpec> >, FibreValues>
+struct Fibre<SparseString<ContainerView<TString>, TSpec>, FibreValues>
 {
-    typedef typename View<typename Fibre<SparseString<TString, TSpec>, FibreValues>::Type>::Type       Type;
+    typedef typename View<typename Fibre<SparseString<TString, TSpec>, FibreValues>::Type>::Type        Type;
 };
 
 template <typename TString, typename TSpec>
-struct Fibre<SparseString<TString, View<TSpec> > const, FibreValues>
+struct Fibre<SparseString<ContainerView<TString>, TSpec> const, FibreValues>
 {
     typedef typename View<typename Fibre<SparseString<TString, TSpec> const, FibreValues>::Type>::Type  Type;
 };
