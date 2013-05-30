@@ -374,7 +374,33 @@ struct Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec> const, FibreSp
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                       [SparseString View]
+// Metafunction Member                                      [SparseString View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+struct Member<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreLF>
+{
+    typedef typename Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreLF>::Type     Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreIndicators                             [SparseString View]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TSpec>
+struct Fibre<SparseString<TString, View<TSpec> >, FibreIndicators>
+{
+    typedef typename View<typename Fibre<SparseString<TString, TSpec>, FibreIndicators>::Type>::Type        Type;
+};
+
+template <typename TString, typename TSpec>
+struct Fibre<SparseString<TString, View<TSpec> > const, FibreIndicators>
+{
+    typedef typename View<typename Fibre<SparseString<TString, TSpec> const, FibreIndicators>::Type>::Type  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreValues                                 [SparseString View]
 // ----------------------------------------------------------------------------
 
 template <typename TString, typename TSpec>
@@ -662,10 +688,10 @@ view(CompressedSA<TText, TSpec> & sa)
 // ----------------------------------------------------------------------------
 
 template <typename TString, typename TSpec>
-SparseString<TString, View<TSpec> >
+typename View<SparseString<TString, TSpec> >::Type
 view(SparseString<TString, TSpec> & sparseString)
 {
-    SparseString<TString, View<TSpec> > sparseStringView;
+    typename View<SparseString<TString, TSpec> >::Type sparseStringView;
 
     getFibre(sparseStringView, FibreValues()) = view(getFibre(sparseString, FibreValues()));
     getFibre(sparseStringView, FibreIndicators()) = view(getFibre(sparseString, FibreIndicators()));
