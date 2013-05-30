@@ -81,6 +81,11 @@ findCUDA(TIndex index, TPattern pattern)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
+    // Print the Compressed SA values.
+    printf("lengthSA=%ld\n", length(indexSA(index)));
+    for (unsigned i = 0; i < length(indexSA(index)); ++i)
+        printf("%ld\n", indexSA(index)[i]);
+
     // Instantiate a virtual suffix tree iterator.
     TIterator it(index);
 
@@ -189,10 +194,6 @@ void testIndex()
     // Copy index to device.
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
-
-//    printf("lengthSA=%ld\n", length(indexSA(deviceIndex)));
-//    for (unsigned i = 0; i < length(indexSA(deviceIndex)); ++i)
-//        printf("%ld\n", indexSA(deviceIndex)[i]);
 
     // Create a pattern.
     TString pattern("TA");
