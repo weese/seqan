@@ -295,8 +295,25 @@ struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec> const, F
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                     [Device SparseString]
+// Metafunction FibreIndicators                           [Device SparseString]
 // ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreIndicators>
+{
+    typedef RankDictionary<TwoLevels<bool, Device<TSpec> > >        Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreIndicators>
+{
+    typedef RankDictionary<TwoLevels<bool, Device<TSpec> > > const  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction FibreValues                               [Device SparseString]
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): FibreValues is already defined as below.
 
 //template <typename TValue, typename TAlloc, typename TSpec>
 //struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
