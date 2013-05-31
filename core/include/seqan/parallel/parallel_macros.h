@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,13 @@ i += 1;
   #endif // #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
 #else  // #ifdef _OPENMP
   #define SEQAN_OMP_PRAGMA(x)
+
+  // low-level OpenMP runtime compatibility
+  inline void omp_set_num_threads(int) {}
+  inline int  omp_get_num_threads()    { return 1; }
+  inline int  omp_get_max_threads()    { return 1; }
+  inline int  omp_get_thread_num()     { return 0; }
+
 #endif  // #ifdef _OPENMP
 
 #endif  // SEQAN_PARALLEL_PARALLEL_MACROS_H_

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andreas Gogol-Doering <doering@mdc-berlin.de>
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // Author: Anne-Katrin Emde <anne-katrin.emde@fu-berlin.de>
 // Author: Tobias Rausch <rausch@embl.de>
 // Author: Birte Kehr <birte.kehr@fu-berlin.de>

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -208,7 +208,7 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 	typedef typename TAlignedReadStoreElement::TId 				TId;
 	typedef typename FragmentStore<TSpec, TConfig>::TContigGapAnchor 	TContigGapAnchor;
 	typedef		 String<TContigGapAnchor> 				TContigGaps;
-	typedef typename Iterator<TContigGaps >::Type 				TContigGapsIter;
+	typedef typename Iterator<TContigGaps const>::Type 			TContigGapsIter;
 	typedef typename Iterator<TIntervals>::Type 				TReadIntervalIter;
 	
 	

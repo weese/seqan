@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,7 @@ public:
 
     TNameStore * _nameStore;
     TNameStoreCache * _nameStoreCache;
+    CharString buffer;
 
     BamIOContext() : _nameStore(0), _nameStoreCache(0)
     {}
@@ -118,7 +119,7 @@ public:
 // ----------------------------------------------------------------------------
 
 /**
-.Function.nameStore
+.Function.BamIOContext#nameStore
 ..class:Class.BamIOContext
 ..cat:BAM I/O
 ..summary:Return reference to name store from @Class.BamIOContext@.
@@ -151,7 +152,7 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> const & context)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.nameStoreCache
+.Function.BamIOContext#nameStoreCache
 ..class:Class.BamIOContext
 ..cat:BAM I/O
 ..summary:Return reference to name store cache from @Class.BamIOContext@.
@@ -160,7 +161,7 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> const & context)
 ...type:Class.BamIOContext
 ..see:Typedef.BamIOContext#TNameStoreCache
 ..include:seqan/bam_io.h
-..see:Function.nameStore
+..see:Function.BamIOContext#nameStore
 */
 
 // TODO(holtgrew): Rename to referenceNameStoreCache

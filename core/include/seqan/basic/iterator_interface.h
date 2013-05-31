@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,26 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/*!
+ * @defgroup ContainerIteratorTags Container Iterator Tags
+ *
+ * The tags <tt>Standard</tt> and <tt>Rooted</tt> can be used for selecting specific iterator types with the
+ * @link Container#Iterator @endlink metafunction.  Rooted iterators also carry a pointer to the container
+ * they are iterating whereas standard iterators do not carry this information.
+ *
+ * @tag ContainerIteratorTags#Standard
+ * @headerfile <seqan/basic.h>
+ * @brief Tag for selecting standard iterators.
+ * @signature struct Standard_;
+ *            typedef Tag<Standard_> Standard;
+ *
+ * @tag ContainerIteratorTags#Rooted
+ * @headerfile <seqan/basic.h>
+ * @brief Tag for selecting rooted iterators.
+ * @signature struct Rooted_;
+ *            typedef Tag<Rooted_> Rooted;
+ */
+
 /**
 .Tag.Iterator Spec:
 ..cat:Iteration
@@ -82,6 +102,20 @@ typedef Tag<Standard_> const Standard;
 // Metafunction DefaultIteratorSpec
 // ----------------------------------------------------------------------------
 
+/*!
+ * @mfn ContainerConcept#DefaultIteratorSpec
+ * @brief Returns the default iterator specialization.
+ *
+ * @signature DefaultIteratorSpec<TContainer>::Type
+ *
+ * @tparam TContainer The Container type to query.
+ * @return Type       The iterator specialization tag type.
+ *
+ * Used by @link ContainerConcept#Iterator @endlink to select the default value for <tt>TSpec</tt>.
+ *
+ * @see ContainerConcept#Iterator
+ */
+
 /**
 .Metafunction.DefaultIteratorSpec:
 ..hidefromindex
@@ -89,7 +123,7 @@ typedef Tag<Standard_> const Standard;
 ..summary:Specifies default kind of iterator.
 ..signature:DefaultIteratorSpec<T>::Type
 ..param.T:Container type for which the default iterator spec is determined.
-...concept:Concept.ContainerConcept
+...type:Concept.ContainerConcept
 ..returns.param.Type:Iterator spec of $T$.
 ..see:Metafunction.Iterator
 ..include:seqan/basic.h
@@ -104,6 +138,21 @@ struct DefaultIteratorSpec
 // ----------------------------------------------------------------------------
 // Metafunction DefaultGetIteratorSpec
 // ----------------------------------------------------------------------------
+
+/*!
+ * @mfn ContainerConcept#DefaultGetIteratorSpec
+ * @brief Returns the default iterator specialization for functions.
+ *
+ * @signature DefaultGetIteratorSpec<TContainer>::Type
+ *
+ * @tparam TContainer The Container type to query.
+ * @return Type       The iterator specialization tag type.
+ *
+ * Used by functions such as @link ContainerConcept#begin @endlink and @link ContainerConcept#end @endlink for the <tt>TSpec</tt>
+ * parameter.
+ *
+ * @see ContainerConcept#Iterator
+ */
 
 /**
 .Metafunction.DefaultGetIteratorSpec:
@@ -150,21 +199,32 @@ struct DefaultGetIteratorSpec
 ..include:seqan/basic.h
 */
 
-// TODO(holtgrew): Rename this Metafunction to IteratorDefaultImp_?
 template <typename T, typename TSpec>
-struct Iterator_Default_Imp;
+struct IteratorDefaultImp_;
 
 // We use plain pointers as standard iterators.
 template <typename T>
-struct Iterator_Default_Imp<T, Standard>
+struct IteratorDefaultImp_<T, Standard>
 {
     typedef typename Value<T>::Type * Type;
 };
 
-//Iterator_Default_Imp<T, Rooted> is implemented in basic_iterator_adaptor.h
+// (weese): This definition is important and defines default const-iterators. Don't remove.
+//          However, there are different places where const-correctness is broken that must be fixed before we can uncomment this
 
+template <typename T>
+struct IteratorDefaultImp_<T const, Standard>
+{
+    typedef typename Value<T>::Type const * Type;
+};
+
+//IteratorDefaultImp_<T, Rooted> is implemented in basic_iterator_adaptor.h
+
+// TODO(weese): Mmh. What was the reason to introduce the helper struct IteratorDefaultImp_ instead of directly defining it here.
+//              Aah. I guess in to allow to specialize Iterator only in the first template argument. However, right now it is always
+//              specialized for both the first and second argument everywhere in the code.
 template <typename T, typename TSpec = typename DefaultIteratorSpec<T>::Type>
-struct Iterator : Iterator_Default_Imp<T, TSpec>
+struct Iterator : IteratorDefaultImp_<T, TSpec>
 {
 };
 
@@ -238,7 +298,7 @@ value(T const & me)
 ..signature:GetValue getValue(object)
 ..param.object:An object that holds a value or points to a value.
 ...type:Class.Iter
-...concept:Concept.IteratorAssociatedConcept
+...concept:Concept.IteratorAssociatedTypesConcept
 ..see:Metafunction.GetValue
 ..include:seqan/basic.h
 */
@@ -590,7 +650,6 @@ atEnd(T const & it)
 /**
 .Function.goBegin
 ..class:Class.Iter
-..concept:Concept.ContainerConcept
 ..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Iterates to the first position of a container.
@@ -641,7 +700,6 @@ goBegin(TIterator & it)
 /**
 .Function.goEnd
 ..class:Class.Iter
-..concept:Concept.ContainerConcept
 ..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Iterates to the last position of a container.

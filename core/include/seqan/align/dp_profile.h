@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@
 // specializations of global and local alignments or selects the gap cost
 // function, or enables or disables the trace-back function.
 // ==========================================================================
+
+// TODO(holtgrew): Documentation in this header necessary or internal only?
 
 #ifndef SEQAN_CORE_INCLUDE_SEQAN_ALIGN_DP_PROFILE_H_
 #define SEQAN_CORE_INCLUDE_SEQAN_ALIGN_DP_PROFILE_H_

@@ -84,6 +84,14 @@ if (MINGW)
 endif (MINGW)
 
 # ---------------------------------------------------------------------------
+# Disable false positive terminal detection in Xcode
+# ---------------------------------------------------------------------------
+
+if (CMAKE_GENERATOR STREQUAL Xcode)
+  add_definitions (-DSEQAN_NO_TERMINAL)
+endif (CMAKE_GENERATOR STREQUAL Xcode)
+
+# ---------------------------------------------------------------------------
 # Function add_executable (name [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
 #                          source1 source2 ... sourceN)
 #
@@ -227,8 +235,7 @@ macro (seqan_setup_library NAME)
         file (GLOB HEADERS
               RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
               include/seqan/[A-z]*/[A-z]*.h
-              include/seqan/[A-z]*.h
-              include/seqan.h)
+              include/seqan/[A-z]*.h)
         foreach (HEADER ${HEADERS})
             get_filename_component (_DESTINATION ${HEADER} PATH)
             install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/${HEADER} DESTINATION ${_DESTINATION})
@@ -236,8 +243,7 @@ macro (seqan_setup_library NAME)
     endif ()
 
     # Get list of header and super header files.
-    file (GLOB SUPER_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/seqan/[A-z]*.h
-                             ${CMAKE_CURRENT_SOURCE_DIR}/include/seqan.h)
+    file (GLOB SUPER_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/seqan/[A-z]*.h)
     file (GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/seqan/[A-z]*/[A-z]*.h)
 
     # Sort headers for Xcode, ...
@@ -454,9 +460,13 @@ macro (seqan_build_demos_develop PREFIX)
     foreach (ENTRY ${ENTRIES})
         string (REPLACE "/" "_" BIN_NAME "${ENTRY}")
         string (REPLACE "\\" "_" BIN_NAME "${BIN_NAME}")
-        get_filename_component(BIN_NAME "${BIN_NAME}" NAME_WE)
-        add_executable(${PREFIX}${BIN_NAME} ${ENTRY})
-        target_link_libraries (${PREFIX}${BIN_NAME} ${SEQAN_LIBRARIES})
+        get_filename_component (BIN_NAME "${BIN_NAME}" NAME_WE)
+
+        get_filename_component (FILE_NAME "${ENTRY}" NAME)
+        if (NOT "${FILE_NAME}" MATCHES "^\\.")
+            add_executable(${PREFIX}${BIN_NAME} ${ENTRY})
+            target_link_libraries (${PREFIX}${BIN_NAME} ${SEQAN_LIBRARIES})
+        endif ()
     endforeach (ENTRY ${ENTRIES})
 endmacro (seqan_build_demos_develop)
 

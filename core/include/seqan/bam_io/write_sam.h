@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -182,19 +182,19 @@ int write2(TStream & stream,
 
     SEQAN_PUT_TAB;
 
-    if (record.rId == BamAlignmentRecord::INVALID_REFID)
+    if (record.rID == BamAlignmentRecord::INVALID_REFID)
         res = streamPut(stream, '*');
     else
-        res = streamPut(stream, nameStore(context)[record.rId]);
+        res = streamPut(stream, nameStore(context)[record.rID]);
     if (res != 0)
         return res;
 
     SEQAN_PUT_TAB;
 
-    if (record.rId == BamAlignmentRecord::INVALID_REFID)
+    if (record.rID == BamAlignmentRecord::INVALID_REFID)
         res = streamPut(stream, '*');
     else
-        res = streamPut(stream, record.pos + 1);
+        res = streamPut(stream, record.beginPos + 1);
     if (res != 0)
         return res;
 
@@ -233,7 +233,7 @@ int write2(TStream & stream,
 
     if (record.rNextId == BamAlignmentRecord::INVALID_REFID)
         res = streamPut(stream, '*');
-    else if (record.rId == record.rNextId)
+    else if (record.rID == record.rNextId)
         res = streamPut(stream, '=');
     else
         res = streamPut(stream, nameStore(context)[record.rNextId]);

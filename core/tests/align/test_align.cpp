@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -364,6 +364,10 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_align2_traceback_linear_small_banded_alignment);
     SEQAN_CALL_TEST(test_align2_traceback_linear_wide_banded_alignment);
     SEQAN_CALL_TEST(test_align2_traceback_affine);
+    SEQAN_CALL_TEST(test_align2_traceback_gaps_left_linear_gaps);
+    SEQAN_CALL_TEST(test_align2_traceback_gaps_right_linear_gaps);
+        SEQAN_CALL_TEST(test_align2_traceback_gaps_left_affine_gaps);
+    SEQAN_CALL_TEST(test_align2_traceback_gaps_right_affine_gaps);
 
     // ----------------------------------------------------------------------------
     // Test Band Locations.
@@ -562,6 +566,7 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_align_global_alignment_score_hirschberg);
     SEQAN_CALL_TEST(test_align_global_alignment_score_myers);
     SEQAN_CALL_TEST(test_align_global_alignment_score_myers_hirschberg);
+    SEQAN_CALL_TEST(test_align_global_alignment_hirschberg_single_character);
 
     // -----------------------------------------------------------------------
     // Test Operations On Align Objects

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                                 arg_parse
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,11 @@ SEQAN_BEGIN_TESTSUITE(test_arg_parse)
     SEQAN_CALL_TEST(test_int_short_argument);
     SEQAN_CALL_TEST(test_int_long_argument);
     SEQAN_CALL_TEST(test_non_int_argument);
+
+    // Call the int64 option tests
+    SEQAN_CALL_TEST(test_int64_short_argument);
+    SEQAN_CALL_TEST(test_int64_long_argument);
+    SEQAN_CALL_TEST(test_non_int64_argument);
 
     // Call the double option tests
     SEQAN_CALL_TEST(test_double_short_argument);

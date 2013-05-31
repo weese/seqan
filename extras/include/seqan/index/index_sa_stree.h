@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -65,14 +65,14 @@ struct IndexSa {};
 ..param.TText:The text type.
 ...type:Class.String
 ...type:Class.StringSet
-..include:seqan/index.h
+..include:seqan/index_extras.h
 */
 
 template <typename TText, typename TSpec>
 class Index<TText, IndexSa<TSpec> >
 {
 public:
-    typename FibreTextMember_<Index>::Type          text;
+    typename Member<Index, FibreText>::Type         text;
     typename Fibre<Index, EsaSA>::Type              sa;
     typename Cargo<Index>::Type                     cargo;
 

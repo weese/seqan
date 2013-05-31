@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -174,7 +174,7 @@ refresh(NameStoreCache<TNameStore, TName> &cache)
 
 /**
 .Function.getIdByName:
-..summary:Appends a name to a name store.
+..summary:Get the id/index of a string in a name store with a cache.
 ..cat:Fragment Store
 ..signature:getIdByName(nameStore, name, id[, cache])
 ..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
@@ -270,21 +270,21 @@ getIdByName(TNameStore const & /*nameStore*/, TName const & name, TPos & pos, Na
 
 template <typename TNameStore, typename TName>
 inline void
-appendName(TNameStore &nameStore, TName &name)
+appendName(TNameStore &nameStore, TName const & name)
 {
     appendValue(nameStore, name, Generous());
 }
 
 template <typename TNameStore, typename TName, typename TContext>
 inline void
-appendName(TNameStore &nameStore, TName &name, TContext &)
+appendName(TNameStore &nameStore, TName const & name, TContext &)
 {
     appendName(nameStore, name);
 }
 
 template <typename TNameStore, typename TName, typename TCNameStore, typename TCName>
 inline void
-appendName(TNameStore &nameStore, TName &name, NameStoreCache<TCNameStore, TCName> &context)
+appendName(TNameStore &nameStore, TName const & name, NameStoreCache<TCNameStore, TCName> &context)
 {
     appendValue(nameStore, name, Generous());
     context.nameSet.insert(length(nameStore) - 1);

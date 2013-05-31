@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -465,7 +465,7 @@ inline bool _pigeonholeProcessQGram(
 	//typedef Pattern<TIndex, Pigeonhole<TSpec> >         TPattern;
 	//typedef typename TFinder::THstkPos					THstkPos;
 
-    typedef typename Fibre<TIndex, QGramSA>::Type       TSA;
+    typedef typename Fibre<TIndex, QGramSA>::Type const TSA;
     typedef typename Iterator<TSA, Standard>::Type      TSAIter;
     typedef typename TFinder::TPigeonholeHit            THit;
     
@@ -723,8 +723,8 @@ pigeonholeInfix(TPigeonholeHit const &hit, TText &text)
 
 //____________________________________________________________________________
 
-///.Function.infix.param.finder.type:Spec.Pigeonhole
-///.Function.infix.class:Spec.Pigeonhole
+///.Function.Finder#infix.param.finder.type:Spec.Pigeonhole
+///.Function.Finder#infix.class:Spec.Pigeonhole
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
@@ -992,13 +992,13 @@ windowFindNext(
 {
 	SEQAN_CHECKPOINT
 	
-	typedef typename Fibre<TIndex, QGramShape>::Type	TShape;
-	typedef Finder<THaystack, Pigeonhole<TSpec> >		TFinder;
-	typedef typename TFinder::THstkPos					THstkPos;
+	typedef typename Fibre<TIndex, QGramShape>::Type        TShape;
+	typedef Finder<THaystack, Pigeonhole<TSpec> >           TFinder;
+	typedef typename TFinder::THstkPos                      THstkPos;
     
-    typedef typename Fibre<TIndex, QGramSA>::Type       TSA;
-    typedef typename Iterator<TSA, Standard>::Type      TSAIter;
-    typedef typename TFinder::TPigeonholeHit            THit;
+    typedef typename Fibre<TIndex, QGramSA>::Type           TSA;
+    typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
+    typedef typename TFinder::TPigeonholeHit                THit;
 
     TIndex const &index = host(pattern);	
 

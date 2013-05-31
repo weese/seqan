@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ namespace seqan {
 
 /**
 .Spec.Double-Pass RecordReader
-..cat:Input / Output
+..cat:Input/Output
 ..general:Class.RecordReader
 ..summary:Record reader specialization for double-pass reading.
 ..signature:RecordReader<TStream, DoublePass>
@@ -290,7 +290,6 @@ position(RecordReader<TFile, DoublePass<void> > const & recordReader)
 // Function setPosition()
 // ----------------------------------------------------------------------------
 
-// TODO(holtgrew): Document!
 // This automatically starts the first pass at the position.
 template <typename TFile, typename TPosition>
 inline int

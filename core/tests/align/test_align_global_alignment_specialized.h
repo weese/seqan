@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,88 @@
 
 #ifndef SEQAN_CORE_TESTS_ALIGN_TEST_ALIGN_GLOBAL_ALIGNMENT_SPECIALIZED_H_
 #define SEQAN_CORE_TESTS_ALIGN_TEST_ALIGN_GLOBAL_ALIGNMENT_SPECIALIZED_H_
+
+SEQAN_DEFINE_TEST(test_align_global_alignment_hirschberg_single_character)
+{
+    using namespace seqan;
+
+    // Horizontal sequence has length 1.
+    {
+        Dna5String strH = "T";
+        Dna5String strV = "AAT";
+
+        Align<Dna5String> align;
+        resize(rows(align), 2);
+        assignSource(row(align, 0), strH);
+        assignSource(row(align, 1), strV);
+
+        Score<int, Simple> scoringScheme(3, -1, -1);
+
+        int score = globalAlignment(align, scoringScheme, Hirschberg());
+        // std::cerr << align << "\n";
+
+        SEQAN_ASSERT_EQ(score, 1);
+
+        std::stringstream ssH, ssV;
+        ssH << row(align, 0);
+        ssV << row(align, 1);
+
+        SEQAN_ASSERT_EQ(ssH.str(), "--T");
+        SEQAN_ASSERT_EQ(ssV.str(), "AAT");
+    }
+
+    // Vertical sequence has length 1.
+    {
+
+        Dna5String strH = "AAT";
+        Dna5String strV = "A";
+
+        Align<Dna5String> align;
+        resize(rows(align), 2);
+        assignSource(row(align, 0), strH);
+        assignSource(row(align, 1), strV);
+
+        Score<int, Simple> scoringScheme(3, -1, -1);
+
+        int score = globalAlignment(align, scoringScheme, Hirschberg());
+        // std::cerr << align << "\n";
+
+        SEQAN_ASSERT_EQ(score, 1);
+
+        std::stringstream ssH, ssV;
+        ssH << row(align, 0);
+        ssV << row(align, 1);
+
+        SEQAN_ASSERT_EQ(ssH.str(), "AAT");
+        SEQAN_ASSERT_EQ(ssV.str(), "A--");
+    }
+
+    // Both sequences have length 1.
+    {
+
+        Dna5String strH = "T";
+        Dna5String strV = "A";
+
+        Align<Dna5String> align;
+        resize(rows(align), 2);
+        assignSource(row(align, 0), strH);
+        assignSource(row(align, 1), strV);
+
+        Score<int, Simple> scoringScheme(3, -1, -1);
+
+        int score = globalAlignment(align, scoringScheme, Hirschberg());
+        // std::cerr << align << "\n";
+
+        SEQAN_ASSERT_EQ(score, -1);
+
+        std::stringstream ssH, ssV;
+        ssH << row(align, 0);
+        ssV << row(align, 1);
+
+        SEQAN_ASSERT_EQ(ssH.str(), "T");
+        SEQAN_ASSERT_EQ(ssV.str(), "A");
+    }
+}
 
 SEQAN_DEFINE_TEST(test_align_global_alignment_hirschberg_align)
 {

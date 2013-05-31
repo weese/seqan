@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -80,15 +80,15 @@ getStrandIndependentOrientation(BamAlignmentRecord const& rec)
 {
     if (!hasFlagRC(rec)) {
         if (!(hasFlagNextRC(rec))) {
-            return (rec.pos < rec.pNext) ? LibraryInfo::F_PLUS : LibraryInfo::F_MINUS;
+            return (rec.beginPos < rec.pNext) ? LibraryInfo::F_PLUS : LibraryInfo::F_MINUS;
         } else {
-            return (rec.pos < rec.pNext) ? LibraryInfo::R_PLUS : LibraryInfo::R_MINUS;
+            return (rec.beginPos < rec.pNext) ? LibraryInfo::R_PLUS : LibraryInfo::R_MINUS;
         }
     } else {
         if (!hasFlagNextRC(rec)) {
-            return (rec.pos > rec.pNext) ? LibraryInfo::R_PLUS : LibraryInfo::R_MINUS;
+            return (rec.beginPos > rec.pNext) ? LibraryInfo::R_PLUS : LibraryInfo::R_MINUS;
         } else {
-            return (rec.pos > rec.pNext) ? LibraryInfo::F_PLUS : LibraryInfo::F_MINUS;
+            return (rec.beginPos > rec.pNext) ? LibraryInfo::F_PLUS : LibraryInfo::F_MINUS;
         }
     }
 }

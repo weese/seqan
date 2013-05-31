@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -296,17 +296,6 @@ struct DeepestSpec<T<T1, T2, T3, T4, T5> > :
 // ----------------------------------------------------------------------------
 // Metafunction LENGTH
 // ----------------------------------------------------------------------------
-
-/**
-.Metafunction.LENGTH:
-..cat:Basic
-..summary:Number of elements in a fixed-size container.
-..signature:LENGTH<T>::VALUE
-..param.T:Type for which the number of elements is determined.
-..returns.param.VALUE:Number of elements.
-..remarks.text:The default return value is 1 for dynamic-size containers.
-..include:seqan/basic.h
-*/
 
 template <typename T>
 struct LENGTH;

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -392,14 +392,14 @@ _globalAlignment(Gaps<TSequenceH, TGapsSpecH> & gapsH,
     TSequenceH const & s1 = source(gapsH);
     TSequenceV const & s2 = source(gapsV);
 	
-	TScoreValue total_score=0;
+	TScoreValue total_score = 0;
 
     typedef typename Value<TSequenceV>::Type TValueV;
 
 	typedef typename Size<TSequenceH>::Type TStringSize;
 	
-	typedef typename Iterator<TSequenceH>::Type TSequenceHIter;
-	typedef typename Iterator<TSequenceV>::Type TSequenceVIter;
+	typedef typename Iterator<TSequenceH const, Standard>::Type TSequenceHIter;
+	typedef typename Iterator<TSequenceV const, Standard>::Type TSequenceVIter;
 
 	typedef typename Iterator<Gaps<TSequenceH, TGapsSpecH> >::Type TGapsHIter;
 	typedef typename Iterator<Gaps<TSequenceV, TGapsSpecV> >::Type TGapsVIter;
@@ -451,6 +451,15 @@ _globalAlignment(Gaps<TSequenceH, TGapsSpecH> & gapsH,
 				++target_1;
 			}
 		}
+        if(_begin1(target) == _end1(target))
+		{
+			for(i = 0;i < (_end2(target) - _begin2(target));++i)
+			{
+				insertGap(target_0);
+				++target_0;
+				++target_1;
+			}
+		}
 		else if(_begin1(target) + 1 == _end1(target) || _begin2(target) + 1 == _end2(target))
 		{
 			/* ALIGN */			
@@ -470,10 +479,10 @@ _globalAlignment(Gaps<TSequenceH, TGapsSpecH> & gapsH,
 			resize(matrix_);
 
 			/* init matrix */
-			TSequenceHIter x_begin = iter(s1,_begin1(target)) - 1;
-			TSequenceHIter x_end = iter(s1,_end1(target)) - 1;
-			TSequenceVIter y_begin = iter(s2,_begin2(target)) - 1;
-			TSequenceVIter y_end = iter(s2,_end2(target)) - 1;
+			TSequenceHIter x_begin = iter(s1, _begin1(target), Standard()) - 1;
+			TSequenceHIter x_end = iter(s1, _end1(target), Standard()) - 1;
+			TSequenceVIter y_begin = iter(s2, _begin2(target), Standard()) - 1;
+			TSequenceVIter y_end = iter(s2, _end2(target), Standard()) - 1;
 
 			TSequenceHIter x = x_end;
 			TSequenceVIter y;
@@ -534,7 +543,11 @@ _globalAlignment(Gaps<TSequenceH, TGapsSpecH> & gapsH,
 					}
 					*finger1 = v;
 				}
-			}	
+			}
+            total_score += value(matrix_, 0,0);
+#ifdef SEQAN_HIRSCHBERG_DEBUG_CUT
+            std::cout << "alignment score is " << total_score << std::endl << std::endl;
+#endif
 
 			/* TRACE BACK */
 			finger1 = begin(matrix_);
@@ -697,10 +710,6 @@ _globalAlignment(Gaps<TSequenceH, TGapsSpecH> & gapsH,
 					dp = sg;
 				}
 			}
-
-			// if computed the whole matrix max = alignment score
-			if(hs_complete == target)
-				total_score = c_score[_end2(target)];
 
 #ifdef SEQAN_HIRSCHBERG_DEBUG_CUT
 			std::cout << "hirschberg calculates cut in column " << mid << " and row " << pointer[_end2(target)] << std::endl;

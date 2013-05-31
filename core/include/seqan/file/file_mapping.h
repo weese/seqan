@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,18 +48,18 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Enum.FileMappingAdviseScheme
+.Enum.FileMappingMode
 ..cat:Sequences
-..cat:Input / Output
-..summary:Enum with mmap advise values.
-..value.MAP_NORMAL:There is no advise on the given address range.
-..value.MAP_RANDOM:The address range will be accessed with a random access memory pattern.
-..value.MAP_SEQUENTIAL:The address range will be accessed sequentially.
-..value.MAP_WILLNEED:The address range in the advise will be needed in the future.
-..value.MAP_DONTNEED:The address range in the advise will not be needed any more.
-..see:Function.adviseFileSegment
+..cat:Input/Output
+..summary:Flags to define the mapping mode of @Function.mapFileSegment@.
+..value.MAP_COPYONWRITE:Write accesses are not written back to file and not shared among different mappings.
+..value.MAP_RDONLY:Map the segment in read-only mode.
+..value.MAP_RDWR:Map the segment for reading and writing.
+..value.MAP_WRONLY:Map the segment in write-only mode.
+..remarks:The mapping mode must be compatible to the open mode of a @Class.FileMapping@,
+e.g. $MAP_RDWR$ is not allowed if the file mapping was opened with $OPEN_RDONLY$.
 ..include:seqan/file.h
- */
+*/
 
 enum FileMappingMode {
     MAP_RDONLY = 1,
@@ -67,6 +67,19 @@ enum FileMappingMode {
     MAP_RDWR = 3,
     MAP_COPYONWRITE = 4
 };
+
+/**
+.Enum.FileMappingAdvise
+..cat:Sequences
+..cat:Input/Output
+..summary:Enum with mmap advise values.
+..value.MAP_NORMAL:There is no advise on the given address range.
+..value.MAP_RANDOM:The address range will be accessed with a random access memory pattern.
+..value.MAP_SEQUENTIAL:The address range will be accessed sequentially.
+..value.MAP_WILLNEED:The address range in the advise will be needed in the future.
+..value.MAP_DONTNEED:The address range in the advise will not be needed any more.
+..include:seqan/file.h
+*/
 
 #ifdef PLATFORM_WINDOWS
 
@@ -94,9 +107,11 @@ enum FileMappingAdvise {
 /**
 .Class.FileMapping:
 ..cat:File
-..summary:A structure used by a @Class.FilePager@ to represent a file and its memory mapping.
-..signature:FileMapping<TFile>
-..param.TFile:The file type.
+..summary:A structure to memory-map a file.
+..signature:FileMapping<TSpec>
+..param.TSpec:The specializing type.
+...default:$void$
+..remarks:This structure represents both a file and its memory mapping.
 ..include:seqan/file.h
 */
 
@@ -234,9 +249,27 @@ _unmapFile(FileMapping<TSpec> &mapping)
     return result;
 }
 
-template <typename TSpec, typename TFilename, typename TOpenMode>
+/**
+.Function.FileMapping#open:
+..class:Class.FileMapping
+..summary:Open a file to be mapped into memory.
+..cat:Input/Output
+..signature:open(mapping, fileName[, openMode])
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.fileName:C-style character string containing the file name.
+..param.openMode:The combination of flags defining how the file should be opened. See @Enum.FileOpenMode@ for more details.
+...remarks:Write-only mode is not supported, use OPEN_RDWR if you need write access.
+If you omit the $OPEN_APPEND$ flag in write mode, the file will be cleared when opened.
+...type:Enum.FileOpenMode
+...default:$OPEN_RDWR | OPEN_CREATE | OPEN_APPEND$
+..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
+*/
+
+template <typename TSpec>
 inline bool
-open(FileMapping<TSpec> &mapping, TFilename const &filename, TOpenMode const &openMode)
+open(FileMapping<TSpec> &mapping, const char *filename, int openMode)
 {
     _initialize(mapping);
     bool result = open(mapping.file, filename, openMode);
@@ -265,6 +298,18 @@ open(FileMapping<TSpec> &mapping, TFile const &file)
     return false;
 }
 
+/**
+.Function.FileMapping#openTemp:
+..class:Class.FileMapping
+..summary:Open a temporary file to be mapped into memory.
+..cat:Input/Output
+..signature:openTemp(mapping)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
+*/
+
 template <typename TSpec>
 inline bool
 openTemp(FileMapping<TSpec> &mapping)
@@ -277,6 +322,18 @@ openTemp(FileMapping<TSpec> &mapping)
     return result;
 }
 
+/**
+.Function.FileMapping#close:
+..class:Class.FileMapping
+..summary:Close a file and its memory mapping.
+..cat:Input/Output
+..signature:close(mapping)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
+*/
+
 template <typename TSpec>
 inline bool
 close(FileMapping<TSpec> &mapping)
@@ -287,6 +344,19 @@ close(FileMapping<TSpec> &mapping)
     _initialize(mapping);
     return result;
 }
+
+/**
+.Function.FileMapping#closeAndResize:
+..class:Class.FileMapping
+..summary:Close a memory mapping and resize and close the underlying file.
+..cat:Input/Output
+..signature:closeAndResize(mapping, newFileSize)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.newFileSize:The new file size.
+..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
+*/
 
 template <typename TSpec, typename TSize>
 inline bool
@@ -301,6 +371,17 @@ closeAndResize(FileMapping<TSpec> &mapping, TSize newFileSize)
     return result;
 }
 
+/**
+.Function.FileMapping#length:
+..class:Class.FileMapping
+..summary:Return the file size of a memory mapping.
+..cat:Input/Output
+..signature:length(mapping)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..returns:The size of the underlying file.
+..include:seqan/file.h
+*/
 
 template <typename TSpec>
 inline typename Size<FileMapping<TSpec> >::Type
@@ -315,6 +396,20 @@ length(FileMapping<TSpec> const &mapping)
 {
     return mapping.fileSize;
 }
+
+/**
+.Function.FileMapping#resize:
+..class:Class.FileMapping
+..summary:Resize the underlying file.
+..cat:Input/Output
+..signature:resize(mapping, newFileSize)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.newFileSize:The new file size.
+..returns:A $bool$ which is $true$ on success.
+..remarks:Under Windows, all existing file mappings must be unmapped via @Function.unmapFileSegment@ prior calling this function.
+..include:seqan/file.h
+*/
 
 template <typename TSpec, typename TSize>
 inline bool
@@ -331,6 +426,23 @@ resize(FileMapping<TSpec> &mapping, TSize newFileSize)
     return result;
 }
 
+/**
+.Function.flushFileSegment:
+..class:Class.FileMapping
+..summary:Wait for all outstanding transactions of a memory-mapped file segment.
+..cat:Input/Output
+..signature:flushFileSegment(mapping, addr, fileOfs, size)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.addr:A pointer to the beginning of the memory-mapped segment in memory (returned by a prior call of @Function.mapFileSegment@).
+..param.fileOfs:The absolute start address of the segment in bytes.
+..param.size:The segment length in bytes.
+..returns:A $bool$ which is $true$ on success.
+..remarks:This function has no effect under Windows. On all other platforms it calls $msync$.
+This function is only needed to synchronize file accesses in non-shared-memory environments.
+..include:seqan/file.h
+*/
+
 template <typename TSpec, typename TPos, typename TSize>
 inline bool
 flushFileSegment(FileMapping<TSpec> &, void *addr, TPos beginPos, TSize size)
@@ -345,36 +457,87 @@ flushFileSegment(FileMapping<TSpec> &, void *addr, TPos beginPos, TSize size)
 #endif
 }
 
-// cancel all transactions
-template <typename TSpec, typename TPos, typename TSize>
-inline bool
-cancelFileSegment(FileMapping<TSpec> &, void *addr, TPos beginPos, TSize size)
-{
-#ifdef PLATFORM_WINDOWS
-    ignoreUnusedVariableWarning(addr);
-    ignoreUnusedVariableWarning(beginPos);
-    ignoreUnusedVariableWarning(size);
-    return true;
-#else
-    return (msync(addr, size + beginPos, MS_INVALIDATE) == 0);
-#endif
-}
+/**
+.Function.cancelFileSegment:
+..class:Class.FileMapping
+..summary:Cancel all outstanding transactions of a memory-mapped file segment.
+..cat:Input/Output
+..signature:cancelFileSegment(mapping, addr, fileOfs, size)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.addr:A pointer to the beginning of the memory-mapped segment in memory (returned by a prior call of @Function.mapFileSegment@).
+..param.fileOfs:The absolute start address of the segment in bytes.
+..param.size:The segment length in bytes.
+..returns:A $bool$ which is $true$ on success.
+..remarks:This function has no effect under Windows. On all other platforms it calls $msync$.
+..include:seqan/file.h
+*/
 
 template <typename TSpec, typename TPos, typename TSize>
 inline bool
-adviseFileSegment(FileMapping<TSpec> &, FileMappingAdvise advise, void *addr, TPos beginPos, TSize size)
+cancelFileSegment(FileMapping<TSpec> &, void *addr, TPos fileOfs, TSize size)
+{
+#ifdef PLATFORM_WINDOWS
+    ignoreUnusedVariableWarning(addr);
+    ignoreUnusedVariableWarning(fileOfs);
+    ignoreUnusedVariableWarning(size);
+    return true;
+#else
+    return (msync(addr, size + fileOfs, MS_INVALIDATE) == 0);
+#endif
+}
+
+/**
+.Function.adviseFileSegment:
+..class:Class.FileMapping
+..summary:Give advice about use of a memory-mapped file segment.
+..cat:Input/Output
+..signature:adviseFileSegment(mapping, advise, addr, fileOfs, size)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.advise:Advise flags
+...type:Enum.FileMappingAdvise
+..param.addr:A pointer to the beginning of the memory-mapped segment in memory (returned by a prior call of @Function.mapFileSegment@).
+..param.fileOfs:The absolute start address of the segment in bytes.
+..param.size:The segment length in bytes.
+..returns:A $bool$ which is $true$ on success.
+..remarks:This function has no effect under Windows. On all other platforms it calls $posix_madvise$.
+..include:seqan/file.h
+*/
+template <typename TSpec, typename TPos, typename TSize>
+inline bool
+adviseFileSegment(FileMapping<TSpec> &, FileMappingAdvise advise, void *addr, TPos fileOfs, TSize size)
 {
 #ifdef PLATFORM_WINDOWS
     ignoreUnusedVariableWarning(advise);
     ignoreUnusedVariableWarning(addr);
-    ignoreUnusedVariableWarning(beginPos);
+    ignoreUnusedVariableWarning(fileOfs);
     ignoreUnusedVariableWarning(size);
     return true;
 #else
 //		posix_fadvise(mapping.file.handle, beginPos, size, advise);
-    return (posix_madvise(static_cast<char*>(addr) + beginPos, size, advise) == 0);
+    return (posix_madvise(static_cast<char*>(addr) + fileOfs, size, advise) == 0);
 #endif
 }
+
+/**
+.Function.mapFileSegment:
+..class:Class.FileMapping
+..summary:Map a segment of a file into memory.
+..cat:Input/Output
+..signature:mapFileSegment(mapping, fileOfs[, size[, mode]])
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.fileOfs:The absolute start address of the segment in bytes.
+..param.size:The segment length in bytes.
+...default:The rest of the file.
+..param.mode:The mapping access mode.
+...type:Enum.FileMappingMode
+...default:The read/write open mode of the underlying file.
+..returns:A pointer to the beginning of the memory-mapped segment in memory or NULL on error. 
+...type:nolink:$void *$
+..include:seqan/file.h
+*/
 
 template <typename TSpec, typename TPos, typename TSize, typename TFileMappingMode>
 inline void *
@@ -445,6 +608,20 @@ mapFileSegment(FileMapping<TSpec> &mapping, TPos fileOfs = 0)
     return mapFileSegment(mapping, fileOfs, length(mapping) - fileOfs);
 }
 
+/**
+.Function.unmapFileSegment:
+..class:Class.FileMapping
+..summary:Unmap a memory-mapped file segment.
+..cat:Input/Output
+..signature:unmapFileSegment(mapping, addr, size)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.addr:A pointer to the beginning of the memory-mapped segment in memory.
+..param.size:The segment length in bytes.
+..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
+*/
+
 template <typename TSpec, typename TSize>
 inline bool
 unmapFileSegment(FileMapping<TSpec> &, void *addr, TSize size)
@@ -462,6 +639,23 @@ unmapFileSegment(FileMapping<TSpec> &, void *addr, TSize size)
         SEQAN_FAIL("unmapFileSegment(%x,%i) failed: \"%s\"", (unsigned long)addr, size, strerror(errno));
     return result;
 }
+
+/**
+.Function.remapFileSegment:
+..class:Class.FileMapping
+..summary:Change the size of a memory-mapped file segment.
+..cat:Input/Output
+..signature:remapFileSegment(mapping, oldAddr, oldFileOfs, oldSize, newSize)
+..param.mapping:A file mapping object.
+...type:Class.FileMapping
+..param.oldAddr:The address returned by @Function.mapFileSegment@.
+..param.oldFileOfs:The fileOfs parameter used in @Function.mapFileSegment@.
+..param.oldSize:The size parameter used in @Function.mapFileSegment@.
+..param.newSize:The new segment length in bytes.
+..returns:A pointer to the beginning of the memory-mapped segment in memory or NULL on error. 
+...type:nolink:$void *$
+..include:seqan/file.h
+*/
 
 template <typename TSpec, typename TPos, typename TSize>
 inline void *

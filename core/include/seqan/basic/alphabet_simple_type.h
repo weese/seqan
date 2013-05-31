@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,6 @@ are not optimized for simple types this way.
 But for classes derived from $SimpleType$, optimized variants of array manipulation functions are applied. 
 ...text:Note that simple types need not to be derived or specialized from $SimpleType$, but
 it could be convenient to do so.
-..implements:Concept.SimpleConcept Type
 ..include:seqan/basic.h
 */
 

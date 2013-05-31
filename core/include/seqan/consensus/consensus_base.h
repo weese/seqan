@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -163,12 +163,12 @@ public:
 
 template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
 inline void 
-_loadContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
-				 String<TPosPair, TStringSpec>& startEndPos,
-				 FragmentStore<TSpec, TConfig> const& fragStore,
+_loadContigReads(StringSet<TValue, Owner<TStrSpec> > & strSet,
+				 String<TPosPair, TStringSpec> & startEndPos,
+				 FragmentStore<TSpec, TConfig> const & fragStore,
 				 TId const contigId)
 {
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> const TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename TFragmentStore::TReadPos TReadPos;
 
@@ -178,7 +178,7 @@ _loadContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 	resize(strSet, length(fragStore.alignedReadStore));
 
 	// Retrieve all reads, limit them to the clear range and if required reverse complement them
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore const>::Type TAlignIter;
 	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TSize numRead = 0;
@@ -441,7 +441,7 @@ assignGappedConsensus(FragmentStore<TSpec, TConfig>& fragStore,
 ..include:seqan/consensus.h
 ..example.code:
 #include <seqan/sequence.h>
-#include <seqan/refinement.h>
+#include <seqan/graph_align.h>
 #include <seqan/consensus.h>
 
 int main()
@@ -775,13 +775,12 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 template <typename TValue, typename TSpec, typename TCounters, typename TSize, typename TAlphabet>
 inline void
-_countLetters(String<TValue, TSpec> const& mat,
-			   TCounters& counterValues,
-			   TSize alignDepth,
-			   TAlphabet)
+_countLetters(String<TValue, TSpec> const & mat,
+              TCounters & counterValues,
+              TSize alignDepth,
+              TAlphabet)
 {
-	SEQAN_CHECKPOINT
-	typedef String<TValue, TSpec> TMatrix;
+	typedef String<TValue, TSpec> const TMatrix;
 	typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
 
 	// Initialization
@@ -1381,7 +1380,7 @@ _convertSimpleReadFile(TFile& file,
         {
 			TAlignedElement alignEl;
 			TId id = count;
-			TId fragId = count;
+			TId fragId = TReadStoreElement::INVALID_ID;
 			TId repeatId = 0;
 
             goNext(reader);
@@ -1522,10 +1521,10 @@ _convertSimpleReadFile(TFile& file,
 	TContigElement contigEl;
 	std::string fileName = filePath + 'S';
 	FILE* strmRef = fopen(fileName.c_str(), "rb");
-    seqan::RecordReader<FILE *, SinglePass<> > readerRef(strmRef);
 	String<char> contigEid = "C0";
     if (strmRef)
     {
+        seqan::RecordReader<FILE *, SinglePass<> > readerRef(strmRef);
         clear(contigEid);
         if (readRecord(contigEid, contigEl.seq, readerRef, Fasta()) != 0)
             return 1;
@@ -1543,9 +1542,9 @@ _convertSimpleReadFile(TFile& file,
 	// Read fragments
 	fileName = filePath + 'F';
 	FILE* strmFrag = fopen(fileName.c_str(), "rb");
-    RecordReader<FILE *, SinglePass<> > readerFrag(strmFrag);
     if (!strmFrag)
         return 1;
+    RecordReader<FILE *, SinglePass<> > readerFrag(strmFrag);
     while (!atEnd(readerFrag))
     {
         if (value(readerFrag) == '>')

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@
 #include <cstdlib>
 
 #include <seqan/basic.h>
-#include <seqan/misc/misc_random.h>
 
 //____________________________________________________________________________
 // Module Headers
@@ -60,6 +59,7 @@
 #include <seqan/random/random_normal.h>
 #include <seqan/random/random_lognormal.h>  // uses normal.h, uniform.h
 #include <seqan/random/random_geometric.h>
+#include <seqan/random/random_beta.h>
 #include <seqan/random/random_rng_functor.h>
 
 // Functions with randomness.

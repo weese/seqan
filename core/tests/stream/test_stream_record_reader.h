@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -171,7 +171,7 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_single_pass_mmap_position)
     seqan::CharString s = "1234567890";
 
     // Create RecordReader object.
-    typedef seqan::RecordReader<seqan::CharString, seqan::SinglePass<seqan::Mapped> > TRecordReader;
+    typedef seqan::RecordReader<seqan::CharString, seqan::SinglePass<seqan::StringReader> > TRecordReader;
     TRecordReader reader(s);
 
     typedef typename seqan::Position<TRecordReader>::Type TPos;
@@ -192,7 +192,7 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_single_pass_mmap_set_position)
     seqan::CharString s = "1234567890";
 
     // Create RecordReader object.
-    typedef seqan::RecordReader<seqan::CharString, seqan::SinglePass<seqan::Mapped> > TRecordReader;
+    typedef seqan::RecordReader<seqan::CharString, seqan::SinglePass<seqan::StringReader> > TRecordReader;
     TRecordReader reader(s);
 
     typedef typename seqan::Position<TRecordReader>::Type TPos;
@@ -215,7 +215,7 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_double_pass_mmap_position)
     seqan::CharString s = "1234567890";
 
     // Create RecordReader object.
-    typedef seqan::RecordReader<seqan::CharString, seqan::DoublePass<seqan::Mapped> > TRecordReader;
+    typedef seqan::RecordReader<seqan::CharString, seqan::DoublePass<seqan::StringReader> > TRecordReader;
     TRecordReader reader(s);
 
     typedef typename seqan::Position<TRecordReader>::Type TPos;
@@ -251,7 +251,7 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_double_pass_mmap_set_position)
     seqan::CharString s = "1234567890";
 
     // Create RecordReader object.
-    typedef seqan::RecordReader<seqan::CharString, seqan::DoublePass<seqan::Mapped> > TRecordReader;
+    typedef seqan::RecordReader<seqan::CharString, seqan::DoublePass<seqan::StringReader> > TRecordReader;
     TRecordReader reader(s);
 
     typedef typename seqan::Position<TRecordReader>::Type TPos;

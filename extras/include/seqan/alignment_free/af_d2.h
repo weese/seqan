@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ _alignmentFreeCompareCounts(TValue & result,
                             String<unsigned> const & kmerCounts2,
                             AFScore<D2> const & /*score*/)
 {
-    typedef typename Iterator<String<unsigned> >::Type TIteratorInt;
+    typedef typename Iterator<String<unsigned> const>::Type TIteratorInt;
 
     TIteratorInt it1 = begin(kmerCounts1);
     TIteratorInt it2 = begin(kmerCounts2);

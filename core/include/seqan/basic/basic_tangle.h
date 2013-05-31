@@ -1,7 +1,7 @@
 // ==========================================================================
 //                               basic_tangle.h
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -126,7 +126,7 @@ template <typename TDest, typename TSource>
 void assignQualities(TDest &dst, TSource const &src)
 {
     typedef typename Iterator<TDest>::Type TDestIter;
-    typedef typename Iterator<TSource>::Type TSourceIter;
+    typedef typename Iterator<TSource const>::Type TSourceIter;
 
 	if (length(dst) < length(src))
         resize(dst, length(src));

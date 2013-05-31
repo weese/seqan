@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -181,7 +181,7 @@ int readRecord(SamAlignment & record,
     // Reading integers.
     CharString buffer;
     tokenizeTo(buffer, reader, '\t');
-    record.pos = ::seqan::lexical_cast<__int32>(buffer); // We should probably steal/port the boost code, with enforcing english locale.
+    record.beginPos = ::seqan::lexical_cast<__int32>(buffer); // We should probably steal/port the boost code, with enforcing english locale.
     goNext(reader);
     
     // ... etc.

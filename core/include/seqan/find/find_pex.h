@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -165,11 +165,11 @@ class Pattern<TNeedle, Pex<TVerification, TMultiFinder > >:
    // store the infixes for the verifiers
    String<Segment<TNeedle> > segment_store;
   
-   // track position where the last occurence was found
+   // track position where the last occurrence was found
    unsigned lastFPos;
    unsigned lastFNdl;
    
-   // indicator to track if we already found an occurence
+   // indicator to track if we already found an occurrence
    bool findNext,patternNeedsInit; 
 
    unsigned needleLength;
@@ -628,7 +628,7 @@ SEQAN_CHECKPOINT
      _patternInit(me, finder);
   }
   if(me.findNext){
-    // we found an occurence
+    // we found an occurrence
     startPos = position(finder);
     unsigned pnode = _getRoot(me); // use root 
     unsigned in = me.range_table[me.leaf_map[me.lastFNdl]].start;
@@ -685,7 +685,7 @@ SEQAN_CHECKPOINT
     }
     // if we verfied till here .. verify the complete pattern
     if(cand){
-      // we found an occurence
+      // we found an occurrence
       node = _getRoot(me); // use root 
       int p1 = position(mf) - (in - me.range_table[node].start) - me.range_table[node].error;
       int p2 = position(mf) + (me.range_table[node].end - in + 1) + me.range_table[node].error;

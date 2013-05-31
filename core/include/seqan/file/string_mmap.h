@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -327,11 +327,11 @@ SEQAN_CHECKPOINT
 ..param.mmapString:The @Spec.MMap String@ that contains the location in the advise call.
 ...type:Spec.MMap String
 ..param.scheme:The memory access scheme to use.
-...type:Enum.MMapAdviseScheme
+...type:Enum.FileMappingAdvise
 ..param.beginPos:Begin position in the string for the advise call.
 ..param.size:Size of the range used for the advise call.
 ..returns:$int$, return code 0 on success.
-..see:Enum.MMapAdviseScheme
+..see:Enum.FileMappingAdvise
 ..include:seqan/file.h
  */
     template <typename TValue, typename TConfig, typename TPos, typename TSize>
@@ -597,7 +597,7 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 ///.Function.close.param.string.type:Spec.MMap String
-///.Function.class:Spec.MMap String
+///.Function.close.class:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,31 @@ In case of $PreorderEmptyEdges$ and $PostorderEmptyEdges$, the empty edges are a
 ..tag.PostorderEmptyEdges:Visit the node after its children, visit empty edges.
 ..include:seqan/index.h
 */
-
+/*!
+ * @defgroup DfsOrder DFS Order
+ * 
+ * @brief Pre/postorder selection for depth-first search.
+ * 
+ * These tags are given to @link goNext @endlink and trigger post-order or pre-
+ * order traversal of a suffix tree. In case of <tt>PreorderEmptyEdges</tt> and
+ * <tt>PostorderEmptyEdges</tt>, the empty edges are also traversed.
+ * 
+ * @tag DfsOrder#Preorder
+ * 
+ * @brief Visit the node before its children.
+ * 
+ * @tag DfsOrder#PostorderEmptyEdges
+ * 
+ * @brief Visit the node after its children, visit empty edges.
+ * 
+ * @tag DfsOrder#PreorderEmptyEdges
+ * 
+ * @brief Visit the node before its children, visit empty edges.
+ * 
+ * @tag DfsOrder#Postorder
+ * 
+ * @brief Visit the node after its children.
+ */
 	// predefined iterator traits
 	struct Preorder:			VSTreeIteratorTraits<Preorder_,  True> {};
 	struct Postorder:			VSTreeIteratorTraits<Postorder_, True> {};
@@ -115,6 +139,22 @@ In case of $PreorderEmptyEdges$ and $PostorderEmptyEdges$, the empty edges are a
 ..returns:$Tag.Postorder$ by default and $Tag.Preorder$ if $TIterator$ is $VSTree<TopDown<ParentLinks<> > >$ or $VSTree<TopDown<ParentLinks<Preorder> > >$.
 ..include:seqan/index.h
 */
+/*!
+ * @mfn Index#GetVSTreeIteratorTraits
+ * 
+ * @headerfile seqan/index.h
+ * 
+ * @brief Default behaviour of @link goNext @endlink when no second parameter is
+ *        given.
+ * 
+ * @signature GetVSTreeIteratorTraits<TIterator>::Type
+ * 
+ * @tparam TIterator A @link VSTreeIterator @endlink.
+ * 
+ * @return TReturn @link DfsOrder#Postorder @endlink by default and @link DfsOrde#Preorder @endlink
+ *                 if <tt>TIterator</tt> is <tt>VSTree<TopDown<ParentLinks<> >
+ *                 ></tt> or <tt>VSTree<TopDown<ParentLinks<Preorder> > ></tt>.
+ */
 
 	template <typename TIterator>
 	struct GetVSTreeIteratorTraits:
@@ -222,6 +262,97 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 ..include:seqan/index.h
 */
 
+/*!
+ * @defgroup IndexEsaFibres Index Esa Fibres
+ * 
+ * @brief Tag to select a specific fibre (e.g. table, object, ...) of an @link
+ *        IndexEsa @endlink index.
+ * 
+ * @section Remarks
+ * 
+ * These tags can be used to get @link Fibre.Fibres @endlink of an Enhanced
+ * Suffix Array based @link IndexEsa.Index @endlink.
+ * 
+ * @see Fibre
+ * @see getFibre
+ * @see IndexEsa
+ * 
+ * @tag IndexEsaFibres#EsaSA
+ * 
+ * @headerfile seqan/index.h
+ *
+ * @brief The suffix array.
+ * 
+ * @section Remarks
+ * 
+ * The suffix array contains the indices of all suffices of <tt>EsaRawText</tt>
+ * in lexicographical order.
+ * 
+ * @link Fibre @endlink returns a @link String @endlink over the alphabet of the
+ * @link SAValue @endlink of <tt>TIndex</tt>.
+ * 
+ * @tag IndexEsaFibres#EsaChildtab
+ * 
+ * @headerfile seqan/index.h
+ *
+ * @brief The child table.
+ * 
+ * @section Remarks
+ * 
+ * The child table contains structural information of the suffix tree (see
+ * Abhouelda et al.).
+ * 
+ * @link Fibre @endlink returns a @link String @endlink over the alphabet of a
+ * size type.
+ * 
+ * @tag IndexEsaFibres#EsaRawText
+ * 
+ * @headerfile seqan/index.h
+ *
+ * @brief The raw text the index is really based on.
+ * 
+ * @section Remarks
+ * 
+ * <tt>EsaText</tt> and <tt>EsaRawText</tt> fibres are equal by default. They
+ * differ if the index text is a set of strings. Then, raw text is the
+ * concatenation of all strings in this set.
+ * 
+ * @tag IndexEsaFibres#EsaText
+ * 
+ * @headerfile seqan/index.h
+ *
+ * @brief The original text the index should be based on.
+ * 
+ * @tag IndexEsaFibres#EsaBwt
+ * 
+ * @headerfile seqan/index.h
+ *
+ * @brief The Burrows-Wheeler table.
+ * 
+ * @section Remarks
+ * 
+ * The Burrows-Wheeler table contains the Burrows-Wheeler transformation of
+ * <tt>EsaRawText</tt>. The entries are the characters left of the corresponding
+ * suffix in the suffix array <tt>EsaSA</tt>.
+ * 
+ * @link Fibre @endlink returns the same type for <tt>EsaRawText</tt> and for
+ * <tt>EsaBwt</tt>.
+ * 
+ * @tag IndexEsaFibres#EsaLcp
+ * 
+ * @headerfile seqan/index.h
+ *
+ * @brief The lcp table.
+ * 
+ * @section Remarks
+ * 
+ * The lcp table contains the lcp-value of two adjacent suffices in the suffix
+ * array <tt>EsaSA</tt>.
+ * 
+ * @link Fibre @endlink returns a @link String @endlink over the alphabet of a
+ * size type.
+ */
+
 ///.Metafunction.Fibre.param.TSpec.type:Tag.ESA Index Fibres
 
 	typedef FibreText		EsaText;
@@ -250,6 +381,30 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 ..remarks:This index can be accessed as a Suffix Tree using the @Spec.VSTree Iterator@ classes.
 ..include:seqan/index.h
 */
+/*!
+ * @class IndexEsa
+ * 
+ * @extends Index
+ * 
+ * @headerfile seqan/index.h
+ * 
+ * @brief An index based on an enhanced suffix array.
+ * 
+ * @signature Index<TText, IndexEsa<> >
+ * 
+ * @tparam TText The text type. Types: String
+ * 
+ * @section Remarks
+ * 
+ * The fibres (see @link Index @endlink and @link Fibre @endlink) of this index
+ * are a suffix array (see @link ESA Index Fibres.EsaSA @endlink), a lcp table
+ * (see @link ESA Index Fibres.EsaLcp @endlink), etc.
+ * 
+ * This index can be accessed as a Suffix Tree using the @link VSTree Iterator
+ * @endlink classes.
+ * 
+ * @see ESA Index Fibres
+ */
 
 /*
 	already defined in index_base.h
@@ -261,8 +416,8 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 	template < typename TText, typename TSpec >
 	class Index<TText, IndexEsa<TSpec> > {
 	public:
-        typename FibreTextMember_<Index>::Type      text;
-		typename Fibre<Index, EsaSA>::Type          sa;			// suffix array 
+        typename Member<Index, EsaText>::Type       text;
+		typename Fibre<Index, EsaSA>::Type          sa;			// suffix array
 		typename Fibre<Index, EsaLcp>::Type         lcp;		// longest-common-prefix table
 		typename Fibre<Index, EsaLcpe>::Type        lcpe;		// extended lcp table
 		typename Fibre<Index, EsaChildtab>::Type    childtab;	// child table (tree topology)
@@ -327,21 +482,9 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		clear(getFibre(index, EsaBwt()));
 	}
 
-//////////////////////////////////////////////////////////////////////////////
-// assign
-
-    template <typename TText, typename TSpec, typename TText2, typename TSpec2>
-    inline void
-    assign(Index<TText, IndexEsa<TSpec> > & index, Index<TText2, IndexEsa<TSpec2> > & source)
-    {
-        assign(indexText(index), indexText(source));
-        assign(indexSA(index), indexSA(source));
-        assign(indexLcp(index), indexLcp(source));
-        assign(indexChildtab(index), indexChildtab(source));
-    }
-
-//////////////////////////////////////////////////////////////////////////////
-// open
+// ----------------------------------------------------------------------------
+// Function open
+// ----------------------------------------------------------------------------
 
 	template < typename TObject, typename TSpec >
 	inline bool open(
@@ -377,9 +520,9 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		return open(index, fileName, DefaultOpenMode<Index< TObject, IndexEsa<TSpec> > >::VALUE);
 	}
 
-
-//////////////////////////////////////////////////////////////////////////////
-// save
+// ----------------------------------------------------------------------------
+// Function save
+// ----------------------------------------------------------------------------
 
 	template < typename TObject, typename TSpec >
 	inline bool save(

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -170,8 +170,8 @@ struct Needle<Segment<THost, TSpec> const>
 ..param.k:Desired minimal score (for approximate matching).
 ...remarks:$k$ has to be a number <= 0.
 ...remarks:Differences are deletions, insertions and substitutions.
-..returns:$boolean$ that indicates whether an occurence of $pattern$ was found or not.
-..remarks:Repeated calls of this function iterate through all occurences of $pattern$.
+..returns:$boolean$ that indicates whether an occurrence of $pattern$ was found or not.
+..remarks:Repeated calls of this function iterate through all occurrences of $pattern$.
 ..include:seqan/find.h
 */
 
@@ -190,9 +190,77 @@ struct Needle<Segment<THost, TSpec> const>
 ..remarks:$position(finder)$ returns the position of the current hit in the haystack.
 If $THaystack$ is a set of strings or an index of a set of strings, then $position(finder)$ returns a @Class.Pair@ $(hayNo, pos)$,
 in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
-..remarks:Use $clear(finder)$ to reset a finder object and search from the beginning.
+..remarks:To reset the finder object and use it on another text or different text position, use $clear(finder)$
+Note that $clear(finder)$ doesn't move the text iterator. To start the search from the beginning or somewhere else in the text, use
+@Function.goBegin@ or @Function.setPosition@.
+..example.text:The following example shows how to restart a search from the beginning of a text.
+..example.code:
+CharString hstck = "I spy with my little eye something that is yellow";
+Finder<CharString> finder(hstck);
+
+Pattern<CharString, Horspool> p1("y");
+findAll(finder, p1);
+
+goBegin(finder);    // move Finder to the beginning of the text
+clear(finder);      // reset Finder
+
+Pattern<CharString, Horspool> p2("t");
+findAll(finder, p2);
 ..include:seqan/find.h
 */
+
+/*!
+ * @class Finder
+ * 
+ * @headerfile seqan/find.h
+ * 
+ * @brief Holds the haystack and a current search context.
+ * 
+ * @signature Finder<THaystack[, TSpec]>
+ * 
+ * @tparam TSpec The index-algorithm to search with (Optional).Leave empty for
+ *               online pattern matching (see @link Pattern @endlink).If
+ *               <tt>THaystack</tt> is an @link Index @endlink, then
+ *               <tt>TSpec</tt> specifies the index search algorithm. Types:
+ *               Pigeonhole, Swift, Backtracking Default: The result of @link
+ *               DefaultFinder @endlink
+ * @tparam THaystack The haystack type. Types: String, Index
+ * 
+ * @section Remarks
+ * 
+ * <tt>position(finder)</tt> returns the position of the current hit in the
+ * haystack. If <tt>THaystack</tt> is a set of strings or an index of a set of
+ * strings, then <tt>position(finder)</tt> returns a @link Pair @endlink
+ * <tt>(hayNo, pos)</tt>, in which <tt>hayNo</tt> is the haystack index and
+ * <tt>pos</tt> the local position of the hit.
+ * 
+ * To reset the finder object and use it on another text or different text
+ * position, use <tt>clear(finder)</tt> Note that <tt>clear(finder)</tt> doesn't
+ * move the text iterator. To start the search from the beginning or somewhere
+ * else in the text, use @link goBegin @endlink or @link setPosition @endlink.
+ * 
+ * @section Examples
+ * 
+ * The following example shows how to restart a search from the beginning of a
+ * text.
+ * 
+ * @code{.cpp}
+ * CharString hstck = "I spy with my little eye something that is yellow";
+ * Finder<CharString> finder(hstck);
+ *  
+ * Pattern<CharString, Horspool> p1("y");
+ * findAll(finder, p1);
+ *  
+ * goBegin(finder);    // move Finder to the beginning of the text
+ * clear(finder);      // reset Finder
+ *  
+ * Pattern<CharString, Horspool> p2("t");
+ * findAll(finder, p2);
+ * @endcode
+ * Demo: Demo.Index Finder StringSet
+ * 
+ * Demo: Demo.Index Finder
+ */
 
 ///.Function.clear.param.object.type:Class.Finder
 ///.Function.clear.class:Class.Finder
@@ -464,8 +532,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.infix:
-..description:Segment of the last found match in haystack.
+.Function.Finder#infix:
+..summary:Returns the segment of the last found match in haystack.
 ..signature:Infix infix(finder)
 ..param.finder:An online finder.
 ...type:Class.Finder

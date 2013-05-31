@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -199,19 +199,19 @@ int readRecord(BamAlignmentRecord & record,
 
     // Reference sequence id.
     SEQAN_ASSERT_GT(remainingBytes, 4);
-    record.rId = 0;
-    res = streamReadBlock(reinterpret_cast<char *>(&record.rId), stream, 4);
+    record.rID = 0;
+    res = streamReadBlock(reinterpret_cast<char *>(&record.rID), stream, 4);
     if (res != 4)
         return res;
-    SEQAN_ASSERT_GEQ(record.rId, -1);
-    if (record.rId >= 0)
-        SEQAN_ASSERT_LT(static_cast<__uint64>(record.rId), length(nameStore(context)));
+    SEQAN_ASSERT_GEQ(record.rID, -1);
+    if (record.rID >= 0)
+        SEQAN_ASSERT_LT(static_cast<__uint64>(record.rID), length(nameStore(context)));
     remainingBytes -= 4;
 
     // 0-based position.
     SEQAN_ASSERT_GT(remainingBytes, 4);
-    record.pos = 0;
-    res = streamReadBlock(reinterpret_cast<char *>(&record.pos), stream, 4);
+    record.beginPos = 0;
+    res = streamReadBlock(reinterpret_cast<char *>(&record.beginPos), stream, 4);
     if (res != 4)
         return res;
     remainingBytes -= 4;

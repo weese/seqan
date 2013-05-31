@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ _readOneAnnotation(
     clear(ctx);
 
     // read column 1: contig name
-    ctx.contigName = record.seqID;
+    ctx.contigName = record.ref;
 
     // skip column 2
     // read column 3: type
@@ -382,7 +382,7 @@ _writeCommonGffGtfInfo(
     {
         if (length(store.contigNameStore[annotation.contigId]) > 0u)
         {
-            record.seqID = store.contigNameStore[annotation.contigId];
+            record.ref = store.contigNameStore[annotation.contigId];
         }
     }
 
@@ -450,16 +450,13 @@ _writeOneAnnotation(
     String<char> temp;
     if (id < length(store.annotationNameStore) && !empty(getAnnoName(store, id)))
     {
+        appendValue(record.tagName, "ID");
         appendValue(record.tagValue, getAnnoName(store, id));
     }
     else if (annotation.lastChildId != TAnnotation::INVALID_ID)
     {
-        appendValue(record.tagValue, getAnnoUniqueName(store, id));
-    }
-
-    if (length(record.tagValue[0]) > 0)
-    {
         appendValue(record.tagName, "ID");
+        appendValue(record.tagValue, getAnnoUniqueName(store, id));
     }
 
     // write column 9.2: parent id

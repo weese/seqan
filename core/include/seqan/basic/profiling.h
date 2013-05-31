@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,9 @@
 
 #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_PROFILING_H_
 #define SEQAN_CORE_INCLUDE_SEQAN_BASIC_PROFILING_H_
+
+namespace seqan
+{
 
 // todo: substitute defines with inlines
 #ifndef SEQAN_PROFILE
@@ -589,5 +592,6 @@ if (printTiming)
         a += x;
         return x;
     }
+}
 
 #endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_PROFILING_H_

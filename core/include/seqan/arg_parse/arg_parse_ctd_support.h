@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -219,7 +219,14 @@ _getSupportedFormats(std::vector<std::string> & supported_formats, ArgParseArgum
              valid != opt.validValues.end();
              ++valid)
         {
+            SEQAN_ASSERT_NOT(empty(*valid));
+
             filetype = "*";
+
+            // ensure . as separator between * and file-extension
+            if (value(*valid, 0) != '.')
+                appendValue(filetype, '.');
+
             append(filetype, *valid);
             appendValue(supported_formats, filetype);
         }
@@ -386,7 +393,7 @@ writeCTD(ArgumentParser const & me, std::ostream & ctdfile)
 
         if (isStringArgument(opt) || isBooleanOption(opt))
             type = "string";
-        else if (isIntegerArgument(opt))
+        else if (isIntegerArgument(opt) || isInt64Argument(opt))
             type = "int";
         else if (isDoubleArgument(opt))
             type = "double";
@@ -472,7 +479,7 @@ writeCTD(ArgumentParser const & me, std::ostream & ctdfile)
 
         if (isStringArgument(arg))
             type = "string";
-        else if (isIntegerArgument(arg))
+        else if (isIntegerArgument(arg) || isInt64Argument(arg))
             type = "int";
         else if (isDoubleArgument(arg))
             type = "double";

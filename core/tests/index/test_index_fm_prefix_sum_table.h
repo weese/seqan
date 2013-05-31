@@ -1,7 +1,7 @@
 // ==========================================================================
-//                               fm_index_beta
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef TEST_PREFIX_SUM_TABLE_BETA_H_
@@ -171,35 +171,30 @@ void prefixSumTableGetPivotPosition(TPrefixSumTable & /*tag*/)
 template <typename TPrefixSumTable>
 void prefixSumTableDetermineSentinelSubstitute(TPrefixSumTable & /*tag*/)
 {
-    typedef typename RemoveConst<TPrefixSumTable>::Type TNonConstPrefixSumTable;
-	typedef typename CharacterValue<TNonConstPrefixSumTable>::Type TChar;
+	typedef typename CharacterValue<TPrefixSumTable>::Type      TChar;
 
 	{
 		String<TChar> text = "ACGTNACGTNACGTNNN";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('A'));
 	}
 	{
 		String<TChar> text = "AGTNAGTNAGTNNN";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('A'));
 	}
 	{
 		String<TChar> text = "ACGTNAGTNAGTNNN";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('C'));
 	}
 	{
 		String<TChar> text = "ACGTNACGTNACGT";
 		TPrefixSumTable prefixSumTable(text);
-		TChar character;
-		_determineSentinelSubstitute(prefixSumTable, character);
+		TChar character = determineSentinelSubstitute(prefixSumTable);
 		SEQAN_ASSERT_EQ(character, TChar('N'));
 	}
 }
@@ -235,7 +230,7 @@ void _prefixSumTableInsertSentinel(TPrefixSumTable & /*tag*/)
     TPrefixSumTable const pstConst = pst;
 
     unsigned numSentinel = 10;
-    _insertSentinel(pst, numSentinel);
+    insertSentinels(pst, numSentinel);
 
     for (unsigned i = 0; i < length(pst); ++i)
         SEQAN_ASSERT_EQ(getPrefixSum(pst, i), getPrefixSum(pstConst, i) + numSentinel);
@@ -316,24 +311,24 @@ void prefixSumTableValue(TPrefixSumTable & /*tag*/)
     SEQAN_ASSERT_EQ(getPrefixSum(pst, 0), 11u);
 }
 
-template <typename TPrefixSumTable>
-void prefixSumTableOpenSave(TPrefixSumTable & /*tag*/)
-{
-    typedef typename CharacterValue<TPrefixSumTable>::Type TChar;
-    //typedef typename MakeUnsigned<TChar>::Type TUChar;
-    typedef String<TChar> TText;
-
-    TText text = "ACGT";
-    TPrefixSumTable pst(text);
-
-    CharString tempFilename = SEQAN_TEMP_FILENAME();
-    save(pst, toCString(tempFilename));
-
-    TPrefixSumTable openPst;
-    open(openPst, toCString(tempFilename));
-
-    SEQAN_ASSERT(pst == openPst);
-}
+//template <typename TPrefixSumTable>
+//void prefixSumTableOpenSave(TPrefixSumTable & /*tag*/)
+//{
+//    typedef typename CharacterValue<TPrefixSumTable>::Type TChar;
+//    //typedef typename MakeUnsigned<TChar>::Type TUChar;
+//    typedef String<TChar> TText;
+//
+//    TText text = "ACGT";
+//    TPrefixSumTable pst(text);
+//
+//    CharString tempFilename = SEQAN_TEMP_FILENAME();
+//    save(pst, toCString(tempFilename));
+//
+//    TPrefixSumTable openPst;
+//    open(openPst, toCString(tempFilename));
+//
+//    SEQAN_ASSERT(pst == openPst);
+//}
 
 SEQAN_DEFINE_TEST(prefix_sum_table_constructor)
 {
@@ -396,16 +391,16 @@ SEQAN_DEFINE_TEST(prefix_sum_table_get_pivot_position)
     //prefixSumTableGetPivotPosition(constTag);
 }
 
-SEQAN_DEFINE_TEST(prefix_sum_table_determine_sentinel_substitute)
-{
-    using namespace seqan;
-
-    PrefixSumTable<Dna5, void> tag;
-    prefixSumTableDetermineSentinelSubstitute(tag);
-
-    PrefixSumTable<Dna5, void> const constTag;
-    prefixSumTableDetermineSentinelSubstitute(constTag);
-}
+//SEQAN_DEFINE_TEST(prefix_sum_table_determine_sentinel_substitute)
+//{
+//    using namespace seqan;
+//
+//    PrefixSumTable<Dna5, void> tag;
+//    prefixSumTableDetermineSentinelSubstitute(tag);
+//
+//    PrefixSumTable<Dna5, void> const constTag;
+//    prefixSumTableDetermineSentinelSubstitute(constTag);
+//}
 
 SEQAN_DEFINE_TEST(prefix_sum_table_get_value)
 {
@@ -415,13 +410,13 @@ SEQAN_DEFINE_TEST(prefix_sum_table_get_value)
     prefixSumTableGetValue(tag);
 }
 
-SEQAN_DEFINE_TEST(prefix_sum_table_insert_sentinel_)
-{
-    using namespace seqan;
-
-    PrefixSumTable<Dna5, void> tag;
-    _prefixSumTableInsertSentinel(tag);
-}
+//SEQAN_DEFINE_TEST(prefix_sum_table_insert_sentinel_)
+//{
+//    using namespace seqan;
+//
+//    PrefixSumTable<Dna5, void> tag;
+//    _prefixSumTableInsertSentinel(tag);
+//}
 
 SEQAN_DEFINE_TEST(prefix_sum_table_length)
 {
@@ -463,12 +458,12 @@ SEQAN_DEFINE_TEST(prefix_sum_table_value)
     prefixSumTableValue(tag);
 }
 
-SEQAN_DEFINE_TEST(prefix_sum_table_open_save)
-{
-    using namespace seqan;
-
-    PrefixSumTable<Dna5, void> tag;
-    prefixSumTableOpenSave(tag);
-}
+//SEQAN_DEFINE_TEST(prefix_sum_table_open_save)
+//{
+//    using namespace seqan;
+//
+//    PrefixSumTable<Dna5, void> tag;
+//    prefixSumTableOpenSave(tag);
+//}
 
 #endif  // TEST_PREFIX_SUM_TABLE_BETA_H_

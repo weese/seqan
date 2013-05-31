@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,21 @@ struct Host<Matrix<TValue, DIMENSION> >
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+
+// TODO(holtgrew): Add more comprehensive documentation!
+
+/*!
+ * @class Matrix
+ * @include <seqan/align.h>
+ * @brief A simple n-dimensional matrix type.
+ *
+ * @signature template <typename TValue, unsigned DIMENSION = 0>
+ *            class Matrix;
+ *
+ * @tparam TValue    Type of matrix entries.
+ * @tparam DIMENSION Dimension of the matrix.  Use 0 for n-dimensional, values &gt; 0 for a matrix with
+ *                   <tt>DIMENSION</tt> dimensions.
+ */
 
 /**
 .Class.Matrix:
@@ -1039,8 +1054,9 @@ matricialProduct(Matrix<TValue, 2> &matrix1,
 */
 // TODO(holtgrew): Should work as the graph-transpose.
 /**
-.Function.transpose:
+.Function.Matrix#transpose
 ..summary:Transposes matrix
+..class:Class.Matrix
 ..signature:Matrix transpose(matrix)
 ..param.matrix:The matrix (mxn) to transpose.
 ...type:Class.Matrix

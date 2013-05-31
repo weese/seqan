@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 // Declarations related to and implementation of the Segment class.
 // ==========================================================================
@@ -41,9 +42,141 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+/*!
+ * @concept SegmentableConcept
+ * @headerfile <seqan/sequence.h>
+ * @brief A concept for sequences that can be used as the host of a @link SegmentConcept segment @endlink.
+ *
+ * @signature concept Segmentable;
+ * @brief Returns prefix type in a infix fashion.
+ */
+
+/*!
+ * @mfn SegmentableConcept#Prefix
+ * @brief Return prefix type in a flattening fashion.
+ *
+ * @signature Prefix<TSeq>::Type
+ *
+ * @tparam TSeq The segmentable sequence type to get infix type for.
+ * @return Type The prefix type.
+ *
+ * The prefix type of a prefix is a suffix, the prefix of any other segment type is an infix.
+ */
+
+/*!
+ * @fn SegmentableConcept#prefix
+ * @brief Returns the prefix of a Segmentable type.
+ *
+ * @signature TPrefix prefix(s, endPos);
+ *
+ * @param s      Segmentable sequence to return the prefix for (type <tt>TSeq</tt>).
+ * @param endPos End position must be convertible to <tt>Position<TSeq>::Type</tt>.
+ *
+ * @return TPrefix The prefix of length <tt>endPos</tt>.  Type as returned by @link Segmentable#Prefix @endlink for TSeq.
+ */
+
+/*!
+ * @mfn SegmentableConcept#Infix
+ * @brief Returns infix type in a flattening fashion.
+ *
+ * @signature Suffix<TSeq>::Type
+ *
+ * @tparam TSeq The segmentable sequence type to get infix type for.
+ * @return Type The infix type.
+ *
+ * The infix any segment is an infix.
+ */
+
+/*!
+ * @fn SegmentableConcept#infixWithLength
+ * @brief Returns the infix of a Segmentable type.
+ *
+ * @signature TPrefix infixWithLength(s, beginPos, len);
+ *
+ * @param s        Segmentable sequence to return the infix for (type <tt>TSeq</tt>).
+ * @param beginPos Begin position must be convertible to <tt>Position<TSeq>::Type</tt>.
+ * @param len      Length of the prefix, must be convertible to <tt>Size<TSeq>::Type</tt>.
+ *
+ * Equivalent to <tt>infix(s, beginPos, beginPos + len)</tt>.
+ */
+
+/*!
+ * @fn SegmentableConcept#infix
+ * @brief Returns the infix of a Segmentable type.
+ *
+ * @signature TPrefix infix(s, beginPos, endPos);
+ *
+ * @param s        Segmentable sequence to return the infix for (type <tt>TSeq</tt>).
+ * @param beginPos Begin position must be convertible to <tt>Position<TSeq>::Type</tt>.
+ * @param endPos   End position must be convertible to <tt>Position<TSeq>::Type</tt>.
+ */
+
+/*!
+ * @mfn SegmentableConcept#Suffix
+ * @brief Returns suffix type in a flattening fashion.
+ *
+ * @signature Suffix<TSeq>::Type
+ *
+ * @tparam TSeq The segmentable sequence type to get suffix type for.
+ * @return Type The suffix type.
+ * 
+ * The suffix type of a suffix is a suffix, the suffix of any other segment type is an infix.
+ */
+
+/*!
+ * @fn SegmentableConcept#suffix
+ * @brief Returns the suffix of a Segmentable type.
+ *
+ * @signature TPrefix suffix(s, beginPos);
+ *
+ * @param s        The segmentable type to get the suffix of.
+ * @param beginPos Begin position must be convertible to <tt>Position<TSeq>::Type</tt>.
+ *
+ * @return TSuffix The suffix type as returned by @link Segmentable#Suffix @endlink.
+ */
+
 //////////////////////////////////////////////////////////////////////////////
 // Segment
 //////////////////////////////////////////////////////////////////////////////
+
+// TODO(holtgrew): We need to document how to get reference/pointer type of segments.
+
+/*!
+ * @class Segment
+ * @implements RandomAccessContainerConcept
+ * @implements SegmentableConcept
+ * @headerfile <seqan/sequence.h>
+ * @brief A contiguous part of a sequence.
+ *
+ * @signature template <typename THost, typename TSpec>
+ *            class Segment;
+ *
+ * @tparam THost The underlying @link SequenceConcept sequence@ type.
+ * @tparam TSpec The tag to use for selecting the Segment specialization.
+ *
+ * Segments are lightweight representations of an underlying sequence (host).  Only a pointer to the host and begin
+ * and/or end position have to be stored.
+ *
+ * Segments support element access (reading and writing) as well as random access iteration.
+ *
+ * @snippet core/demos/sequence/segment.cpp basic operations
+ *
+ * You can get the type of the infix/prefix/suffix of a sequence using @link Sequence#Infix @endlink,
+ * @link Sequence#Prefix @endlink, and @link Sequence#Suffix @endlink.  These metafunctions will
+ * "flatten" the type such that using these metafunctions, the infix of an infix is an infix and not
+ * an Infix Segment with an Infix Segment as its host.  Instead, it will again be an Infix Segment
+ * of the host of the inner type.
+ *
+ * A suffix of a suffix remains a suffix, a prefix of a prefix remains a prefix.  Any other combination leads to
+ * the resulting type being a infix segment.
+ *
+ * @snippet core/demos/sequence/segment.cpp metafunction examples
+ *
+ * If you explicitely need a segment and keep the underlying sequence as it is, explicitely use the <tt>Segment</tt>
+ * template class.
+ *
+ * @snippet core/demos/sequence/segment.cpp explicit segment
+ */
 
 /**
 .Class.Segment:
@@ -132,16 +265,12 @@ struct Spec<Segment<THost, TSpec> const>
 ///.Metafunction.Value.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct Value<Segment<THost, TSpec> >
-{
-    typedef typename Value<THost>::Type Type;
-};
+struct Value<Segment<THost, TSpec> > :
+    Value<THost> {};
 
 template <typename THost, typename TSpec>
-struct Value<Segment<THost, TSpec> const >
-{
-    typedef typename Value<THost const>::Type Type;
-};
+struct Value<Segment<THost, TSpec> const > :
+    Value<THost const> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -149,16 +278,12 @@ struct Value<Segment<THost, TSpec> const >
 ///.Metafunction.GetValue.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct GetValue<Segment<THost, TSpec> >
-{
-    typedef typename GetValue<THost>::Type Type;
-};
+struct GetValue<Segment<THost, TSpec> > :
+    GetValue<THost> {};
 
 template <typename THost, typename TSpec>
-struct GetValue<Segment<THost, TSpec> const >
-{
-    typedef typename GetValue<THost const>::Type Type;
-};
+struct GetValue<Segment<THost, TSpec> const > :
+    GetValue<THost const> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -166,17 +291,21 @@ struct GetValue<Segment<THost, TSpec> const >
 ///.Metafunction.Reference.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct Reference<Segment<THost, TSpec> >
-{
-	typedef typename Reference<THost>::Type Type;
-};
+struct Reference<Segment<THost, TSpec> > :
+    Reference<THost> {};
 
 template <typename THost, typename TSpec>
-struct Reference<Segment<THost, TSpec> const >
-{
-	typedef typename Reference<THost>::Type Type;
-};
-	
+struct Reference<Segment<THost, TSpec> const > :
+    Reference<THost> {};
+
+// TODO(weese): It's a philosophical question whether const Views like Segments are allowed to modify the host or not
+//              It would be more restrictive but consistent in generic algorithms if Segments would behave like Strings (immutable host)
+//              On the other hand segments are prone to unintentionally be given as a const to a function (by-const-reference, not by copy)
+
+//template <typename THost, typename TSpec>
+//struct Reference<Segment<THost, TSpec> const > :
+//    Reference<THost const> {};
+
 //////////////////////////////////////////////////////////////////////////////
 
 // TODO(holtgrew): Should the iterators of const segments be iterators with the constness of the host.
@@ -195,20 +324,17 @@ template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec> const, Rooted>
 {
     typedef Segment<THost, TSpec> TSequence_;
-    typedef typename Iterator<THost const, Standard>::Type TIterator_;
+    typedef typename Iterator<THost, Standard>::Type TIterator_;
     typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec>, Standard>:
-    Iterator<THost, Standard>
-{
-};
+    Iterator<THost, Standard> {};
+
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec> const, Standard>:
-    Iterator<THost const, Standard>
-{
-};
+    Iterator<THost , Standard> {};
 
 
 
@@ -218,28 +344,20 @@ struct Iterator<Segment<THost, TSpec> const, Standard>:
 ///.Metafunction.Size.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct Size<Segment<THost, TSpec> >
-{
-    typedef typename Size<THost>::Type Type;
-};
+struct Size<Segment<THost, TSpec> > :
+    Size<THost> {};
 
 template <typename THost, typename TSpec>
-struct Size<Segment<THost, TSpec> const >
-{
-    typedef typename Size<THost>::Type Type;
-};
+struct Size<Segment<THost, TSpec> const > :
+    Size<THost> {};
 
 template <typename THost, typename TSpec>
-struct Position<Segment<THost, TSpec> >
-{
-    typedef typename Position<THost>::Type Type;
-};
+struct Position<Segment<THost, TSpec> > :
+    Position<THost> {};
 
 template <typename THost, typename TSpec>
-struct Position<Segment<THost, TSpec> const >
-{
-    typedef typename Position<THost>::Type Type;
-};
+struct Position<Segment<THost, TSpec> const > :
+    Position<THost> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -247,16 +365,12 @@ struct Position<Segment<THost, TSpec> const >
 ///.Metafunction.DefaultOverflowImplicit.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct DefaultOverflowImplicit<Segment<THost, TSpec > >:
-    DefaultOverflowImplicit<THost>
-{
-};
+struct DefaultOverflowImplicit<Segment<THost, TSpec > > :
+    DefaultOverflowImplicit<THost> {};
 
 template <typename THost, typename TSpec>
-struct DefaultOverflowImplicit<Segment<THost, TSpec > const >:
-    DefaultOverflowImplicit<THost>
-{
-};
+struct DefaultOverflowImplicit<Segment<THost, TSpec > const > :
+    DefaultOverflowImplicit<THost> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -264,16 +378,12 @@ struct DefaultOverflowImplicit<Segment<THost, TSpec > const >:
 ///.Metafunction.DefaultOverflowExplicit.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct DefaultOverflowExplicit<Segment<THost, TSpec > >:
-    DefaultOverflowExplicit<THost>
-{
-};
+struct DefaultOverflowExplicit<Segment<THost, TSpec > > :
+    DefaultOverflowExplicit<THost> {};
 
 template <typename THost, typename TSpec>
-struct DefaultOverflowExplicit<Segment<THost, TSpec > const >:
-    DefaultOverflowExplicit<THost>
-{
-};
+struct DefaultOverflowExplicit<Segment<THost, TSpec > const > :
+    DefaultOverflowExplicit<THost> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -281,8 +391,8 @@ struct DefaultOverflowExplicit<Segment<THost, TSpec > const >:
 ///.Metafunction.IsContiguous.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct IsContiguous< Segment<THost, TSpec> >:
-    public IsContiguous<THost> {};
+struct IsContiguous< Segment<THost, TSpec> > :
+    IsContiguous<THost> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -290,10 +400,8 @@ struct IsContiguous< Segment<THost, TSpec> >:
 ///.Metafunction.IsSequence.class:Class.Segment
 
 template <typename THost, typename TSpec>
-struct IsSequence< Segment<THost, TSpec> > {
-    typedef True Type;
-    enum { VALUE = true };
-};
+struct IsSequence< Segment<THost, TSpec> > :
+    True {};
 
 //////////////////////////////////////////////////////////////////////////////
 

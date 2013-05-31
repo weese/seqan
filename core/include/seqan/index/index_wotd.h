@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,62 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.IndexWotd
 ..include:seqan/index.h
 */
+/*! 
+ * @defgroup WOTDIndexFibres WOTD Index Fibres
+ * 
+ * @brief Tag to select a specific fibre (e.g. table, object, ...) of an @link
+ *        IndexWotd @endlink index.
+ * 
+ * @section Remarks
+ * 
+ * These tags can be used to get @link Fibre @endlink of an @link IndexWotd @endlink.
+ * 
+ * TODO(holtgrew): Ask David.
+ * 
+ * @see Fibre
+ * @see getFibre
+ * @see IndexWotd
+ * 
+ * @tag WOTDIndexFibres#WotdDir
+ * 
+ * @brief The child table.
+ * 
+ * @section Remarks
+ * 
+ * TODO(holtgrew): Ask David.
+ * 
+ * @tag WOTDIndexFibres#WotdRawSA
+ * 
+ * @brief The raw suffix array.
+ * 
+ * @section Remarks
+ * 
+ * TODO(holtgrew): Ask David.
+ * 
+ * @tag WOTDIndexFibres#WotdText
+ * 
+ * @brief The original text the index should be based on.
+ * 
+ * @section Remarks
+ * 
+ * TODO(holtgrew): Ask David.
+ * 
+ * @tag WOTDIndexFibres#WotdRawText
+ * 
+ * @brief The raw text the index is really based on.
+ * 
+ * @section Remarks
+ * 
+ * TODO(holtgrew): Ask David.
+ * 
+ * @tag WOTDIndexFibres#WotdSA
+ * 
+ * @brief The suffix array.
+ * 
+ * @section Remarks
+ * 
+ * TODO(holtgrew): Ask David.
+ */
 	typedef FibreText		WotdText;
 	typedef FibreRawText	WotdRawText;
 	typedef FibreSA         WotdSA;
@@ -93,6 +149,30 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a partially sorted suffix array (see @Tag.WOTD Index Fibres.WotdSA@) and the wotd tree (see @Tag.WOTD Index Fibres.WotdDir@).
 ..include:seqan/index.h
 */
+/*!
+ * @class IndexWotd
+ * 
+ * @extends Index
+ * 
+ * @headerfile seqan/index.h
+ * 
+ * @brief An index based on a lazy suffix tree (see Giegerich et al., "Efficient
+ *        implementation of lazy suffix trees").
+ * 
+ * @signature Index<TText, IndexWotd<> >
+ * 
+ * @tparam TText The text type. Types: @link SequenceConcept @endlink
+ * 
+ * @section Remarks
+ * 
+ * The fibres (see @link Index @endlink and @link Fibre @endlink) of this index
+ * are a partially sorted suffix array (see @link WOTDIndexFibres#WotdSA
+ * @endlink) and the wotd tree (see @link WOTDIndexFibres#WotdDir @endlink).
+ * 
+ * Demo: Demo.Constraint Iterator
+ * 
+ * @see WOTD Index Fibres
+ */ 
 
 	struct WotdOriginal_;
 	typedef Tag<WotdOriginal_> const WotdOriginal;
@@ -930,7 +1010,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
-		typedef typename Iterator<TSA const, Standard>::Type	TSAIterator;
+		typedef typename Iterator<TSA, Standard>::Type          TSAIterator;
 		typedef typename Size<TText>::Type						TTextSize;
 
 		TTextIterator itText = begin(text, Standard());
@@ -1037,8 +1117,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_wotdCummulativeSum(TBounds &bounds, TBuckets const &buckets, TSize offset)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Iterator<TBounds, Standard>::Type		TBoundIterator;
-		typedef typename Iterator<TBuckets, Standard>::Type		TBucketsIterator;
+		typedef typename Iterator<TBounds, Standard>::Type          TBoundIterator;
+		typedef typename Iterator<TBuckets const, Standard>::Type   TBucketsIterator;
 
 		TBucketsIterator it = begin(buckets, Standard());
 		TBucketsIterator itEnd = end(buckets, Standard());
@@ -1066,6 +1146,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 //////////////////////////////////////////////////////////////////////////////
+//TODO(singer): The function createWotdIndex in never defined!
 /**
 .Function.createWotdIndex:
 ..summary:Builds a q-gram index on a sequence. 
@@ -1078,6 +1159,24 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
 ..include:seqan/index.h
 */
+/*!
+ * @fn IndexWotd#createWotdIndex
+ * 
+ * @headerfile seqan/index.h
+ * 
+ * @brief Builds a q-gram index on a sequence.
+ * 
+ * @signature createWotdIndex(sa, dir, text)
+ * 
+ * @param text The sequence. Types: @link SequnceConcept @endlink
+ * @param sa The resulting list in which all q-grams are sorted alphabetically. 
+ * @param dir The resulting array that indicates at which position in index the
+ *            corresponding q-grams can be found.
+ * 
+ * @return TReturn Index contains the sorted list of qgrams. For each possible
+ *                 q-gram pos contains the first position in index that
+ *                 corresponds to this q-gram.
+ */
 
 	// single sequence
 	template < typename TIndex >
@@ -1193,14 +1292,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
-		typedef Index<TText, IndexWotd<WotdOriginal> >			TIndex;
-		typedef typename Fibre<TIndex, WotdSA >::Type			TSA;
-		typedef typename TIndex::TCounter						TCounter;
+		typedef Index<TText, IndexWotd<WotdOriginal> >              TIndex;
+		typedef typename Fibre<TIndex, WotdSA >::Type               TSA;
+		typedef typename TIndex::TCounter                           TCounter;
 
-		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
-		typedef typename Iterator<TSA, Standard>::Type			TSAIterator;
-		typedef typename Iterator<TCounter, Standard>::Type		TCntIterator;
-		typedef typename Size<TText>::Type						TTextSize;
+		typedef typename Iterator<TText const, Standard>::Type      TTextIterator;
+		typedef typename Iterator<TSA, Standard>::Type              TSAIterator;
+		typedef typename Iterator<TCounter, Standard>::Type         TCntIterator;
+		typedef typename Iterator<TCounter const, Standard>::Type   TConstCntIterator;
+		typedef typename Size<TText>::Type                          TTextSize;
 
 		TText const &text = indexText(index);
 		TCounter const &tempSA = index.tempSA;
@@ -1214,7 +1314,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		index.tempSA = infix(indexSA(index), left, right);
 		index.sentinelBound = 0;
 		index.sentinelOcc =
-			_wotdCountCharsWotdOriginal(occ, text, tempSA, prefixLen);
+			_wotdCountCharsWotdOriginal(occ, text, index.tempSA, prefixLen);
 
 		// 3. cumulative sum
 		TSize requiredSize = 0;
@@ -1236,8 +1336,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TCntIterator boundBeg = begin(bound, Standard());
 
 			TTextIterator itText = begin(text, Standard());
-			TCntIterator itSA = begin(tempSA, Standard());
-			TCntIterator itSAEnd = end(tempSA, Standard());
+			TConstCntIterator itSA = begin(tempSA, Standard());
+			TConstCntIterator itSAEnd = end(tempSA, Standard());
 			TTextSize textLength = length(text);
 			for(; itSA != itSAEnd; ++itSA)
 			{
@@ -1307,14 +1407,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Fibre<TIndex, WotdText >::Type		TText;
-		typedef typename Fibre<TIndex, WotdSA >::Type			TSA;
-		typedef typename TIndex::TCounter						TCounter;
+		typedef typename Fibre<TIndex, WotdText >::Type             TText;
+		typedef typename Fibre<TIndex, WotdSA >::Type               TSA;
+		typedef typename TIndex::TCounter                           TCounter;
 
-		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
-		typedef typename Iterator<TSA, Standard>::Type			TSAIterator;
-		typedef typename Iterator<TCounter, Standard>::Type		TCntIterator;
-		typedef typename Size<TText>::Type						TTextSize;
+		typedef typename Iterator<TText const, Standard>::Type      TTextIterator;
+		typedef typename Iterator<TSA, Standard>::Type              TSAIterator;
+		typedef typename Iterator<TCounter, Standard>::Type         TCntIterator;
+		typedef typename Iterator<TCounter const, Standard>::Type   TConstCntIterator;
+		typedef typename Size<TText>::Type                          TTextSize;
 
 		TText const &text = indexText(index);
 		TCounter const &tempSA = index.tempSA;
@@ -1347,8 +1448,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TCntIterator boundBeg = begin(bound, Standard());
 
 			TTextIterator itText = begin(text, Standard()) + prefixLen;
-			TCntIterator itSA = begin(tempSA, Standard());
-			TCntIterator itSAEnd = end(tempSA, Standard());
+			TConstCntIterator itSA = begin(tempSA, Standard());
+			TConstCntIterator itSAEnd = end(tempSA, Standard());
 			TTextSize textLength = length(text) - prefixLen;
 			for(; itSA != itSAEnd; ++itSA)
 			{
@@ -1380,7 +1481,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef typename Iterator<TText const, Standard>::Type		TTextIterator;
 		typedef typename Iterator<TSA, Standard>::Type				TSAIterator;
-		typedef typename Iterator<TTempSA, Standard>::Type			TTempSAIterator;
+		typedef typename Iterator<TTempSA const, Standard>::Type    TTempSAIterator;
 		typedef typename Iterator<TCounter, Standard>::Type			TCntIterator;
 		typedef typename Size<TText>::Type							TTextSize;
 

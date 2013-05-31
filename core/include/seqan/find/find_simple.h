@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -117,7 +117,7 @@ inline bool find(TFinder & finder,
 				 Pattern<TNeedle, Simple> & me)
 {
 	typedef typename Haystack<TFinder>::Type THaystack;
-	typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
+	typedef typename Iterator<THaystack const, Standard>::Type THaystackIterator;
 
 	if (empty(finder))
 	{

@@ -1,7 +1,7 @@
 // ==========================================================================
-//                 seqan - the library for sequence analysis
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,30 +37,16 @@
 
 namespace seqan {
 
-// ==========================================================================
+// ============================================================================
 // Forwards
-// ==========================================================================
-template <typename TOccTable, typename TPrefixSumTable>
-struct LfTable;
-
-template <typename TValue>
-struct WaveletTree;
-
-template<typename TValue> 
-class RankDictionary;
-
-template<typename TRankDictionarySpec, typename TSpec> 
-class SentinelRankDictionary;
-
-struct FibreTreeStructure_;
-typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
+// ============================================================================
 
 template <typename TChar, typename TSpec = void>
 class RightArrayBinaryTree;
 
-// ==========================================================================
+// ============================================================================
 // Tags 
-// ==========================================================================
+// ============================================================================
 //
 /**
 .Tag.RightArrayBinaryTree Fibres
@@ -73,13 +59,22 @@ class RightArrayBinaryTree;
 ..include:seqan/index.h
 */
 
+///.Metafunction.Fibre.param.TContainer.type:Class.RightArrayBinaryTree
 ///.Metafunction.Fibre.param.TSpec.type:Tag.RightArrayBinaryTree Fibres
 struct FibreTreeStructureEncoding_;
 typedef Tag<FibreTreeStructureEncoding_> const FibreTreeStructureEncoding;
 
-// ==========================================================================
+struct FibreTreeStructure_;
+typedef Tag<FibreTreeStructure_> const FibreTreeStructure;
+
+// ============================================================================
 // Metafunctions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Fibre
+// ----------------------------------------------------------------------------
+
 template <typename TChar, typename TSpec>
 struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>
 {
@@ -94,7 +89,10 @@ struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>
 //     typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type const Type;
 // };
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Metafunction Reference
+// ----------------------------------------------------------------------------
+
 template <typename TChar, typename TSpec>
 struct Reference<RightArrayBinaryTree<TChar, TSpec> >
 {
@@ -107,12 +105,15 @@ struct Reference<const RightArrayBinaryTree<TChar, TSpec> >
     typedef typename Value<RightArrayBinaryTree<TChar, TSpec> >::Type const & Type;
 };
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
+
 template <typename TChar, typename TSpec>
 struct Value<RightArrayBinaryTree<TChar, TSpec> >
 {
-    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type TWaveletTreeVertieces_;
-    typedef typename Value<TWaveletTreeVertieces_>::Type TWaveletTreeVertex_;
+    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type TWaveletTreeVertices_;
+    typedef typename Value<TWaveletTreeVertices_>::Type TWaveletTreeVertex_;
     typedef typename Value<TWaveletTreeVertex_, 2>::Type TPos;
 
     typedef Pair<TChar, TPos> Type;
@@ -121,16 +122,20 @@ struct Value<RightArrayBinaryTree<TChar, TSpec> >
 template <typename TChar, typename TSpec>
 struct Value<RightArrayBinaryTree<TChar, TSpec> const>
 {
-    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type TWaveletTreeVertieces_;
-    typedef typename Value<TWaveletTreeVertieces_>::Type TWaveletTreeVertex_;
+    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type TWaveletTreeVertices_;
+    typedef typename Value<TWaveletTreeVertices_>::Type TWaveletTreeVertex_;
     typedef typename Value<TWaveletTreeVertex_, 2>::Type TPos;
 
     typedef Pair<TChar, TPos> Type;
 };
 
-// ==========================================================================
-//Tags, Classes, Enums
-// ==========================================================================
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class RightArrayBinaryTree
+// ----------------------------------------------------------------------------
 
 /**
 .Class.RightArrayBinaryTree:
@@ -146,32 +151,30 @@ template <typename TChar, typename TSpec>
 class RightArrayBinaryTree
 {
 public:
-    typename Fibre<RightArrayBinaryTree, FibreTreeStructureEncoding>::Type treeVertieces;
+    typename Fibre<RightArrayBinaryTree, FibreTreeStructureEncoding>::Type treeVertices;
     TChar minCharValue;
  
     RightArrayBinaryTree() :
-        treeVertieces(),
+        treeVertices(),
         minCharValue()
     {}
 
     template <typename TText>
     explicit RightArrayBinaryTree(TText const & text) :
-        treeVertieces(),
+        treeVertices(),
         minCharValue()
     {
-        createRightArrayBinaryTree(*this,
-                                    text);
-    }
-
-    inline bool operator==(const RightArrayBinaryTree & b) const
-    {
-        return treeVertieces == b.treeVertieces;
+        createRightArrayBinaryTree(*this, text);
     }
 };
 
-// ==========================================================================
+// ============================================================================
 // Functions
-// ==========================================================================
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.clear
@@ -181,10 +184,13 @@ public:
 template <typename TChar, typename TSpec>
 inline void clear(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
 {
-    clear(treeStructure.treeVertieces);
+    clear(treeStructure.treeVertices);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function createRightArrayBinaryTree()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.createRightArrayBinaryTree
 ..summary:Computes the wavelet tree structure of a text.
@@ -202,9 +208,9 @@ computeRightArrayBinaryTree(genome);
 */
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TBorderString, typename TPrefixSumTable, typename TIterSpec>
-inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                                        TBorderString & borderString,
-                                        TPrefixSumTable & pst)
+inline void _createRightArrayBinaryTreeImpl(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
+                                            TBorderString & borderString,
+                                            TPrefixSumTable & pst)
 {
     do
     {
@@ -216,7 +222,7 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
             SEQAN_ASSERT_MSG(isLeaf(it), "You just deleted a subtree.");
         }
         else
-            _setChildVertieces(it, borderString, pst);
+            _setChildVertices(it, borderString, pst);
 
         if (!_goDownConstruction(it) && !_setAndGoRight(it, borderString, pst))
             while (_goUpStructureConstruction(it, borderString) && !_setAndGoRight(it, borderString, pst))
@@ -225,11 +231,10 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
     while (!isRoot(it));
 }
 
-// ==========================================================================
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TPrefixSumTable>
-inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                                        TPrefixSumTable & pst)
+inline void _createRightArrayBinaryTreeImpl(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
+                                            TPrefixSumTable & pst)
 {
     typedef RightArrayBinaryTree<TChar, TSpec> TRightArrayBinaryTree;
     TRightArrayBinaryTree & waveletTreeStructure = container(it);
@@ -237,31 +242,36 @@ inline void createRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, 
     unsigned alpSize = getAlphabetSize(pst);
     String<Pair<unsigned> > borderString;
     appendValue(borderString, Pair<unsigned>(0, alpSize - 1));
-    _resize(waveletTreeStructure, 1);
-    createRightArrayBinaryTree(it, borderString, pst);
+    _resize(waveletTreeStructure, 1, Exact());
+    _createRightArrayBinaryTreeImpl(it, borderString, pst);
 }
 
-// This function computes the wavelet tree structure contained in the lfTable.
-template < typename TValue, typename TSpec, typename TPrefixSumTable>
-inline void createRightArrayBinaryTree(LfTable<SentinelRankDictionary<RankDictionary<WaveletTree<TValue> >, TSpec>, TPrefixSumTable> & lfTable)
-{
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type TRightArrayBinaryTree;
-    TRightArrayBinaryTree & rightArrayBinaryTree = lfTable.occTable.rankDictionary.waveletTreeStructure;
+// ----------------------------------------------------------------------------
+// Function createRightArrayBinaryTree()
+// ----------------------------------------------------------------------------
 
-    typename Iterator<TRightArrayBinaryTree, TopDown<ParentLinks<void> > >::Type it(rightArrayBinaryTree, 0u);
-    createRightArrayBinaryTree(it, lfTable.prefixSumTable);
+template <typename TChar, typename TSpec, typename TPrefixSumTable>
+inline void
+createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure,
+                           TPrefixSumTable & pst)
+{
+    typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TopDown<ParentLinks<> > >::Type it(waveletTreeStructure, 0u);
+    _createRightArrayBinaryTreeImpl(it, pst);
 }
 
 template <typename TChar, typename TSpec, typename TText>
-inline void createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure, TText const & text)
+inline void
+createRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure,
+                           TText const & text)
 {
-    PrefixSumTable<TChar, void> pst(text);
-
-    typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TopDown<ParentLinks<> > >::Type it(waveletTreeStructure, 0u);
-    createRightArrayBinaryTree(it, pst);
+    PrefixSumTable<TChar> pst(text);
+    createRightArrayBinaryTree(waveletTreeStructure, pst);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function empty()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.empty
 ..param.object:
@@ -273,7 +283,10 @@ inline bool empty(RightArrayBinaryTree<TChar, TSpec> const & treeStructure)
     return empty(getFibre(treeStructure, FibreTreeStructureEncoding()));
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function getFibre()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.RightArrayBinaryTree#getFibre:
 ..summary:Returns a specific fibre of a container.
@@ -291,47 +304,59 @@ template <typename TChar, typename TSpec>
 inline typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type &
 getFibre(RightArrayBinaryTree<TChar, TSpec> & treeStructure, FibreTreeStructureEncoding)
 {
-    return treeStructure.treeVertieces;
+    return treeStructure.treeVertices;
 }
 
 template <typename TChar, typename TSpec>
 inline typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type const &
 getFibre(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, FibreTreeStructureEncoding)
 {
-    return treeStructure.treeVertieces;
+    return treeStructure.treeVertices;
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function length()
+// ----------------------------------------------------------------------------
+
 // This function returns the number of different entries in the wavelet tree structure.
 template <typename TChar, typename TSpec>
-inline unsigned _length(RightArrayBinaryTree<TChar, TSpec> const & tree)
+inline unsigned length(RightArrayBinaryTree<TChar, TSpec> const & tree)
 {
-    return length(tree.treeVertieces);
+    return length(tree.treeVertices);
 }
 
-// ==========================================================================
-// This function resizes the string holding the nodes of the wavelet tree structure.
-template <typename TChar, typename TSpec, typename TSize>
-inline void _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size)
-{
-    resize(treeStructure.treeVertieces, size);
-}
+// ----------------------------------------------------------------------------
+// Function _resize()
+// ----------------------------------------------------------------------------
 
 // This function resizes the string holding the nodes of the wavelet tree structure.
-template <typename TChar, typename TSpec, typename TSize>
-inline void _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size,
-                   typename Value<typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type>::Type value)
+template <typename TChar, typename TSpec, typename TSize, typename TExpand>
+inline typename Size<RightArrayBinaryTree<TChar, TSpec> >::Type
+_resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size, Tag<TExpand> tag)
 {
-    resize(treeStructure.treeVertieces, size, value);
+    return resize(treeStructure.treeVertices, size, tag);
 }
 
-// ==========================================================================
+// This function resizes the string holding the nodes of the wavelet tree structure.
+template <typename TChar, typename TSpec, typename TSize, typename TExpand>
+inline typename Size<RightArrayBinaryTree<TChar, TSpec> >::Type
+_resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size,
+        typename Value<typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type>::Type value,
+        Tag<TExpand> tag)
+{
+    return resize(treeStructure.treeVertices, size, value, tag);
+}
+
+// ----------------------------------------------------------------------------
+// Function open()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.RightArrayBinaryTree#open
 ..class:Class.RightArrayBinaryTree
 ..summary:This functions loads a @Class.RightArrayBinaryTree@ from disk.
-..signature:open(rightArrayBinaryTree, filename [, openMode])
-..param.dictionary:The rightArrayBinaryTree.
+..signature:open(rightArrayBinaryTree, fileName [, openMode])
+..param.rightArrayBinaryTree:The rightArrayBinaryTree.
 ...type:Class.RightArrayBinaryTree
 ..param.fileName:C-style character string containing the file name.
 ..param.openMode:The combination of flags defining how the file should be opened.
@@ -344,35 +369,37 @@ inline void _resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize si
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec>
-inline bool open(
-    RightArrayBinaryTree<TChar, TSpec> & treeStructure,
-    const char * fileName,
-    int openMode)
+inline bool open(RightArrayBinaryTree<TChar, TSpec> & treeStructure, const char * fileName, int openMode)
 {
     String<char> name;
 
-    String<TChar> minString;
-    name = fileName;    append(name, ".rtv");   if(!open(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".rtm");   if(!open(minString, toCString(name), openMode)) return false;
-    treeStructure.minCharValue = minString[0];
+    name = fileName;
+    append(name, ".rtv");
+    if (!open(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".rtm");
+    if (!open(treeStructure.minCharValue, toCString(name), openMode)) return false;
+
     return true;
 }
 
 template <typename TChar, typename TSpec>
-inline bool open(
-    RightArrayBinaryTree<TChar, TSpec> & treeStructure,
-    const char * fileName)
+inline bool open(RightArrayBinaryTree<TChar, TSpec> & treeStructure, const char * fileName)
 {
     return open(treeStructure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }
 
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function save()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.RightArrayBinaryTree#save
 ..class:Class.RightArrayBinaryTree
 ..summary:This functions saves a @Class.RightArrayBinaryTree@ to disk.
-..signature:save(rightArrayBinaryTree, filename [, openMode])
-..param.dictionary:The rightArrayBinaryTree.
+..signature:save(rightArrayBinaryTree, fileName [, openMode])
+..param.rightArrayBinaryTree:The rightArrayBinaryTree.
 ...type:Class.RightArrayBinaryTree
 ..param.fileName:C-style character string containing the file name.
 ..param.openMode:The combination of flags defining how the file should be opened.
@@ -385,24 +412,23 @@ inline bool open(
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec>
-inline bool save(
-    RightArrayBinaryTree<TChar, TSpec> const & treeStructure,
-    const char * fileName,
-    int openMode)
+inline bool save(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, const char * fileName, int openMode)
 {
     String<char> name;
 
-    String<TChar> minString;
-    appendValue(minString, treeStructure.minCharValue);
-    name = fileName;    append(name, ".rtv");   if (!save(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
-    name = fileName;    append(name, ".rtm");   if (!save(minString, toCString(name), openMode)) return false;
+    name = fileName;
+    append(name, ".rtv");
+    if (!save(getFibre(treeStructure, FibreTreeStructureEncoding()), toCString(name), openMode)) return false;
+
+    name = fileName;
+    append(name, ".rtm");
+    if (!save(treeStructure.minCharValue, toCString(name), openMode)) return false;
+
     return true;
 }
 
 template <typename TChar, typename TSpec>
-inline bool save(
-    RightArrayBinaryTree<TChar, TSpec> const & treeStructure,
-    const char * fileName)
+inline bool save(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, const char * fileName)
 {
     return save(treeStructure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,27 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.gapLen:Number of '0's in the second block.
 ..param.blockLen2:Number of '1's in the third block.
 */
+/*!
+ * @class OneGappedShape
+ * 
+ * @extends Shape
+ * 
+ * @headerfile seqan/index.h
+ * 
+ * @brief A variable shape with one optional gap.
+ * 
+ * @signature Shape<TValue, OneGappedShape>
+ * 
+ * @tparam TValue The @link Value @endlink type of the string the shape is
+ *                applied to (e.g. <tt>Dna</tt>).
+ * 
+ * @section Remarks
+ * 
+ * A OneGappedShape must be initialized first with a valid shape. To do so, call
+ * @link stringToShape @endlink.
+ * 
+ * @see GenericShape
+ */
 
 	struct OneGappedShape;
 

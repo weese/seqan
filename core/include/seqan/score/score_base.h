@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -93,6 +93,7 @@ struct SequenceEntryForScore
 
 /**
 .Function.Score#sequenceEntryForScore
+..summary:Helper function for element access, depending on score type.
 ..cat:Alignments
 ..signature:sequenceEntryForScore(scoringScheme, seq, pos)
 ..param.scoringScheme:The scoring scheme to get the representation for.

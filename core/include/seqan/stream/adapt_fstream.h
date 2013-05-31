@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ namespace seqan {
 
 /**
 .Adaption.File stream
-..cat:Input / Output
+..cat:Input/Output
 ..summary:Adaption from $fstream$, $ifstream$ and $ofstream$ to the @Concept.StreamConcept@ concept.
 ..include:seqan/stream.h
  */
@@ -577,6 +577,7 @@ streamFlush(::std::ofstream & stream)
 inline int
 streamSeek(::std::fstream & stream, long int delta, int origin)
 {
+    stream.clear();  // Reset fail flags before seek.
     // For fstream, the input and output pointer are kept in sync.
     if (origin == SEEK_SET) {
         stream.seekg(delta, ::std::fstream::beg);
@@ -585,31 +586,39 @@ streamSeek(::std::fstream & stream, long int delta, int origin)
     } else {
         stream.seekg(delta, ::std::fstream::end);
     }
-    return (stream.fail() || stream.bad());
+    int res = (stream.fail() || stream.bad());
+    stream.clear();  // Reset EOF flag.
+    return res;
 }
 
 inline int
 streamSeek(::std::ifstream & stream, long int delta, int origin)
 {
+    stream.clear();  // Reset fail flags before seek.
     if (origin == SEEK_SET)
         stream.seekg(delta, ::std::fstream::beg);
     else if (origin == SEEK_CUR)
         stream.seekg(delta, ::std::fstream::cur);
     else
         stream.seekg(delta, ::std::fstream::end);
-    return (stream.fail() || stream.bad());
+    int res = (stream.fail() || stream.bad());
+    stream.clear();  // Reset EOF flag.
+    return res;
 }
 
 inline int
 streamSeek(::std::ofstream & stream, long int delta, int origin)
 {
+    stream.clear();  // Reset fail flags before seek.
     if (origin == SEEK_SET)
         stream.seekp(delta, ::std::fstream::beg);
     else if (origin == SEEK_CUR)
         stream.seekp(delta, ::std::fstream::cur);
     else
         stream.seekp(delta, ::std::fstream::end);
-    return (stream.fail() || stream.bad());
+    int res = (stream.fail() || stream.bad());
+    stream.clear();  // Reset EOF flag.
+    return res;
 }
 
 // ----------------------------------------------------------------------------

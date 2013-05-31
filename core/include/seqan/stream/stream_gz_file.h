@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ inline void close(Stream<GZFile> & stream);
 
 /**
 .Spec.GZ File Stream
-..cat:Input / Output
+..cat:Input/Output
 ..signature:Stream<GZFile>
 ..general:Class.Stream
 ..summary:Adaption from $gzFile$ of $<zlib.h>$ to streams.
@@ -275,10 +275,10 @@ open(Stream<GZFile> & stream, char const * filename, char const * mode)
 /**
 .Function.isDirect
 ..class:Spec.GZ File Stream
-..cat:Input / Output
+..cat:Input/Output
 ..summary:Query a GZ File Stream for being "direct."
 ..signature:isDirect(gzStream)
-..param.stream:GZ File Stream to query.
+..param.gzStream:GZ File Stream to query.
 ...type:Spec.GZ File Stream
 ..returns:$bool$, indicating whether the file is opened uncompressed ("direct").
 ..remarks:

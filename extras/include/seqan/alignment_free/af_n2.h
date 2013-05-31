@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ namespace seqan {
  * This function returns a string with indices indicating which k-mer is the
  * reverse complement k-mer: i=revComIndex[revComIndex[i]]
  */
-void _initialiseRevComIndex(String<unsigned> & revComIndex, unsigned const k)
+inline void _initialiseRevComIndex(String<unsigned> & revComIndex, unsigned const k)
 {
     unsigned myLength = (unsigned)pow(4.0, (int)k);
     resize(revComIndex, myLength, 0);
@@ -70,7 +70,7 @@ void _initialiseRevComIndex(String<unsigned> & revComIndex, unsigned const k)
  * k-mers belong to the word neighbourhood for every k-mer (all k-mers with
  * one mismatch)
  */
-void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourhood,
+inline void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourhood,
                                   unsigned const k, bool const revCom,
                                   String<unsigned> const & revComIndex)
 {
@@ -98,7 +98,7 @@ void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourho
                 {
                     wTMP[j] = l;
                     unsigned hashValue = hash(myShape, begin(wTMP));
-                    // Check for double word occurences
+                    // Check for double word occurrences
                     bool duplicate = false;
                     if (revCom == true)
                     {

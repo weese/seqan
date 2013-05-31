@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,65 @@ clear(String<TValue, CStyle> & me);
 // Tags, Classes, Enums
 // ============================================================================
 
+// TODO(holtgrew): Put example into demo.
+
+/*!
+ * @class CStyleString CStyle String
+ * @extends String
+ * @headerfile seqan/sequence.h
+ * @brief Allows adaption of strings to C-style strings.
+ * 
+ * @signature template <typename TValue, typename TCStyle>
+ *            class String<TValue, CStyle>;
+ * 
+ * @tparam TValue The value type, that is the type of the items/characters
+ *                stored in the string.Use @link Value @endlink to get the value
+ *                type for a given class.
+ * 
+ * Assigning a string <tt>TValue *</tt> to a CStyle String will not create a
+ * copy of the string but just copy pointers.
+ * 
+ * @section Remarks
+ * 
+ * The purpose of this class is to access to the content of a sequence in a
+ * "zero terminated string" style. This can be useful if SeqAn classes has to be
+ * integrated in programs that use <tt>char</tt> arrays to store strings.
+ * Instances of <tt>String<TValue, CStyle></tt> can implicitely converted to a
+ * <tt>TValue *</tt> that points to a zero terminated CStyle of <tt>TValue</tt>.
+ * 
+ * The stored c-style string object can be set by constructors or assignment.
+ * The content of a c-style string can eighter be stored in a separate buffer,
+ * that is the source string is copied. Or the buffer of the source string
+ * itself is used instead, in this case the c-style string depends on the source
+ * string and gets invalid as soon as the buffer of the source string is
+ * destroyed.
+ * 
+ * Hence, this class is a kind of adaptor from an arbitrary SeqAn string to char
+ * arrays. Of course, the opposite way is possible too: Read @link char
+ * array.here @endlink about adapting char arrays to SeqAn strings.
+ * 
+ * @section Examples
+ * 
+ * @code{.cpp}
+ * // Create a string str:
+ * String<char> str = "this is a test string";
+ *  
+ * // Create a c-style string object for str:
+ * String<char, CStyle> cStyle = str;
+ *  
+ * // Now use cStyle as char array:
+ * strcmp(cStyle, "compare it to this string");
+ * @endcode
+ * If the c-style string is needed only temporarily, the function
+ * <tt>toCString</tt> can be used:
+ * 
+ * @code{.cpp}
+ * String<char> str = "this is a test string";
+ * strcmp(toCString(str), "compare it to this string");
+ * @endcode
+ * @see create
+ */
+ 
 /**
 .Spec.CStyle String:
 ..cat:Strings
@@ -64,7 +123,6 @@ clear(String<TValue, CStyle> & me);
 ..signature:String<TValue, CStyle>
 ..param.TValue:The value type, that is the type of the items/characters stored in the string.
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
-...note:$TValue$ must be a @Concept.SimpleConcept Type@.
 ..remarks:
 ..text:Assigning a string $TValue *$ to a CStyle String will not create a copy of the string but just copy pointers.
 ..remarks:

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -157,17 +157,19 @@ public:
     // ------------------------------------------------------------------------
     // Pointer Operators;  Have to be defined within class.
     // ------------------------------------------------------------------------
+
+    // For chaining behaviour of operator->(), see http://stackoverflow.com/a/8782794/84349
     
-    typename Value<Iter>::Type *
+    TIterator &
     operator->()
     {
-        return &*data_iterator;
+        return data_iterator;
     }
 
-    typename Value<Iter>::Type const *
+    TIterator const &
     operator->() const
     {
-        return &*data_iterator;
+        return data_iterator;
     }
 
     // ------------------------------------------------------------------------
@@ -186,11 +188,11 @@ public:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction Iterator_Default_Imp
+// Metafunction IteratorDefaultImp_
 // ----------------------------------------------------------------------------
 
 template <typename T>
-struct Iterator_Default_Imp<T, Rooted>
+struct IteratorDefaultImp_<T, Rooted>
 {
     typedef typename Iterator<T, Standard>::Type TStandardIterator;
     typedef Iter<T, AdaptorIterator<TStandardIterator> > Type;
@@ -229,6 +231,7 @@ container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
 .Function.setContainer
 ..class:Spec.Adaptor Iterator
 ..summary:Set container of an adaptor iterator.
+..description:After setting the pointer to the container, the position will be set to 0.
 ..cat:Dependent Objects
 ..signature:setContainer(object, container)
 ..param.object:Object to set the container for.
@@ -241,15 +244,8 @@ inline void
 setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,
              typename Parameter_<TContainer>::Type container_)
 {
-    SEQAN_CHECKPOINT;
-    typedef Iter<TContainer, AdaptorIterator<TIterator, TSpec> > TIter;
-    if (me.data_container && me.data_iterator != TIterator()) {
-        typename Position<TIter>::Type pos = position(me);
-        me.data_container = _toPointer(container_);
-        setPosition(me, pos);
-    } else {
-        me.data_container = _toPointer(container_);
-    }
+    me.data_container = _toPointer(container_);
+    setPosition(me, 0);
 }
 
 // ----------------------------------------------------------------------------

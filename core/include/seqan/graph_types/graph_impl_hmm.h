@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -345,24 +345,24 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEmission> 
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type 
-addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
-		  String<TEmission> const& emis)
+addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> > & g,
+		  String<TEmission> const & emis)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<String<TCargo>, Standard>::Type TEmisIter;
-	typedef typename Iterator<String<TEmission>, Standard>::Type TInputIter;
+	typedef typename Iterator<String<TEmission> const, Standard>::Type TInputIter;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
-	SEQAN_ASSERT(alph_size == length(emis));
+	SEQAN_ASSERT_EQ(alph_size, length(emis));
 
 	TVertexDescriptor vd = addVertex(g);
 	TEmisIter it = begin(g.data_emission, Standard());
 	it += vd * alph_size;
 	TInputIter itIn = begin(emis, Standard());
-	for(TSize counter = 0; counter < alph_size; ++counter, ++itIn, ++it) *it = *itIn;
+	for (TSize counter = 0; counter < alph_size; ++counter, ++itIn, ++it)
+        *it = *itIn;
 	return vd;
 }
 

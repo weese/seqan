@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,12 @@ namespace seqan {
 // ===========================================================================
 
 // Forward-declarations.
-struct Normal;
+struct Normal_;
+typedef Tag<Normal_> Normal;
 
 // Specialization Tag for log-normal distribution.
-struct LogNormal {};
+struct LogNormal_;
+typedef Tag<LogNormal_> LogNormal;
 
 /**
 .Tag.Lognormal Construction:
@@ -62,8 +64,10 @@ struct LogNormal {};
 ..see:Spec.Log-Normal Pdf
 */
 
-struct MuSigma {};
-struct MeanStdDev {};
+struct MuSigma_;
+typedef Tag<MuSigma_> MuSigma;
+struct MeanStdDev_;
+typedef Tag<MeanStdDev_> MeanStdDev;
 
 // ===========================================================================
 // Classes

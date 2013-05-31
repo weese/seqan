@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,6 @@ SEQAN_CONCEPT_REFINE(AlphabetConcept, (TValue), (Assignable)(DefaultConstructibl
 ..summary:Totally strict ordered alphabet.
 ..baseconcept:Concept.AlphabetConcept
 ..baseconcept:Concept.ComparableConcept
-..summary:Ordered alphabet value.
 ..include:seqan/basic.h
 
 .Function.operator<.concept:Concept.OrderedAlphabetConcept

@@ -1,7 +1,7 @@
 // ==========================================================================
-//                               fm_index_beta
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef TEST_COMPRESSED_SA_BETA_H_
@@ -105,27 +105,27 @@ void compressedSaCreateCompressedSa(TCompressedSA & /*tag*/)
 
     createCompressedSa(compressedSA, fullSA, 3u);
 
-    SEQAN_ASSERT_EQ(length(getFibre(getFibre(compressedSA, FibreSparseString()), FibreValueString())), 4u);
+    SEQAN_ASSERT_EQ(length(getFibre(getFibre(compressedSA, FibreSparseString()), FibreValues())), 4u);
 
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 2), 6u);
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 5), 9u);
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 7), 0u);
     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 9), 3u);
 
-    typedef typename Fibre<typename Fibre<TCompressedSA, FibreSparseString>::Type, FibreIndicatorString>::Type TIndicatorString;
+    typedef typename Fibre<typename Fibre<TCompressedSA, FibreSparseString>::Type, FibreIndicators>::Type TIndicators;
 
-    TIndicatorString & indicatorString = getFibre(getFibre(compressedSA, FibreSparseString()), FibreIndicatorString());
+    TIndicators & indicators = getFibre(getFibre(compressedSA, FibreSparseString()), FibreIndicators());
 
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 0), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 1), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 2), true);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 3), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 4), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 5), true);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 6), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 7), true);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 8), false);
-    SEQAN_ASSERT_EQ(isBitSet(indicatorString, 9), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 0), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 1), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 2), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 3), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 4), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 5), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 6), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 7), true);
+    SEQAN_ASSERT_EQ(getValue(indicators, 8), false);
+    SEQAN_ASSERT_EQ(getValue(indicators, 9), true);
 }
 
 template <typename TCompressedSA>
@@ -137,59 +137,59 @@ void compressedSaGetFibre(TCompressedSA & /*tag*/)
     SEQAN_ASSERT(getFibre(compressedSA, FibreSparseString()) == compressedSA.sparseString);
 }
 
-template <typename TIndex>
-void _compressedSaGetNextPos(TIndex & /*tag*/)
-{ 
-    typedef typename Fibre<TIndex, FibreText>::Type TText;
-    typedef typename SAValue<TText>::Type TSAValue;
-    typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
-    typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
-    typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
+//template <typename TIndex>
+//void _compressedSaGetNextPos(TIndex & /*tag*/)
+//{ 
+//    typedef typename Fibre<TIndex, FibreText>::Type TText;
+//    typedef typename SAValue<TText>::Type TSAValue;
+//    typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
+//    typedef typename Fibre<TIndex, FibreLfTable>::Type TLfTable;
+//    typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
+//
+//    typedef String<TSAValue> TSAString;
+//
+//    TText text;
+//    generateText(text);
+//
+//    TSAString sa;
+//    resize(sa, length(text));
+//    createSuffixArray(sa, text, Skew7());
+//
+//    TIndex index(text, 3);
+//    indexCreate(index);
+//
+//    unsigned pos, pos2;
+//    TCompressedSA & compressedSA = getFibre(index, FibreSA());
+//    TOccTable occTable = getFibre(getFibre(index, FibreLfTable()), FibreOccTable());
+//
+//    for (unsigned i = 1; i < length(text); ++i)
+//    {
+//        if (!isSentinelPosition(occTable, i))
+//        {
+//            pos = i;
+//            pos2 = pos;
+//            while(compressedSA[pos] % 3 != 0)
+//            {
+//                SEQAN_ASSERT(_getNextPos(compressedSA, pos) == false);
+//                pos2 = lfMapping(getFibre(index, FibreLfTable()), pos2);
+//            }
+//            SEQAN_ASSERT(_getNextPos(compressedSA, pos) == true);
+//            SEQAN_ASSERT_EQ(pos, pos2);
+//        }
+//    }
+//}
 
-    typedef String<TSAValue> TSAString;
-
-    TText text;
-    generateText(text);
-
-    TSAString sa;
-    resize(sa, length(text));
-    createSuffixArray(sa, text, Skew7());
-
-    TIndex index(text, 3);
-    indexCreate(index);
-
-    unsigned pos, pos2;
-    TCompressedSA & compressedSA = getFibre(index, FibreSA());
-    TOccTable occTable = getFibre(getFibre(index, FibreLfTable()), FibreOccTable());
-
-    for(unsigned i = 1; i < length(text); ++i)
-    {
-        if (!sentinelPosition(occTable, i))
-        {
-            pos = i;
-            pos2 = pos;
-            while(compressedSA[pos] % 3 != 0)
-            {
-                SEQAN_ASSERT(_getNextPos(compressedSA, pos) == false);
-                pos2 = lfMapping(getFibre(index, FibreLfTable()), pos2);
-            }
-            SEQAN_ASSERT(_getNextPos(compressedSA, pos) == true);
-            SEQAN_ASSERT_EQ(pos, pos2);
-        }
-    }
-}
-
-template <typename TCompressedSA>
-void compressedSaSetLfTable(TCompressedSA & /*tag*/)
-{ 
-    TCompressedSA compressedSA;
-
-    CharString dummyLfTable;
-
-    setLfTable(compressedSA, dummyLfTable);
-
-    SEQAN_ASSERT(compressedSA.lfTable == &dummyLfTable);
-}
+//template <typename TCompressedSA>
+//void compressedSaSetLfTable(TCompressedSA & /*tag*/)
+//{ 
+//    TCompressedSA compressedSA;
+//
+//    CharString dummyLfTable;
+//
+//    setLfTable(compressedSA, dummyLfTable);
+//
+//    SEQAN_ASSERT(compressedSA.lfTable == &dummyLfTable);
+//}
 
 template <typename TIndex>
 void compressedSaValueAccess(TIndex & /*tag*/)
@@ -252,7 +252,7 @@ SEQAN_DEFINE_TEST(compressed_sa_clear_length_resize)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaClearLengthResize(tag);
 }
@@ -261,7 +261,7 @@ SEQAN_DEFINE_TEST(compressed_sa_empty)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaEmpty(tag);
 }
@@ -270,7 +270,7 @@ SEQAN_DEFINE_TEST(compressed_sa_create_compressed_sa)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaCreateCompressedSa(tag);
 }
@@ -279,31 +279,32 @@ SEQAN_DEFINE_TEST(compressed_sa_get_fibre)
 {
     using namespace seqan;
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+    CompressedSA<CharString, void> tag;
 
     compressedSaGetFibre(tag);
 }
 
-SEQAN_DEFINE_TEST(compressed_sa_get_next_pos_)
-{
-    using namespace seqan;
+// NOTE(esiragusa): getNextPos() does not seem to be used anywhere.
+//SEQAN_DEFINE_TEST(compressed_sa_get_next_pos_)
+//{
+//    using namespace seqan;
+//
+//    typedef Dna TChar;
+//    typedef String<TChar> TText;
+//
+//    Index<TText, FMIndex<WT<>, void > > tag;
+//
+//    _compressedSaGetNextPos(tag);
+//}
 
-    typedef Dna TChar;
-    typedef String<TChar> TText;
-
-    Index<TText, FMIndex<WT<>, void > > tag;
-
-    _compressedSaGetNextPos(tag);
-}
-
-SEQAN_DEFINE_TEST(compressed_sa_set_lf_table)
-{
-    using namespace seqan;
-
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
-
-    compressedSaSetLfTable(tag);
-}
+//SEQAN_DEFINE_TEST(compressed_sa_set_lf_table)
+//{
+//    using namespace seqan;
+//
+//    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+//
+//    compressedSaSetLfTable(tag);
+//}
 
 SEQAN_DEFINE_TEST(compressed_sa_value_access)
 {

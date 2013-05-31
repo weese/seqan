@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,17 @@ inline void _reinitArrayGaps(Gaps<TSequence, ArrayGaps> & gaps);
 
 struct ArrayGaps_;
 typedef Tag<ArrayGaps_> ArrayGaps;
+
+/*!
+ * @class ArrayGaps
+ * @headerfile <seqan/align.h>
+ * @brief Stores length of gap- and non-gap runs in an array.
+ *
+ * @signature template <typename TSequence>
+ *            class Gaps<TSequence, ArrayGaps>
+ *
+ * @tparam TSequence The type of the underling sequence.
+ */
 
 /**
 .Spec.ArrayGaps

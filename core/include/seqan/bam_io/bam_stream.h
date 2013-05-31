@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,7 @@ namespace seqan {
 
 /**
 .Class.BamStream
+..cat:BAM I/O
 ..summary:Class that provides an easy to use interface for reading and writing SAM and BAM files.
 ..signature:BamStream
 ..example.text:Stream through a SAM or BAM file.
@@ -108,7 +109,7 @@ for (unsigned i = 0; i < length(record); ++i)
 
 .Memvar.BamStream#header:
 ..class:Class.BamStream
-..type:BamHeader
+..type:Class.BamHeader
 ..summary:The @Class.BamHeader@ of the @Class.BamStream@ object.
 ..description:
 SAM and BAM files have a header.
@@ -130,12 +131,14 @@ When reading SAM, new reference sequences can be introduced "on the fly" when a 
 When writing, the $bamIOContext$ is automatically filled/reset when the first record is written.
 
 .Enum.BamStream\colon\colonOperationMode:
+..cat:BAM I/O
 ..summary:Select the operation mode of a @Class.BamStream@.
 ..value.READ:Open stream for reading.
 ..value.WRITE:Open stream for writing.
 ..include:seqan/bam_io.h
 
 .Enum.BamStream\colon\colonFormat:
+..cat:BAM I/O
 ..summary:Select the format to use for reading/writing.
 ..value.AUTO:Auto-detect format from file content on reading and from the file name on writing. If Auto-detection fails, SAM is used.
 ..value.SAM:Force reading/writing of SAM.
@@ -520,7 +523,7 @@ inline int readRecord(BamAlignmentRecord & record, BamStream & bamIO)
 ..include:seqan/bam_io.h
 */
 
-inline int writeRecord(BamStream & bamIO, BamAlignmentRecord & record)
+inline int writeRecord(BamStream & bamIO, BamAlignmentRecord const & record)
 {
     bamIO._writeHeader();  // Does nothing if head already written out.
 

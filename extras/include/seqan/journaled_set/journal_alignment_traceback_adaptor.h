@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@ template <typename TValue, typename THostSpec, typename TBuffSpec, typename TRef
           typename TSource, typename TPosition, typename TSize, typename TStringSpec>
 inline void
 _adaptTraceSegmentsTo(String<TValue, Journaled<THostSpec, SortedArray, TBuffSpec> > & targetJournal,
-                      TReference const & reference, // What if the TSequenceH is a journal string.
+                      TReference const & /*reference*/, //TODO(rmaerker): What if the TSequenceH is a journal string.
                       TSource const & source,
                       String<TraceSegment_<TPosition, TSize>, TStringSpec> const & traceSegments)
 {
@@ -73,7 +73,7 @@ _adaptTraceSegmentsTo(String<TValue, Journaled<THostSpec, SortedArray, TBuffSpec
     typedef typename JournalType<TJournalString>::Type TJournalEntries;
     typedef typename Value<TJournalEntries>::Type TJournalEntry;
 
-    typedef typename Position<TReference>::Type TPhysicalPosition;
+//    typedef typename Position<TReference>::Type TPhysicalPosition;
     typedef typename Position<TSource>::Type TVirtualPosition;
 
     typedef TraceSegment_<TPosition, TSize> TTraceSegment;

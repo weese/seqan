@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -179,7 +179,7 @@ _includeInCTD(CommandLineOption const & opt)
 inline void
 writeCTD(CommandLineParser const & me)
 {
-    typedef Iterator<CommandLineParser::TOptionMap>::Type TOptionMapIterator;
+    typedef Iterator<CommandLineParser::TOptionMap const>::Type TOptionMapIterator;
     TOptionMapIterator optionMapIterator;
 
     // create file [appname].ctd in working directory

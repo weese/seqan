@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -137,8 +137,8 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_read_alignment)
 
     SEQAN_ASSERT_EQ(alignments[0].qName, "READ0");
     SEQAN_ASSERT_EQ(alignments[0].flag, 2);
-    SEQAN_ASSERT_EQ(alignments[0].rId, 0);
-    SEQAN_ASSERT_EQ(alignments[0].pos, 0);
+    SEQAN_ASSERT_EQ(alignments[0].rID, 0);
+    SEQAN_ASSERT_EQ(alignments[0].beginPos, 0);
     SEQAN_ASSERT_EQ(alignments[0].mapQ, 8);
     SEQAN_ASSERT_EQ(length(alignments[0].cigar), 3u);
     SEQAN_ASSERT_EQ(alignments[0].cigar[0].count, 5u);

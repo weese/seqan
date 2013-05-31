@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -77,18 +77,19 @@ class SeedSet;
 // Metafunctions
 // ===========================================================================
 
-///.Metafunction.Position.param.T:Class.SeedSet
+///.Metafunction.Position.param.T.type:Class.SeedSet
 ///.Metafunction.Position.class:Class.SeedSet
-///.Metafunction.Size.param.T:Class.SeedSet
+///.Metafunction.Size.param.T.type:Class.SeedSet
 ///.Metafunction.Size.class:Class.SeedSet
-///.Metafunction.Value.param.T:Class.SeedSet
+///.Metafunction.Value.param.T.type:Class.SeedSet
 ///.Metafunction.Value.class:Class.SeedSet
-///.Metafunction.GetValue.param.T:Class.SeedSet
+///.Metafunction.GetValue.param.T.type:Class.SeedSet
 ///.Metafunction.GetValue.class:Class.SeedSet
-///.Metafunction.Reference.param.T:Class.SeedSet
+///.Metafunction.Reference.param.T.type:Class.SeedSet
 ///.Metafunction.Reference.class:Class.SeedSet
-///.Metafunction.Iterator.param.T:Class.SeedSet
+///.Metafunction.Iterator.param.T.type:Class.SeedSet
 ///.Metafunction.Iterator.class:Class.SeedSet
+
 
 // ===========================================================================
 // Functions
@@ -101,28 +102,19 @@ class SeedSet;
 ..class:Class.SeedSet
 .Function.end.param.object.type:Class.SeedSet
 ..class:Class.SeedSet
-.Function.end.param.object.type:Class.SeedSet
-..class:Class.SeedSet
 .Function.length.param.object.type:Class.SeedSet
 ..class:Class.SeedSet
-.Function.length.param.object.type:Class.SeedSet
-..class:Class.SeedSet
-.Function.front.param.object.type:Class.SeedSet
-..class:Class.SeedSet
-.Function.front.param.object.type:Class.SeedSet
+.Function.front.param.container.type:Class.SeedSet
 ..class:Class.SeedSet
 .Function.back.param.container.type:Class.SeedSet
 ..class:Class.SeedSet
-.Function.back.param.container.type:Class.SeedSet
-..class:Class.SeedSet
-..include:seqan/seeds.h
- */
+*/
 // TODO(holtgrew): dddoc {begin,end,length,front,back}All(T)
 
 // SeedSet Functions
 
 /**
-.Function.addSeed:
+.Function.SeedSet#addSeed:
 ..summary:Adds a seed to an existing set.
 ..cat:Seed Handling
 ..signature:addSeed(set, beginPosH, beginPosV, length, tag)
@@ -148,7 +140,7 @@ class SeedSet;
 */
 
 /**
-.Function.addSeeds:
+.Function.SeedSet#addSeeds:
 ..summary:Adds several seeds to an existing set. If a merging or chaining algorithm is used seeds are added if the merging or chaining fails.
 ..cat:Seed Handling
 ..signature:addSeed(set, container, tag)
@@ -171,7 +163,7 @@ class SeedSet;
 // ---------------------------------------------------------------------------
 
 /**
-.Function.minScore:
+.Function.SeedSet#minScore:
 ..summary:Returns the threshold to distinguish between high-scoring and low-scoring seeds.
 ..cat:Seed Handling
 ..signature:minScore(set)
@@ -180,7 +172,7 @@ class SeedSet;
 ...type:Class.SeedSet
 ...remarks: If the score of a seed is higher than the given threshold, then it is virtually put
 into a container storing the high-scoring seeds which can be iterated separately.
-..see:Function.setMinScore
+..see:Function.SeedSet#setMinScore
 ..include:seqan/seeds.h
 */
 
@@ -196,7 +188,7 @@ minScore(SeedSet<TSeedSpec, TSeedSetSpec> const & seedSet)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.setMinScore:
+.Function.SeedSet#setMinScore:
 ..summary:Sets the threshold at which seeds are considered high-scoring.
 ..cat:Seed Handling
 ..signature:setMinScore(set, score)
@@ -206,7 +198,7 @@ minScore(SeedSet<TSeedSpec, TSeedSetSpec> const & seedSet)
 ..param.score:The new threshold to set.
 ...remarks: If the score of a seed is higher than the given threshold, then it is virtually put
 into a container storing the high-scoring seeds which can be iterated separately.
-..see:Function.minScore
+..see:Function.SeedSet#minScore
 ..include:seqan/seeds.h
 */
 

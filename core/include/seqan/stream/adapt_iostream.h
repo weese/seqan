@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,8 @@ namespace seqan {
 
 /**
 .Adaption.IO stream
-..cat:Input / Output
+..summary:Adaption of standard C++ iostream objects.
+..cat:Input/Output
 ..remarks:Also, adaption from $ostream$ and $istream$ to the @Concept.StreamConcept@ concept.
 ..include:seqan/stream.h
  */

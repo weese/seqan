@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -120,7 +120,7 @@ struct DPCellDefaultInfinity<DPCell_<TScoreValue, TGapCostFunction> >
 };
 
 template <typename TScoreValue, typename TGapCostFunction>
-const TScoreValue DPCellDefaultInfinity<DPCell_<TScoreValue, TGapCostFunction> >::VALUE = MinValue<TScoreValue>::VALUE >> 1;
+const TScoreValue DPCellDefaultInfinity<DPCell_<TScoreValue, TGapCostFunction> >::VALUE = MinValue<TScoreValue>::VALUE / 2;
 
 template <typename TScoreValue, typename TGapCostFunction>
 struct DPCellDefaultInfinity<DPCell_<TScoreValue, TGapCostFunction> const>:

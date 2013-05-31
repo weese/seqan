@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andreas Gogol-Doering <doering@mdc-berlin.de
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 // Adaptions for STL strings to SeqAn strings.
@@ -305,7 +305,7 @@ empty(std::basic_string<TChar, TCharTraits, TAlloc> const & me)
 }
 
 ///.Function.clear.param.object.type:Adaption.std::basic_string
-///.Function.class:Adaption.std::basic_string
+///.Function.clear.class:Adaption.std::basic_string
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 inline void

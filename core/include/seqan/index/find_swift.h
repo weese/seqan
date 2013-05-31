@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -936,7 +936,7 @@ inline bool _swiftMultiProcessQGram(
     typedef Pattern<TIndex, Swift<TSpec> >                      TPattern;
 
     //typedef typename Size<TIndex>::Type                         TSize;
-    typedef typename Fibre<TIndex, QGramSA>::Type               TSA;
+    typedef typename Fibre<TIndex const, QGramSA>::Type         TSA;
     typedef typename Iterator<TSA, Standard>::Type              TSAIter;
     typedef typename TPattern::TBucketString                    TBucketString;
     typedef typename Iterator<TBucketString, Standard>::Type    TBucketIter;
@@ -947,7 +947,7 @@ inline bool _swiftMultiProcessQGram(
 
     TIndex const &index = host(pattern);
 
-    // create an iterator over the positions of the q-gram occurences in pattern
+    // create an iterator over the positions of the q-gram occurrences in pattern
     TSAIter saBegin = begin(indexSA(index), Standard());
     TSAIter occ = saBegin + indexDir(index)[getBucket(index.bucketMap, hash)];
     TSAIter occEnd = saBegin + indexDir(index)[getBucket(index.bucketMap, hash) + 1];
@@ -964,14 +964,14 @@ inline bool _swiftMultiProcessQGram(
     }
 */
 
-    // iterate over all q-gram occurences and do the processing
+    // iterate over all q-gram occurrences and do the processing
     __int64 curPos = finder.curPos + pattern.finderPosOffset;
     for(; occ != occEnd; ++occ)
     {
         posLocalize(ndlPos, *occ, stringSetLimits(index)); // get pair of SeqNo and Pos in needle
         TBucketParams &bucketParams = _swiftBucketParams(pattern, getSeqNo(ndlPos));
 
-        // begin position of the diagonal of q-gram occurence in haystack (possibly negative)
+        // begin position of the diagonal of q-gram occurrence in haystack (possibly negative)
         __int64 diag = finder.curPos;
         if (Swift<TSpec>::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
 
@@ -1071,7 +1071,7 @@ inline bool _swiftMultiProcessQGram(
 
     typedef typename Size<TIndex>::Type                         TSize;
     typedef typename Fibre<TIndex, QGramSA>::Type               TSA;
-    typedef typename Iterator<TSA, Standard>::Type              TSAIter;
+    typedef typename Iterator<TSA const, Standard>::Type        TSAIter;
     typedef typename TPattern::TBucketString                    TBucketString;
     typedef typename Iterator<TBucketString, Standard>::Type    TBucketIter;
     typedef typename Value<TBucketString>::Type                 TBucket;
@@ -1079,9 +1079,9 @@ inline bool _swiftMultiProcessQGram(
     typedef typename TPattern::TBucketParams                    TBucketParams;
     typedef typename FindResult<TFinder, TPattern>::Type        THit;
     
-    TIndex const &index = host(pattern);    
+    TIndex const & index = host(pattern);    
     
-    // create an iterator over the positions of the q-gram occurences in pattern
+    // create an iterator over the positions of the q-gram occurrences in pattern
     TSAIter saBegin = begin(indexSA(index), Standard());
     TSAIter occ = saBegin + indexDir(index)[getBucket(index.bucketMap, hash)];
     TSAIter occEnd = saBegin + indexDir(index)[getBucket(index.bucketMap, hash) + 1];
@@ -1097,7 +1097,7 @@ inline bool _swiftMultiProcessQGram(
             std::cerr<<*(hostIterator(hostIterator(finder))+i);
     }
 */  
-    // iterate over all q-gram occurences and do the processing
+    // iterate over all q-gram occurrences and do the processing
     __int64 curPos = finder.curPos + pattern.finderPosOffset;
 //    bool dbg=pattern.params.debug && (finder.curPos > 496 && finder.curPos < 591);
     for(; occ != occEnd; ++occ) 
@@ -1554,8 +1554,8 @@ swiftInfix(TSwiftHit const & hit, TText & text)
 
 //____________________________________________________________________________
 
-///.Function.infix.remarks:For finders or patterns of filtering algorithms (e.g. @Spec.Swift@) the returned infix is a potential match.
-///.Function.infix.param.finder.type:Spec.Swift
+///.Function.Finder#infix.remarks:For finders or patterns of filtering algorithms (e.g. @Spec.Swift@) the returned infix is a potential match.
+///.Function.Finder#infix.param.finder.type:Spec.Swift
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type

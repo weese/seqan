@@ -37,9 +37,13 @@
 # ============================================================================
 
 if (("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE") OR
-    ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY") OR
     ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_APPS"))
     include (InstallRequiredSystemLibraries)
+endif ()
+
+if (("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE") OR
+    ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY") OR
+    ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_APPS"))
     include (SetCPackSystemName)
 
     # NOTE that you have to run "make docs" before running cpack.  The reason
@@ -50,7 +54,11 @@ if (("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE") OR
     # Archive Packages (.tar & .tar.bz2)
     # ===========================================================================
 
-    SET(CPACK_GENERATOR "ZIP;TBZ2;DEB")
+    if (WIN32)
+        SET (CPACK_GENERATOR "ZIP")
+    else ()
+        SET (CPACK_GENERATOR "ZIP;TBZ2")
+    endif ()
     if ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE")
       SET(CPACK_PACKAGE_NAME "seqan")
     elseif ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY")
@@ -79,10 +87,10 @@ if (("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE") OR
     SET(CPACK_PACKAGE_VERSION_PATCH "${SEQAN_VERSION_PATCH}")
     SET(CPACK_PACKAGE_INSTALL_DIRECTORY "SeqAn ${CPACK_PACKAGE_VERSION}")
 
-	if ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY")
-		set (CPACK_PACKAGE_FILE_NAME "seqan-library-${CPACK_PACKAGE_VERSION}")
-	endif ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY")
-	
+    if ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY")
+        set (CPACK_PACKAGE_FILE_NAME "seqan-library-${CPACK_PACKAGE_VERSION}")
+    endif ("${SEQAN_BUILD_SYSTEM}" STREQUAL "SEQAN_RELEASE_LIBRARY")
+
     # Should be the last include.
     INCLUDE(CPack)
 endif ()

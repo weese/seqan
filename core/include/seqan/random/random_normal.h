@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@ namespace seqan {
 // ===========================================================================
 
 // Specialization Tag for normal distribution.
-struct Normal {};
+struct Normal_;
+typedef Tag<Normal_> Normal;
 
 // ===========================================================================
 // Classes
@@ -100,6 +101,8 @@ struct Value<const Pdf<Normal> > : Value<Pdf<Normal> > {};
 // ===========================================================================
 // Functions
 // ===========================================================================
+
+static const double SEQAN_NV_MAGICCONST = 1.7155277699214135;  // == 4 * exp(-0.5)/sqrt(2.0)
 
 /*
 ..summary:Pick a normally distributed random number.

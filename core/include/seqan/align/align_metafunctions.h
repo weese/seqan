@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,18 @@ struct Cols;
 // ----------------------------------------------------------------------------
 // Metafunction Col
 // ----------------------------------------------------------------------------
+
+/*!
+ * @mfn Align#Col
+ * @headerfile <seqan/align.h>
+ * @brief The column type for @link Align @endlink objects.
+ *
+ * @signature Col<TAlign>::Type
+ *
+ * @tparam TAlign The @link Align @endlink object to query for its column type.
+ *
+ * @return Type   The resulting type.
+ */
 
 /**
 .Metafunction.Col:

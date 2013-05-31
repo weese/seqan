@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ namespace seqan {
 ..cat:Seed Handling
 ..summary:The local chaining algorithms to use when adding a seed to a @Class.SeedSet@.
 ..see:Class.SeedSet
-..see:Function.addSeed
+..see:Function.SeedSet#addSeed
 ..tag.Merge:Merge with existing seed.
 ..tag.Chaos:CHAOS chaining.
 ..tag.SimpleChain:Simple chaining.

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,27 @@ namespace seqan {
 // Class AlignConfig
 // ----------------------------------------------------------------------------
 
+/*!
+ * @class AlignConfig
+ * @headerfile <seqan/align.h>
+ * @brief Indication of whether begin/end gaps are free for DP alignment algorithms.
+ *
+ * @signature template <bool TOP, bool LEFT, bool RIGHT, bool BOTTOM, typename TSpec>
+ *            AlignConfig;
+ *
+ * @tparam TOP    Whether or not the begin gaps in the vertical sequence are free.
+ * @tparam LEFT   Whether or not the begin gaps in the horizontal sequence are free.
+ * @tparam RIGHT  Whether or not the end gaps in the horizontal sequence are free.
+ * @tparam BOTTOM Whether or not the end gap sin the vertical sequence are free.
+ * @tparam TSpec  Tag for specializing the AlignConfig object (default: <tt>Default</tt>).
+ *
+ * Used in the DP alignment algorithms to configure the begin/end gap free-nes.
+ */
+
 /**
 .Class.AlignConfig:
 ..cat:Alignments
-..summary:The AlignConfig class encapsulates how DP is carried out. 
+..summary:The AlignConfig class encapsulates how DP is carried out.
 It indicates at what ends gaps are free, the so-called free ends-space alignments.
 ..signature:AlignConfig<bool TOP, bool LEFT, bool RIGHT, bool BOTTOM, TSpec>
 ..param.TOP:If true then 0's in top row.
@@ -66,13 +83,12 @@ It indicates at what ends gaps are free, the so-called free ends-space alignment
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
-..include:seqan/graph_align.h
+..include:seqan/align.h
 */
 
 template <bool TOP = false, bool LEFT = false, bool RIGHT = false, bool BOTTOM = false, typename TSpec = Default>
 class AlignConfig
-{
-};
+{};
 
 // ============================================================================
 // Metafunctions

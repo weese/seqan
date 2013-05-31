@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -132,20 +132,18 @@ SEQAN_CHECKPOINT
 	inline void
 	setHost(
 		Finder< Index<TText, TSpec>, TSpecFinder > & me, 
-		typename Parameter_<Index<TText, TSpec> >::Type /*container_*/)
+		typename Parameter_<Index<TText, TSpec> >::Type container_)
 	{
-SEQAN_CHECKPOINT
-		me.index = container;
+		me.index = container_;
 	}
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
 	inline void
 	setContainer(
 		Finder< Index<TText, TSpec>, TSpecFinder > & me, 
-		typename Parameter_<Index<TText, TSpec> >::Type /*container_*/)
+		typename Parameter_<Index<TText, TSpec> >::Type container_)
 	{
-SEQAN_CHECKPOINT
-		me.index = container;
+		me.index = container_;
 	}
 
 //____________________________________________________________________________

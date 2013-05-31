@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -146,7 +146,6 @@ parentAllocator(Allocator<SimpleAlloc<TParentAllocator> > & me)
 ..signature:clear(allocator)
 ..param.allocator:Allocator object.
 ...type:Class.Allocator
-...concept:Concept.AllocatorConcept
 ..remarks:This function deallocates all memory blocks 
 that was allocated using @Function.allocate@ for $allocator$.
 The memory is not pooled but directly passed back to the heap manager.

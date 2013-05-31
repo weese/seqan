@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,7 @@ ArgParseArgument.
 ...tableheader:Flag|Description
 ...table:$ArgParseArgument::STRING$|Argument is a string
 ...table:$ArgParseArgument::INTEGER$|Argument is an integer
+...table:$ArgParseArgument::INT64|Argument is a 64 bit integer
 ...table:$ArgParseArgument::DOUBLE$|A float
 ...table:$ArgParseArgument::INPUTFILE$|An input file
 ...table:$ArgParseArgument::OUTPUTFILE$|An output file
@@ -99,6 +100,7 @@ public:
         // argument is
         STRING,     // .. a string
         INTEGER,    // .. an integer
+        INT64,      // .. a 64 bit integer
         DOUBLE,     // .. a float
         INPUTFILE,  // .. an inputfile (implicitly also a string)
         OUTPUTFILE  // .. an outputfile (implicitly also a string)
@@ -208,6 +210,10 @@ inline std::string _typeToString(ArgParseArgument const & me)
         typeName = "integer";
         break;
 
+    case ArgParseArgument::INT64:
+        typeName = "int64";
+        break;
+
     case ArgParseArgument::STRING:
         typeName = "string";
         break;
@@ -294,6 +300,28 @@ inline bool isStringArgument(ArgParseArgument const & me)
 inline bool isIntegerArgument(ArgParseArgument const & me)
 {
     return me._argumentType == ArgParseArgument::INTEGER;
+}
+
+// ----------------------------------------------------------------------------
+// Function isInt64Argument()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.isInt64Argument
+..class:Class.ArgParseArgument
+..summary:Returns whether the argument is a 64 bit integer.
+..cat:Miscellaneous
+..signature:isListArgument(argument)
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..returns:$true$ if the argument argument is a 64 bit  integer argument.
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
+..include:seqan/arg_parse.h
+*/
+
+inline bool isInt64Argument(ArgParseArgument const & me)
+{
+    return me._argumentType == ArgParseArgument::INT64;
 }
 
 // ----------------------------------------------------------------------------
@@ -464,6 +492,12 @@ inline void setMinValue(ArgParseArgument & me, const std::string minValue)
         _intervalAssert<int>(minValue, me.maxValue);
         me.minValue = minValue;
     }
+    else if (isInt64Argument(me))
+    {
+        SEQAN_CHECK(_isCastable<__int64>(minValue), "The maximal value for a 64 integer argument must be a 64 bit integer");
+        _intervalAssert<__int64>(minValue, me.maxValue);
+        me.minValue = minValue;
+    }
     else
         SEQAN_FAIL("min/max values are not applicable to non numeric arguments");
 }
@@ -496,6 +530,12 @@ inline void setMaxValue(ArgParseArgument & me, const std::string maxValue)
     else if (isIntegerArgument(me))
     {
         SEQAN_CHECK(_isCastable<int>(maxValue), "The maximal value for an integer argument must be an integer");
+        _intervalAssert<int>(me.minValue, maxValue);
+        me.maxValue = maxValue;
+    }
+    else if (isInt64Argument(me))
+    {
+        SEQAN_CHECK(_isCastable<int>(maxValue), "The maximal value for a 64 bit integer argument must be an 64 bit integer");
         _intervalAssert<int>(me.minValue, maxValue);
         me.maxValue = maxValue;
     }
@@ -691,6 +731,9 @@ inline void _checkValue(ArgParseArgument const & me, std::string const & value)
     if (isIntegerArgument(me))
         _checkNumericArgument<int>(me, value);
 
+    if (isInt64Argument(me))
+        _checkNumericArgument<__int64>(me, value);
+
     if (isDoubleArgument(me))
         _checkNumericArgument<double>(me, value);
 
@@ -740,7 +783,7 @@ inline void _assignArgumentValue(ArgParseArgument & me, std::string const & valu
 // ----------------------------------------------------------------------------
 
 /**
-.Function.getArgumentValue
+.Function.ArgParseArgument#getArgumentValue
 ..class:Class.ArgParseArgument
 ..summary:Returns the value of the @Class.ArgParseArgument@ object. If
 the @Class.ArgParseArgument@ is a list or can hold multiple values
@@ -801,7 +844,7 @@ inline std::vector<std::string> const & getArgumentValues(ArgParseArgument const
 // ----------------------------------------------------------------------------
 
 /**
-.Function.hasArgumentValue
+.Function.ArgParseArgument#hasValue
 ..class:Class.ArgParseArgument
 ..summary:Returns true if a value for the given position is available.
 ..cat:Miscellaneous
@@ -827,7 +870,7 @@ inline bool hasValue(ArgParseArgument const & arg)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.isSet
+.Function.ArgParseArgument#isSet
 ..class:Class.ArgParseArgument
 ..summary:Returns true if a value was assigned to the argument.
 ..cat:Miscellaneous
@@ -848,7 +891,7 @@ inline bool isSet(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.hasDefault
+.Function.ArgParseArgument#hasDefault
 ..summary:Returns true if a default value was given for that argument.
 ..cat:Miscellaneous
 ..signature:hasDefault(argument)

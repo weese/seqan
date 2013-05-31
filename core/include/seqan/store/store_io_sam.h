@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -928,6 +928,7 @@ _fillHeader(BamHeader & header,
         typedef FragmentStore<TSpec, TConfig>                           TFragmentStore;
 
         typedef typename TFragmentStore::TReadStore                     TReadStore;
+        typedef typename TFragmentStore::TReadNameStore                 TReadNameStore;
         typedef typename TFragmentStore::TAlignedReadStore              TAlignedReadStore;
         typedef typename TFragmentStore::TContigStore                   TContigStore;
         typedef typename TFragmentStore::TReadSeq                       TReadSeq;
@@ -1014,11 +1015,12 @@ _fillHeader(BamHeader & header,
             }
             
             // <qname>
-            if (readId < length(store.readNameStore)) {
-                typedef typename Iterator<CharString, Standard>::Type TCharStringIterator;
+            if (readId < length(store.readNameStore))
+            {
+                typedef typename Iterator<typename Value<TReadNameStore>::Type const>::Type TReadNameIterator;
                 if (empty(store.readNameStore[readId]))
                     continue;
-                for (TCharStringIterator it = begin(store.readNameStore[readId]); it != end(store.readNameStore[readId]); ++it) {
+                for (TReadNameIterator it = begin(store.readNameStore[readId]); it != end(store.readNameStore[readId]); ++it) {
                     if (*it == ' ' || *it == '\t' || *it == '\n' || *it == '\r')
                         break;
                     _streamPut(target, *it);

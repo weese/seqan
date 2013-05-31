@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ public:
     TScoreValue _score;
 
     Seed() :_beginPositionH(0), _beginPositionV(0), _endPositionH(0), _endPositionV(0),_lowerDiagonal(0), _upperDiagonal(0),
-            _score(0)
+            _score()
     {}
 
     Seed(TPosition beginPositionH, TPosition beginPositionV, TPosition seedLength) :

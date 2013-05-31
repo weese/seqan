@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,18 @@ namespace seqan {
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+/*!
+ * @mfn GappedValueType
+ * @headerfile <seqan/align.h>
+ * @brief Returns a value type that contains a black value <tt>'-'</tt>.
+ *
+ * @signature GappedValueType<T>::Type
+ *
+ * @tparam T The value type that should be expanded (if needed) by '-'.
+ *
+ * @return Type A type that can store the values of <tt>T</tt> and the value <tt>'-'</tt>.
+ */
 
 /**
 .Metafunction.GappedValueType:

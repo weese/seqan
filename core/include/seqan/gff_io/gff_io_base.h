@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ typedef Tag<TagGtf_> const Gtf;
 ..summary:Static member with invalid score value.
 ..type:nolink:$float$
 
-.Memvar.GffRecord#seqID
+.Memvar.GffRecord#ref
 ..class:Class.GffRecord
 ..summary:The sequence id of the record.
 ..type:Shortcut.CharString
@@ -156,8 +156,8 @@ struct GffRecord
 
     // TODO(singer): Maybe use a I/O context object and store ids as integers
     // The ID of the landmark used to establish the coordinate system for the current feature.
-    String<char> seqID;
-    int seqIdx;
+    String<char> ref;
+    int rID;
 
     // The source is a free text qualifier intended to describe the algorithm or operating procedure that generated this feature.
     String<char> source;
@@ -195,7 +195,7 @@ struct GffRecord
     }
 
     GffRecord() :
-        seqIdx(INVALID_IDX), beginPos(-1), endPos(-1), score(INVALID_SCORE()),
+        rID(INVALID_IDX), beginPos(-1), endPos(-1), score(INVALID_SCORE()),
         strand('.'), phase('.')
     {}
 };
@@ -296,7 +296,7 @@ _parseReadGffKeyValue(TValueString & outValue, TKeyString & key, TReader & reade
 /**
 .Function.GffRecord#clear
 ..class:Class.GffRecord
-..cat:Input / Output
+..cat:Input/Output
 ..signature:clear(record)
 ..param.record:The @Class.GffRecord@ to reset.
 ...type:Class.GffRecord
@@ -306,7 +306,7 @@ _parseReadGffKeyValue(TValueString & outValue, TKeyString & key, TReader & reade
 
 inline void clear(GffRecord & record)
 {
-    clear(record.seqID);
+    clear(record.ref);
     clear(record.source);
     clear(record.type);
     clear(record.tagName);
@@ -339,11 +339,11 @@ _readGffRecord(GffRecord & record, RecordReader<TStream, TRecordReaderSpec> & re
     // read column 1: seqid
     // The letters until the first whitespace will be read.
     // Then, we skip until we hit the first tab character.
-    if (readUntilWhitespace(record.seqID, reader))
+    if (readUntilTabOrLineBreak(record.ref, reader))
         return 1;
-    record.seqIdx = GffRecord::INVALID_IDX;
+    record.rID = GffRecord::INVALID_IDX;
 
-    if (!empty(record.seqID) && record.seqID[0] == '#')
+    if (!empty(record.ref) && record.ref[0] == '#')
     {
         if (skipLine(reader))
             return 1;
@@ -354,7 +354,7 @@ _readGffRecord(GffRecord & record, RecordReader<TStream, TRecordReaderSpec> & re
         return 1;
 
     // read column 2: source
-    if (readUntilWhitespace(record.source, reader))
+    if (readUntilTabOrLineBreak(record.source, reader))
         return 1;
 
     if (record.source == ".")
@@ -364,7 +364,7 @@ _readGffRecord(GffRecord & record, RecordReader<TStream, TRecordReaderSpec> & re
         return 1;
 
     // read column 3: type
-    if (readUntilWhitespace(record.type, reader))
+    if (readUntilTabOrLineBreak(record.type, reader))
         return 1;
 
     if (skipWhitespaces(reader))
@@ -439,7 +439,7 @@ _readGffRecord(GffRecord & record, RecordReader<TStream, TRecordReaderSpec> & re
 
     // read column 7: strand
     clear(temp);
-    if (readUntilWhitespace(temp, reader))
+    if (readUntilTabOrLineBreak(temp, reader))
         return 1;
 
     if (temp[0] != '-' && temp[0] != '+')
@@ -456,7 +456,7 @@ _readGffRecord(GffRecord & record, RecordReader<TStream, TRecordReaderSpec> & re
 
     // read column 8: phase
     clear(temp);
-    if (readUntilWhitespace(temp, reader))
+    if (readUntilTabOrLineBreak(temp, reader))
         return 1;
 
     if (temp != "0" && temp != "1" && temp != "2")
@@ -470,6 +470,12 @@ _readGffRecord(GffRecord & record, RecordReader<TStream, TRecordReaderSpec> & re
 
     if (skipBlanks(reader))
         return 1;
+
+    // It's fine if there are no attributes and the line ends here.
+    if (atEnd(reader))
+        return 0;
+    if (value(reader) == '\n' || value(reader) == '\r')
+        return skipLine(reader);
 
     // read column 9: attributes
     while (!atEnd(reader))
@@ -518,19 +524,19 @@ template <typename TRecordReader, typename TContextSpec, typename TContextSpec2>
 inline int
 _readGffRecord(GffRecord & record, TRecordReader & reader, GffIOContext<TContextSpec, TContextSpec2> & context)
 {
-    // Read record with string seqID from GFF file.
+    // Read record with string ref from GFF file.
     int res = _readGffRecord(record, reader);
     if (res != 0)
         return res;
 
-    // Translate seqID to seqIdx using the context.  If there is no such sequence name in the context yet then we add it.
+    // Translate ref to rID using the context.  If there is no such sequence name in the context yet then we add it.
     unsigned idx = 0;
-    if (!getIdByName(nameStore(context), record.seqID, idx, nameStoreCache(context)))
+    if (!getIdByName(nameStore(context), record.ref, idx, nameStoreCache(context)))
     {
         idx = length(nameStore(context));
-        appendName(nameStore(context), record.seqID, nameStoreCache(context));
+        appendName(nameStore(context), record.ref, nameStoreCache(context));
     }
-    record.seqIdx = idx;
+    record.rID = idx;
 
     return 0;
 }
@@ -598,7 +604,7 @@ _writeSemicolonSensitive(TTargetStream & target, TString & temp)
 ..summary:Writes one gff record to a stream.
 ..signature:writeRecord(TSreamm stream, GffRecord record)
 ..param.stream:The output stream.
-...type:Concept.Stream
+...type:Concept.StreamConcept
 ..param.record:The gff record.
 ...type:Class.GffRecord
 ..include:seqan/gff_io.h
@@ -606,10 +612,13 @@ _writeSemicolonSensitive(TTargetStream & target, TString & temp)
 
 template <typename TStream>
 inline int
-_writeAttributes(TStream & stream, GffRecord & record, Gff /*tag*/)
+_writeAttributes(TStream & stream, GffRecord const & record, Gff /*tag*/)
 {
+    if (empty(record.tagName))
+        return 0;
+
     unsigned i = 0;
-    for (; i < length(record.tagName) - 1; ++i)
+    for (; i + 1 < length(record.tagName); ++i)
     {
         if (_writeSemicolonSensitive(stream, record.tagName[i]))
             return 1;
@@ -645,7 +654,7 @@ _writeAttributes(TStream & stream, GffRecord & record, Gff /*tag*/)
 
 template <typename TStream>
 inline int
-_writeAttributes(TStream & stream, GffRecord & record, Gtf /*tag*/)
+_writeAttributes(TStream & stream, GffRecord const & record, Gtf /*tag*/)
 {
     unsigned i = 0;
     for (; i < length(record.tagName) - 1; ++i)
@@ -688,16 +697,16 @@ _writeAttributes(TStream & stream, GffRecord & record, Gtf /*tag*/)
     return 0;
 }
 
-template <typename TStream, typename TTag>
+template <typename TStream, typename TSeqId, typename TTag>
 inline int
-writeRecord(TStream & stream, GffRecord & record, TTag const tag)
+_writeRecordImpl(TStream & stream, GffRecord const & record, TSeqId const & ref, TTag const tag)
 {
     // ignore empty annotations, i.e. annotations that are 'guessed' by implicit information from their children (in GFF)
-    if (empty(record.seqID))
+    if (empty(ref))
         return 0;
 
     // write column 1: seqid
-    if (streamWriteBlock(stream, &record.seqID[0], length(record.seqID)) != length(record.seqID))
+    if (streamWriteBlock(stream, &ref[0], length(ref)) != length(ref))
         return 1;
 
     if (streamWriteChar(stream, '\t'))
@@ -793,15 +802,23 @@ writeRecord(TStream & stream, GffRecord & record, TTag const tag)
     return 0;
 }
 
+template <typename TStream, typename TTag>
+inline int
+writeRecord(TStream & stream, GffRecord const & record, TTag const tag)
+{
+    return _writeRecordImpl(stream, record, record.ref, tag);
+}
+
 template <typename TStream, typename TContextSpec, typename TContextSpec2, typename TTag>
 inline int
-writeRecord(TStream & stream, GffRecord & record, GffIOContext<TContextSpec, TContextSpec2> & context, TTag const tag)
+writeRecord(TStream & stream, GffRecord const & record, GffIOContext<TContextSpec, TContextSpec2> & context, TTag const tag)
 {
-    if (record.seqIdx != GffRecord::INVALID_IDX)
+    if (record.rID != GffRecord::INVALID_IDX)
     {
-        record.seqID = nameStore(context)[record.seqIdx];
+        String<char> tempSeqId = nameStore(context)[record.rID];
+        return _writeRecordImpl(stream, record, tempSeqId, tag);
     }
-    return writeRecord(stream, record, tag);
+    return _writeRecordImpl(stream, record, record.ref, tag);
 }
 
 }  // namespace seqan

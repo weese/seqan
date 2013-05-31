@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@
 // TODO(holtgrew): Local alignments & Fragments don't work nicely together at the moment, multiLocalAlignments() needs an equivalent in the new align module.
 // TODO(holtgrew): Align<>, AlignCol<> need some love and documentation.
 // TODO(holtgrew): Gaps need better documentation.
-// TODO(holtgrew): graph_align should go away.
 // TODO(holtgrew): refinement should become graph_align and also host Graph<Alignment<>>
 // TODO(holtgrew): graph_msa should become align_msa, or so, see whitepaper.
 // TODO(holtgrew): The documentation and Tutorial need heavy updates, clipping alignments howto can go away.
@@ -52,7 +51,7 @@
 
 #include <seqan/basic.h>
 #include <seqan/modifier.h>  // ModifiedAlphabet<>.
-#include <seqan/refinement.h>  // TODO(holtgrew): This module should become graph_align and we should not depend on it.
+#include <seqan/graph_align.h>  // TODO(holtgrew): We should not have to depend on this.
 
 // TODO(holtgrew): Why not use priority queue from STL?
 #include <seqan/misc/priority_type_base.h>

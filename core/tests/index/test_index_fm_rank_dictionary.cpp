@@ -1,7 +1,7 @@
 // ==========================================================================
-//                               fm_index_beta
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
 
 #include "test_index_fm.h"
 #include "test_index_fm_rank_dictionary.h"
-#include "test_index_fm_sentinel_rank_dictionary.h"
 
 int main(int argc, char const ** argv) {
     seqan::TestSystem::init(argc, argv);

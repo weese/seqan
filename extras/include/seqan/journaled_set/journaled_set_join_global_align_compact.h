@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ _joinInternal(String <TValue, THostSpec> const & reference,
 {
 
     typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > TJournalString;
-    typedef typename Size<TJournalString>::Type TSize;
+//    typedef typename Size<TJournalString>::Type TSize;
 
     // TODO(rmaerker): Check the correct behavior here.
     TJournalString tmpJournal;

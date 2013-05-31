@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -106,8 +106,8 @@ createIntervalTreeStore(FragmentStore<TSpec, TConfig> & me, const bool &unknownO
 		TCIter itR = begin(contigIntervals_R);
 		for ( ; itF != itFEnd; goNext(itF), goNext(itR))
 		{
-			TIntervalTree intervalTree_F(getValue(itF),RandomCenter());
-			TIntervalTree intervalTree_R(getValue(itR),RandomCenter());
+			TIntervalTree intervalTree_F(getValue(itF), ComputeCenter());
+			TIntervalTree intervalTree_R(getValue(itR), ComputeCenter());
 				
 			assignValue(me.intervalTreeStore_F, position(itF, contigIntervals_F), intervalTree_F);  
 			assignValue(me.intervalTreeStore_R, position(itR, contigIntervals_R), intervalTree_R);
@@ -156,7 +156,7 @@ createIntervalTreeStore(FragmentStore<TSpec, TConfig> & me, const bool &unknownO
 		TCIter itCEnd = end(contigIntervals);
 		for ( ; itC != itCEnd; goNext(itC))
 		{
-			TIntervalTree intervalTree(getValue(itC),RandomCenter());
+			TIntervalTree intervalTree(getValue(itC), ComputeCenter());
 				
 			assignValue(me.intervalTreeStore_F, position(itC, contigIntervals), intervalTree); 
 		}

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -549,6 +549,23 @@ operator>=(Tuple<TValue, SIZE, TSpec> const & left,
            Tuple<TValue, SIZE, TSpec> const & right)
 {
     return !operator<(left, right);
+}
+
+// -----------------------------------------------------------------------
+// Function operator+()
+// -----------------------------------------------------------------------
+
+template <typename TValue, unsigned SIZE, typename TSpec>
+inline Tuple<TValue, SIZE, TSpec>
+operator+(Tuple<TValue, SIZE, TSpec> const & left,
+          Tuple<TValue, SIZE, TSpec> const & right)
+{
+    Tuple<TValue, SIZE, TSpec>  tuple;
+
+    for (unsigned j = 0; j < SIZE; ++j)
+        tuple[j] = left[j] + right[j];
+
+    return tuple;
 }
 
 }  // namespace seqan

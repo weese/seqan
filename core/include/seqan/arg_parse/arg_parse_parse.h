@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,9 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 /**
-.Function.parse:
+.Function.ArgumentParser#parse
 ..summary:Parses the command line.
+..class:Class.ArgumentParser
 ..cat:Miscellaneous
 ..signature:parse(parser, argc, argv[, outputStream, errorStream])
 ..param.parser:The @Class.ArgumentParser@ object.

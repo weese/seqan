@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -157,13 +157,7 @@ struct Tuple<TValue, SIZE, BitPacked<> >
     template <typename T>
     inline void operator|=(T const & t)
     {
-        i |= t;
-    }
-
-    template <typename T, typename TSpec>
-    inline void operator|=(SimpleType<T, TSpec> const & t)
-    {
-        i |= t.value;
+        i |= ordValue(t);
     }
 
     inline TBitVector* operator&()

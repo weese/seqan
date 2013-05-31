@@ -1,7 +1,7 @@
 // ==========================================================================
 //                            builtin_functions.h
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,7 @@ namespace seqan {
 ..cat:C++ built-in
 ..summary:C++ built-in logical AND operator.
 
-.Function.operator\pipe\pipe|operator||
+.DISABLED.Function.operator\pipe\pipe|operator||
 ..cat:C++ built-in
 ..summary:C++ built-in logical OR operator.
 
@@ -151,7 +151,7 @@ namespace seqan {
 ..cat:C++ built-in
 ..summary:C++ built-in bitwise AND operator.
 
-.Function.operator\pipe|operator|
+.DISABLED.Function.operator\pipe|operator\pipe
 ..cat:C++ built-in
 ..summary:C++ built-in bitwise OR operator.
 
@@ -199,7 +199,7 @@ namespace seqan {
 ..cat:C++ built-in
 ..summary:C++ built-in bitwise AND assignment operator.
 
-.Function.operator\pipe=|operator|=
+.DISABLED.Function.operator\pipe=|operator|=
 ..cat:C++ built-in
 ..summary:C++ built-in bitwise OR assignment operator.
 

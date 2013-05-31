@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ public:
     virtual int writeHeader(BamHeader const & header, BamIOContext<StringSet<CharString> > const & bamIOContext) = 0;
 
     // Write the BAM record to the wrapped file.
-    virtual int writeRecord(BamAlignmentRecord & record,
+    virtual int writeRecord(BamAlignmentRecord const & record,
                             BamIOContext<StringSet<CharString> > const & bamIOContext) = 0;
 
     // Flush all buffers.

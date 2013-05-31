@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -135,10 +135,7 @@ enum ExtensionDirection
 ..param.scoreMatrix: The scoring scheme.
 ...type:Spec.Simple Score
 ...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
-..param.tag: The algorithm to use.
-...type:Tag.Seed Extension.MatchExtend
-...type:Tag.Seed Extension.UngappedXDrop
-...type:Tag.Seed Extension.GappedXDrop
+..remarks:You can use the tags, @Tag.Seed Extension.MatchExtend@, @Tag.Seed Extension.UngappedXDrop@, and @Tag.Seed Extension.GappedXDrop@.
 ..include:seqan/seeds.h
 */
 

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -224,7 +224,7 @@ struct FindBeginImpl_<Myers<FindPrefix, THasState, void> >
 
 		//build begin_finder
 		TBeginFinder begin_finder;
-		THaystack & hayst = haystack(finder);
+		typename Parameter_<THaystack>::Type hayst = haystack(finder);
 		setContainer(host(hostIterator(begin_finder)), hayst);
 		TPosition begin_finder_beginPosition = position(finder);
 		TPosition begin_finder_position;
@@ -374,7 +374,7 @@ findBegin(TFinder & finder,
 ..summary:Score of the last match found by @Function.findBegin@ during approximate searching.
 ..signature:getBeginScore(pattern)
 ..class:Class.Finder
-..param.pattern:A @Concept.PatternConcept|pattern@ that can be used for approximate searching.
+..param.pattern:A @Class.Pattern@ that can be used for approximate searching.
 ...type:Spec.DPSearch
 ..returns:The score of the last match found using $pattern$.
 ...remarks:The value is set after a successfully call of @Function.findBegin@.

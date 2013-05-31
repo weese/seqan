@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -424,7 +424,7 @@ _createVertices(Graph<TSpec>& g,
 ..cat:Graph
 ..summary:Shortcut to add multiple edges at once.
 Creates vertices implicitly.
-..signature:addEdge(g, edges, size)
+..signature:addEdges(g, edges, size)
 ..param.g:A graph.
 ...type:Class.Graph
 ..param.edges:An array of vertex descriptors. It is assumed that the

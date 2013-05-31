@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,28 @@ All $TPredHull$ sufficing nodes can be iterated using a @Spec.TopDown Iterator@.
 To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterator$ of this index.
 ..include:seqan/index.h
 */
+/*!
+ * @class IndexDfi
+ * 
+ * @extends IndexWotd
+ * 
+ * @headerfile seqan/index.h
+ * 
+ * @brief The Deferred Frequency Index (see Weese and Schulz, "Efficient string
+ *        mining under constraints via the deferred frequency index").
+ * 
+ * @signature Index<TText, IndexWotd< Dfi<TPredHull, TPred> > >
+ * 
+ * @tparam TText The text type. Types: @link String @endling, @link StringSet @endlink
+ * @tparam TPred An arbitrary frequency predicate
+ * @tparam TPredHull A monotonic hull of <tt>TPred</tt>
+ * 
+ * @section Remarks
+ * 
+ * This index is based on a lazy suffix tree (see @link IndexWotd @endlink). All
+ * <tt>TPredHull</tt> sufficing nodes can be iterated using a @link TopDownIterator @endlink. To iterate the exact solution set of <tt>TPred</tt>, use a
+ * <tt>Spec.TopDownHistory Iterator</tt> of this index.
+ */
 
 	template < 
 		typename TPredHull = DfiPredDefault_<true>,
@@ -308,7 +330,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 
 		typedef typename Iterator<TText const, Standard>::Type		TTextIterator;
 		typedef typename Iterator<TSA, Standard>::Type				TSAIterator;
-		typedef typename Iterator<TTempSA, Standard>::Type			TTempSAIterator;
+		typedef typename Iterator<TTempSA const, Standard>::Type    TTempSAIterator;
 		typedef typename Iterator<TCounter, Standard>::Type			TCntIterator;
 		typedef typename Size<TText>::Type							TTextSize;
 		typedef typename Value<TText>::Type							TValue;

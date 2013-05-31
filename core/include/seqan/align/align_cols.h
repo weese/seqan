@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,19 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 // Class AlignCols
 // ----------------------------------------------------------------------------
+
+/*!
+ * @class AlignCols
+ * @implements EqualityComparableConcept
+ * @implements RandomAccessContainerConcept
+ * @headerfile <seqan/align.h>
+ * @brief Pseudo columns container for row-based Align class.
+ *
+ * @signature template <typename TAlign>
+ *            class AlignCols<TAlign>;
+ *
+ * @tparam TAlign The Align type.
+ */
 
 /**
 .Class.AlignCols:
@@ -120,6 +133,8 @@ struct AlignColIterator;
 // ----------------------------------------------------------------------------
 // Metafunction Host
 // ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Add HostedTypeConcept and make AlignCols object implement the concept.
 
 ///.Metafunction.Host.param.T.type:Class.AlignCols
 

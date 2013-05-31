@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -421,8 +421,6 @@ _alignTracePrint(JournalTraceBuffer<String<TValue, Journaled<THostSpec, TJournal
          TPos const segLen,
          TTraceValue const tv)
  {
-    SEQAN_CHECKPOINT;
-
     typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > TString;
     typedef typename Value<JournalTraceBuffer<TString> >::Type TEntryString;
     typedef typename Value<TEntryString>::Type TJournalEntry;
@@ -469,8 +467,6 @@ _constructAndSetJournalTree(String<TValue, Journaled<THostSpec, SortedArray, TBu
                             String<TCargo, THostSpec2> const & cargoArray,
                             String<TValue, TBuffSpec> const & insertionBuffer)
 {
-    SEQAN_CHECKPOINT;
-
     assign(journalSeq._journalEntries._journalNodes, cargoArray);
     assign(journalSeq._insertionBuffer, insertionBuffer);
 }
@@ -481,10 +477,9 @@ _constructAndSetJournalTree(String<TValue, Journaled<THostSpec, UnbalancedTree, 
                             String<TCargo, THostSpec2> const & cargoArray,
                             String<TValue, TBuffSpec> const & insertionBuffer)
 {
-    SEQAN_CHECKPOINT;
-    typedef String<TValue, Journaled<THostSpec, UnbalancedTree, TBuffSpec> > TJournalString;
+//    typedef String<TValue, Journaled<THostSpec, UnbalancedTree, TBuffSpec> > TJournalString;
 //      typedef typename TJournalString::TJournalEntry TEntry;
-    typedef typename JournalEntries<TCargo, UnbalancedTree>::TNode TNode;
+//    typedef typename JournalEntries<TCargo, UnbalancedTree>::TNode TNode;
     //sorted array
     clear(seq._journalEntries._nodeAllocator);
     _doConstructTree(seq._journalEntries._root,seq._journalEntries, cargoArray, 0, (int) length(cargoArray)-1);
@@ -503,8 +498,6 @@ _doConstructTree(JournalEntriesUnorderedTreeNode<TEntry> *& node,
                 TPos const begin,
                 TPos const end )
 {
-    SEQAN_CHECKPOINT;
-
     typedef typename JournalEntries<TEntry, UnbalancedTree>::TNode TNode;
 
     if (begin > end) {

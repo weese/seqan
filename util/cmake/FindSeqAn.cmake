@@ -38,8 +38,6 @@
 # defaults are given after the variable name.
 #
 #   SEQAN_FIND_DEPENDENCIES   -- DEFAULT
-#   SEQAN_FIND_ENABLE_DEBUG   -- TRUE if ${CMAKE_BUILD_TYPE} == "Debug", FALSE
-#                                otherwise.
 #   SEQAN_FIND_ENABLE_TESTING -- TRUE if ${CMAKE_BUILD_TYPE} == "Debug", FALSE
 #                                otherwise.
 #
@@ -135,15 +133,6 @@ elseif (SEQAN_FIND_DEPENDENCIES STREQUAL "NONE")
   set(SEQAN_FIND_DEPENDENCIES)
 endif ()
 
-# SEQAN_FIND_ENABLE_DEBUG
-if (NOT SEQAN_FIND_ENABLE_DEBUG)
-  if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(SEQAN_FIND_ENABLE_DEBUG "TRUE")
-  else ()
-    set(SEQAN_FIND_ENABLE_DEBUG "FALSE")
-  endif()
-endif ()
-
 # SEQAN_FIND_ENABLE_TESTING
 if (NOT SEQAN_FIND_ENABLE_TESTING)
   set(SEQAN_FIND_ENABLE_TESTING "FALSE")
@@ -203,9 +192,9 @@ if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
   # mainly important for 64 bit but does not get into the way on 32 bit either
   # at minimal performance impact.
   if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer")
+    set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} ${SEQAN_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer")
   elseif (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
-    set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS_RELEASE} -g -fno-omit-frame-pointer")
+    set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} ${SEQAN_CXX_FLAGS_RELEASE} -g -fno-omit-frame-pointer")
   endif ()
 endif ()
 
@@ -233,15 +222,15 @@ if (MSVC)
 endif (MSVC)
 
 # ----------------------------------------------------------------------------
-# Search for header seqan.h.
+# Search for directory seqan.
 # ----------------------------------------------------------------------------
 
 option (SEQAN_USE_SEQAN_BUILD_SYSTEM "Whether or not to expect the SeqAn build system with core/extras structure." OFF)
 
 if (SEQAN_USE_SEQAN_BUILD_SYSTEM)
   # When using the SeqAn build system, we scan all entries in
-  # CMAKE_INCLUDE_PATH for a seqan.h and add all paths to the variable
-  # SEQAN_INCLUDE_DIRS.
+  # CMAKE_INCLUDE_PATH for a subdirectory seqan and add all paths to the
+  # variable SEQAN_INCLUDE_DIRS.
   set (_SEQAN_INCLUDE_DIRS "")
   foreach (_SEQAN_BASEDIR ${CMAKE_INCLUDE_PATH})
     if (EXISTS ${_SEQAN_BASEDIR}/seqan)
@@ -257,9 +246,9 @@ if (SEQAN_USE_SEQAN_BUILD_SYSTEM)
     set(SEQAN_FOUND        FALSE)
   endif (_SEQAN_INCLUDE_DIRS)
 else (SEQAN_USE_SEQAN_BUILD_SYSTEM)
-  # When NOT using the SeqAn build system then we only look for one seqan.h
-  # and thus only one library.
-  find_path(_SEQAN_BASEDIR "seqan.h" PATHS ${SEQAN_INCLUDE_PATH})
+  # When NOT using the SeqAn build system then we only look for one directory
+  # with subdirectory seqan and thus only one library.
+  find_path(_SEQAN_BASEDIR "seqan" PATHS ${SEQAN_INCLUDE_PATH})
   mark_as_advanced(_SEQAN_BASEDIR)
   if (_SEQAN_BASEDIR)
     set(SEQAN_FOUND        TRUE)
@@ -277,12 +266,6 @@ if (SEQAN_FIND_ENABLE_TESTING)
   set(SEQAN_DEFINITIONS ${SEQAN_DEFINITIONS} -DSEQAN_ENABLE_TESTING=1)
 else ()
   set(SEQAN_DEFINITIONS ${SEQAN_DEFINITIONS} -DSEQAN_ENABLE_TESTING=0)
-endif ()
-
-if (SEQAN_FIND_ENABLE_DEBUG)
-  set(SEQAN_DEFINITIONS ${SEQAN_DEFINITIONS} -DSEQAN_ENABLE_DEBUG=1)
-else ()
-  set(SEQAN_DEFINITIONS ${SEQAN_DEFINITIONS} -DSEQAN_ENABLE_DEBUG=0)
 endif ()
 
 # ----------------------------------------------------------------------------

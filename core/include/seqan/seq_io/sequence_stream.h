@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@ namespace seqan {
 
 /**
 .Class.SequenceStream
+..cat:Input/Output
 ..summary:High-level reading and writing of sequences.
 ..description:
 Building upon the more low-level sequence I/O functionality of SeqAn, this class provides easier to use I/O facilities.
@@ -127,6 +128,7 @@ while (!atEnd(seqIO)))
 ...default:@Enum.SequenceStream\colon\colonFileType.value.AUTO_TYPE@
 
 .Enum.SequenceStream\colon\colonOperationMode
+..cat:Input/Output
 ..summary:Select the operation mode of a @Class.SequenceStream@.
 ..value.READ:Open stream for reading.
 ..value.READ_PERSISTENT:Open stream for reading, mark as "persisent reading". See @Class.SequenceStream@ for more information on the difference between normal and persistent reading.
@@ -134,6 +136,7 @@ while (!atEnd(seqIO)))
 ..include:seqan/seq_io.h
 
 .Enum.SequenceStream\colon\colonFileFormat
+..cat:Input/Output
 ..summary:Select the file format to read/write.
 ..description:The file format is the format of the possibly compressed content.
 ..value.AUTO_FORMAT:Auto-detect format from file content on reading and from the file name on writing. If Auto-detection fails, FASTA is used.
@@ -142,6 +145,7 @@ while (!atEnd(seqIO)))
 ..include:seqan/seq_io.h
 
 .Enum.SequenceStream\colon\colonFileType
+..cat:Input/Output
 ..summary:Select the file type to read/write.
 ..description:The file type is the type of the file itself, i.e. plain text or compressed.
 ..value.AUTO_TYPE:Auto-detect format from file content on reading and from the file name on writing. If Auto-detection fails, $PLAIN_TEXT$ is used.
@@ -294,7 +298,9 @@ public:
 .Function.SequenceStream#open
 ..summary:Open or re-open a file using a SequenceStream.
 ..class:Class.SequenceStream
-..signature:void open(fileName[, operationMode[, format[, fileType]]])
+..signature:void open(seqStream, fileName[, operationMode[, format[, fileType]]])
+..param.seqStream:The SequenceStream object to open.
+...type:Class.SequenceStream
 ..param.fileName:Path to the file to open.
 ...type:nolink:$char const *$
 ..param.operationMode:Mode to open the file in. Optional.
@@ -581,7 +587,7 @@ int readBatch(StringSet<TId, TIdSpec> & ids,
 ..class:Class.SequenceStream
 ..summary:Read all sequence records from a @Class.SequenceStream@ object.
 ..signature:int readAll(ids, seqs, seqIO)
-..signature:int readRecord(ids, seqs, quals, seqIO)
+..signature:int readAll(ids, seqs, quals, seqIO)
 ..param.ids:The identifiers of the sequence are written here.
 ...type:nolink:@Class.StringSet@ of @Shortcut.CharString@.
 ..param.seq:The sequence of the record is written here.
@@ -654,52 +660,6 @@ int readAll(StringSet<TId, TIdSpec> & ids,
 }
 
 // ----------------------------------------------------------------------------
-// Function readRecord()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.SequenceStream#readRecord
-..class:Class.SequenceStream
-..summary:Read the next sequence record from @Class.SequenceStream@.
-..signature:int readRecord(id, seq, seqIO)
-..signature:int readRecord(id, seq, quals, seqIO)
-..param.id:The identifier of the sequence is written here.
-...type:Shortcut.CharString
-..param.seq:The sequence of the record is written here.
-...type:Class.String
-..param.quals:The qualities of the sequence is written here. Optional.
-...type:Shortcut.CharString
-...remarks:If the sequence has no qualities, @Function.clear@ is called on $quals$ to indicate this.
-..param.seqIO:The @Class.SequenceStream@ object to read from.
-...type:Class.SequenceStream
-..returns:An integer, $0$ on success, $1$ on errors.
-...type:nolink:$int$
-..example:Read the first sequence of a FASTA file.
-..example.code:
-int main()
-{
-    seqan::SequenceStream seqIO("in.fasta", seqan::SequenceStream::READ_SINGLE);
-    seqan::CharString id;
-    seqan::Dna5String seq;
-
-    if (atEnd(seqIO))
-    {
-        std::cerr << "ERROR: File does not contain any sequences!\n";
-        return 1;
-    }
-    int res = readRecord(id, seq, seqIO);
-    if (res != 0)
-    {
-        std::cerr << "ERROR: Could not read first record!\n";
-        return 1;
-    }
-
-    return 0;
-}
-..include:seqan/seq_io.h
-*/
-
-// ----------------------------------------------------------------------------
 // Function writeRecord()
 // ----------------------------------------------------------------------------
 
@@ -711,7 +671,7 @@ int main()
 The record is appended to the file if you have written out any previously.
 When writing out @Spec.Dna5@, qualities are automatically taken from the sequence characters.
 ..signature:int writeRecord(seqIO, id, seq, [options])
-..signature:int writeRecord(seqIO, id, seq, qual, [options])
+..signature:int writeRecord(seqIO, id, seq, quals, [options])
 ..param.seqIO:The @Class.SequenceStream@ object to write to.
 ...type:Class.SequenceStream
 ..param.id:The identifier to write.
@@ -819,8 +779,8 @@ int writeRecord(SequenceStream & seqIO,
 ..description:
 The records are appended to the file if you have written out any previously.
 When writing out @Spec.Dna5@, qualities are automatically taken from the sequence characters.
-..signature:int writeAll(seqIO, ids, seqs)
-..signature:int writeAll(seqIO, ids, seqs, quals)
+..signature:int writeAll(seqIO, ids, seqs[, options])
+..signature:int writeAll(seqIO, ids, seqs, quals, [options])
 ..param.seqIO:The @Class.SequenceStream@ object to write to.
 ...type:Class.SequenceStream
 ..param.ids:Identifiers to write out.

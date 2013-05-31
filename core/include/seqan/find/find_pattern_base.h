@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Holds the needle and preprocessing data (depends on algorithm).
 ..cat:Searching
 ..signature:Pattern<TNeedle[, TSpec]>
-..implements:Concept.PatternConcept
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..param.TSpec:The online-algorithm to search with.

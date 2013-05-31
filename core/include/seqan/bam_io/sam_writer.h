@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ public:
     virtual int open(CharString const & filename);
     virtual bool isGood();
     virtual int writeHeader(BamHeader const & header, BamIOContext<StringSet<CharString> > const & context);
-    virtual int writeRecord(BamAlignmentRecord & record, BamIOContext<StringSet<CharString> > const & context);
+    virtual int writeRecord(BamAlignmentRecord const & record, BamIOContext<StringSet<CharString> > const & context);
     virtual int flush();
     virtual int close();
 };
@@ -131,7 +131,7 @@ inline int SamWriter_::writeHeader(BamHeader const & header, BamIOContext<String
 // Member Function SamWriter_::writeRecord()
 // ----------------------------------------------------------------------------
 
-inline int SamWriter_::writeRecord(BamAlignmentRecord & record, BamIOContext<StringSet<CharString> > const & context)
+inline int SamWriter_::writeRecord(BamAlignmentRecord const & record, BamIOContext<StringSet<CharString> > const & context)
 {
     return seqan::write2(*this->_stream, record, context, Sam());
 }

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ isOOPSMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d,
 	int counter = 0;
 	int hd = 0;
 	typename Size<TString>::Type l = length(motif);
-	typename Iterator<TString>::Type seq_iter, seq_end, l_mer_begin;
+	typename Iterator<TString const>::Type seq_iter, seq_end, l_mer_begin;
 	while( (ds_iter!=ds_end) & (((int)(ds_end-ds_iter))==t) )
 	{
 		seq_iter = begin(*ds_iter);
@@ -89,7 +89,7 @@ isOMOPSMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d
 	int counter = 0;
 	int hd = 0;
 	typename Size<TString>::Type l = length(motif);
-	typename Iterator<TString>::Type seq_iter, seq_end, l_mer_begin;
+	typename Iterator<TString const>::Type seq_iter, seq_end, l_mer_begin;
 	while( (ds_iter!=ds_end) & (((int)(ds_end-ds_iter))==t) )
 	{
 		seq_iter = begin(*ds_iter);
@@ -132,7 +132,7 @@ isZOOPSMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d
 	int counter = 0;
 	int hd = 0;
 	typename Size<TString>::Type l = length(motif);
-	typename Iterator<TString>::Type seq_iter, seq_end, l_mer_begin;
+	typename Iterator<TString const>::Type seq_iter, seq_end, l_mer_begin;
 	while( (ds_iter!=ds_end) )
 	{
 		seq_iter = begin(*ds_iter);
@@ -175,7 +175,7 @@ isTCMMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d, 
 	int counter = 0;
 	int hd = 0;
 	typename Size<TString>::Type l = length(motif);
-	typename Iterator<TString>::Type seq_iter, seq_end, l_mer_begin;
+	typename Iterator<TString const>::Type seq_iter, seq_end, l_mer_begin;
 	while( (ds_iter!=ds_end) )
 	{
 		seq_iter = begin(*ds_iter);

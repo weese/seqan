@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -121,17 +121,21 @@ struct StlComparator_< ::std::map<TKey, TCargo, TCompare, TAlloc> >
 
 */
 
+// TODO(rmaerker): Default type should not be int.
+// TODO(rmaerker): Metafunction for const iterator is missing.
 
 template <typename T>
 struct StlIterator_
 {
 	typedef int Type;
 };
+
 template <typename TKey, typename TCompare, typename TAlloc>
 struct StlIterator_< ::std::set<TKey, TCompare, TAlloc> >
 {
 	typedef typename ::std::set<TKey, TCompare, TAlloc>::iterator Type;
 };
+
 template <typename TKey, typename TCargo, typename TCompare, typename TAlloc>
 struct StlIterator_< ::std::map<TKey, TCargo, TCompare, TAlloc> >
 {
@@ -498,8 +502,8 @@ SEQAN_CHECKPOINT
 template <typename TValue, typename TCompare, typename TAlloc, typename TIteratorSpec>
 struct Iterator< ::std::set<TValue, TCompare, TAlloc> , TIteratorSpec >
 {
-    typedef ::std::set<TValue, TCompare, TAlloc> TStlMap_;
-	typedef Iter<TStlMap_, StlSetIterator> Type;
+    typedef ::std::set<TValue, TCompare, TAlloc> TStlSet_;
+	typedef Iter<TStlSet_, StlSetIterator> Type;
 };
 
 template <typename TStlMap>

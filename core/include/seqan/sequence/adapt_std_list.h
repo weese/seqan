@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -355,14 +355,6 @@ capacity(std::list<T> const & list)
 {
     SEQAN_CHECKPOINT;
     return length(list);
-}
-
-template <typename T>
-inline typename Size<std::list<T> >::Type
-capacity(std::list<T> & list)
-{
-    SEQAN_CHECKPOINT;
-    return capacity(const_cast<std::list<T> const &>(list));
 }
 
 }  // namespace seqan

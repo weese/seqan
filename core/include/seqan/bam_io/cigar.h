@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -460,7 +460,7 @@ inline void _getClippedLength(TCigarString const & cigar, TNum & sum)
 template <typename TCigarString, typename TNum>
 inline void _getLengthInRef(TCigarString const & cigar, TNum & sum)
 {
-    typedef typename Iterator<TCigarString, Standard>::Type TCigarIter;
+    typedef typename Iterator<TCigarString const, Standard>::Type TCigarIter;
     
     TCigarIter it = begin(cigar, Standard());
     TCigarIter itEnd = end(cigar, Standard());

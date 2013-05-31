@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@ SEQAN_DEFINE_TEST(test_arg_parse_ctd_support)
 
     addOption(parser, seqan::ArgParseOption("d", "double", "set a double option", seqan::ArgParseArgument::DOUBLE));
     addOption(parser, seqan::ArgParseOption("i", "integer", "set an integer option", seqan::ArgParseArgument::INTEGER));
+    addOption(parser, seqan::ArgParseOption("j", "int64", "set a 64 bit integer option", seqan::ArgParseArgument::INT64));
     addOption(parser, seqan::ArgParseOption("s", "string", "set a string option", seqan::ArgParseArgument::STRING, "", true));
     addOption(parser, seqan::ArgParseOption("f", "in", "set an input file", seqan::ArgParseArgument::INPUTFILE));
     addOption(parser, seqan::ArgParseOption("o", "out", "set an output file", seqan::ArgParseArgument::OUTPUTFILE));

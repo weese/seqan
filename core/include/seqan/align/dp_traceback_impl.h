@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #define SEQAN_CORE_INCLUDE_SEQAN_ALIGN_DP_TRACEBACK_IMPL_H_
 
 // TODO(holtgrew): GapsRight traceback is currently untested.
-// TODO(rmaerker): Change Tracback to TraceConfig<TGapsPlacement, TAllPaths, TAllOptimal> | TraceBackOff
+// TODO(rmaerker): Change Tracback to TraceConfig<TGapsPlacement, TPathSpec> | TraceBackOff
 
 namespace seqan {
 
@@ -118,6 +118,10 @@ struct PreferGapsAtEnd_ : False{};
 template <typename TAlgorithm, typename TTracebackSpec>
 struct PreferGapsAtEnd_<DPProfile_<TAlgorithm, AffineGaps, TTracebackSpec > > : True{};
 
+template <typename TAlgorithm>
+struct PreferGapsAtEnd_<DPProfile_<TAlgorithm, LinearGaps, TracebackOn<GapsRight> > > : True{};
+
+
 // ============================================================================
 // Functions
 // ============================================================================
@@ -147,16 +151,22 @@ _initTracebackCoordinator(TracebackCoordinator_<TPosition> & coordinator,
     typedef typename Position<DPBand_<TBandFlag> >::Type TBandPosition;
     if (IsSameType<TBandFlag, BandOn>::VALUE)
     {
+        // Adapt the current column value when the lower diagonal is positive (shift right in horizontal direction).
         if (lowerDiagonal(band) >= 0)
             coordinator._currColumn += static_cast<TPosition>(lowerDiagonal(band));
+        // Adapt the current row value when the current column comes after the upper diagonal (shift down in vertical direction).
         if (static_cast<TBandPosition>(coordinator._currColumn) > upperDiagonal(band))
             coordinator._currRow += coordinator._currColumn - upperDiagonal(band);
+        // Adapt the end row value when the end column comes after the upper diagonal (shift down in vertical direction).
         if (static_cast<TBandPosition>(coordinator._endColumn) > upperDiagonal(band))
             coordinator._endRow += coordinator._endColumn - upperDiagonal(band);
 
         coordinator._breakpoint1 = _min(seqHSize, static_cast<TSizeH>(_max(0, upperDiagonal(band))));
         coordinator._breakpoint2 = _min(seqHSize, static_cast<TSizeH>(_max(0, static_cast<TBandPosition>(seqVSize) +
                                                                            lowerDiagonal(band))));
+        // Update the current row if the current column is before the upper diagoal or the first column where the maximal band size is reached.
+        if (coordinator._currColumn < _min(coordinator._breakpoint1, coordinator._breakpoint2))
+            coordinator._currRow -= _min(coordinator._breakpoint1, coordinator._breakpoint2) - coordinator._currColumn;
         coordinator._isInBand = true;
     }
 }
@@ -463,11 +473,12 @@ _retrieveInitialTraceDirection(TTraceValue & traceValue, TDPProfile const & /*dp
     }
 
     if (traceValue & TraceBitMap_::DIAGONAL)
-        return TraceBitMap_::DIAGONAL;
-    else if (traceValue & (TraceBitMap_::VERTICAL | TraceBitMap_::MAX_FROM_VERTICAL_MATRIX))
+            return TraceBitMap_::DIAGONAL;
+    if (traceValue & (TraceBitMap_::VERTICAL | TraceBitMap_::MAX_FROM_VERTICAL_MATRIX))
         return  TraceBitMap_::VERTICAL;
-    else if (traceValue & (TraceBitMap_::HORIZONTAL | TraceBitMap_::MAX_FROM_HORIZONTAL_MATRIX))
+    if (traceValue & (TraceBitMap_::HORIZONTAL | TraceBitMap_::MAX_FROM_HORIZONTAL_MATRIX))
         return TraceBitMap_::HORIZONTAL;
+
     return TraceBitMap_::NONE;
 }
 

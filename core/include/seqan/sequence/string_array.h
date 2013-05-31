@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,6 @@
 #ifndef SEQAN_SEQUENCE_STRING_ARRAY_H_
 #define SEQAN_SEQUENCE_STRING_ARRAY_H_
 
-// TODO(holtgrew): Too much usage of size_t?
-
 namespace seqan {
 
 // ============================================================================
@@ -48,6 +46,25 @@ namespace seqan {
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
+
+/*!
+ * @class ArrayString Array String
+ * @extends String
+ * @headerfile <seqan/sequence.h>
+ * @brief Fast, static-size string.
+ * 
+ * @signature template <typename TValue, size_t LENGTH>
+ *            class String<TValue, Array<LENGTH> >;
+ * 
+ * @tparam TValue The value type, that is the type of the items/characters
+ *                stored in the string.Use @link Value @endlink to get the value
+ *                type for a given class.
+ * @tparam LENGTH A positive integer that specifies the capacity of the
+ *                string.Note that the capacity of an Array String is fixed at
+ *                compile-time.
+ * 
+ * Having static-sized strings is useful as members of structs for external memory algorithms, for example.
+ */
 
 /**
 .Spec.Array String:
@@ -63,16 +80,15 @@ namespace seqan {
 ..include:seqan/sequence.h
 */
 
-template <unsigned int LENGTH>
+template <size_t LENGTH>
 struct Array;
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 class String<TValue, Array<LENGTH> >
 {
 public:
-    // TODO(holtgrew): Why mutable? Not better RemoveConst? Necessary? Creating with const Dna would be stupid!
-    mutable TValue data_begin[LENGTH];
-    TValue * data_end;
+    mutable TValue   data_begin[LENGTH];    // TODO(weese): mutable seems to be a workaround for non-const iterators returned by
+    TValue * data_end;                      //              Iterator<> for const Alloc/Array strings. Must be fixed to work without mutable.
 
     String()
     {
@@ -119,10 +135,11 @@ public:
         return *this;
     }
 
+/*  // TODO(weese): Empty destructors are superfluos
     ~String()
     {
     }
-
+*/
     // ----------------------------------------------------------------------
     // Subscription operators; have to be defined in class def.
     // ----------------------------------------------------------------------
@@ -152,13 +169,13 @@ public:
 // Metafunction DefaultOverflowImplicit
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 struct DefaultOverflowImplicit<String<TValue, Array<LENGTH> > >
 {
     typedef Limit Type;
 };
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 struct DefaultOverflowImplicit<String<TValue, Array<LENGTH> > const>
 {
     typedef Limit Type;
@@ -168,13 +185,13 @@ struct DefaultOverflowImplicit<String<TValue, Array<LENGTH> > const>
 // Metafunction DefaultOverflowExplicit
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 struct DefaultOverflowExplicit<String<TValue, Array<LENGTH> > >
 {
     typedef Limit Type;
 };
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 struct DefaultOverflowExplicit<String<TValue, Array<LENGTH> > const>
 {
     typedef Limit Type;
@@ -184,7 +201,7 @@ struct DefaultOverflowExplicit<String<TValue, Array<LENGTH> > const>
 // Metafunction IsContiguous
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 struct IsContiguous<String<TValue, Array<LENGTH> > >
 {
     typedef True Type;
@@ -196,7 +213,7 @@ struct IsContiguous<String<TValue, Array<LENGTH> > >
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.LENGTH.param.T.type:Spec.Array String
-template <typename TValue, unsigned int LENGTH_>
+template <typename TValue, size_t LENGTH_>
 struct LENGTH<String<TValue, Array<LENGTH_> > >
 {
     enum { VALUE = LENGTH_ };
@@ -210,7 +227,7 @@ struct LENGTH<String<TValue, Array<LENGTH_> > >
 // Function begin()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 inline typename Iterator<String<TValue, Array<LENGTH> >, Standard>::Type
 begin(String<TValue, Array<LENGTH> > & me,
       Standard const &)
@@ -218,7 +235,7 @@ begin(String<TValue, Array<LENGTH> > & me,
     SEQAN_CHECKPOINT;
     return me.data_begin;
 }
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 inline typename Iterator<String<TValue, Array<LENGTH> > const, Standard>::Type
 begin(String<TValue, Array<LENGTH> > const & me,
       Standard const & )
@@ -231,7 +248,7 @@ begin(String<TValue, Array<LENGTH> > const & me,
 // Function end()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 inline typename Iterator<String<TValue, Array<LENGTH> >, Standard>::Type
 end(String<TValue, Array<LENGTH> > & me,
     Standard const &)
@@ -239,7 +256,7 @@ end(String<TValue, Array<LENGTH> > & me,
     SEQAN_CHECKPOINT;
     return me.data_end;
 }
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH>
 inline typename Iterator<String<TValue, Array<LENGTH> > const, Standard>::Type
 end(String<TValue, Array<LENGTH> > const & me,
     Standard const &)
@@ -252,16 +269,8 @@ end(String<TValue, Array<LENGTH> > const & me,
 // Function capacity()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH>
-inline size_t
-capacity(String<TValue, Array<LENGTH> > &)
-{
-    SEQAN_CHECKPOINT;
-    return LENGTH;
-}
-
-template <typename TValue, unsigned int LENGTH>
-inline size_t
+template <typename TValue, size_t LENGTH>
+inline typename Size<String<TValue, Array<LENGTH> > >::Type
 capacity(String<TValue, Array<LENGTH> > const &)
 {
     SEQAN_CHECKPOINT;
@@ -272,10 +281,10 @@ capacity(String<TValue, Array<LENGTH> > const &)
 // Function reserve()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, unsigned int LENGTH, typename TExpand>
-inline size_t
+template <typename TValue, size_t LENGTH, typename TSize, typename TExpand>
+inline typename Size<String<TValue, Array<LENGTH> > >::Type
 reserve(String<TValue, Array<LENGTH> > & me,
-        size_t,
+        TSize,
         Tag<TExpand>)
 {
 SEQAN_CHECKPOINT
@@ -290,10 +299,10 @@ SEQAN_CHECKPOINT
 /**
 .Internal._setLength.param.object.type:Spec.Array String
 */
-template <typename TValue, unsigned int LENGTH>
+template <typename TValue, size_t LENGTH, typename TSize>
 inline void
 _setLength(String<TValue, Array<LENGTH> > & me,
-           size_t new_length)
+           TSize new_length)
 {
     SEQAN_CHECKPOINT;
     me.data_end = me.data_begin + new_length;

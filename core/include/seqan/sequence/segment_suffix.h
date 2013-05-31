@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,17 @@ namespace SEQAN_NAMESPACE_MAIN
 // SuffixSegment
 //////////////////////////////////////////////////////////////////////////////
 
+/*!
+ * @class SuffixSegment Suffix Segment
+ * @extends Segment
+ * @headerfile <seqan/sequence.h>
+ * @brief A suffix of a sequence.
+ *
+ * @signature template <typename THost>
+ *            class Segment<THost, SuffixSegment>;
+ *
+ * @tparam THost The underlying @link SequenceConcept sequence@ type.
+ */
 
 /**
 .Spec.SuffixSegment:

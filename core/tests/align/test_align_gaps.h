@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -164,9 +164,9 @@ void testAlignGapsAssignSource(TGapsSpec const & /*spec*/)
         TString seq("AAAAACCCCC");
         TGaps gaps;
 
-        setSource(gaps, seq);
+        assignSource(gaps, seq);
 
-        SEQAN_ASSERT_EQ(&source(gaps), &seq);
+        SEQAN_ASSERT_NEQ(&source(gaps), &seq);
         SEQAN_ASSERT_EQ(source(gaps), seq);
     }
 
@@ -331,11 +331,7 @@ void testAlignGapsGapOperationsGapsLeading(TGapsSpec const & /*spec*/)
         TString seq("GTTTTTT");
         TGaps gaps(seq);
 
-        std::cerr << "gaps " << gaps << "\n";
-
         insertGap(gaps, 0);
-
-        std::cerr << "gaps " << gaps << "\n";
 
         SEQAN_ASSERT_EQ(length(seq), 7u);
         SEQAN_ASSERT_EQ(length(gaps), 8u);

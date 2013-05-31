@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ namespace seqan {
 
 /**
 .Class.SequenceOutputOptions
-..cat:Input / Output
+..cat:Input/Output
 ..summary:Configuration for writing sequence (FASTA/FASTQ) files.
 ..description:
 This $struct$ is used for the configuration of writing out FASTA and FASTQ files.
@@ -100,16 +100,17 @@ public:
 
 /**
 .Function.FASTA/FASTQ I/O#writeRecord
+..summary:Write one FASTA or FASTQ record.
 ..signature:int writeRecord(stream, id, seq, tag[, options])
-..signature:int writeRecord(stream, id, seq, qual, tag[, options])
+..signature:int writeRecord(stream, id, seq, quals, tag[, options])
 ..param.stream:The stream to write to.
-...type:Concept.Stream
+...type:Concept.StreamConcept
 ..param.id:ID/Meta information line to write out.
-...type:Concept.Sequence
+...type:Concept.SequenceConcept
 ..param.seq:Sequence to write out.
-...type:Concept.Sequence
+...type:Concept.SequenceConcept
 ..param.quals:ASCII quality characters to write out.
-...type:Concept.Sequence
+...type:Concept.SequenceConcept
 ..param.tag:The format selector.
 ...type:nolink:$Fasta$, $Fastq$
 ..param.options:if not supplied defaults are chosen.
@@ -402,10 +403,11 @@ writeRecord(TStream & stream,
 
 /**
 .Function.FASTA/FASTQ I/O#write2
+..summary:Write FASTA or FASTQ records.
 ..signature:int write2(stream, ids, seqs, tag[, options])
 ..signature:int write2(stream, ids, seqs, quals, tag[, options])
 ..param.stream:The stream to write to.
-...type:Concept.Stream
+...type:Concept.StreamConcept
 ..param.ids:IDs/Metainformation strings to write out.
 ...type:Class.StringSet
 ..param.seqs:Sequences to write out.

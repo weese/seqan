@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ namespace seqan {
 
 /**
 .Metafunction.Pointer
+..cat:Basic
 ..summary:Returns pointer to an object, required for @Function.operator->@, for example.
 ..signature:Pointer<T>::Type
 ..param.T:The type to query.
@@ -50,6 +51,109 @@ namespace seqan {
 
 // Forward Declaration / Prototype.
 template <typename T> struct Pointer;
+
+/*!
+ * @concept IteratorAssociatedTypesConcept
+ * @headerfile <seqan/basic.h>
+ * @brief Requires metafunctions for the associated types used in the iterator concepts.
+ * 
+ * @signature IteratorAssociatedTypesConcept<T>
+ * 
+ * @section Remarks
+ * 
+ * The SeqAn iterators mirror the definitions from <a href="http://generic-programming.org/languages/conceptcpp/concept_web.php?header=iterator">ConceptC++</a>.
+ */
+
+/*!
+ * @mfn IteratorAssociatedTypesConcept#Value
+ * @brief The value type of the iterator (same as the value type of the underlying container).
+ *
+ * @signature Value<TIter>::Type
+ *
+ * @tparam TIter The <tt>TIter</tt> class to query for its value type.
+ *
+ * @return Type The value type of <tt>TIter</tt>
+ */
+
+/*!
+ * @mfn IteratorAssociatedTypesConcept#GetValue
+ * @brief The get-value type of the iterator (same as the get-value type of the underlying container).
+ *
+ * @signature GetValue<TIter>::Type
+ *
+ * @tparam TIter The <tt>TIter</tt> class to query for its get-value type.
+ *
+ * @return Type The get-value type of <tt>TIter</tt>
+ */
+
+/*!
+ * @mfn IteratorAssociatedTypesConcept#Reference
+ * @brief The reference type of the iterator (same as the reference type of the underlying container).
+ *
+ * @signature Reference<TIter>::Type
+ *
+ * @tparam TIter The <tt>TIter</tt> class to query for its reference type.
+ *
+ * @return Type The reference type of <tt>TIter</tt>
+ */
+
+/*!
+ * @mfn IteratorAssociatedTypesConcept#Difference
+ * @brief Returns the type for distances between two iterators.
+ *
+ * @signature Size<TContainer>::Type
+ *
+ * @tparam TContainer The Container type to query.
+ * @return Type       The type to use for storing iterator distances sizes.
+ *
+ * This must be the same type as the distance type of the containers iterators.
+ */
+
+/*!
+ * @mfn IteratorAssociatedTypesConcept#Pointer
+ * @brief Returns pointer to an object, required for <tt>operator-></tt>, for example.
+ * 
+ * @signature Pointer<TIter>::Type
+ * 
+ * @tparam TIter The type to query.
+ * 
+ * @return Type Pointer type.
+ */
+
+/*!
+ * @fn IteratorAssociatedTypesConcept#operator*
+ * @brief Returns reference to the pointed-to value.
+ * 
+ * @signature TReference operator*(it);
+ * 
+ * @param it The iterator to dereference.
+ * 
+ * @return TReference The reference type.
+ */
+
+/*!
+ * @fn IteratorAssociatedTypesConcept#value
+ * @brief Returns reference to the pointed-to value.
+ * @deprecated Use <tt>operator*()</tt> instead.
+ * 
+ * @signature TReference value(it);
+ * 
+ * @param it The iterator to dereference.
+ * 
+ * @return TReference The reference type.
+ */
+
+/*!
+ * @fn IteratorAssociatedTypesConcept#getValue
+ * @brief Returns get-value of pointed-to character.
+ * @deprecated Use <tt>operator*()</tt> instead.
+ * 
+ * @signature TGetValue getValue(it);
+ * 
+ * @param it The iterator to get get-value from.
+ * 
+ * @return TGetValue The get-value that is pointed to.
+ */
 
 /**
 .Concept.IteratorAssociatedTypesConcept
@@ -80,6 +184,71 @@ SEQAN_CONCEPT(IteratorAssociatedTypesConcept, (T))
     {
     }
 };
+
+/*!
+ * @concept InputIteratorConcept
+ * @extends IteratorAssociatedTypesConcept
+ * @extends CopyConstructibleConcept
+ * @extends EqualityComparableConcept
+ * @headerfile seqan/basic.h
+ * @brief Iterator that allows dereferenced reading.
+ * 
+ * @signature InputIteratorConcept<T>
+ * 
+ * @section Remarks
+ * 
+ * The SeqAn iterators mirror the definitions from <a href="http://generic-programming.org/languages/conceptcpp/concept_web.php?header=iterator">ConceptC++</a>.
+ * 
+ * @see BasicOutputIteratorConcept
+ */
+
+/*!
+ * @fn InputIteratorConcept#operator++(suffix)
+ * @brief C++ built-in suffix increment operator.
+ *
+ * @signature TIterator operator++(it, i)
+ *
+ * @param it The iterator to increment.
+ * @param i  An integer, used to mark suffix decrement.
+ *
+ * @return TIterator A copy of the original iterator.
+ */
+
+/*!
+ * @fn InputIteratorConcept#operator++(prefix)
+ * @brief C++ built-in prefix increment operator.
+ *
+ * @signature TIterator operator++(it)
+ *
+ * @param it The iterator to increment.
+ *
+ * @return TIterator A copy of the original iterator.
+ */
+
+/*!
+ * @fn InputIteratorConcept#operator->
+ * @brief C++ built-in structure dereference operator.
+ *
+ * @signature TResult operator->(it)
+ *
+ * @param it The iterator to structure-dereference.
+ *
+ * @return TResult Either a pointer or another type.  If it is another type, the <tt>operator-></tt> is called
+ *                 recursively.
+ */
+
+/*!
+ * @fn InputIteratorConcept#goNext
+ * @brief Iterates to next position.
+ *
+ * @signature void goNext(it);
+ * 
+ * @param it The iterator to increment.
+ * 
+ * @section Remarks
+ * 
+ * This function is equivalent to <tt>++iterator</tt>.
+ */
 
 /**
 .Concept.InputIteratorConcept
@@ -136,6 +305,87 @@ SEQAN_CONCEPT_REFINE(InputIteratorConcept, (T), (IteratorAssociatedTypesConcept)
     }
 };
 
+/*!
+ * @concept BasicOutputIteratorConcept
+ * @extends IteratorAssociatedTypesConcept
+ * @extends CopyConstructibleConcept
+ * @headerfile <seqan/basic.h>
+ * 
+ * @brief Iterator that allows dereferenced writing.
+ * 
+ * @signature OutputIteratorConcept<T>
+ * 
+ * @section Remarks
+ * 
+ * The SeqAn iterators mirror the definitions from <a href="http://generic-programming.org/languages/conceptcpp/concept_web.php?header=iterator">ConceptC++</a>. * 
+ *
+ * @section Examples
+ * 
+ * In the following, <tt>x</tt> is an iterator to type <tt>X</tt>, <tt>t</tt> is
+ * a valid rvalue of type <tt>X</tt>.
+ * 
+ * The following expressions must be valid.
+ * 
+ * @code{.cpp}
+ * *x = t     // Dereference assignment.
+ * ++x        // Preincrement.
+ * (void)x++  // Postincrement.
+ * *x++ = t   // Postincrement and assign.
+ *  
+ * assignValue(x, t);
+ * @endcode
+ *
+ * @see InputIteratorConcept
+ */
+
+/*!
+ * @fn BasicOutputIteratorConcept#assignValue
+ * @brief Assigns value to iterator.
+ * @deprecated Use dereferencement and assignment instead.
+ * 
+ * @signature void assignValue(it, value);
+ * @signature assignValue(container, pos, value)
+ * 
+ * @param it The iterator to assign value to.
+ * @param value A value that is assigned to the item <tt>it</tt> points to.
+ */
+
+/*!
+ * @fn BasicOutputIteratorConcept#operator++(suffix)
+ * @brief C++ built-in suffix increment operator.
+ * 
+ * @signature TIterator operator++(it, i)
+ * 
+ * @param it The iterator to increment.
+ * @param i An integer, used to mark suffix decrement.
+ * 
+ * @return TIterator A copy of the original iterator.
+ */
+
+/*!
+ * @fn BasicOutputIteratorConcept#operator++(prefix)
+ * @brief C++ built-in prefix increment operator.
+ * 
+ * @signature TIterator operator++(it)
+ * 
+ * @param it The iterator to increment.
+ * 
+ * @return TIterator A copy of the original iterator.
+ */
+
+/*!
+ * @fn BasicOutputIteratorConcept#goNext
+ * @brief Iterates to next position.
+ * 
+ * @signature void goNext(it);
+ * 
+ * @param it The iterator to increment.
+ * 
+ * @section Remarks
+ * 
+ * This function is equivalent to <tt>++iterator</tt>.
+ */
+
 /**
 .Concept.BasicOutputIteratorConcept
 ..cat:Iterators
@@ -186,6 +436,31 @@ SEQAN_CONCEPT_REFINE(BasicOutputIteratorConcept, (T), (CopyConstructible))
     }
 };
 
+/*!
+ * @concept ForwardIteratorConcept
+ * @extends InputIteratorConcept
+ * @extends DefaultConstructibleConcept
+ * @headerfile <seqan/basic.h>
+ * @brief Iterator that allows passing over a linear sequence multiple times.
+ * 
+ * @signature ForwardIteratorConcept<T>
+ * 
+ * @section Remarks
+ * 
+ * The SeqAn iterators mirror the definitions from <a href="http://generic-programming.org/languages/conceptcpp/concept_web.php?header=iterator">ConceptC++</a>.
+ * 
+ * @section Examples
+ * 
+ * In the following, <tt>x</tt> is an iterator to type <tt>X</tt>.
+ * 
+ * The following expressions must be valid.
+ * 
+ * @code{.cpp}
+ * ++x  // Preincrement.
+ * x++  // Postincrement.
+ * @endcode
+ */
+
 /**
 .Concept.ForwardIteratorConcept
 ..cat:Iterators
@@ -215,6 +490,19 @@ SEQAN_CONCEPT_REFINE(ForwardIteratorConcept, (T), (InputIteratorConcept)(Default
     }
 };
 
+/*!
+ * @concept MutableForwardIteratorConcept
+ * @extends ForwardIteratorConcept
+ * @extends BasicOutputIteratorConcept
+ * @headerfile <seqan/basic.h>
+ * 
+ * @brief A @link ForwardIteratorConcept Forward Iterator @endlink that allows dereferenced assignment.
+ * 
+ * @section Remarks
+ * 
+ * The SeqAn iterators mirror the definitions from <a href="http://generic-programming.org/languages/conceptcpp/concept_web.php?header=iterator">ConceptC++</a>.
+ */
+
 /**
 .Concept.MutableForwardIteratorConcept
 ..cat:Iterators
@@ -237,6 +525,69 @@ SEQAN_CONCEPT_REFINE(MutableForwardIteratorConcept, (T), (ForwardIteratorConcept
         *x = v;
     }
 };
+
+/*!
+ * @concept BidirectionalIteratorConcept
+ * 
+ * @headerfile seqan/basic.h
+ * 
+ * @extends ForwardIteratorConcept
+ * 
+ * @brief Iterator that can be both incremented and decremented.
+ * 
+ * @signature BidirectionalIteratorConcept<T>
+ * 
+ * @section Remarks
+ * 
+ * The SeqAn iterators mirror the definitions from <a href="http://generic-programming.org/languages/conceptcpp/concept_web.php?header=iterator">ConceptC++</a>.
+ * 
+ * @section Examples
+ * 
+ * In the following, <tt>x</tt> is an iterator to type <tt>X</tt>.
+ * 
+ * The following expressions must be valid.
+ * 
+ * @code{.cpp}
+ * --x  // Predecrement.
+ * x--  // Postdecrement.
+ * @endcode
+ */
+
+/*!
+ * @fn BidirectionalIteratorConcept#operator--(prefix)
+ * @brief C++ built-in prefix decrement operator.
+ *
+ * @signature TIterator operator--(it);
+ *
+ * @param it The iterator to increment.
+ *
+ * @return TIterator Reference to the incremented iterator.
+ */
+
+/*!
+ * @fn BidirectionalIteratorConcept#operator--(suffix)
+ * @brief C++ built-in suffix decrement operator.
+ *
+ * @signature TIterator operator--(it, i);
+ *
+ * @param it The iterator to increment.
+ * @param i  An int value to mark the operator as suffix decrement.
+ *
+ * @return TIterator Reference to the incremented iterator.
+ */
+
+/*!
+ * @fn BidirectionalIteratorConcept#goPrevious
+ * @brief Iterates to pevious position.
+ * 
+ * @signature void goPrevious(it);
+ * 
+ * @param it Iterator to move to previous position.
+ * 
+ * @section Remarks
+ * 
+ * This function is equivalent to <tt>--iterator</tt>.
+ */
 
 /**
 .Concept.BidirectionalIteratorConcept
@@ -269,6 +620,15 @@ SEQAN_CONCEPT_REFINE(BidirectionalIteratorConcept, (T), (ForwardIteratorConcept)
     }
 };
 
+/*!
+ * @concept MutableBidirectionalIteratorConcept
+ * @extends BidirectionalIteratorConcept
+ * @brief Bidirectional iterator that also allows writing of dereferenced values.
+ * @headerfile <seqan/basic.h>
+ *
+ * @signature MutableBidirectionalIteratorConcept<T>
+ */
+
 /**
 .Concept.MutableBidirectionalIteratorConcept
 ..cat:Iterators
@@ -290,6 +650,142 @@ SEQAN_CONCEPT_REFINE(MutableBidirectionalIteratorConcept, (T), (BidirectionalIte
         *x = v;
     }
 };
+
+/*!
+ * @concept RandomAccessIteratorConcept
+ * @extends BidirectionalIteratorConcept
+ * @extends LessThanComparableConcept
+ * @brief An iterator allowing random access.
+ * @headerfile <seqan/basic.h>
+ *
+ * @signature RandomAccessIteratorConcept<T>
+ *
+ * @section Remarks
+ * 
+ * This function is equivalent to <tt>--iterator</tt>.
+ *
+ * @section Examples
+ * 
+ * In the following, <tt>x</tt> is an iterator to type <tt>X</tt>, <tt>t</tt> is
+ * a valid rvalue of type <tt>X</tt>, <tt>n</tt> is a distance type.
+ * 
+ * The following expressions must be valid.
+ * 
+ * @code{.cpp}
+ * x += n    // Iterator addition assignment.
+ * x + n     // Iterator addition.
+ * n + i     // Iterator addition.
+ * x -= n    // Iterator subtraction assignment.
+ * x - n     // Iterator subtraction.
+ * x - a     // Difference.
+ * x[n]      // Element operator.
+ * @endcode
+ */
+
+/*!
+ * @mfn RandomAccessIteratorConcept#Difference
+ * @brief Type of an object that stores the difference between two iterators.
+ * 
+ * @signature Difference<T>::Type
+ * 
+ * @tparam T Type for which the difference type is determined.
+ * 
+ * @return Type The difference type.
+ * 
+ * @section Remarks
+ * 
+ * In most cases this type is <tt>ptrdiff_t</tt>.
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#difference
+ * @brief The difference between two iterators.
+ * 
+ * @signature TDifference difference(begin, end);
+ * 
+ * @param begin Iterator to the first position of a range.
+ * @param end  Iterator behind the last position of a range.
+ * 
+ * @return TDifference Length of the range between <tt>begin</tt> and <tt>end</tt>, type from 
+ * 
+ * @section Remarks
+ * 
+ * This function is equivalent to <tt>end - begin</tt>.
+ * 
+ * Usually, <tt>begin</tt> and <tt>end</tt> have the same type.
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#operator+=
+ * @brief C++ built-in addition assignment operator.
+ *
+ * @signature TIterator operator+=(it, diff);
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#operator+
+ * @brief C++ built-in addition operator.
+ *
+ * @signature TIterator operator+(lhs, rhs);
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#operator-=
+ * @brief C++ built-in subtraction assignment operator.
+ *
+ * @signature TIterator operator-=(it, diff);
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#goNil
+ * @brief Moves iterator to nil position.
+ * 
+ * @signature void goNil(it);
+ * 
+ * @param it The iterator that will be moved.
+ *
+ * 
+ * @section Remarks
+ * 
+ * <tt>it</tt> is set to an invalid position, e.g. <tt>NULL</tt> for pointer types.
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#goFurther
+ * @brief Iterates some steps further.
+ * 
+ * @signature void goFurther(iterator, steps);
+ * 
+ * @param it    The iterator to move.
+ * @param steps Number of steps <tt>iterator</tt> should be moved further.
+ * 
+ * @section Remarks
+ * 
+ * This function is equivalent to <tt>iterator += steps</tt>.
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept::operator[]
+ * @brief C++ built-in array subscript operator.
+ *
+ * @signature TReference TIterator::operator[](pos);
+ *
+ * @tparam TReference The referenced element.
+ * @tparam TIterator  The iterator to subscript.
+ *
+ * @param pos Position to get element at.
+ */
+
+/*!
+ * @fn RandomAccessIteratorConcept#atNil
+ * @brief Tests whether iterator is at nil position.
+ * 
+ * @signature bool atNil(it);
+ * 
+ * @param it The iterator to query.
+ *
+ * @return bool Whether or not the iterator is at the nil positions (NULL for pointers).
+ */
 
 /**
 .Concept.RandomAccessIteratorConcept
@@ -352,6 +848,15 @@ SEQAN_CONCEPT_REFINE(RandomAccessIteratorConcept, (T), (BidirectionalIteratorCon
     }
 };
 
+/*!
+ * @concept MutableRandomAccessIteratorConcept
+ * @extends RandomAccessIteratorConcept
+ * @headerfile <seqan/basic.h>
+ * @brief A random access iterator whose dereferenced values can be assigned.
+ *
+ * @signature MutableRandomAccessIteratorConcept<T>
+ */
+
 /**
 .Concept.MutableRandomAccessIteratorConcept
 ..cat:Iterators
@@ -382,6 +887,60 @@ SEQAN_CONCEPT_REFINE(MutableRandomAccessIteratorConcept, (T), (RandomAccessItera
         x[n] = t;
     }
 };
+
+/*!
+ * @concept RootedIteratorConcept
+ * @extends ForwardIteratorConcept
+ * @brief Iterator that knows its container.
+ *
+ * @signature RootedIteratorConcept<T>
+ */
+
+/*!
+ * @mfn RootedIteratorConcept#Container
+ * @brief Metafunction that returns the container of an iterator.
+ *
+ * @signature Container<TIterator>::Type
+ *
+ * @tparam TIterator The type of the iterator to query for its container.
+ *
+ * @return Type The type of the container for <tt>TIterator</tt>
+ */
+
+/*!
+ * @fn RootedIteratorConcept#container
+ * @brief Returns the container.
+ *
+ * @signature TContainer container(it);
+ *
+ * @param it The iterator to get the container of.
+ *
+ * @return TContainer The container of the iterat.r
+ *
+ * TODO(holtgrew): Need to document Reference_ and Parameter_.
+ */
+
+/*!
+ * @fn RootedIteratorConcept#atBegin
+ * @brief Queries whether the rooted iterator is at the beginning of the container or not.
+ *
+ * @signature bool atBegin(it);
+ *
+ * @param it The rooted iterator to query.
+ *
+ * @return bool Whether or not the iterator is at the beginning.
+ */
+
+/*!
+ * @fn RootedIteratorConcept#atEnd
+ * @brief Queries whether the rooted iterator is at the end of the container or not.
+ *
+ * @signature bool atEnd(it);
+ *
+ * @param it The rooted iterator to query.
+ *
+ * @return bool Whether or not the iterator is at the end.
+ */
 
 /**
 .Concept.RootedIteratorConcept
@@ -416,6 +975,16 @@ SEQAN_CONCEPT_REFINE(RootedIteratorConcept, (T), (IteratorAssociatedTypesConcept
     }
 };
 
+
+/*!
+ * @concept MutableRootedIteratorConcept
+ * @extends RootedIteratorConcept
+ * @extends MutableForwardIteratorConcept
+ * @brief Rooted iterator that allows mutation after dereferencing.
+ *
+ * @signature MutableRootedIteratorConcept<T>
+ */
+
 /**
 .Concept.MutableRootedIteratorConcept
 ..cat:Iterators
@@ -432,6 +1001,65 @@ SEQAN_CONCEPT_REFINE(MutableRootedIteratorConcept, (T), (RootedIteratorConcept)(
     {
     }
 };
+
+/*!
+ * @concept RootedRandomAccessIteratorConcept
+ * @extends RootedIteratorConcept
+ * @extends RandomAccessIteratorConcept
+ * @brief Rooted iterator with random access.
+ *
+ * @signature RootedRandomAccessIteratorConcept<T>
+ */
+
+/*!
+ * @mfn RootedRandomAccessIteratorConcept#Position
+ * @brief Metafunction to get Position type of a rooted random access iterator.
+ *
+ * @signature Position<TIter>::Type
+ *
+ * @tparam TIter Iterator to query for its position type.
+ *
+ * @return Type The position type of the iterator.
+ */
+
+/*!
+ * @fn RootedRandomAccessIteratorConcept#position
+ * @brief Function to get the position of a rooted random access iterator.
+ *
+ * @signature TPosition position(it);
+ *
+ * @param it The iterator to query for its position.
+ *
+ * @return TPosition The position of <tt>it</tt>
+ */
+
+/*!
+ * @fn RootedRandomAccessIteratorConcept#setPosition
+ * @brief Set position of a rooted random access iterator.
+ *
+ * @signature void setPosition(it, pos);
+ *
+ * @param it  The iterator to set the position of.
+ * @param pos The position to set <tt>it</tt> to.
+ */
+
+/*!
+ * @fn RootedRandomAccessIteratorConcept#goBegin
+ * @brief Set position of rooted random access iterator to the beginning of the container.
+ *
+ * @signature void goBegin(it);
+ *
+ * @param it  The iterator to set the position of.
+ */
+
+/*!
+ * @fn RootedRandomAccessIteratorConcept#goEnd
+ * @brief Set position of rooted random access iterator to the end of the container.
+ *
+ * @signature void goEnd(it, pos);
+ *
+ * @param it  The iterator to set the position of.
+ */
 
 /**
 .Concept.RootedRandomAccessIteratorConcept
@@ -462,6 +1090,15 @@ SEQAN_CONCEPT_REFINE(RootedRandomAccessIteratorConcept, (T), (RootedIteratorConc
         goEnd(x);
     }
 };
+
+/*!
+ * @concept MutableRootedRandomAccessIteratorConcept
+ * @extends RootedRandomAccessIteratorConcept
+ * @extends MutableBidirectionalIteratorConcept
+ * @brief Rooted iterator with random access that allows the mutation of dereferenced value.
+ *
+ * @signature RootedRandomAccessIteratorConcept<T>
+ */
 
 /**
 .Concept.MutableRootedRandomAccessIteratorConcept

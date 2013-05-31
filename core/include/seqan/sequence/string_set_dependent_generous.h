@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,22 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-// The documentation of the Dependent specialization is in string_set_tight.h
+/*!
+ * @class GenerousDependentStringSet Generous Dependent StringSet
+ * @extends DependentStringSet
+ * @headerfile <seqan/sequence.h>
+ * @brief Dependent StringSet implementation with efficient sequence access by sequence id.
+ *
+ * @signature template <typename TString>
+ *            class StringSet<TString, Depedent<Generous> >;
+ *
+ * @tparam TString The type of the string to store in the string set.
+ *
+ * See @link TightDependentStringSet @endlink for a Dependent StringSet implementation with a more memory efficient
+ * representation at higher costs for by-id element access.
+ */
+
+// The Dddoc documentation of the Dependent specialization is in string_set_tight.h
 // since Tight is the default specialization of Dependent.
 
 // StringSet with individual sequences in a string of string pointers

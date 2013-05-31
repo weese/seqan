@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -117,11 +117,11 @@ int main(int argc, char const ** argv)
             return 1;
         }
 
-        if (record.rId == BamAlignmentRecord::INVALID_REFID)
+        if (record.rID == BamAlignmentRecord::INVALID_REFID)
             continue;  // Skip * reference.
 
         // Convert BAM record to alignment.
-        bamRecordToAlignment(align, seqs[record.rId], record);
+        bamRecordToAlignment(align, seqs[record.rID], record);
         // Dump record as SAM and the alignment.
         write2(std::cout, record, context, Sam());
         std::cout << align << std::endl;

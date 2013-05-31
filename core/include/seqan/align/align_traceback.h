@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,25 @@ namespace seqan {
 
 // TODO(holtgrew): Mark as internal with underscore?
 
+/*!
+ * @tag TraceBack
+ * @headerfile <seqan/align.h>
+ * @brief Traceback value.
+ *
+ * @signature struct TraceBack_;
+ * @signature typedef SimpleType<unsigned char, TraceBack_> TraceBack.
+ *
+ * @section Remarks
+ *
+ * The ValueSize of <tt>TraceBack</tt> is 3.  The values are defined in the following way:
+ *
+ * <ul>
+ *   <li>0 - Diagonal Move</li>
+ *   <li>1 - Horizontal Move</li>
+ *   <li>2 - Vertical Move</li>
+ * </ul>
+ */
+
 /**
 .Spec.TraceBack:
 ..cat:Alphabets
@@ -65,10 +84,10 @@ namespace seqan {
 ..general:Class.SimpleType
 ..signature:TraceBack
 ..remarks:
-...text:The @Metafunction.ValueSize@ of $TraceBack$ is 3. 
+...text:The @Metafunction.ValueSize@ of $TraceBack$ is 3.
 The values are defined in the following way: 0=Diagonal Move, 1=Horizontal Move, 2=Vertical Move
 ..see:Metafunction.ValueSize
-..include:seqan/graph_align.h
+..include:seqan/align.h
 */
 
 struct TraceBack_ {};
@@ -91,6 +110,27 @@ template <> struct BitsPerValue<TraceBack>
 // ----------------------------------------------------------------------------
 
 // TODO(holtgrew): Mark as internal with underscore?
+
+/*!
+ * @class AlignTraceback
+ * @headerfile <seqan/align.h>
+ * @brief Data structure for storing alignment traceback.
+ *
+ * @signature template <typename TSize>
+ *            struct AlignTraceback;
+ *
+ * @tparam TSize Size type to use in the traceback.
+ */
+
+/*!
+ * @var TSizes AlignTraceback#sizes
+ * @brief The traceback lengths.
+ */
+
+/*!
+ * @var TLengths AlignTraceback#tsv
+ * @brief The traceback lengths.
+ */
 
 template <typename TSize>
 struct AlignTraceback

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                            misc_accumulators.h
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -145,6 +145,7 @@ struct Value<Accumulator<TValue, Average> const > : Value<Accumulator<TValue, Av
 
 /**
 .Metafunction.Result
+..cat:Miscellaneous
 ..summary:Return the result of a computation.
 ..signature:Result<T, TTag>::Type
 ..param.T:The type to query

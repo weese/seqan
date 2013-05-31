@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,6 @@ typedef Tag<AllocateStorage_> TagAllocateStorage;
 ..signature:Allocator<TSpec>
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
-..implements:Concept.AllocatorConcept
 ..include:basic.h
 ..remarks:There are two reasons for using non-trivial allocators:
 ...text:1. Allocators support the function @Function.Allocator#clear@ for a fast deallocation of all 

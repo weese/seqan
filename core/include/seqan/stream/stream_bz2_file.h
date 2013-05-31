@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ inline void close(Stream<BZ2File> & stream);
 
 /**
 .Spec.BZ2 File Stream
-..cat:Input / Output
+..cat:Input/Output
 ..signature:Stream<BZ2File>
 ..general:Class.Stream
 ..summary:Wrapper for $BZFILE *$ streams from bzlib.

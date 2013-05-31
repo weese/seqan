@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,8 @@ using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_BEGIN_TESTSUITE(test_graph_algorithms) {
-	mtRandInit();
-
+SEQAN_BEGIN_TESTSUITE(test_graph_algorithms)
+{
 	SEQAN_CALL_TEST(test_heap_tree);
 	SEQAN_CALL_TEST(test_breadth_first_search);
 	SEQAN_CALL_TEST(test_depth_first_search);
@@ -68,11 +67,6 @@ SEQAN_BEGIN_TESTSUITE(test_graph_algorithms) {
 	SEQAN_CALL_TEST(test_longest_common_subsequence);
 	SEQAN_CALL_TEST(test_heaviest_increasing_subsequence);
 	SEQAN_CALL_TEST(test_hmm_algorithm);	
-
-    // Verify Checkpoints.
-	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_algorithms/graph_algorithm.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_algorithms/graph_algorithm_hmm.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_algorithms/graph_algorithm_lis_his.h");
 }
 SEQAN_END_TESTSUITE
 
