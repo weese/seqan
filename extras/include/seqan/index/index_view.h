@@ -243,18 +243,18 @@ struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreBwt>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction FibreTextMember_                                   [Index View]
+// Metafunction Member                                             [Index View]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TSpec>
-struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> >
+struct Member<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreText>
 {
     typedef Index<ContainerView<TText, TViewSpec>, TSpec>       TIndex_;
     typedef typename Fibre<TIndex_, FibreText>::Type            Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSpec>
-struct FibreTextMember_<Index<ContainerView<TText, TViewSpec>, TSpec> const>
+struct Member<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreText>
 {
     typedef Index<ContainerView<TText, TViewSpec>, TSpec> const TIndex_;
     typedef typename Fibre<TIndex_, FibreText>::Type            Type;
