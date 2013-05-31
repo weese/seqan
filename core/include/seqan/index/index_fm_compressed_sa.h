@@ -159,13 +159,6 @@ struct CompressedSA
     typename Fibre<CompressedSA, FibreSparseString>::Type   sparseString;
     typename Member<CompressedSA, FibreLF>::Type            lfTable;
 
-    CompressedSA() :
-        lfTable()
-public:
-    TSparseString   sparseString;
-    // TODO(esiragusa): Change the lfTable pointer to a Member<>::Type metafunction.
-    Holder<TLfTable> lfTable;
-
     // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
 //    CompressedSA() {};
 //
@@ -373,14 +366,14 @@ getFibre(CompressedSA<TText, TSpec> & compressedSA, FibreSparseString)
 }
 
 template <typename TText, typename TSpec>
-SEQAN_FUNC typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type const &
+inline typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type const &
 getFibre(CompressedSA<TText, TSpec> const & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
 }
 
 template <typename TText, typename TSpec>
-SEQAN_FUNC typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type &
+inline typename Fibre<CompressedSA<TText, TSpec>, FibreLF>::Type &
 getFibre(CompressedSA<TText, TSpec> & compressedSA, FibreLF)
 {
     return value(compressedSA.lfTable);
