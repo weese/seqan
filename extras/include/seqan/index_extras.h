@@ -53,7 +53,6 @@
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
 #include <seqan/misc_extras.h>
-#include <seqan/find_extras.h>
 
 // ===========================================================================
 // Extra VSTree Iterators.
