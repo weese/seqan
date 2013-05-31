@@ -137,44 +137,22 @@ struct View<TObject const>
     typedef typename View<TObject>::Type const  Type;
 };
 
-// NOTE(esiragusa): Is this trick necessary?
-//template <typename TObject>
-//struct View
-//{
-//    typedef typename If<typename IsSimple<TObject>::Type, TObject, ContainerView<TObject> >::Type    Type;
-//};
-
 // ----------------------------------------------------------------------------
-// Metafunction Device
+// Metafunction IsView
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Move Device metafunction somewhere else.
-
-#ifdef __CUDACC__
-// NOTE(esiragusa): Is this trick necessary?
-//template <typename TObject>
-//struct Device
-//{
-//    typedef typename Value<TObject>::Type               TValue_;
-////    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
-//    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     TDevice_;
-//
-//    typedef typename If<typename IsSimple<TObject>::Type, TObject, TDevice_>::Type      Type;
-//};
 
 template <typename TObject>
-struct Device
-{
-    typedef typename Value<TObject>::Type               TValue_;
-//    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
-    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     Type;
-};
+struct IsView : public False {};
 
 template <typename TObject>
-struct Device<TObject const>
-{
-    typedef typename Device<TObject>::Type const    Type;
-};
-#endif
+struct IsView<TObject const> : public IsView<TObject> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsView                                          [ContainerView]
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct IsView<ContainerView<TContainer, TSpec> > : public True {};
 
 // ----------------------------------------------------------------------------
 // Metafunction Value
@@ -449,19 +427,6 @@ view(TContainer & container)
 {
     return ContainerView<TContainer>(container);
 }
-
-#ifdef __CUDACC__
-template <typename TContainer, typename TAlloc>
-inline ContainerView<thrust::device_vector<TContainer, TAlloc> >
-view(thrust::device_vector<TContainer, TAlloc> & container)
-{
-    typedef thrust::device_vector<TContainer, TAlloc>    TDeviceContainer;
-    return ContainerView<TDeviceContainer>(
-            thrust::raw_pointer_cast(container.data()),
-            thrust::raw_pointer_cast(&container[container.size()])
-    );
-}
-#endif
 
 // ----------------------------------------------------------------------------
 // Operator<<
