@@ -53,6 +53,13 @@ struct View<StringSet<TString, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction IsView                                         [StringSet View]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TSpec>
+struct IsView<StringSet<ContainerView<TString>, TSpec> > : public True {};
+
+// ----------------------------------------------------------------------------
 // Metafunction StringSetLimits                                [StringSet View]
 // ----------------------------------------------------------------------------
 // NOTE(esiragusa): Generic const version refers to this non-const one.

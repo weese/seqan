@@ -55,6 +55,13 @@ struct Device<StringSet<TString, TSpec> >
 #endif
 
 // ----------------------------------------------------------------------------
+// Metafunction IsDevice                                     [Device StringSet]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec>
+struct IsDevice<StringSet<thrust::device_vector<TValue, TAlloc>, TSpec> > : public True {};
+
+// ----------------------------------------------------------------------------
 // Metafunction StringSetLimits                              [Device StringSet]
 // ----------------------------------------------------------------------------
 // NOTE(esiragusa): Generic const version refers to this non-const one.
