@@ -63,36 +63,6 @@ struct StringSetLimits<StringSet<ContainerView<TString>, TSpec> >
     typedef typename View<typename StringSetLimits<StringSet<TString, TSpec> >::Type>::Type     Type;
 };
 
-// ----------------------------------------------------------------------------
-// Metafunction Device                                              [StringSet]
-// ----------------------------------------------------------------------------
-// NOTE(esiragusa): Generic const version refers to this non-const one.
-// TODO(esiragusa): Move Device metafunction somewhere else.
-
-#ifdef __CUDACC__
-template <typename TString, typename TSpec>
-struct Device<StringSet<TString, TSpec> >
-{
-    typedef StringSet<typename Device<TString>::Type, TSpec>    Type;
-};
-#endif
-
-// ----------------------------------------------------------------------------
-// Metafunction StringSetLimits                              [Device StringSet]
-// ----------------------------------------------------------------------------
-// NOTE(esiragusa): Generic const version refers to this non-const one.
-// TODO(esiragusa): Move StringSetLimits metafunction somewhere else.
-
-#ifdef __CUDACC__
-template <typename TValue, typename TAlloc, typename TSpec>
-struct StringSetLimits<StringSet<thrust::device_vector<TValue, TAlloc>, TSpec> >
-{
-    typedef thrust::device_vector<TValue, TAlloc>   TString_;
-    typedef typename Size<TString_>::Type           TSize_;
-    typedef thrust::device_vector<TSize_>           Type;
-};
-#endif
-
 // ============================================================================
 // Functions
 // ============================================================================

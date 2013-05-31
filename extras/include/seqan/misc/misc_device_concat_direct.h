@@ -31,33 +31,44 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// Facade header for module misc.
-// ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_MISC_H_
-#define EXTRAS_INCLUDE_SEQAN_MISC_H_
+#ifndef SEQAN_HEADER_MISC_DEVICE_CONCAT_DIRECT_H
+#define SEQAN_HEADER_MISC_DEVICE_CONCAT_DIRECT_H
 
-// ===========================================================================
-// Prerequisites from extras.
-// ===========================================================================
+namespace seqan {
 
-#include <seqan/basic_extras.h>
-#include <seqan/sequence_extras.h>
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-// ===========================================================================
-// Views.
-// ===========================================================================
-
-#include <seqan/misc/misc_view.h>
-#include <seqan/misc/misc_view_concat_direct.h>
-
-// ===========================================================================
-// Devices.
-// ===========================================================================
+// ----------------------------------------------------------------------------
+// Metafunction Device                                              [StringSet]
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): Generic const version refers to this non-const one.
 
 #ifdef __CUDACC__
-#include <seqan/misc/misc_device.h>
-#include <seqan/misc/misc_device_concat_direct.h>
+template <typename TString, typename TSpec>
+struct Device<StringSet<TString, TSpec> >
+{
+    typedef StringSet<typename Device<TString>::Type, TSpec>    Type;
+};
 #endif
 
-#endif  // EXTRAS_INCLUDE_SEQAN_MISC_H_
+// ----------------------------------------------------------------------------
+// Metafunction StringSetLimits                              [Device StringSet]
+// ----------------------------------------------------------------------------
+// NOTE(esiragusa): Generic const version refers to this non-const one.
+
+#ifdef __CUDACC__
+template <typename TValue, typename TAlloc, typename TSpec>
+struct StringSetLimits<StringSet<thrust::device_vector<TValue, TAlloc>, TSpec> >
+{
+    typedef thrust::device_vector<TValue, TAlloc>   TString_;
+    typedef typename Size<TString_>::Type           TSize_;
+    typedef thrust::device_vector<TSize_>           Type;
+};
+#endif
+
+}  // namespace seqan
+
+#endif  // #ifndef SEQAN_HEADER_MISC_DEVICE_CONCAT_DIRECT_H
