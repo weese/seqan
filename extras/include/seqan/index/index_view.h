@@ -140,45 +140,6 @@ struct View<SparseString<TString, TSpec> const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                              [Index View]
-// ----------------------------------------------------------------------------
-
-// NOTE(esiragusa): This causes template resolution ambiguity.
-//template <typename TText, typename TViewSpec, typename TSpec, typename TFibre>
-//struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, Tag<TFibre> const>
-//{
-//    typedef typename View<typename Fibre<Index<TText, TSpec>, Tag<TFibre> const>::Type>::Type     Type;
-//};
-
-// ----------------------------------------------------------------------------
-// Metafunction FibreText                                          [Index View]
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TViewSpec, typename TSpec>
-struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreText>
-{
-    typedef typename View<TText>::Type  Type;
-};
-
-template <typename TText, typename TViewSpec, typename TSpec>
-struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreText> :
-    public Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreText> {};
-
-// ----------------------------------------------------------------------------
-// Metafunction FibreRawText                                       [Index View]
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TViewSpec, typename TSpec>
-struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreRawText>
-{
-    typedef typename View<typename Fibre<Index<TText, TSpec>, FibreRawText>::Type>::Type    Type;
-};
-
-template <typename TText, typename TViewSpec, typename TSpec>
-struct Fibre<Index<ContainerView<TText, TViewSpec>, TSpec> const, FibreRawText> :
-    public Fibre<Index<ContainerView<TText, TViewSpec>, TSpec>, FibreRawText> {};
-
-// ----------------------------------------------------------------------------
 // Metafunction FibreSA                                            [Index View]
 // ----------------------------------------------------------------------------
 

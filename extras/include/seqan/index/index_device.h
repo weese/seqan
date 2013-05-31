@@ -60,45 +60,6 @@ struct Device<Index<TText, TSpec> const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Fibre                                            [Device Index]
-// ----------------------------------------------------------------------------
-
-// NOTE(esiragusa): This causes template resolution ambiguity.
-//template <typename TValue, typename TAlloc, typename TSpec, typename TFibre>
-//struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, Tag<TFibre> const>
-//{
-//    typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>  Type;
-//};
-
-// ----------------------------------------------------------------------------
-// Metafunction FibreText                                        [Device Index]
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TAlloc, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreText>
-{
-    typedef thrust::device_vector<TValue, TAlloc>    Type;
-};
-
-template <typename TValue, typename TAlloc, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreText> :
-    public Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreText> {};
-
-// ----------------------------------------------------------------------------
-// Metafunction FibreRawText                                     [Device Index]
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TAlloc, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreRawText>
-{
-    typedef typename Concatenator<thrust::device_vector<TValue, TAlloc> >::Type  Type;
-};
-
-template <typename TValue, typename TAlloc, typename TSpec>
-struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec> const, FibreRawText> :
-    public Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreRawText> {};
-
-// ----------------------------------------------------------------------------
 // Metafunction FibreSA                                          [Device Index]
 // ----------------------------------------------------------------------------
 
