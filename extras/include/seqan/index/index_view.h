@@ -536,6 +536,34 @@ indexCreate(Index<ContainerView<TText, TViewSpec>, FMIndex<TOccSpec, TSpec> > & 
 }
 
 // ----------------------------------------------------------------------------
+// Function getFibre()                                      [CompressedSA View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreLF>::Type &
+getFibre(CompressedSA<ContainerView<TText, TViewSpec>, TSpec> & sa, FibreLF)
+{
+    return sa.lfTable;
+}
+
+template <typename TText, typename TViewSpec, typename TSpec>
+SEQAN_FUNC typename Fibre<CompressedSA<ContainerView<TText, TViewSpec>, TSpec> const, FibreLF>::Type &
+getFibre(CompressedSA<ContainerView<TText, TViewSpec>, TSpec> const & sa, FibreLF)
+{
+    return sa.lfTable;
+}
+
+// ----------------------------------------------------------------------------
+// Function setLfTable()                                    [CompressedSA View]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TSpec, typename TLfTable>
+void setLfTable(CompressedSA<ContainerView<TText, TViewSpec>, TSpec> & sa, TLfTable const & lfTable)
+{
+    assign(sa.lfTable, lfTable);
+}
+
+// ----------------------------------------------------------------------------
 // Function view()                                                      [Index]
 // ----------------------------------------------------------------------------
 // NOTE(esiragusa): view() of a generic Index is not useful and potentially dangerous.
