@@ -710,15 +710,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 // suffix array type
 
-	template <typename TText, typename TSpec>
-	struct Fibre<Index<TText, TSpec>, FibreSA>
-    {
+	template < typename TText, typename TSpec >
+	struct Fibre< Index<TText, TSpec>, FibreSA> {
 		typedef String<
-                        typename SAValue<Index<TText, TSpec> >::Type,
-                        typename DefaultIndexStringSpec<Index<TText, TSpec> >::Type
-                > Type;//TFibreSA_;
-
-//        typedef typename If<typename IsView<TText>::Type, typename View<TFibreSA_>::Type, TFibreSA_>::Type  Type;
+			typename SAValue< Index<TText, TSpec> >::Type,
+			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type 
+		> Type;
 	};
 
 //////////////////////////////////////////////////////////////////////////////
