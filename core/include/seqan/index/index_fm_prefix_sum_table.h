@@ -266,7 +266,7 @@ inline void clear(PrefixSumTable<TChar, TSpec> & prefixSumTable)
 // ----------------------------------------------------------------------------
 
 template <typename TChar, typename TSpec>
-inline bool empty(PrefixSumTable<TChar, TSpec> const & prefixSumTable)
+SEQAN_FUNC bool empty(PrefixSumTable<TChar, TSpec> const & prefixSumTable)
 {
     return empty(prefixSumTable.entries);
 }
