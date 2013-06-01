@@ -45,18 +45,16 @@
 #include <seqan/sequence_extras.h>
 
 // ===========================================================================
-// Views.
+// Views and Devices.
 // ===========================================================================
 
 #include <seqan/misc/misc_view.h>
-#include <seqan/misc/misc_view_concat_direct.h>
-
-// ===========================================================================
-// Devices.
-// ===========================================================================
-
 #ifdef __CUDACC__
 #include <seqan/misc/misc_device.h>
+#endif
+
+#include <seqan/misc/misc_view_concat_direct.h>
+#ifdef __CUDACC__
 #include <seqan/misc/misc_device_concat_direct.h>
 #endif
 
