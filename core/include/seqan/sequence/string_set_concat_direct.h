@@ -372,7 +372,7 @@ inline void clear(StringSet<TString, Owner<ConcatDirect<TDelimiter> > > & me)
 // --------------------------------------------------------------------------
 
 template <typename TString, typename TDelimiter>
-inline typename Size<StringSet<TString, Owner<ConcatDirect<TDelimiter> > > >::Type
+SEQAN_FUNC typename Size<StringSet<TString, Owner<ConcatDirect<TDelimiter> > > >::Type
 length(StringSet<TString, Owner<ConcatDirect<TDelimiter> > > const & me)
 {
     return length(me.limits) - 1;
@@ -485,14 +485,14 @@ infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & m
 // --------------------------------------------------------------------------
 
 template <typename TString, typename TSpec, typename TPos >
-inline typename Infix<TString>::Type
+SEQAN_FUNC typename Infix<TString>::Type
 value(StringSet<TString, Owner<ConcatDirect<TSpec> > > & me, TPos pos)
 {
     return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
 }
 
 template <typename TString, typename TSpec, typename TPos >
-inline typename Infix<TString const>::Type
+SEQAN_FUNC typename Infix<TString const>::Type
 value(StringSet<TString, Owner<ConcatDirect<TSpec> > > const & me, TPos pos)
 {
     return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
