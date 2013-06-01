@@ -305,7 +305,7 @@ std::ostream & operator<<(std::ostream & out, Pair<T1, T2, TSpec> const & p)
 // There can be no getValue with index since T1 can be != T2.
 
 template <typename T1, typename T2, typename TSpec>
-inline T1 getValueI1(Pair<T1, T2, TSpec> const & pair)
+SEQAN_FUNC T1 getValueI1(Pair<T1, T2, TSpec> const & pair)
 {
     return pair.i1;
 }
@@ -322,7 +322,7 @@ inline T1 getValueI1(Pair<T1, T2, TSpec> const & pair)
  */
 
 template <typename T1, typename T2, typename TSpec>
-inline T2 getValueI2(Pair<T1, T2, TSpec> const & pair)
+SEQAN_FUNC T2 getValueI2(Pair<T1, T2, TSpec> const & pair)
 {
     return pair.i2;
 }
