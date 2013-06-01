@@ -53,12 +53,6 @@ struct View<Index<TText, TSpec> >
     typedef Index<typename View<TText>::Type, TSpec>        Type;
 };
 
-template <typename TText, typename TSpec>
-struct View<Index<TText, TSpec> const>
-{
-    typedef Index<typename View<TText>::Type, TSpec> const  Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction View                                                  [LfTable]
 // ----------------------------------------------------------------------------
@@ -67,12 +61,6 @@ template <typename TText, typename TSpec>
 struct View<LfTable<TText, TSpec> >
 {
     typedef LfTable<typename View<TText>::Type, TSpec>          Type;
-};
-
-template <typename TText, typename TSpec>
-struct View<LfTable<TText, TSpec> const>
-{
-    typedef LfTable<typename View<TText>::Type, TSpec> const    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -85,12 +73,6 @@ struct View<CompressedSA<TText, TSpec> >
     typedef CompressedSA<typename View<TText>::Type, TSpec>         Type;
 };
 
-template <typename TText, typename TSpec>
-struct View<CompressedSA<TText, TSpec> const>
-{
-    typedef CompressedSA<typename View<TText>::Type, TSpec> const   Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction View                                           [PrefixSumTable]
 // ----------------------------------------------------------------------------
@@ -99,12 +81,6 @@ template <typename TValue, typename TSpec>
 struct View<PrefixSumTable<TValue, TSpec> >
 {
     typedef PrefixSumTable<TValue, View<TSpec> >        Type;
-};
-
-template <typename TValue, typename TSpec>
-struct View<PrefixSumTable<TValue, TSpec> const>
-{
-    typedef PrefixSumTable<TValue, View<TSpec> > const  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -117,12 +93,6 @@ struct View<RankDictionary<TwoLevels<TValue, TSpec> > >
     typedef RankDictionary<TwoLevels<TValue, View<TSpec> > >        Type;
 };
 
-template <typename TValue, typename TSpec>
-struct View<RankDictionary<TwoLevels<TValue, TSpec> > const>
-{
-    typedef RankDictionary<TwoLevels<TValue, View<TSpec> > > const  Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction View                                             [SparseString]
 // ----------------------------------------------------------------------------
@@ -131,12 +101,6 @@ template <typename TString, typename TSpec>
 struct View<SparseString<TString, TSpec> >
 {
     typedef SparseString<ContainerView<TString>, TSpec>         Type;
-};
-
-template <typename TString, typename TSpec>
-struct View<SparseString<TString, TSpec> const>
-{
-    typedef SparseString<ContainerView<TString>, TSpec> const   Type;
 };
 
 // ----------------------------------------------------------------------------
