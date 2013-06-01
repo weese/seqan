@@ -84,7 +84,8 @@ findCUDA(TIndex index, TPattern pattern)
     // Print the Compressed SA values.
     printf("lengthSA=%ld\n", length(indexSA(index)));
     for (unsigned i = 0; i < length(indexSA(index)); ++i)
-        printf("%ld\n", indexSA(index)[i]);
+        printf("<%ld,%ld>\n", indexSA(index)[i].i1, indexSA(index)[i].i2);
+//        printf("%ld\n", indexSA(index)[i]);
 
     // Instantiate a virtual suffix tree iterator.
     TIterator it(index);
@@ -150,10 +151,10 @@ void testStringSet()
 {
     typedef String<TAlphabet>                           TString;
     typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
+    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
     typedef typename View<TString>::Type                TStringView;
     typedef typename View<TStringSet>::Type             TStringSetView;
-    typedef typename Device<TString>::Type              TDeviceString;
-    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
+    typedef typename View<TDeviceStringSet>::Type       TDeviceStringSetView;
 
     TStringSet ss;
     appendValue(ss, "AAAAAAAA");
@@ -166,6 +167,10 @@ void testStringSet()
     SEQAN_ASSERT_EQ(length(ss), length(ssView));
     for (unsigned i = 0; i < length(ss); ++i)
         SEQAN_ASSERT(isEqual(ss[i], ssView[i]));
+
+    TDeviceStringSet deviceSs;
+    assign(deviceSs, ss);
+    TDeviceStringSetView deviceSsView = view(deviceSs);
 }
 
 // --------------------------------------------------------------------------
@@ -177,13 +182,18 @@ void testIndex()
 {
     typedef String<TAlphabet>                           TString;
     typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-    typedef Index<TString, TIndexSpec>                  TIndex;
+//    typedef Index<TString, TIndexSpec>                  TIndex;
+    typedef Index<TStringSet, TIndexSpec>               TIndex;
     typedef typename Device<TString>::Type              TDeviceString;
     typedef typename Device<TStringSet>::Type           TDeviceStringSet;
     typedef typename Device<TIndex>::Type               TDeviceIndex;
 
     // Instantiate an index over a text.
-    TString text("ACGTACGTACGT");
+//    TString text("ACGTACGTACGT");
+    TStringSet text;
+    appendValue(text, "ATAAAAAAAAA");
+    appendValue(text, "CCCCTACCC");
+
     TIndex index(text);
 
     // Create the index on the reversed text.
@@ -200,9 +210,11 @@ void testIndex()
     TDeviceString devicePattern;
     assign(devicePattern, pattern);
 
+#ifdef __CUDACC__
     // Find on GPU.
     findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
     cudaDeviceSynchronize();
+#endif
 }
 
 // --------------------------------------------------------------------------
