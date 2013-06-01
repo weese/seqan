@@ -83,28 +83,6 @@ struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>
     typedef String<Pair<TChar, TPos> > Type;
 };
 
-// template <typename TChar, typename TSpec>
-// struct Fibre<RightArrayBinaryTree<TChar, TSpec> const, FibreTreeStructureEncoding>
-// {
-//     typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type const Type;
-// };
-
-// ----------------------------------------------------------------------------
-// Metafunction Reference
-// ----------------------------------------------------------------------------
-
-template <typename TChar, typename TSpec>
-struct Reference<RightArrayBinaryTree<TChar, TSpec> >
-{
-    typedef typename Value<RightArrayBinaryTree<TChar, TSpec> >::Type & Type;
-};
-
-template <typename TChar, typename TSpec>
-struct Reference<const RightArrayBinaryTree<TChar, TSpec> >
-{
-    typedef typename Value<RightArrayBinaryTree<TChar, TSpec> >::Type const & Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
@@ -120,14 +98,8 @@ struct Value<RightArrayBinaryTree<TChar, TSpec> >
 };
 
 template <typename TChar, typename TSpec>
-struct Value<RightArrayBinaryTree<TChar, TSpec> const>
-{
-    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeStructureEncoding>::Type TWaveletTreeVertices_;
-    typedef typename Value<TWaveletTreeVertices_>::Type TWaveletTreeVertex_;
-    typedef typename Value<TWaveletTreeVertex_, 2>::Type TPos;
-
-    typedef Pair<TChar, TPos> Type;
-};
+struct Value<RightArrayBinaryTree<TChar, TSpec> const> :
+    Value<RightArrayBinaryTree<TChar, TSpec> > {};
 
 // ============================================================================
 // Tags, Classes, Enums

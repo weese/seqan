@@ -110,10 +110,6 @@ struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
     typedef TValue  Type;
 };
 
-template <typename TValue, typename TSpec>
-struct Value<RankDictionary<TwoLevels<TValue, TSpec> > const > :
-    public Value<RankDictionary<TwoLevels<TValue, TSpec> > > {};
-
 // ----------------------------------------------------------------------------
 // Metafunction Size                                           [RankDictionary]
 // ----------------------------------------------------------------------------
@@ -124,10 +120,6 @@ struct Size<RankDictionary<TwoLevels<TValue, TSpec> > >
     // TODO(esiragusa): Choose a better RankDictinonary size type.
     typedef typename Size<String<TValue, TSpec> >::Type Type;
 };
-
-template <typename TValue, typename TSpec>
-struct Size<RankDictionary<TwoLevels<TValue, TSpec> > const> :
-    public Size<RankDictionary<TwoLevels<TValue, TSpec> > > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryValuesPerBlock_

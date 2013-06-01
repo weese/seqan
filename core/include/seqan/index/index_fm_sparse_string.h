@@ -78,10 +78,8 @@ struct Value<SparseString<TFibreValues, TSpec> >
 };
 
 template <typename TFibreValues, typename TSpec>
-struct Value<SparseString<TFibreValues, TSpec> const>
-{
-    typedef typename Value<TFibreValues>::Type Type;
-};
+struct Value<SparseString<TFibreValues, TSpec> const> :
+    Value<SparseString<TFibreValues, TSpec> > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction GetValue
@@ -105,25 +103,16 @@ struct Reference<SparseString<TFibreValues, TSpec> >
     typedef typename Value<SparseString<TFibreValues, TSpec> >::Type Type;
 };
 
-template <typename TFibreValues, typename TSpec>
-struct Reference<SparseString<TFibreValues, TSpec> const>
-{
-    typedef typename Value<SparseString<TFibreValues, TSpec> >::Type const Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction DefaultValue
 // ----------------------------------------------------------------------------
 
 template <typename TSpec>
-struct DefaultValue {};
+struct DefaultValue;
 
-template <typename TFibreValues, typename TSpec>
-struct DefaultValue<SparseString<TFibreValues, TSpec> const>
-{
-    typedef typename GetValue<SparseString<TFibreValues, TSpec> const>::Type Type;
-    static const Type VALUE = -1;
-};
+template <typename TSpec>
+struct DefaultValue<TSpec const> :
+    DefaultValue<TSpec> {};
 
 template <typename TFibreValues, typename TSpec>
 struct DefaultValue<SparseString<TFibreValues, TSpec> >
@@ -143,19 +132,7 @@ struct Fibre<SparseString<TFibreValues, TSpec>, FibreValues>
 };
 
 template <typename TFibreValues, typename TSpec>
-struct Fibre<SparseString<TFibreValues, TSpec> const, FibreValues>
-{
-    typedef TFibreValues const Type;
-};
-
-template <typename TFibreValues, typename TSpec>
 struct Fibre<SparseString<TFibreValues, TSpec>, FibreIndicators>
-{
-    typedef RankDictionary<TwoLevels<bool, TSpec> > Type;
-};
-
-template <typename TFibreValues, typename TSpec>
-struct Fibre<SparseString<TFibreValues, TSpec> const, FibreIndicators>
 {
     typedef RankDictionary<TwoLevels<bool, TSpec> > Type;
 };
@@ -165,15 +142,15 @@ struct Fibre<SparseString<TFibreValues, TSpec> const, FibreIndicators>
 // ----------------------------------------------------------------------------
 
 template <typename TFibreValues, typename TSpec>
-struct Iterator<SparseString<TFibreValues, TSpec> const, Standard>
-{
-    typedef Iter<SparseString<TFibreValues, TSpec> const, PositionIterator> Type;
-};
-
-template <typename TFibreValues, typename TSpec>
 struct Iterator<SparseString<TFibreValues, TSpec>, Standard>
 {
     typedef Iter<SparseString<TFibreValues, TSpec>, PositionIterator> Type;
+};
+
+template <typename TFibreValues, typename TSpec>
+struct Iterator<SparseString<TFibreValues, TSpec> const, Standard>
+{
+    typedef Iter<SparseString<TFibreValues, TSpec> const, PositionIterator> Type;
 };
 
 template <typename TFibreValues, typename TSpec>
