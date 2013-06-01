@@ -308,17 +308,20 @@ void fmIndexEmpty(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
 
     {
         TIndex fmIndex;
-	    SEQAN_ASSERT_LEQ(empty(fmIndex), true);
+	    SEQAN_ASSERT_EQ(empty(fmIndex), true);
     }
     {
 	    TText text;
 	    generateText(text);
 
 	    TIndex fmIndex(text);
-        SEQAN_ASSERT_LEQ(empty(fmIndex), false);
+        SEQAN_ASSERT_EQ(empty(fmIndex), true);
+
+        indexCreate(fmIndex);
+        SEQAN_ASSERT_EQ(empty(fmIndex), false);
 
         clear(fmIndex);
-	    SEQAN_ASSERT_LEQ(empty(fmIndex), true);
+	    SEQAN_ASSERT_EQ(empty(fmIndex), true);
     }
 }
 
