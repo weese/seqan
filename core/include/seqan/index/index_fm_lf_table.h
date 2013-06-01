@@ -273,7 +273,7 @@ SEQAN_FUNC bool empty(LfTable<TText, TSpec> const & lfTable)
 }
 
 template <typename TText, typename TSSetSpec, typename TSpec>
-inline bool empty(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable)
+SEQAN_FUNC bool empty(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable)
 {
     return empty(lfTable.values) &&
            empty(lfTable.sentinels) &&
@@ -330,7 +330,7 @@ SEQAN_FUNC bool sentinelAt(LfTable<TText, TSpec> const & lfTable, TPos pos)
 }
 
 template <typename TText, typename TSSetSpec, typename TSpec, typename TPos>
-inline bool sentinelAt(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable, TPos pos)
+SEQAN_FUNC bool sentinelAt(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable, TPos pos)
 {
     return getValue(getFibre(lfTable, FibreSentinels()), pos);
 }
@@ -358,7 +358,7 @@ _getRank(LfTable<TText, TSpec> const & lfTable, TPos pos, TValue character)
 }
 
 template <typename TText, typename TSSetSpec, typename TSpec, typename TPos, typename TValue>
-inline typename Size<typename Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreValues>::Type>::Type
+SEQAN_FUNC typename Size<typename Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreValues>::Type>::Type
 _getRank(LfTable<StringSet<TText, TSSetSpec>, TSpec> const & lfTable, TPos pos, TValue character)
 {
     typedef LfTable<StringSet<TText, TSSetSpec>, TSpec> const   TLfTable;
