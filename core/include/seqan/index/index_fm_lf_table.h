@@ -118,27 +118,11 @@ struct Fibre<LfTable<TText, TSpec>, FibrePrefixSum>
 };
 
 template <typename TText, typename TSpec>
-struct Fibre<LfTable<TText, TSpec> const, FibrePrefixSum>
-{
-    typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
-    typedef typename MakeUnsigned<TValue_>::Type            TUValue_;
-    typedef PrefixSumTable<TUValue_, TSpec> const           Type;
-};
-
-template <typename TText, typename TSpec>
 struct Fibre<LfTable<TText, TSpec>, FibreValues>
 {
     typedef typename Value<LfTable<TText, TSpec> >::Type    TValue_;
     typedef RankDictionary<TwoLevels<TValue_, TSpec> >      Type;
 //    typedef RankDictionary<WaveletTree<TValue_> >           Type;
-};
-
-template <typename TText, typename TSpec>
-struct Fibre<LfTable<TText, TSpec> const, FibreValues>
-{
-    typedef typename Value<LfTable<TText, TSpec> >::Type        TValue_;
-    typedef RankDictionary<TwoLevels<TValue_, TSpec> > const    Type;
-//    typedef RankDictionary<WaveletTree<TValue_> > const         Type;
 };
 
 template <typename TText, typename TSpec>
@@ -151,12 +135,6 @@ template <typename TText, typename TSSetSpec, typename TSpec>
 struct Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreSentinels>
 {
     typedef RankDictionary<TwoLevels<bool, TSpec> >         Type;
-};
-
-template <typename TText, typename TSSetSpec, typename TSpec>
-struct Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec> const, FibreSentinels>
-{
-    typedef RankDictionary<TwoLevels<bool, TSpec> > const   Type;
 };
 
 template <typename TText, typename TSpec>

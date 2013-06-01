@@ -101,12 +101,6 @@ struct Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>
     typedef String<unsigned> Type;
 };
 
-template <typename TChar, typename TSpec>
-struct Fibre<PrefixSumTable<TChar, TSpec> const, FibreEntries>
-{
-    typedef String<unsigned> const Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction Size
 // ----------------------------------------------------------------------------
@@ -119,58 +113,21 @@ struct Size<PrefixSumTable<TChar, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Infix
-// ----------------------------------------------------------------------------
-
-template <typename TChar, typename TSpec>
-struct Infix<PrefixSumTable<TChar, TSpec> >
-{
-    typedef typename Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>::Type TEntries;
-    typedef typename Infix<TEntries>::Type Type;
-};
-
-template <typename TChar, typename TSpec>
-struct Infix<PrefixSumTable<TChar, TSpec> const>
-{
-    typedef typename Fibre<PrefixSumTable<TChar, TSpec> const, FibreEntries>::Type TEntries;
-    typedef typename Infix<TEntries>::Type Type;
-};
-
-// ----------------------------------------------------------------------------
 // Metafunction CharacterValue
 // ----------------------------------------------------------------------------
 
 template <typename TSpec>
 struct CharacterValue;
 
+template <typename TSpec>
+struct CharacterValue<TSpec const> :
+    public CharacterValue<TSpec> {};
+
 template <typename TChar, typename TSpec>
 struct CharacterValue<PrefixSumTable<TChar, TSpec> >
 {
     typedef typename MakeUnsigned<TChar>::Type TUChar;
     typedef TUChar Type;
-};
-
-template <typename TChar, typename TSpec>
-struct CharacterValue<PrefixSumTable<TChar, TSpec> const>
-{
-    typedef typename MakeUnsigned<TChar>::Type TUChar;
-    typedef TUChar Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction Reference
-// ----------------------------------------------------------------------------
-
-template <typename TChar, typename TSpec>
-struct Reference<PrefixSumTable<TChar, TSpec> >
-{
-    typedef typename Value<PrefixSumTable<TChar, TSpec> >::Type & Type;
-};
-
-template <typename TChar, typename TSpec>
-struct Reference<PrefixSumTable<TChar, TSpec> const>
-{
-    typedef typename Value<PrefixSumTable<TChar, TSpec> >::Type const & Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -302,6 +259,16 @@ template <typename TChar, typename TSpec>
 inline void clear(PrefixSumTable<TChar, TSpec> & prefixSumTable)
 {
     clear(prefixSumTable.entries);
+}
+
+// ----------------------------------------------------------------------------
+// Function empty()
+// ----------------------------------------------------------------------------
+
+template <typename TChar, typename TSpec>
+inline bool empty(PrefixSumTable<TChar, TSpec> const & prefixSumTable)
+{
+    return empty(prefixSumTable.entries);
 }
 
 // ----------------------------------------------------------------------------

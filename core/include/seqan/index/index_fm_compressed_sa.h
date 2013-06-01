@@ -114,7 +114,7 @@ struct Reference<CompressedSA<TText, TSpec> >
 };
 
 template <typename TText, typename TSpec>
-struct Reference<const CompressedSA<TText, TSpec> >
+struct Reference<CompressedSA<TText, TSpec> const>
 {
     // TODO(singer): We actually need a proxy here.
     typedef typename Value<CompressedSA<TText, TSpec> >::Type /*const*/ Type;

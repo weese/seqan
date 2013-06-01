@@ -102,41 +102,26 @@ struct Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>
 };
 
 template <typename TValue>
-struct Fibre<RankDictionary<WaveletTree<TValue> > const, FibreBitStrings>
-{
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type const Type;
-};
-
-template <typename TValue>
 struct Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>
 {
     typedef typename MakeUnsigned<TValue>::Type TUChar_;
     typedef RightArrayBinaryTree<TUChar_, void>  Type;
 };
 
-template <typename TValue>
-struct Fibre<RankDictionary<WaveletTree<TValue> > const, FibreTreeStructure>
-{
-    typedef typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const Type;
-};
-
 // ----------------------------------------------------------------------------
 // Metafunction Size
 // ----------------------------------------------------------------------------
- 
+
 template <typename TValue>
 struct Size<RankDictionary<WaveletTree<TValue> > >
 {
     typedef typename Size<String<TValue> >::Type Type;
 };
 
-template <typename TValue>
-struct Size<RankDictionary<WaveletTree<TValue> > const> :
-    public Size<RankDictionary<WaveletTree<TValue> > > {};
-
 // ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
+// NOTE(esiragusa): shouldn't const version be Value const as by default?
 
 template <typename TValue>
 struct Value<RankDictionary<WaveletTree<TValue> > >
@@ -211,14 +196,14 @@ struct RankDictionary<WaveletTree<TValue> >
 */
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type &
-getFibre(RankDictionary<WaveletTree<TValue> > & dict, const FibreBitStrings)
+getFibre(RankDictionary<WaveletTree<TValue> > & dict, FibreBitStrings)
 {
     return dict.bitStrings;
 }
 
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreBitStrings>::Type const &
-getFibre(RankDictionary<WaveletTree<TValue> > const & dict, const FibreBitStrings)
+getFibre(RankDictionary<WaveletTree<TValue> > const & dict, FibreBitStrings)
 {
     return dict.bitStrings;
 }
@@ -232,7 +217,7 @@ getFibre(RankDictionary<WaveletTree<TValue> > & dict, FibreTreeStructure)
 
 template <typename TValue>
 inline typename Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>::Type const &
-getFibre(RankDictionary<WaveletTree<TValue> > const & dict, const FibreTreeStructure)
+getFibre(RankDictionary<WaveletTree<TValue> > const & dict, FibreTreeStructure)
 {
     return dict.waveletTreeStructure;
 }
