@@ -421,9 +421,9 @@ struct Member<CompressedSA<ContainerView<TText, TViewSpec>, TSpec>, FibreLF>
 };
 
 template <typename TText, typename TViewSpec, typename TSSetSpec, typename TSpec>
-struct Member<CompressedSA<ContainerView<StringSet<TText, TSSetSpec>, TViewSpec>, TSpec>, FibreLF>
+struct Member<CompressedSA<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TSpec>, FibreLF>
 {
-    typedef typename Fibre<CompressedSA<ContainerView<StringSet<TText, TSSetSpec>, TViewSpec>, TSpec>, FibreLF>::Type   Type;
+    typedef typename Fibre<CompressedSA<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TSpec>, FibreLF>::Type   Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -725,6 +725,7 @@ view(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 // ----------------------------------------------------------------------------
 // Function view()                                                    [LfTable]
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): Make view() return the object itself for simple types.
 
 template <typename TText, typename TSpec>
 typename View<LfTable<TText, TSpec> >::Type
