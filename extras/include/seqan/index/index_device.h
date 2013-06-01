@@ -63,6 +63,12 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSA>
     typedef thrust::device_vector<typename SAValue<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type> Type;
 };
 
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreSA>
+{
+    typedef thrust::device_vector<typename SAValue<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec> >::Type>   Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction FibreLcp                                         [Device Index]
 // ----------------------------------------------------------------------------
@@ -71,6 +77,12 @@ template <typename TValue, typename TAlloc, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreLcp>
 {
     typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>    Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreLcp>
+{
+    typedef thrust::device_vector<typename Size<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec> >::Type>  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -83,6 +95,12 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreChildtab>
     typedef thrust::device_vector<typename Size<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>    Type;
 };
 
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreChildtab>
+{
+    typedef thrust::device_vector<typename Size<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec> >::Type>  Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction FibreBwt                                         [Device Index]
 // ----------------------------------------------------------------------------
@@ -93,6 +111,12 @@ struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreBwt>
     typedef thrust::device_vector<typename Value<Index<thrust::device_vector<TValue, TAlloc>, TSpec> >::Type>   Type;
 };
 
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreBwt>
+{
+    typedef thrust::device_vector<typename Value<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec> >::Type> Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction FibreSA                                        [Device FMIndex]
 // ----------------------------------------------------------------------------
@@ -101,6 +125,12 @@ template <typename TValue, typename TAlloc, typename TOccSpec, typename TSpec>
 struct Fibre<Index<thrust::device_vector<TValue, TAlloc>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
     typedef CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>      Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TOccSpec, typename TSpec>
+struct Fibre<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, FMIndex<TOccSpec, TSpec> >, FibreSA>
+{
+    typedef CompressedSA<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -117,6 +147,16 @@ struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibrePrefixS
     typedef PrefixSumTable<TUValue_, Device<TSpec> >            Type;
 };
 
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<LfTable<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibrePrefixSum>
+{
+    typedef StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec> TText_;
+    typedef typename Value<LfTable<TText_, TSpec> >::Type               TValue_;
+    typedef typename MakeUnsigned<TValue_>::Type                        TUValue_;
+
+    typedef PrefixSumTable<TUValue_, Device<TSpec> >                    Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction FibreValues                                    [Device LfTable]
 // ----------------------------------------------------------------------------
@@ -130,15 +170,31 @@ struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreValues>
     typedef RankDictionary<TwoLevels<TValue_, Device<TSpec> > > Type;
 };
 
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<LfTable<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreValues>
+{
+    typedef StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec> TText_;
+    typedef typename Value<LfTable<TText_, TSpec> >::Type               TValue_;
+
+    typedef RankDictionary<TwoLevels<TValue_, Device<TSpec> > >         Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction FibreSentinels                                 [Device LfTable]
 // ----------------------------------------------------------------------------
 
+// NOTE(esiragusa): Single text sentinel rank dictionary is an integer.
 //template <typename TText, typename TViewSpec, typename TSpec>
 //struct Fibre<LfTable<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSentinels>
 //{
 //    typedef typename Fibre<LfTable<TText, TSpec>, FibreSentinels>::Type   Type;
 //};
+
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<LfTable<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreSentinels>
+{
+    typedef RankDictionary<TwoLevels<bool, Device<TSpec> > >    Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction FibreEntries                            [Device PrefixSumTable]
@@ -174,6 +230,16 @@ struct Fibre<CompressedSA<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreSp
     typedef thrust::device_vector<TSAValue_/*, TAlloc*/>    TString_;
 
     typedef SparseString<TString_, TSpec>                   Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Fibre<CompressedSA<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreSparseString>
+{
+    typedef StringSet<thrust::device_vector<TValue/*, TAlloc*/>, TSSetSpec> TText_;
+    typedef typename SAValue<TText_>::Type                                  TSAValue_;
+    typedef thrust::device_vector<TSAValue_/*, TAlloc*/>                    TString_;
+
+    typedef SparseString<TString_, TSpec>                                   Type;
 };
 
 // ----------------------------------------------------------------------------
