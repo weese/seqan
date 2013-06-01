@@ -229,7 +229,7 @@ SEQAN_CHECKPOINT
 ///Function.host.param.object.type:Class.Segment
 
 template <typename THost_>
-inline typename Parameter_<THost_>::Type
+SEQAN_FUNC typename Parameter_<THost_>::Type
 host(Segment<THost_, InfixSegment> & me)
 {
 SEQAN_CHECKPOINT
@@ -237,7 +237,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THost_>
-inline typename Parameter_<THost_>::Type
+SEQAN_FUNC typename Parameter_<THost_>::Type
 host(Segment<THost_, InfixSegment> const & me)
 {
 SEQAN_CHECKPOINT
@@ -251,7 +251,7 @@ SEQAN_CHECKPOINT
 ///.Function.begin.class:Class.Segment
 
 template <typename THost_>
-inline typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type
+SEQAN_FUNC typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type
 begin(Segment<THost_, InfixSegment> & me,
     Standard)
 {
@@ -259,7 +259,7 @@ SEQAN_CHECKPOINT
     return begin(host(me), Standard()) + me.data_begin_position;
 }
 template <typename THost_>
-inline typename Iterator<Segment<THost_, InfixSegment> const, Standard>::Type
+SEQAN_FUNC typename Iterator<Segment<THost_, InfixSegment> const, Standard>::Type
 begin(Segment<THost_, InfixSegment> const & me,
     Standard)
 {
@@ -273,14 +273,14 @@ SEQAN_CHECKPOINT
 ///.Function.beginPosition.class:Class.Segment
 
 template <typename THost_>
-inline typename Position<Segment<THost_, InfixSegment> >::Type
+SEQAN_FUNC typename Position<Segment<THost_, InfixSegment> >::Type
 beginPosition(Segment<THost_, InfixSegment> & me)
 {
 SEQAN_CHECKPOINT
     return me.data_begin_position;
 }
 template <typename THost_>
-inline typename Position<Segment<THost_, InfixSegment> const>::Type
+SEQAN_FUNC typename Position<Segment<THost_, InfixSegment> const>::Type
 beginPosition(Segment<THost_, InfixSegment> const & me)
 {
 SEQAN_CHECKPOINT
@@ -346,7 +346,7 @@ SEQAN_CHECKPOINT
 ///.Function.begin.class:Class.Segment
 
 template <typename THost_>
-inline typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type
+SEQAN_FUNC typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type
 end(Segment<THost_, InfixSegment> & me,
     Standard)
 {
@@ -354,7 +354,7 @@ SEQAN_CHECKPOINT
     return begin(host(me), Standard()) + me.data_end_position;
 }
 template <typename THost_>
-inline typename Iterator<Segment<THost_, InfixSegment> const, Standard>::Type
+SEQAN_FUNC typename Iterator<Segment<THost_, InfixSegment> const, Standard>::Type
 end(Segment<THost_, InfixSegment> const & me,
     Standard)
 {
@@ -368,14 +368,14 @@ SEQAN_CHECKPOINT
 ///.Function.endPosition.class:Class.Segment
 
 template <typename THost_>
-inline typename Position<Segment<THost_, InfixSegment> >::Type
+SEQAN_FUNC typename Position<Segment<THost_, InfixSegment> >::Type
 endPosition(Segment<THost_, InfixSegment> & me)
 {
 SEQAN_CHECKPOINT
     return me.data_end_position;
 }
 template <typename THost_>
-inline typename Position<Segment<THost_, InfixSegment> >::Type
+SEQAN_FUNC typename Position<Segment<THost_, InfixSegment> >::Type
 endPosition(Segment<THost_, InfixSegment> const & me)
 {
 SEQAN_CHECKPOINT
@@ -733,7 +733,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost, typename TSpec, typename TPos>
-inline typename Reference< Segment<THost, TSpec> >::Type
+SEQAN_FUNC typename Reference< Segment<THost, TSpec> >::Type
 value(Segment<THost, TSpec> & me,
       TPos pos)
 {
@@ -743,7 +743,7 @@ value(Segment<THost, TSpec> & me,
 }
 
 template <typename THost, typename TSpec, typename TPos>
-inline typename Reference< Segment<THost, TSpec> const >::Type
+SEQAN_FUNC typename Reference< Segment<THost, TSpec> const >::Type
 value(Segment<THost, TSpec> const & me,
       TPos pos)
 {
@@ -778,7 +778,7 @@ value(Segment<THost, TSpec> const & me,
 */
 
 template <typename T, typename TPosBegin, typename TPosEnd>
-inline typename Infix<T>::Type
+SEQAN_FUNC typename Infix<T>::Type
 infix(T & t, TPosBegin pos_begin, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
