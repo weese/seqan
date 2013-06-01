@@ -44,7 +44,6 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 // Metafunction View                                                [StringSet]
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Generic const version?
 
 template <typename TString, typename TSpec>
 struct View<StringSet<TString, TSpec> >
@@ -62,7 +61,6 @@ struct IsView<StringSet<ContainerView<TString>, TSpec> > : public True {};
 // ----------------------------------------------------------------------------
 // Metafunction StringSetLimits                                [StringSet View]
 // ----------------------------------------------------------------------------
-// NOTE(esiragusa): Generic const version refers to this non-const one.
 
 template <typename TString, typename TSpec>
 struct StringSetLimits<StringSet<ContainerView<TString>, TSpec> >
