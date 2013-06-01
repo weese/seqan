@@ -741,20 +741,19 @@ view(LfTable<TText, TSpec> & lfTable)
     return lfTableView;
 }
 
-// NOTE(esiragusa): StringSet specialization
-//template <typename TText, typename TSSetSpec, typename TSpec>
-//typename View<LfTable<StringSet<TText, TSSetSpec>, TSpec> >::Type
-//view(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTable)
-//{
-//    typename View<LfTable<StringSet<TText, TSSetSpec>, TSpec> >::Type lfTableView;
-//
-//    getFibre(lfTableView, FibrePrefixSum()) = view(getFibre(lfTable, FibrePrefixSum()));
-//    getFibre(lfTableView, FibreValues()) = view(getFibre(lfTable, FibreValues()));
-//    getFibre(lfTableView, FibreSentinels()) = view(getFibre(lfTable, FibreSentinels()));
-//    lfTableView.sentinelSubstitute = lfTable.sentinelSubstitute;
-//
-//    return lfTableView;
-//}
+template <typename TText, typename TSSetSpec, typename TSpec>
+typename View<LfTable<StringSet<TText, TSSetSpec>, TSpec> >::Type
+view(LfTable<StringSet<TText, TSSetSpec>, TSpec> & lfTable)
+{
+    typename View<LfTable<StringSet<TText, TSSetSpec>, TSpec> >::Type lfTableView;
+
+    getFibre(lfTableView, FibrePrefixSum()) = view(getFibre(lfTable, FibrePrefixSum()));
+    getFibre(lfTableView, FibreValues()) = view(getFibre(lfTable, FibreValues()));
+    getFibre(lfTableView, FibreSentinels()) = view(getFibre(lfTable, FibreSentinels()));
+    lfTableView.sentinelSubstitute = lfTable.sentinelSubstitute;
+
+    return lfTableView;
+}
 
 // ----------------------------------------------------------------------------
 // Function view()                                             [PrefixSumTable]
