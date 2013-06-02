@@ -117,7 +117,7 @@ struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
 template <typename TValue, typename TSpec>
 struct RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >
 {
-    static const unsigned VALUE = BitsPerValue<unsigned long>::VALUE / BitsPerValue<TValue>::VALUE;
+    static const unsigned VALUE = BitsPerValue<__uint64>::VALUE / BitsPerValue<TValue>::VALUE;
 };
 
 // ----------------------------------------------------------------------------
@@ -156,9 +156,9 @@ struct RankDictionaryValues_<TwoLevels<TValue, TSpec> >
 // ----------------------------------------------------------------------------
 
 template <>
-struct RankDictionaryBitMask_<unsigned int>
+struct RankDictionaryBitMask_<__uint32>
 {
-    static const unsigned int VALUE = 0x55555555;
+    static const __uint32 VALUE = 0x55555555;
 };
 
 template <>
