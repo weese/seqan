@@ -410,7 +410,7 @@ _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna
     TValues values = _valueAt(dict, pos);
 
     // Clear the last bitsPos positions.
-    TBitVector word = values.i & ~((TBitVector(1) << (BitsPerValue<TBitVector>::VALUE - 2 - bitPos*2)) - TBitVector(1));
+    TBitVector word = hiBits(values.i, BitsPerValue<Dna>::VALUE * (bitPos + 1));
 
     // And matches when c == G|T.
     TBitVector odd  = ((ordValue(c) & ordValue(Dna('G'))) ? word : ~word) >> 1;
@@ -425,7 +425,7 @@ _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna
     TSize valueRank = popCount(mask);
 
     // If c == A then masked character positions must be subtracted from the count.
-    if (c == Dna('A')) valueRank -= RankDictionaryValuesPerBlock_<TwoLevels<Dna, TSpec> >::VALUE - 1 - bitPos;
+    if (c == Dna('A')) valueRank -= RankDictionaryValuesPerBlock_<TwoLevels<Dna, TSpec> >::VALUE - (bitPos + 1);
 
     return valueRank;
 }
@@ -451,7 +451,7 @@ _getValueRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos, bo
     TBitVector word = c ? values.i : ~values.i;
 
     // Clear the last bitsPos positions.
-    TBitVector mask = word & ~((TBitVector(1) << (BitsPerValue<TBitVector>::VALUE - 1 - bitPos)) - TBitVector(1));
+    TBitVector mask = hiBits(word, bitPos + 1);
 
     // Get the sum of the values on.
     return popCount(mask);

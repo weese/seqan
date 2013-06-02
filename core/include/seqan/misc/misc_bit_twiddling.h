@@ -167,8 +167,7 @@ clearBit(TWord & word, TPos index)
  */
 
 template <typename TWord>
-inline
-void
+inline void
 clearBits(TWord & word)
 {
     word = 0;
@@ -196,12 +195,22 @@ clearBits(TWord & word)
  */
 
 template <typename TWord, typename TIndex>
-inline
-bool
+inline bool
 isBitSet(TWord word, TIndex index)
 {
     typedef typename MakeUnsigned<TWord>::Type TUnsignedWord;
     return (word & (TUnsignedWord(1) << index)) != static_cast<TWord>(0);
+}
+
+// ----------------------------------------------------------------------------
+// Function hiBits()
+// ----------------------------------------------------------------------------
+
+template <typename TWord, typename TPos>
+inline TWord
+hiBits(TWord word, TPos index)
+{
+    return word & ~((TWord(1) << (BitsPerValue<TWord>::VALUE - index)) - TWord(1));
 }
 
 // ----------------------------------------------------------------------------
