@@ -124,7 +124,6 @@ struct Size<RankDictionary<TwoLevels<TValue, TSpec> > >
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryValuesPerBlock_
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Specialize it for CUDA.
 
 template <typename TValue, typename TSpec>
 struct RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >
@@ -278,7 +277,6 @@ template <typename TValue, typename TSpec, typename TPos>
 inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toValuePos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos pos)
 {
-    // TODO(esiragusa): Use bit shifts.
     return pos % RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
 }
 
@@ -290,7 +288,6 @@ template <typename TValue, typename TSpec, typename TPos>
 inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toBlockPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos pos)
 {
-    // TODO(esiragusa): Use bit shifts.
     return pos / RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
 }
 
@@ -302,7 +299,6 @@ template <typename TValue, typename TSpec, typename TBlockPos>
 inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TBlockPos blockPos)
 {
-    // TODO(esiragusa): Use bit shifts.
     return blockPos * RankDictionaryValuesPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
 }
 
@@ -700,7 +696,7 @@ resize(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TSize newLength, Tag<TE
 template <typename TValue, typename TSpec>
 inline bool open(RankDictionary<TwoLevels<TValue, TSpec> > & dict, const char * fileName, int openMode)
 {
-    // TODO(esiragusa): Open _length.
+    // TODO(esiragusa): Open _length or remove it.
     return open(dict.ranks, fileName, openMode);
 }
 
@@ -723,7 +719,7 @@ inline bool save(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, const c
 template <typename TValue, typename TSpec>
 inline bool save(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, const char * fileName)
 {
-    // TODO(esiragusa): Save _length.
+    // TODO(esiragusa): Save _length or remove it.
     return save(dict, fileName, DefaultOpenMode<RankDictionary<TwoLevels<TValue, TSpec> > >::VALUE);
 }
 
