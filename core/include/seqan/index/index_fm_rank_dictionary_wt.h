@@ -109,16 +109,6 @@ struct Fibre<RankDictionary<WaveletTree<TValue> >, FibreTreeStructure>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Size
-// ----------------------------------------------------------------------------
-
-template <typename TValue>
-struct Size<RankDictionary<WaveletTree<TValue> > >
-{
-    typedef typename Size<String<TValue> >::Type Type;
-};
-
-// ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
 // NOTE(esiragusa): shouldn't const version be Value const as by default?

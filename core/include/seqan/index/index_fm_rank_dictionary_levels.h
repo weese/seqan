@@ -111,17 +111,6 @@ struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Size                                           [RankDictionary]
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TSpec>
-struct Size<RankDictionary<TwoLevels<TValue, TSpec> > >
-{
-    // TODO(esiragusa): Choose a better RankDictinonary size type.
-    typedef typename Size<String<TValue, TSpec> >::Type Type;
-};
-
-// ----------------------------------------------------------------------------
 // Metafunction RankDictionaryValuesPerBlock_
 // ----------------------------------------------------------------------------
 
