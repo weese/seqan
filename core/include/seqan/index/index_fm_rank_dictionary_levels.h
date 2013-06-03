@@ -406,11 +406,11 @@ _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna
     typedef typename RankDictionaryValues_<TRankDictionarySpec>::Type   TValues;
     typedef typename TValues::TBitVector                                TBitVector;
 
-    TSize bitPos = _toValuePos(dict, pos);
+    TSize valuePos = _toValuePos(dict, pos);
     TValues values = _valueAt(dict, pos);
 
     // Clear the last bitsPos positions.
-    TBitVector word = hiBits(values.i, BitsPerValue<Dna>::VALUE * (bitPos + 1));
+    TBitVector word = hiBits(values.i, BitsPerValue<Dna>::VALUE * (valuePos + 1));
 
     // And matches when c == G|T.
     TBitVector odd  = ((ordValue(c) & ordValue(Dna('G'))) ? word : ~word) >> 1;
@@ -421,11 +421,11 @@ _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna
     // Apply the interleaved mask.
     TBitVector mask = odd & even & RankDictionaryBitMask_<TBitVector>::VALUE;
 
-    // The rank is the sum of values on.
+    // The rank is the sum of the bits on.
     TSize valueRank = popCount(mask);
 
     // If c == A then masked character positions must be subtracted from the count.
-    if (c == Dna('A')) valueRank -= RankDictionaryValuesPerBlock_<TwoLevels<Dna, TSpec> >::VALUE - (bitPos + 1);
+    if (c == Dna('A')) valueRank -= RankDictionaryValuesPerBlock_<TwoLevels<Dna, TSpec> >::VALUE - (valuePos + 1);
 
     return valueRank;
 }
@@ -438,11 +438,11 @@ template <typename TSpec, typename TPos>
 inline typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
 _getValueRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos, bool c)
 {
-    typedef TwoLevels<bool, TSpec>                                  TRankDictionarySpec;
-    typedef RankDictionary<TRankDictionarySpec>                     TRankDictionary;
-    typedef typename Size<TRankDictionary>::Type                    TSize;
-    typedef typename RankDictionaryValues_<TRankDictionarySpec>::Type TValues;
-    typedef typename TValues::TBitVector                              TBitVector;
+    typedef TwoLevels<bool, TSpec>                                      TRankDictionarySpec;
+    typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
+    typedef typename Size<TRankDictionary>::Type                        TSize;
+    typedef typename RankDictionaryValues_<TRankDictionarySpec>::Type   TValues;
+    typedef typename TValues::TBitVector                                TBitVector;
 
     TSize bitPos = _toValuePos(dict, pos);
     TValues values = _valueAt(dict, pos);
@@ -453,7 +453,7 @@ _getValueRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos, bo
     // Clear the last bitsPos positions.
     TBitVector mask = hiBits(word, bitPos + 1);
 
-    // Get the sum of the values on.
+    // Get the sum of the bits on.
     return popCount(mask);
 }
 
