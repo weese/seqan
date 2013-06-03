@@ -45,45 +45,61 @@ add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
 add_executable (masai_indexer indexer.cpp
-                             store.h
-                             index.h
-                             options.h)
+                              options.h
+                              store.h
+                              store/genome.h
+                              store/reads.h
+                              store/store_io.h
+                              store/store_io_sam.h
+                              index.h
+                              index/genome_index.h
+                              index/reads_index.h
+                              index/index_qgram_stretched.h
+                              index/find_backtracking_stretched.h)
 
 add_executable (masai_mapper mapper.cpp
-                            mapper.h
-                            tags.h
-                            store.h
-                            index.h
-                            seeder.h
-                            extender.h
-                            manager.h
-                            matches.h
-                            writer.h
-                            options.h
-                            index/index_qgram_stretched.h
-                            index/find_backtracking_stretched.h
-                            store/store_io.h
-                            store/store_io_sam.h)
+                             mapper.h
+                             tags.h
+                             options.h
+                             seeder.h
+                             extender.h
+                             manager.h
+                             matches.h
+                             writer.h
+                             store.h
+                             store/genome.h
+                             store/reads.h
+                             store/store_io.h
+                             store/store_io_sam.h
+                             index.h
+                             index/genome_index.h
+                             index/reads_index.h
+                             index/index_qgram_stretched.h
+                             index/find_backtracking_stretched.h)
 
 add_executable (masai_output_se sorter.cpp
-                               sorter.h
-                               tags.h
-                               store.h
-                               matches.h
-                               writer.h
-                               options.h
-                               store/store_io.h
-                               store/store_io_sam.h)
+                                sorter.h
+                                tags.h
+                                options.h
+                                matches.h
+                                writer.h
+                                store.h
+                                store/genome.h
+                                store/reads.h
+                                store/store_io.h
+                                store/store_io_sam.h)
 
 add_executable (masai_output_pe pairer.cpp
-                               pairer.h
-                               tags.h
-                               store.h
-                               matches.h
-                               writer.h
-                               options.h
-                               store/store_io.h
-                               store/store_io_sam.h)
+                                pairer.h
+                                tags.h
+                                options.h
+                                matches.h
+                                writer.h
+                                store.h
+                                store/genome.h
+                                store/reads.h
+                                store/store_io.h
+                                store/store_io_sam.h)
 
 # Add dependencies found by find_package (SeqAn).
 target_link_libraries (masai_indexer ${SEQAN_LIBRARIES})

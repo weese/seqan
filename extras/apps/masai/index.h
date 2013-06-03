@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,14 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/index.h>
 #include <seqan/index_extras.h>
+
+#include "store.h"
 
 #include "index/index_qgram_stretched.h"
 #include "index/find_backtracking_stretched.h"
-
-#include "store.h"
+#include "index/genome_index.h"
+#include "index/reads_index.h"
 
 using namespace seqan;
 
@@ -156,8 +157,7 @@ struct Fibre<TGenomeBaseQGram, FibreDir>
 // Contigs FM Index Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, FMIndex<WT<>, CompressText> >   TGenomeFM;
-//typedef Index<TContigs, FMIndex<BMS<>, CompressText> >  TGenomeFM;
+typedef Index<TContigs, FMIndex<> >     TGenomeFM;
 
 // ----------------------------------------------------------------------------
 // Contigs Uncompressed FM Index Fibres
@@ -235,68 +235,6 @@ struct Fibre<TReadsQGram, FibreDir>
     typedef String<unsigned int, DefaultIndexStringSpec<TReadsQGram>::Type>    Type;
 };
 }
-
-// ============================================================================
-// Tags, Classes, Enums
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// Class GenomeIndex
-// ----------------------------------------------------------------------------
-
-template <typename TGenome, typename TIndex, typename TSpec = void>
-struct GenomeIndex
-{
-    Holder<TGenome>     genome;
-    TIndex              index;
-
-    GenomeIndex() {}
-
-    GenomeIndex(TGenome & genome) :
-        genome(genome)
-    {}
-};
-
-// ----------------------------------------------------------------------------
-// Class ReadsIndex
-// ----------------------------------------------------------------------------
-
-template <typename TReads, typename TIndex, typename TSpec = void>
-struct ReadsIndex
-{
-    Holder<TReads>      reads;
-    TIndex              index;
-
-    ReadsIndex() {}
-
-    ReadsIndex(TReads const & reads) :
-        reads(reads)
-    {}
-};
-
-// ============================================================================
-// Metafunctions
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// Metafunction GenomeHost<T>::Type                               [GenomeIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TGenome, typename TIndex, typename TSpec>
-struct GenomeHost<GenomeIndex<TGenome, TIndex, TSpec> >
-{
-    typedef TGenome Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction ReadsHost<T>::Type                                 [ReadsIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TReads, typename TIndex, typename TSpec>
-struct ReadsHost<ReadsIndex<TReads, TIndex, TSpec> >
-{
-    typedef TReads  Type;
-};
 
 // ============================================================================
 // Functions
@@ -417,223 +355,5 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
 //    return occ;
 //}
 //}
-
-// ----------------------------------------------------------------------------
-// Function load()                                                [GenomeIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TGenome, typename TIndex, typename TSpec, typename TString>
-bool load(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & genomeIndexFile)
-{
-    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
-
-    return open(genomeIndex.index, toCString(genomeIndexFile));
-}
-
-// ----------------------------------------------------------------------------
-// Function build()                                               [GenomeIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TGenome, typename TIndex, typename TSpec>
-void build(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex)
-{
-    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
-
-    // Iterator instantiation calls automatic index construction.
-    typename Iterator<TIndex, TopDown<> >::Type it(genomeIndex.index);
-}
-
-template <typename TGenome, typename TSpec>
-void build(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
-{
-    // IndexFM is built on the reversed genome.
-    reverse(getGenome(genomeIndex));
-
-    genomeIndex.index = TGenomeFM(getContigs(getGenome(genomeIndex)));
-
-    // Iterator instantiation calls automatic index construction.
-    typename Iterator<TGenomeFM, TopDown<> >::Type it(genomeIndex.index);
-
-    // NOTE(esiragusa): This removes a warning.
-    goRoot(it);
-
-    reverse(getGenome(genomeIndex));
-}
-
-// ----------------------------------------------------------------------------
-// Function dump()                                                [GenomeIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TGenome, typename TIndex, typename TSpec, typename TString>
-bool dump(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & genomeIndexFile)
-{
-    return save(genomeIndex.index, toCString(genomeIndexFile));
-}
-
-// ----------------------------------------------------------------------------
-// Function clear()                                               [GenomeIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TGenome, typename TSpec>
-void clear(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
-{
-    clear(genomeIndex.index);
-}
-
-// ----------------------------------------------------------------------------
-// Function build()                                                [ReadsIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TReads, typename TSpec, typename TManager>
-void build(ReadsIndex<TReads, TReadsQGram, TSpec> & readsIndex,
-           TManager & manager,
-           TReadSeqSize seedsLength,
-           TReadSeqSize firstSeed,
-           TReadSeqSize lastSeed)
-{
-    typedef typename Fibre<TReadsQGram, QGramSA>::Type          TReadsIndexSAFibre;
-    typedef typename Fibre<TReadsQGram, QGramDir>::Type         TReadsIndexDirFibre;
-    typedef typename Fibre<TReadsQGram, QGramShape>::Type       TReadsIndexShape;
-    typedef typename Fibre<TReadsQGram, QGramBucketMap>::Type   TReadsIndexBucketMap;
-
-    typedef typename Value<TReadsIndexDirFibre>::Type           TSize;
-    typedef Iterator<TReadSeq, Standard>::Type                  TReadSeqIterator;
-
-    TReadSeqStoreSize seqsCount = length(getSeqs(getReads(readsIndex)));
-
-    readsIndex.index = TReadsQGram(getSeqs(getReads(readsIndex)));
-
-    setStepSize(readsIndex.index, seedsLength);
-
-    TReadsIndexSAFibre & sa = indexSA(readsIndex.index);
-    TReadsIndexDirFibre & dir = indexDir(readsIndex.index);
-    TReadsIndexShape & shape = indexShape(readsIndex.index);
-    TReadsIndexBucketMap & bucketMap = indexBucketMap(readsIndex.index);
-
-    // Resize suffix array and directory.
-    resize(sa, (lastSeed - firstSeed) * seqsCount, Exact());
-    resize(dir, _fullDirLength(readsIndex.index), Exact());
-
-    // Clear directory.
-    _qgramClearDir(dir, bucketMap);
-
-    // Count qgrams.
-    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(manager, getReadId(getReads(readsIndex), seqId)))
-            continue;
-
-        TReadSeq & read = getSeqs(getReads(readsIndex))[seqId];
-        TReadSeqIterator itText = begin(read, Standard());
-
-        itText += seedsLength * firstSeed;
-        for (TSize i = firstSeed; i < lastSeed; ++i)
-        {
-            ++dir[requestBucket(bucketMap, hash(shape, itText))];
-            itText += seedsLength;
-        }
-    }
-
-    // Compute cumulative sum.
-    _qgramCummulativeSum(dir, False());
-
-    // Fill suffix array.
-    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(manager, getReadId(getReads(readsIndex), seqId)))
-            continue;
-
-        TReadSeq & read = getSeqs(getReads(readsIndex))[seqId];
-        TReadSeqIterator itText = begin(read, Standard());
-
-        typename Value<TReadsIndexSAFibre>::Type localPos;
-        assignValueI1(localPos, seqId);
-        assignValueI2(localPos, 0);
-
-        itText += seedsLength * firstSeed;
-        for (TSize i = firstSeed; i < lastSeed; ++i)
-        {
-            assignValueI2(localPos, seedsLength * i);
-
-            sa[dir[getBucket(bucketMap, hash(shape, itText)) + 1]++] = localPos;
-
-            itText += seedsLength;
-        }
-    }
-
-    // Refine buckets.
-//    _refineQGramIndex(sa, dir, indexText(readsIndex.index), weight(shape), seedsLength);
-//    _setHost(readsIndex.index);
-}
-
-// ----------------------------------------------------------------------------
-// Function build()                                                [ReadsIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TReads, typename TSpec, typename TManager>
-void build(ReadsIndex<TReads, TReadsWotd, TSpec> & readsIndex,
-           TManager & manager,
-           TReadSeqSize seedsLength,
-           TReadSeqSize firstSeed,
-           TReadSeqSize lastSeed)
-{
-    typedef typename Fibre<TReadsWotd, FibreSA>::Type           TReadsIndexSAFibre;
-    typedef typename Value<TReadsIndexSAFibre>::Type            TReadsIndexSAPos;
-
-//    clear(readsIndex.index);
-    readsIndex.index = TReadsWotd(getSeqs(getReads(readsIndex)));
-    TReadSeqStoreSize seqsCount = length(getSeqs(getReads(readsIndex)));
-
-    TReadsIndexSAFibre & sa = indexSA(readsIndex.index);
-
-    reserve(sa, (lastSeed - firstSeed) * seqsCount, Exact());
-
-    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(manager, getReadId(getReads(readsIndex), seqId)))
-            continue;
-
-        for (TReadSeqSize seed = firstSeed; seed < lastSeed; ++seed)
-        {
-            TReadsIndexSAPos localPos;
-            assignValueI1(localPos, seqId);
-            assignValueI2(localPos, seed * seedsLength);
-            appendValue(sa, localPos, Exact());
-        }
-    }
-}
-
-// ----------------------------------------------------------------------------
-// Function visit()                                                [ReadsIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TReads, typename TIndex, typename TSpec, typename TDepth>
-void visit(ReadsIndex<TReads, TIndex, TSpec> & readsIndex, TDepth depth)
-{
-    typedef typename Iterator<TIndex, TopDown<ParentLinks<> > >::Type  TReadsIndexIterator;
-    TReadsIndexIterator readsIt(readsIndex.index);
-
-    do
-    {
-        std::cout << representative(readsIt) << std::endl;
-        if (repLength(readsIt) >= depth || !goDown(readsIt))
-            if (!goRight(readsIt))
-                while (goUp(readsIt) && !goRight(readsIt)) ;
-    }
-    while (!isRoot(readsIt));
-}
-
-// ----------------------------------------------------------------------------
-// Function clear()                                                [ReadsIndex]
-// ----------------------------------------------------------------------------
-
-template <typename TReads, typename TIndex, typename TSpec>
-void clear(ReadsIndex<TReads, TIndex, TSpec> & readsIndex)
-{
-    clear(readsIndex.index);
-}
 
 #endif  // #ifndef SEQAN_EXTRAS_MASAI_INDEX_H_
