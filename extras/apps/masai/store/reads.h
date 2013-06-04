@@ -54,13 +54,15 @@ using namespace seqan;
 template <typename TUseReadStore_       = True,
           typename TUseReadNameStore_   = True,
           typename TForward_            = True,
-          typename TReverse_            = True>
+          typename TReverse_            = True,
+          typename TFragStoreConfig_    = void>
 struct ReadsConfig
 {
     typedef TUseReadStore_      TUseReadStore;
     typedef TUseReadNameStore_  TUseReadNameStore;
     typedef TForward_           TForward;
     typedef TReverse_           TReverse;
+    typedef TFragStoreConfig_   TFragStoreConfig;
 };
 
 // ----------------------------------------------------------------------------
@@ -70,7 +72,11 @@ struct ReadsConfig
 template <typename TSpec = void, typename TConfig = ReadsConfig<> >
 struct Reads
 {
-    Holder<TFragmentStore>          _store;
+    typedef typename TConfig::TFragStoreConfig      TFragStoreConfig_;
+    typedef FragmentStore<TSpec, TFragStoreConfig_> TFragmentStore_;
+    typedef typename TFragmentStore_::TReadSeqStore TReadSeqStore;
+
+    Holder<TFragmentStore_>         _store;
     unsigned                        _avgSeqLengthEstimate;
     unsigned                        _avgNameLengthEstimate;
     unsigned                        _countEstimate;
@@ -127,8 +133,11 @@ struct ReadsLoader
 // ----------------------------------------------------------------------------
 
 template <typename TObject>
-struct ReadsHost
-{};
+struct ReadsHost {};
+
+template <typename TObject>
+struct ReadsHost<TObject const> :
+    ReadsHost<TObject> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction ReadsHost<T>::Type                                [ReadsLoader]
@@ -161,7 +170,7 @@ setReads(TObject & object, TReads const & reads)
 
 template <typename TObject>
 inline typename ReadsHost<TObject>::Type &
-getReads(TObject const & object)
+getReads(TObject & object)
 {
     return value(object.reads);
 }
@@ -178,8 +187,7 @@ inline void reserve(Reads<TSpec, TConfig> & reads)
 
 template <typename TConfig>
 inline void reserve(Reads<PairedEnd, TConfig> & /* reads */)
-{
-}
+{}
 
 template <typename TSpec, typename TConfig, typename TSize>
 inline void reserve(Reads<TSpec, TConfig> & reads, TSize count)
@@ -269,7 +277,10 @@ inline void appendId(Reads<TSpec, TConfig> & /* reads */, TReadId const & /* mat
 template <typename TSpec, typename TConfig, typename TReadId>
 inline void appendId(Reads<TSpec, TConfig> & reads, TReadId const & matePairId, True const & /* tag */)
 {
-	typename Value<TFragmentStore::TReadStore>::Type r;
+    typedef FragmentStore<TSpec, typename TConfig::TFragStoreConfig>    TFragmentStore;
+    typedef typename Value<typename TFragmentStore::TReadStore>::Type   TReadStoreElement;
+
+	TReadStoreElement r;
 	r.matePairId = matePairId;
 
 	appendValue(getIds(reads), r, Generous());
@@ -280,7 +291,7 @@ inline void appendId(Reads<TSpec, TConfig> & reads, TReadId const & matePairId, 
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-inline TReadSeqStore &
+inline typename FragmentStore<TSpec, typename TConfig::TFragStoreConfig>::TReadSeqStore &
 getSeqs(Reads<TSpec, TConfig> const & reads)
 {
     return value(reads._store).readSeqStore;
@@ -291,7 +302,7 @@ getSeqs(Reads<TSpec, TConfig> const & reads)
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-inline TReadNameStore &
+inline typename FragmentStore<TSpec, typename TConfig::TFragStoreConfig>::TReadNameStore &
 getNames(Reads<TSpec, TConfig> const & reads)
 {
     return value(reads._store).readNameStore;
@@ -302,7 +313,7 @@ getNames(Reads<TSpec, TConfig> const & reads)
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-inline TReadStore &
+inline typename FragmentStore<TSpec, typename TConfig::TFragStoreConfig>::TReadStore &
 getIds(Reads<TSpec, TConfig> const & reads)
 {
     return value(reads._store).readStore;
@@ -344,7 +355,8 @@ inline bool isReverse(Reads<TSpec, TConfig> const & reads, TSeqId seqId)
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-TReadSeqSize avgSeqLength(Reads<TSpec, TConfig> const & reads)
+inline typename Size<typename FragmentStore<TSpec, typename TConfig::TFragStoreConfig>::TReadSeqStore>::Type
+avgSeqLength(Reads<TSpec, TConfig> const & reads)
 {
     return reads._avgSeqLengthEstimate;
 }
@@ -374,8 +386,10 @@ unsigned long _estimateRecordSize(ReadsLoader<TSpec, TConfig> const & loader, Fa
 template <typename TSpec, typename TConfig>
 void _estimateReadsStatistics(ReadsLoader<TSpec, TConfig> & loader)
 {
-    CharString                  seqName;
-    FragStoreConfig::TReadSeq   seq;
+    typedef typename TConfig::TFragStoreConfig::TReadSeq    TReadSeq;
+
+    CharString  seqName;
+    TReadSeq    seq;
 
     // Read first record.
     if (readRecord(seqName, seq, *(loader._reader), loader._fileFormat) != 0)
@@ -510,8 +524,12 @@ bool load(ReadsLoader<TSpec, TConfig> & loader, TSize count)
 template <typename TSpec, typename TConfig, typename TSize, typename TFormat>
 bool load(ReadsLoader<TSpec, TConfig> & loader, TSize count, TFormat const & /* tag */)
 {
-    CharString                  seqName;
-    FragStoreConfig::TReadSeq   seq;
+    typedef FragmentStore<TSpec, typename TConfig::TFragStoreConfig>    TFragmentStore;
+    typedef typename Value<typename TFragmentStore::TReadStore>::Type   TReadStoreElement;
+    typedef typename TConfig::TFragStoreConfig::TReadSeq                TReadSeq;
+
+    CharString  seqName;
+    TReadSeq    seq;
 
     // Read records.
     for (; count > 0 && !atEnd(loader); count--)
@@ -542,9 +560,13 @@ bool load(ReadsLoader<TSpec, TConfig> & loader, TSize count, TFormat const & /* 
 template <typename TSpec, typename TConfig>
 void _loadReverseComplement(ReadsLoader<TSpec, TConfig> & loader)
 {
+    typedef FragmentStore<TSpec, typename TConfig::TFragStoreConfig>    TFragmentStore;
+    typedef typename Size<typename TFragmentStore::TReadSeqStore>::Type TReadSeqStoreSize;
+    typedef typename TConfig::TFragStoreConfig::TReadSeq                TReadSeq;
+
     for (TReadSeqStoreSize readId = 0; readId < getReads(loader).readsCount; ++readId)
     {
-        TReadSeq & read = getSeqs(getReads(loader))[readId];
+        TReadSeq const & read = getSeqs(getReads(loader))[readId];
         appendSeq(getReads(loader), read);
         reverseComplement(back(getSeqs(getReads(loader))));
     }

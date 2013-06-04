@@ -44,6 +44,13 @@
 using namespace seqan;
 
 // ============================================================================
+// Forwards
+// ============================================================================
+
+template <typename TObject>
+struct Contigs;
+
+// ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
 
@@ -51,7 +58,7 @@ using namespace seqan;
 // Class GenomeConfig
 // ----------------------------------------------------------------------------
 
-template <typename TFragStoreConfig_    = FragmentStoreConfig<> >
+template <typename TFragStoreConfig_ = FragmentStoreConfig<> >
 struct GenomeConfig
 {
     typedef TFragStoreConfig_   TFragStoreConfig;
@@ -61,17 +68,21 @@ struct GenomeConfig
 // Class Genome
 // ----------------------------------------------------------------------------
 
-template <typename TSpec = void>
+template <typename TSpec = void, typename TConfig = GenomeConfig<> >
 struct Genome
 {
-    Holder<TFragmentStore>  _store;
-    TContigs                contigs;
-    String<TContigSeqSize>  contigsLength;
+    typedef typename TConfig::TFragStoreConfig          TFragStoreConfig_;
+    typedef FragmentStore<TSpec, TFragStoreConfig_>     TFragmentStore_;
+
+    Holder<TFragmentStore_>                 _store;
+    typename Contigs<Genome>::Type          contigs;
+    String<typename Size<Genome>::Type>     contigsLength;
 
     Genome() :
         _store()
     {}
 
+    template <typename TFragmentStore>
     Genome(TFragmentStore & store) :
         _store(store)
     {}
@@ -86,8 +97,50 @@ struct Genome
 // ----------------------------------------------------------------------------
 
 template <typename TObject>
-struct GenomeHost
-{};
+struct GenomeHost {};
+
+template <typename TObject>
+struct GenomeHost<TObject const>
+{
+    typedef typename GenomeHost<TObject>::Type const    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Contigs                                               [TObject]
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+struct Contigs {};
+
+template <typename TObject>
+struct Contigs<TObject const>
+{
+    typedef typename Contigs<TObject>::Type const   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Contigs                                                [Genome]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TConfig>
+struct Contigs<Genome<TSpec, TConfig> >
+{
+    typedef typename TConfig::TFragStoreConfig          TFragStoreConfig_;
+    typedef FragmentStore<TSpec, TFragStoreConfig_>     TFragmentStore_;
+    typedef typename TFragStoreConfig_::TContigSeq      TContigSeq_;
+
+    typedef StringSet<TContigSeq_, Dependent<> >        Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Size                                                   [Genome]
+// ----------------------------------------------------------------------------
+
+namespace seqan {
+template <typename TSpec, typename TConfig>
+struct Size<Genome<TSpec, TConfig> > :
+    Size<typename Contigs<Genome<TSpec, TConfig> >::Type> {};
+}
 
 // ============================================================================
 // Functions
@@ -97,9 +150,9 @@ struct GenomeHost
 // Function setGenome()                                               [TObject]
 // ----------------------------------------------------------------------------
 
-template <typename TObject, typename TSpec>
+template <typename TObject, typename TSpec, typename TConfig>
 inline void
-setGenome(TObject & object, Genome<TSpec> const & genome)
+setGenome(TObject & object, Genome<TSpec, TConfig> const & genome)
 {
     setValue(object.genome, genome);
 }
@@ -110,7 +163,7 @@ setGenome(TObject & object, Genome<TSpec> const & genome)
 
 template <typename TObject>
 inline typename GenomeHost<TObject>::Type &
-getGenome(TObject const & object)
+getGenome(TObject & object)
 {
     return value(object.genome);
 }
@@ -119,8 +172,8 @@ getGenome(TObject const & object)
 // Function load()                                                     [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec, typename TString>
-bool load(Genome<TSpec> & genome, TString const & genomeFile)
+template <typename TSpec, typename TConfig, typename TString>
+bool load(Genome<TSpec, TConfig> & genome, TString const & genomeFile)
 {
     // TODO(esiragusa): Use record reader instead of loadContigs() from FragmentStore.
     if (!loadContigs(value(genome._store), genomeFile))
@@ -140,13 +193,13 @@ bool load(Genome<TSpec> & genome, TString const & genomeFile)
 // Function _updateContigs()                                           [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-void _updateContigs(Genome<TSpec> & genome)
+template <typename TSpec, typename TConfig>
+void _updateContigs(Genome<TSpec, TConfig> & genome)
 {
     clear(genome.contigs);
     reserve(genome.contigs, length(value(genome._store).contigStore));
 
-    for (TContigStoreSize contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+    for (unsigned contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
         appendValue(genome.contigs, value(genome._store).contigStore[contigId].seq);
 }
 
@@ -154,13 +207,13 @@ void _updateContigs(Genome<TSpec> & genome)
 // Function _updateContigsLength()                                     [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-void _updateContigsLength(Genome<TSpec> & genome)
+template <typename TSpec, typename TConfig>
+void _updateContigsLength(Genome<TSpec, TConfig> & genome)
 {
     clear(genome.contigsLength);
     reserve(genome.contigsLength, length(genome.contigs), Exact());
 
-    for (TContigStoreSize contigId = 0; contigId < length(genome.contigs); ++contigId)
+    for (unsigned contigId = 0; contigId < length(genome.contigs); ++contigId)
         appendValue(genome.contigsLength, length(genome.contigs[contigId]));
 }
 
@@ -168,10 +221,10 @@ void _updateContigsLength(Genome<TSpec> & genome)
 // Function reverse()                                                  [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-void reverse(Genome<TSpec> & genome)
+template <typename TSpec, typename TConfig>
+void reverse(Genome<TSpec, TConfig> & genome)
 {
-    for (TContigStoreSize contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+    for (unsigned contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
         reverse(value(genome._store).contigStore[contigId].seq);
 }
 
@@ -179,9 +232,16 @@ void reverse(Genome<TSpec> & genome)
 // Function getContigs()                                               [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-inline TContigs &
-getContigs(Genome<TSpec> & genome)
+template <typename TSpec, typename TConfig>
+inline typename Contigs<Genome<TSpec, TConfig> >::Type &
+getContigs(Genome<TSpec, TConfig> & genome)
+{
+    return genome.contigs;
+}
+
+template <typename TSpec, typename TConfig>
+inline typename Contigs<Genome<TSpec, TConfig> const>::Type &
+getContigs(Genome<TSpec, TConfig> const & genome)
 {
     return genome.contigs;
 }
@@ -190,9 +250,9 @@ getContigs(Genome<TSpec> & genome)
 // Function contigLength()                                             [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec, typename TContigId>
-inline TContigSeqSize
-contigLength(Genome<TSpec> const & genome, TContigId contigId)
+template <typename TSpec, typename TConfig, typename TContigId>
+inline typename Size<Genome<TSpec, TConfig> const>::Type
+contigLength(Genome<TSpec, TConfig> const & genome, TContigId contigId)
 {
     return genome.contigsLength[contigId];
 }
@@ -201,8 +261,8 @@ contigLength(Genome<TSpec> const & genome, TContigId contigId)
 // Function clear()                                                    [Genome]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec>
-void clear(Genome<TSpec> & genome)
+template <typename TSpec, typename TConfig>
+void clear(Genome<TSpec, TConfig> & genome)
 {
     clear(genome.contigs);
     clearContigs(value(genome._store));
