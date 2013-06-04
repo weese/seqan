@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -58,12 +58,14 @@ using namespace seqan;
 
 template <typename TDistance_       = EditDistance,
           typename TStrategy_       = AnyBest,
-          typename TBacktracking_   = MultipleBacktracking>
+          typename TBacktracking_   = MultipleBacktracking,
+          typename TGenomeConfig_   = GenomeConfig<> >
 struct ReadMapperConfig
 {
 	typedef TDistance_          TDistance;
 	typedef TStrategy_          TStrategy;
     typedef TBacktracking_      TBacktracking;
+    typedef TGenomeConfig_      TGenomeConfig;
 };
 
 // ----------------------------------------------------------------------------
@@ -73,13 +75,11 @@ struct ReadMapperConfig
 template <typename TReads, typename TDelegate, typename TSpec = void, typename TConfig = ReadMapperConfig<> >
 struct Mapper
 {
-    typedef Mapper<TReads, TDelegate, TSpec, TConfig>   TMapper;
-    typedef typename GenomeHost<TMapper>::Type          TGenome;
-
+    typedef typename GenomeHost<Mapper>::Type                                                       TGenome;
     typedef Manager<TReads, TDelegate, typename TConfig::TStrategy>                                 TManager;
     typedef Extender<TGenome, TReads, TManager, typename TConfig::TDistance>                        TExtender;
-    typedef SeederConfig<Nothing, typename TConfig::TBacktracking, TReadsQGram>                     TSeederConfigExt;
-    typedef SeederConfig<HammingDistance, typename TConfig::TBacktracking, TReadsWotd>              TSeederConfigApx;
+    typedef SeederConfig<Nothing, typename TConfig::TBacktracking, TReadsQGramSpec>                 TSeederConfigExt;
+    typedef SeederConfig<HammingDistance, typename TConfig::TBacktracking, TReadsWotdSpec>          TSeederConfigApx;
     typedef Seeder<TReads, TManager, TExtender, void, TSeederConfigExt>                             TSeederExt;
     typedef Seeder<TReads, TManager, TExtender, void, TSeederConfigApx>                             TSeederApx;
 
@@ -143,7 +143,7 @@ struct ReadsHost<Mapper<TReads, TDelegate, TSpec, TConfig> >
 template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
 struct GenomeHost<Mapper<TReads, TDelegate, TSpec, TConfig> >
 {
-    typedef Genome<void>    Type;
+    typedef Genome<TSpec, typename TConfig::TGenomeConfig>  Type;
 };
 
 // ============================================================================

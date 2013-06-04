@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -209,15 +209,18 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runMapper()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex, typename TFormat, typename TMapperConfig, typename TReadsConfig>
-int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfig const & /* config */)
+template <typename TIndex, typename TFormat, typename TMapperConfig, typename TGenomeConfig, typename TReadsConfig>
+int runMapper(Options & options,
+              TMapperConfig const & /* config */,
+              TGenomeConfig const & /* config */,
+              TReadsConfig const & /* config */)
 {
-    typedef Genome<void>                                                            TGenome;
-    typedef GenomeIndex<TGenome, TIndex>                                            TGenomeIndex;
-    typedef Reads<void, TReadsConfig>                                               TReads;
-    typedef ReadsLoader<void, TReadsConfig>                                         TReadsLoader;
-    typedef Writer<TGenome, TReads, TFormat, typename TMapperConfig::TDistance>     TWriter;
-    typedef Mapper<TReads, TWriter, void, TMapperConfig>                            TMapper;
+    typedef Genome<void, TGenomeConfig>                                                 TGenome;
+    typedef GenomeIndex<TGenome, TIndex, void>                                          TGenomeIndex;
+    typedef Reads<void, TReadsConfig>                                                   TReads;
+    typedef ReadsLoader<void, TReadsConfig>                                             TReadsLoader;
+    typedef Writer<TGenome, TReads, TFormat, typename TMapperConfig::TDistance, void>   TWriter;
+    typedef Mapper<TReads, TWriter, void, TMapperConfig>                                TMapper;
 
     TFragmentStore      store;
     TGenome             genome(store);
@@ -321,13 +324,13 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
 template <typename TIndex, typename TFormat, typename TDistance, typename TStrategy, typename TBacktracking>
 int runMapper(Options & options)
 {
-    typedef ReadMapperConfig<TDistance, TStrategy, TBacktracking>           TMapperConfig;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadStore;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadNameStore;
+    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, FragStoreConfig>  TReadsConfig;
+    typedef GenomeConfig<FragStoreConfig>                                               TGenomeConfig;
+    typedef ReadMapperConfig<TDistance, TStrategy, TBacktracking, TGenomeConfig>        TMapperConfig;
 
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadStore;
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadNameStore;
-    typedef ReadsConfig<TUseReadStore, TUseReadNameStore>                   TReadsConfig;
-
-    return runMapper<TIndex, TFormat>(options, TMapperConfig(), TReadsConfig());
+    return runMapper<TIndex, TFormat>(options, TMapperConfig(), TGenomeConfig(), TReadsConfig());
 }
 
 // ----------------------------------------------------------------------------
@@ -392,16 +395,16 @@ int configureGenomeIndex(Options & options)
     switch (options.genomeIndexType)
     {
         case Options::INDEX_ESA:
-            return configureOutputFormat<TGenomeEsa>(options);
+            return configureOutputFormat<TGenomeEsaSpec>(options);
 
         case Options::INDEX_SA:
-            return configureOutputFormat<TGenomeSa>(options);
+            return configureOutputFormat<TGenomeSaSpec>(options);
 
 //    case Options::INDEX_QGRAM:
-//        return configureOutputFormat<TGenomeQGram>(options);
+//        return configureOutputFormat<TGenomeQGramSpec>(options);
 
         case Options::INDEX_FM:
-            return configureOutputFormat<TGenomeFM>(options);
+            return configureOutputFormat<TGenomeFMSpec>(options);
 
         default:
             return 1;

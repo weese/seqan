@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,14 +53,14 @@ using namespace seqan;
 // Class SeederConfig
 // ----------------------------------------------------------------------------
 
-template <typename TDistance_   = HammingDistance,
-          typename TAlgorithm_  = MultipleBacktracking,
-          typename TReadsIndex_ = TReadsWotd>
+template <typename TDistance_       = HammingDistance,
+          typename TAlgorithm_      = MultipleBacktracking,
+          typename TReadsIndexSpec_ = TReadsWotdSpec>
 struct SeederConfig
 {
-    typedef TDistance_      TDistance;
-    typedef TAlgorithm_     TAlgorithm;
-    typedef TReadsIndex_    TReadsIndex;
+    typedef TDistance_          TDistance;
+    typedef TAlgorithm_         TAlgorithm;
+    typedef TReadsIndexSpec_    TReadsIndexSpec;
 };
 
 // ----------------------------------------------------------------------------
@@ -70,7 +70,7 @@ struct SeederConfig
 template <typename TReads, typename TManager, typename TDelegate, typename TSpec = void, typename TConfig = SeederConfig<> >
 struct Seeder
 {
-    typedef ReadsIndex<TReads, typename TConfig::TReadsIndex>   TReadsIndex;
+    typedef ReadsIndex<TReads, typename TConfig::TReadsIndexSpec>   TReadsIndex;
 
     Holder<TReads>      reads;
     TReadsIndex         readsIndex;
@@ -156,10 +156,11 @@ void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
           TDistance const & /* tag */,
           MultipleBacktracking const & /* tag */)
 {
-    typedef typename TConfig::TReadsIndex                   TReadsIndex;
-    typedef Backtracking<TDistance>                         TBacktracking;
-    typedef Finder<TGenomeIndex, TBacktracking>             TFinder;
-    typedef Pattern<TReadsIndex, TBacktracking>             TPattern;
+    typedef Seeder<TReads, TManager, TDelegate, TSpec, TConfig>     TSeeder;
+    typedef typename TSeeder::TReadsIndex::TIndex                   TReadsIndex;
+    typedef Backtracking<TDistance>                                 TBacktracking;
+    typedef Finder<TGenomeIndex, TBacktracking>                     TFinder;
+    typedef Pattern<TReadsIndex, TBacktracking>                     TPattern;
 
     build(seeder.readsIndex, seeder.manager, seedsLength, firstSeed, lastSeed);
 
@@ -257,10 +258,11 @@ void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
           Nothing const & /* tag */,
           MultipleBacktracking const & /* tag */)
 {
-    typedef typename TConfig::TReadsIndex                   TReadsIndex;
-    typedef Backtracking<HammingDistance, Stretched<> >     TBacktracking;
-    typedef Finder<TGenomeIndex, TBacktracking>             TFinder;
-    typedef Pattern<TReadsIndex, TBacktracking>             TPattern;
+    typedef Seeder<TReads, TManager, TDelegate, TSpec, TConfig>     TSeeder;
+    typedef typename TSeeder::TReadsIndex::TIndex                   TReadsIndex;
+    typedef Backtracking<HammingDistance, Stretched<> >             TBacktracking;
+    typedef Finder<TGenomeIndex, TBacktracking>                     TFinder;
+    typedef Pattern<TReadsIndex, TBacktracking>                     TPattern;
 
     build(seeder.readsIndex, seeder.manager, seedsLength, firstSeed, lastSeed);
 
