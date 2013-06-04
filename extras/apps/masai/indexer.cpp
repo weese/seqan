@@ -130,11 +130,12 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runIndexer()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex>
+template <typename TIndexSpec>
 int runIndexer(Options & options)
 {
-    typedef Genome<>                        TGenome;
-    typedef GenomeIndex<TGenome, TIndex>    TGenomeIndex;
+    typedef GenomeConfig<FragStoreConfig>       TGenomeConfig;
+    typedef Genome<void, TGenomeConfig>         TGenome;
+    typedef GenomeIndex<TGenome, TIndexSpec>    TGenomeIndex;
 
     TFragmentStore      store;
     TGenome             genome(store);
@@ -180,16 +181,16 @@ int configureIndex(Options & options)
     switch (options.genomeIndexType)
     {
     case Options::INDEX_ESA:
-        return runIndexer<TGenomeEsa>(options);
+        return runIndexer<TGenomeEsaSpec>(options);
 
     case Options::INDEX_SA:
-        return runIndexer<TGenomeSa>(options);
+        return runIndexer<TGenomeSaSpec>(options);
 
     case Options::INDEX_QGRAM:
-        return runIndexer<TGenomeQGram>(options);
+        return runIndexer<TGenomeQGramSpec>(options);
 
     case Options::INDEX_FM:
-        return runIndexer<TGenomeFM>(options);
+        return runIndexer<TGenomeFMSpec>(options);
 
     default:
         return 1;
