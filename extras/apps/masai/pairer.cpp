@@ -187,14 +187,14 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runPairer()
 // ----------------------------------------------------------------------------
 
-template <typename TDistance, typename TFormat, typename TReadsConfig>
-int runPairer(Options & options, TReadsConfig const & /* config */)
+template <typename TDistance, typename TFormat, typename TReadsConfig, typename TGenomeConfig>
+int runPairer(Options & options, TReadsConfig const & /* config */, TGenomeConfig const & /* config */)
 {
-    typedef Genome<void>                                                        TGenome;
+    typedef Genome<void, TGenomeConfig>                                         TGenome;
     typedef Reads<PairedEnd, TReadsConfig>                                      TReads;
     typedef ReadsLoader<PairedEnd, TReadsConfig>                                TReadsLoader;
-    typedef Writer<TGenome, TReads, TFormat, TDistance>                         TWriter;
-    typedef Pairer<TReads, TWriter>                                             TPairer;
+    typedef Writer<TGenome, TReads, TFormat, TDistance, void>                   TWriter;
+    typedef Pairer<TReads, TWriter, void>                                       TPairer;
 
     TFragmentStore      store;
     TGenome             genome(store);
@@ -281,11 +281,12 @@ int runPairer(Options & options, TReadsConfig const & /* config */)
 template <typename TDistance, typename TFormat>
 int runPairer(Options & options)
 {
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadStore;
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadNameStore;
-    typedef ReadsConfig<TUseReadStore, TUseReadNameStore>                   TReadsConfig;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadStore;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadNameStore;
+    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, FragStoreConfig>  TReadsConfig;
+    typedef GenomeConfig<FragStoreConfig>                                               TGenomeConfig;
 
-    return runPairer<TDistance, TFormat>(options, TReadsConfig());
+    return runPairer<TDistance, TFormat>(options, TReadsConfig(), TGenomeConfig());
 }
 
 // ----------------------------------------------------------------------------
