@@ -588,7 +588,7 @@ inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar 
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos /* pos */)
+inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
     typedef RankDictionary<TRankDictionarySpec>                     TRankDictionary;
@@ -607,7 +607,7 @@ inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos /
     _clearBlockAt(dict, 0u);
 
     // Iterate through the blocks.
-    for (TFibreRanksIter ranksIt = ranksBegin /* + _toBlockPos(dict, pos) */; ranksIt != ranksEnd - 1; ++ranksIt)
+    for (TFibreRanksIter ranksIt = ranksBegin; ranksIt != ranksEnd - 1; ++ranksIt)
     {
         TSize blockPos = ranksIt - ranksBegin;
         TSize curr = _toPos(dict, blockPos);
@@ -615,16 +615,6 @@ inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos /
 
         _blockAt(dict, next) = _blockAt(dict, curr) + _getValuesRanks(dict, next - 1);
     }
-}
-
-// ----------------------------------------------------------------------------
-// Function updateRanks()                                      [RankDictionary]
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TSpec>
-inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
-{
-    updateRanks(dict, 0u);
 }
 
 // ----------------------------------------------------------------------------
