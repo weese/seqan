@@ -177,14 +177,14 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runSorter()
 // ----------------------------------------------------------------------------
 
-template <typename TDistance, typename TFormat, typename TReadsConfig>
-int runSorter(Options & options, TReadsConfig const & /* config */)
+template <typename TDistance, typename TFormat, typename TReadsConfig, typename TGenomeConfig>
+int runSorter(Options & options, TReadsConfig const & /* config */, TGenomeConfig const & /* config */)
 {
-    typedef Genome<void>                                                        TGenome;
+    typedef Genome<void, TGenomeConfig>                                         TGenome;
     typedef Reads<void, TReadsConfig>                                           TReads;
     typedef ReadsLoader<void, TReadsConfig>                                     TReadsLoader;
-    typedef Writer<TGenome, TReads, TFormat, TDistance>                         TWriter;
-    typedef Sorter<TWriter>                                                     TSorter;
+    typedef Writer<TGenome, TReads, TFormat, TDistance, void>                   TWriter;
+    typedef Sorter<TWriter, void>                                               TSorter;
 
     TFragmentStore      store;
     TGenome             genome(store);
@@ -268,11 +268,12 @@ int runSorter(Options & options, TReadsConfig const & /* config */)
 template <typename TDistance, typename TFormat>
 int runSorter(Options & options)
 {
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadStore;
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadNameStore;
-    typedef ReadsConfig<TUseReadStore, TUseReadNameStore>                   TReadsConfig;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadStore;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadNameStore;
+    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, FragStoreConfig>  TReadsConfig;
+    typedef GenomeConfig<FragStoreConfig>                                               TGenomeConfig;
 
-    return runSorter<TDistance, TFormat>(options, TReadsConfig());
+    return runSorter<TDistance, TFormat>(options, TReadsConfig(), TGenomeConfig());
 }
 
 // ----------------------------------------------------------------------------
