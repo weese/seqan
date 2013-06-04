@@ -245,7 +245,10 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
     // Constructors
     // ------------------------------------------------------------------------
 
-    RankDictionary() : _length(0) {};
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+    RankDictionary() {};
+
+//    RankDictionary() : _length(0) {};
 
     template <typename TText>
     RankDictionary(TText const & text)
@@ -263,14 +266,14 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type &
+SEQAN_FUNC typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type &
 getFibre(RankDictionary<TwoLevels<TValue, TSpec> > & dict, FibreRanks)
 {
     return dict.ranks;
 }
 
 template <typename TValue, typename TSpec>
-inline typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type const &
+SEQAN_FUNC typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> >, FibreRanks>::Type const &
 getFibre(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, FibreRanks)
 {
     return dict.ranks;
@@ -281,7 +284,7 @@ getFibre(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, FibreRanks)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toPosInWord(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos posInBlock)
 {
     typedef TwoLevels<TValue, TSpec>                    TRankDictionarySpec;
@@ -295,7 +298,7 @@ _toPosInWord(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos 
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toWordPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos posInBlock)
 {
     typedef TwoLevels<TValue, TSpec>                    TRankDictionarySpec;
@@ -309,7 +312,7 @@ _toWordPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos po
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toPosInBlock(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                    TRankDictionarySpec;
@@ -323,7 +326,7 @@ _toPosInBlock(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 _toBlockPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                    TRankDictionarySpec;
@@ -351,14 +354,14 @@ _toPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TBlockPos b
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord &
+SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord &
 _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return _valuesAt(dict, blockPos, wordPos).i;
 }
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord const &
+SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord const &
 _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return _valuesAt(dict, blockPos, wordPos).i;
@@ -369,14 +372,14 @@ _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockP
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TValues &
+SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TValues &
 _valuesAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return dict.ranks[blockPos].values[wordPos];
 }
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TValues const &
+SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TValues const &
 _valuesAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return dict.ranks[blockPos].values[wordPos];
@@ -387,14 +390,14 @@ _valuesAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos bloc
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type &
+SEQAN_FUNC typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type &
 _blockAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     return dict.ranks[_toBlockPos(dict, pos)].block;
 }
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type const &
+SEQAN_FUNC typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type const &
 _blockAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     return dict.ranks[_toBlockPos(dict, pos)].block;
@@ -425,7 +428,7 @@ inline void _clearBlockAt(RankDictionary<TwoLevels<bool, TSpec> > & dict, TPos p
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos, typename TChar>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 _getBlockRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
     return _blockAt(dict, pos)[ordValue(c)];
@@ -436,7 +439,7 @@ _getBlockRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, 
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
 _getBlockRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos, bool c)
 {
     // If c == false then return the complementary rank.
@@ -473,7 +476,7 @@ _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TBlockPos, typename TWordPos, typename TPosInWord>
-inline typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
 _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict,
               TBlockPos blockPos,
               TWordPos wordPos,
@@ -513,7 +516,7 @@ _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict,
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TBlockPos, typename TWordPos, typename TPosInWord>
-inline typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
 _getValueRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict,
               TBlockPos blockPos,
               TWordPos wordPos,
@@ -542,7 +545,7 @@ _getValueRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
               TBlockPos blockPos,
               TWordPos wordPos,
@@ -559,7 +562,7 @@ _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TValue c)
 {
     typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
@@ -618,7 +621,7 @@ _getValuesRanks(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos, typename TChar>
-inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
     return _getBlockRank(dict, pos, static_cast<TValue>(c)) + _getValueRank(dict, pos, static_cast<TValue>(c));
@@ -629,7 +632,7 @@ getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar 
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TPos>
-inline typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<bool, TSpec> > const>::Type
 getRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos)
 {
     return getRank(dict, pos, true);
@@ -640,7 +643,7 @@ getRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Value<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+SEQAN_FUNC typename Value<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
@@ -656,7 +659,7 @@ getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 }
 
 template <typename TValue, typename TSpec, typename TPos>
-inline typename Value<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+SEQAN_FUNC typename Value<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
@@ -775,7 +778,7 @@ inline void clear(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-inline bool empty(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
+SEQAN_FUNC bool empty(RankDictionary<TwoLevels<TValue, TSpec> > const & dict)
 {
     return empty(dict.ranks);
 }
