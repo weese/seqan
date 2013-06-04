@@ -131,6 +131,10 @@ struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
     typedef TValue  Type;
 };
 
+template <typename TValue, typename TSpec>
+struct Value<RankDictionary<TwoLevels<TValue, TSpec> > const> :
+    Value<RankDictionary<TwoLevels<TValue, TSpec> > > {};
+
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitsPerBlock_
 // ----------------------------------------------------------------------------
@@ -657,7 +661,8 @@ getRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TPos pos)
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TPos>
-inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
+inline typename Value<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
+getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
     typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
@@ -672,7 +677,8 @@ inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TPos po
 }
 
 template <typename TValue, typename TSpec, typename TPos>
-inline TValue getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
+inline typename Value<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+getValue(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos)
 {
     typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
     typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
