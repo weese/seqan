@@ -587,7 +587,7 @@ inline void appendValue(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TChar 
 // Function updateRanks()                                      [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec, typename TPos>
+template <typename TValue, typename TSpec>
 inline void updateRanks(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 {
     typedef TwoLevels<TValue, TSpec>                                TRankDictionarySpec;
