@@ -37,37 +37,16 @@
 
 namespace seqan {
 
-// TODO(esiragusa): Move this somewhere else.
-#if defined(__CUDA_ARCH__)
-template <typename TSpec = void>
-struct WordSize : BitsPerValue<__uint32> {};
-#else
-template <typename TSpec = void>
-struct WordSize : BitsPerValue<unsigned long> {};
-#endif
-
-template <unsigned A, unsigned B>
-struct Min
-{
-    static const unsigned VALUE = (A <= B) ? A : B;
-};
-
-template <unsigned A, unsigned B>
-struct Max
-{
-    static const unsigned VALUE = (A >= B) ? A : B;
-};
-
 // ============================================================================
 // Forwards
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Struct RankDictionaryEntry_
+// Metafunction RankDictionaryBitMask_
 // ----------------------------------------------------------------------------
 
 template <typename TSpec>
-struct RankDictionaryEntry_;
+struct RankDictionaryBitMask_;
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitsPerBlock_
@@ -91,11 +70,11 @@ template <typename TSpec>
 struct RankDictionaryValues_;
 
 // ----------------------------------------------------------------------------
-// Metafunction RankDictionaryBitMask_
+// Struct RankDictionaryEntry_
 // ----------------------------------------------------------------------------
 
 template <typename TSpec>
-struct RankDictionaryBitMask_;
+struct RankDictionaryEntry_;
 
 // ============================================================================
 // Tags
