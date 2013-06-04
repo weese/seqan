@@ -122,7 +122,23 @@ struct TwoLevels {};
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction Value
+// Metafunction RankDictionaryBitMask_
+// ----------------------------------------------------------------------------
+
+template <>
+struct RankDictionaryBitMask_<__uint32>
+{
+    static const __uint32 VALUE = 0x55555555;
+};
+
+template <>
+struct RankDictionaryBitMask_<__uint64>
+{
+    static const __uint64 VALUE = 0x5555555555555555;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Value                                          [RankDictionary]
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
@@ -136,14 +152,13 @@ struct Value<RankDictionary<TwoLevels<TValue, TSpec> > const> :
     Value<RankDictionary<TwoLevels<TValue, TSpec> > > {};
 
 // ----------------------------------------------------------------------------
-// Metafunction RankDictionaryBitsPerBlock_
+// Metafunction RankDictionaryBitsPerBlock_                         [TwoLevels]
 // ----------------------------------------------------------------------------
+// The number of bits per block equals the number of bits of the block summary.
 
 template <typename TValue, typename TSpec>
-struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, TSpec> >
-{
-    static const unsigned VALUE = BitsPerValue<__uint64>::VALUE;
-};
+struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, TSpec> > :
+    BitsPerValue<typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBlock_                                [TwoLevels]
@@ -177,22 +192,6 @@ struct RankDictionaryValues_<TwoLevels<TValue, TSpec> >
     typedef Tuple<TValue, TRankDictionary_::_VALUES_PER_WORD, BitPacked<> > TPackedValues_;
     
     typedef Tuple<TPackedValues_, TRankDictionary_::_WORDS_PER_BLOCK>       Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction RankDictionaryBitMask_
-// ----------------------------------------------------------------------------
-
-template <>
-struct RankDictionaryBitMask_<__uint32>
-{
-    static const __uint32 VALUE = 0x55555555;
-};
-
-template <>
-struct RankDictionaryBitMask_<__uint64>
-{
-    static const __uint64 VALUE = 0x5555555555555555;
 };
 
 // ----------------------------------------------------------------------------
