@@ -80,7 +80,8 @@ struct SAValue<TContigs>
 // Contigs Enhanced Suffix Array Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, IndexEsa<> >                    TGenomeEsa;
+typedef IndexEsa<>                          TGenomeEsaSpec;
+typedef Index<TContigs, TGenomeEsaSpec>     TGenomeEsa;
 
 #if defined(SEQAN_EXTRAS_MASAI_DISABLE_MMAP)
 typedef DefaultIndexStringSpec<TGenomeEsa>::Type        TGenomeEsaStringSpec;
@@ -112,7 +113,8 @@ struct Fibre<TGenomeEsa, FibreChildtab>
 // Contigs Suffix Array Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, IndexSa<> >                     TGenomeSa;
+typedef IndexSa<>                           TGenomeSaSpec;
+typedef Index<TContigs, TGenomeSaSpec>      TGenomeSa;
 
 #if defined(SEQAN_EXTRAS_MASAI_DISABLE_MMAP)
 typedef DefaultIndexStringSpec<TGenomeSa>::Type         TGenomeSaStringSpec;
@@ -133,11 +135,11 @@ struct Fibre<TGenomeSa, FibreSA>
 // ----------------------------------------------------------------------------
 
 typedef IndexQGram<TShape>                              TQGramBaseIndex;
-typedef IndexQGram<TShape, BucketRefinement>            TQGramBucketRefinementIndex;
+typedef IndexQGram<TShape, BucketRefinement>            TGenomeQGramSpec;
 
 typedef Index<TContigs, TQGramBaseIndex>                TGenomeBaseQGram;
 typedef Index<TContigs, IndexSa<InfixSegment> >         TGenomeInfixSa;
-typedef Index<TContigs, TQGramBucketRefinementIndex>    TGenomeQGram;
+typedef Index<TContigs, TGenomeQGramSpec>               TGenomeQGram;
 
 #if defined(SEQAN_EXTRAS_MASAI_DISABLE_MMAP)
 typedef DefaultIndexStringSpec<TGenomeBaseQGram>::Type  TGenomeQGramStringSpec;
@@ -157,7 +159,8 @@ struct Fibre<TGenomeBaseQGram, FibreDir>
 // Contigs FM Index Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TContigs, FMIndex<> >     TGenomeFM;
+typedef IndexSa<>                           TGenomeFMSpec;
+typedef Index<TContigs, TGenomeFMSpec>      TGenomeFM;
 
 // ----------------------------------------------------------------------------
 // Contigs Uncompressed FM Index Fibres
@@ -196,7 +199,8 @@ struct SAValue<TReadSeqStore>
 // Reads Wotd Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TReadSeqStore, IndexWotd<> >                  TReadsWotd;
+typedef IndexWotd<>                             TReadsWotdSpec;
+typedef Index<TReadSeqStore, TReadsWotdSpec>    TReadsWotd;
 
 //namespace seqan {
 //template <>
@@ -226,7 +230,8 @@ typedef Index<TReadSeqStore, IndexWotd<> >                  TReadsWotd;
 // Reads QGram Index Fibres
 // ----------------------------------------------------------------------------
 
-typedef Index<TReadSeqStore, TQGramBaseIndex>               TReadsQGram;
+typedef IndexQGram<TShape>                      TReadsQGramSpec;
+typedef Index<TReadSeqStore, TReadsQGramSpec>   TReadsQGram;
 
 namespace seqan {
 template <>

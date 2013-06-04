@@ -51,9 +51,11 @@ using namespace seqan;
 // Class ReadsIndex
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TIndex, typename TSpec = void>
+template <typename TReads, typename TIndexSpec, typename TSpec = void>
 struct ReadsIndex
 {
+    typedef Index<typename TReads::TReadSeqStore, TIndexSpec>   TIndex;
+
     Holder<TReads>      reads;
     TIndex              index;
 
@@ -72,8 +74,8 @@ struct ReadsIndex
 // Metafunction ReadsHost<T>::Type                                 [ReadsIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TIndex, typename TSpec>
-struct ReadsHost<ReadsIndex<TReads, TIndex, TSpec> >
+template <typename TReads, typename TIndexSpec, typename TSpec>
+struct ReadsHost<ReadsIndex<TReads, TIndexSpec, TSpec> >
 {
     typedef TReads  Type;
 };
@@ -86,24 +88,25 @@ struct ReadsHost<ReadsIndex<TReads, TIndex, TSpec> >
 // Function build()                                                [ReadsIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TSpec, typename TManager>
-void build(ReadsIndex<TReads, TReadsQGram, TSpec> & readsIndex,
+template <typename TReads, typename TIndexSpec, typename TSpec, typename TManager>
+void build(ReadsIndex<TReads, IndexQGram<TIndexSpec>, TSpec> & readsIndex,
            TManager & manager,
            TReadSeqSize seedsLength,
            TReadSeqSize firstSeed,
            TReadSeqSize lastSeed)
 {
-    typedef typename Fibre<TReadsQGram, QGramSA>::Type          TReadsIndexSAFibre;
-    typedef typename Fibre<TReadsQGram, QGramDir>::Type         TReadsIndexDirFibre;
-    typedef typename Fibre<TReadsQGram, QGramShape>::Type       TReadsIndexShape;
-    typedef typename Fibre<TReadsQGram, QGramBucketMap>::Type   TReadsIndexBucketMap;
-
+    typedef ReadsIndex<TReads, IndexQGram<TIndexSpec>, TSpec>   TReadsIndex;
+    typedef typename TReadsIndex::TIndex                        TIndex;
+    typedef typename Fibre<TIndex, QGramSA>::Type               TReadsIndexSAFibre;
+    typedef typename Fibre<TIndex, QGramDir>::Type              TReadsIndexDirFibre;
+    typedef typename Fibre<TIndex, QGramShape>::Type            TReadsIndexShape;
+    typedef typename Fibre<TIndex, QGramBucketMap>::Type        TReadsIndexBucketMap;
     typedef typename Value<TReadsIndexDirFibre>::Type           TSize;
     typedef Iterator<TReadSeq, Standard>::Type                  TReadSeqIterator;
 
     TReadSeqStoreSize seqsCount = length(getSeqs(getReads(readsIndex)));
 
-    readsIndex.index = TReadsQGram(getSeqs(getReads(readsIndex)));
+    readsIndex.index = TIndex(getSeqs(getReads(readsIndex)));
 
     setStepSize(readsIndex.index, seedsLength);
 
@@ -174,18 +177,20 @@ void build(ReadsIndex<TReads, TReadsQGram, TSpec> & readsIndex,
 // Function build()                                                [ReadsIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TSpec, typename TManager>
-void build(ReadsIndex<TReads, TReadsWotd, TSpec> & readsIndex,
+template <typename TReads, typename TIndexSpec, typename TSpec, typename TManager>
+void build(ReadsIndex<TReads, IndexWotd<TIndexSpec>, TSpec> & readsIndex,
            TManager & manager,
            TReadSeqSize seedsLength,
            TReadSeqSize firstSeed,
            TReadSeqSize lastSeed)
 {
-    typedef typename Fibre<TReadsWotd, FibreSA>::Type           TReadsIndexSAFibre;
+    typedef ReadsIndex<TReads, IndexWotd<TIndexSpec>, TSpec>    TReadsIndex;
+    typedef typename TReadsIndex::TIndex                        TIndex;
+    typedef typename Fibre<TIndex, FibreSA>::Type               TReadsIndexSAFibre;
     typedef typename Value<TReadsIndexSAFibre>::Type            TReadsIndexSAPos;
 
 //    clear(readsIndex.index);
-    readsIndex.index = TReadsWotd(getSeqs(getReads(readsIndex)));
+    readsIndex.index = TIndex(getSeqs(getReads(readsIndex)));
     TReadSeqStoreSize seqsCount = length(getSeqs(getReads(readsIndex)));
 
     TReadsIndexSAFibre & sa = indexSA(readsIndex.index);
@@ -212,10 +217,13 @@ void build(ReadsIndex<TReads, TReadsWotd, TSpec> & readsIndex,
 // Function visit()                                                [ReadsIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TIndex, typename TSpec, typename TDepth>
-void visit(ReadsIndex<TReads, TIndex, TSpec> & readsIndex, TDepth depth)
+template <typename TReads, typename TIndexSpec, typename TSpec, typename TDepth>
+void visit(ReadsIndex<TReads, TIndexSpec, TSpec> & readsIndex, TDepth depth)
 {
-    typedef typename Iterator<TIndex, TopDown<ParentLinks<> > >::Type  TReadsIndexIterator;
+    typedef ReadsIndex<TReads, TIndexSpec, TSpec>                       TReadsIndex;
+    typedef typename TReadsIndex::TIndex                                TIndex;
+    typedef typename Iterator<TIndex, TopDown<ParentLinks<> > >::Type   TReadsIndexIterator;
+
     TReadsIndexIterator readsIt(readsIndex.index);
 
     do
@@ -232,8 +240,8 @@ void visit(ReadsIndex<TReads, TIndex, TSpec> & readsIndex, TDepth depth)
 // Function clear()                                                [ReadsIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TReads, typename TIndex, typename TSpec>
-void clear(ReadsIndex<TReads, TIndex, TSpec> & readsIndex)
+template <typename TReads, typename TIndexSpec, typename TSpec>
+void clear(ReadsIndex<TReads, TIndexSpec, TSpec> & readsIndex)
 {
     clear(readsIndex.index);
 }

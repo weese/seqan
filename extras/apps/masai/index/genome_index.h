@@ -51,9 +51,11 @@ using namespace seqan;
 // Class GenomeIndex
 // ----------------------------------------------------------------------------
 
-template <typename TGenome, typename TIndex, typename TSpec = void>
+template <typename TGenome, typename TIndexSpec, typename TSpec = void>
 struct GenomeIndex
 {
+    typedef Index<typename Contigs<TGenome>::Type, TIndexSpec>  TIndex;
+
     Holder<TGenome>     genome;
     TIndex              index;
 
@@ -64,7 +66,6 @@ struct GenomeIndex
     {}
 };
 
-
 // ============================================================================
 // Metafunctions
 // ============================================================================
@@ -73,8 +74,8 @@ struct GenomeIndex
 // Metafunction GenomeHost<T>::Type                               [GenomeIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TGenome, typename TIndex, typename TSpec>
-struct GenomeHost<GenomeIndex<TGenome, TIndex, TSpec> >
+template <typename TGenome, typename TIndexSpec, typename TSpec>
+struct GenomeHost<GenomeIndex<TGenome, TIndexSpec, TSpec> >
 {
     typedef TGenome Type;
 };
@@ -87,9 +88,11 @@ struct GenomeHost<GenomeIndex<TGenome, TIndex, TSpec> >
 // Function load()                                                [GenomeIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TGenome, typename TIndex, typename TSpec, typename TString>
-bool load(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & genomeIndexFile)
+template <typename TGenome, typename TIndexSpec, typename TSpec, typename TString>
+bool load(GenomeIndex<TGenome, TIndexSpec, TSpec> & genomeIndex, TString const & genomeIndexFile)
 {
+    typedef typename GenomeIndex<TGenome, TIndexSpec, TSpec>::TIndex    TIndex;
+
     genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
 
     return open(genomeIndex.index, toCString(genomeIndexFile));
@@ -99,25 +102,29 @@ bool load(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & gen
 // Function build()                                               [GenomeIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TGenome, typename TIndex, typename TSpec>
-void build(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex)
+template <typename TGenome, typename TIndexSpec, typename TSpec>
+void build(GenomeIndex<TGenome, TIndexSpec, TSpec> & genomeIndex)
 {
+    typedef typename GenomeIndex<TGenome, TIndexSpec, TSpec>::TIndex    TIndex;
+
     genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
 
     // Iterator instantiation calls automatic index construction.
     typename Iterator<TIndex, TopDown<> >::Type it(genomeIndex.index);
 }
 
-template <typename TGenome, typename TSpec>
-void build(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
+template <typename TGenome, typename TIndexSpec, typename TSpec>
+void build(GenomeIndex<TGenome, FMIndex<TIndexSpec>, TSpec> & genomeIndex)
 {
+    typedef typename GenomeIndex<TGenome, TIndexSpec, TSpec>::TIndex    TIndex;
+
     // IndexFM is built on the reversed genome.
     reverse(getGenome(genomeIndex));
 
-    genomeIndex.index = TGenomeFM(getContigs(getGenome(genomeIndex)));
+    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
 
     // Iterator instantiation calls automatic index construction.
-    typename Iterator<TGenomeFM, TopDown<> >::Type it(genomeIndex.index);
+    typename Iterator<TIndex, TopDown<> >::Type it(genomeIndex.index);
 
     // NOTE(esiragusa): This removes a warning.
     goRoot(it);
@@ -129,8 +136,8 @@ void build(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
 // Function dump()                                                [GenomeIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TGenome, typename TIndex, typename TSpec, typename TString>
-bool dump(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & genomeIndexFile)
+template <typename TGenome, typename TIndexSpec, typename TSpec, typename TString>
+bool dump(GenomeIndex<TGenome, TIndexSpec, TSpec> & genomeIndex, TString const & genomeIndexFile)
 {
     return save(genomeIndex.index, toCString(genomeIndexFile));
 }
@@ -139,8 +146,8 @@ bool dump(GenomeIndex<TGenome, TIndex, TSpec> & genomeIndex, TString const & gen
 // Function clear()                                               [GenomeIndex]
 // ----------------------------------------------------------------------------
 
-template <typename TGenome, typename TSpec>
-void clear(GenomeIndex<TGenome, TGenomeFM, TSpec> & genomeIndex)
+template <typename TGenome, typename TIndexSpec, typename TSpec>
+void clear(GenomeIndex<TGenome, FMIndex<TIndexSpec>, TSpec> & genomeIndex)
 {
     clear(genomeIndex.index);
 }
