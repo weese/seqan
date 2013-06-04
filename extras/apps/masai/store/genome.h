@@ -72,7 +72,7 @@ template <typename TSpec = void, typename TConfig = GenomeConfig<> >
 struct Genome
 {
     typedef typename TConfig::TFragStoreConfig          TFragStoreConfig_;
-    typedef FragmentStore<TSpec, TFragStoreConfig_>     TFragmentStore_;
+    typedef FragmentStore<void, TFragStoreConfig_>      TFragmentStore_;
 
     Holder<TFragmentStore_>                 _store;
     typename Contigs<Genome>::Type          contigs;

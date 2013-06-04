@@ -73,7 +73,7 @@ template <typename TSpec = void, typename TConfig = ReadsConfig<> >
 struct Reads
 {
     typedef typename TConfig::TFragStoreConfig      TFragStoreConfig_;
-    typedef FragmentStore<TSpec, TFragStoreConfig_> TFragmentStore_;
+    typedef FragmentStore<void, TFragStoreConfig_>  TFragmentStore_;
     typedef typename TFragmentStore_::TReadSeqStore TReadSeqStore;
 
     Holder<TFragmentStore_>         _store;
