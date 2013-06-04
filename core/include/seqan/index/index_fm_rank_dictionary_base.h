@@ -68,11 +68,12 @@ struct RankDictionary;
 // Metafunction Size                                           [RankDictionary]
 // ----------------------------------------------------------------------------
  
-//template <typename TSpec>
-//struct Size<RankDictionary<TSpec> >
-//{
-//    typedef typename Size<String<TValue, TSpec> >::Type Type;
-//};
+template <typename TSpec>
+struct Size<RankDictionary<TSpec> >
+{
+    typedef typename Value<RankDictionary<TSpec> >::Type    TValue_;
+    typedef typename Size<String<TValue_, TSpec> >::Type    Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryFibreSpec

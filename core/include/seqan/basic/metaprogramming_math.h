@@ -180,6 +180,26 @@ struct Power {
 template <__int64 base> struct Power<base, 1> { static const __uint64 VALUE = base; };
 template <__int64 base> struct Power<base, 0> { static const __uint64 VALUE = 1; };
 
+// ----------------------------------------------------------------------------
+// Metafunction Min
+// ----------------------------------------------------------------------------
+
+template <unsigned A, unsigned B>
+struct Min
+{
+    static const unsigned VALUE = (A <= B) ? A : B;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Max
+// ----------------------------------------------------------------------------
+
+template <unsigned A, unsigned B>
+struct Max
+{
+    static const unsigned VALUE = (A >= B) ? A : B;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
