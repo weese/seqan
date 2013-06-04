@@ -222,7 +222,7 @@ int runMapper(Options & options,
     typedef Writer<TGenome, TReads, TFormat, typename TMapperConfig::TDistance, void>   TWriter;
     typedef Mapper<TReads, TWriter, void, TMapperConfig>                                TMapper;
 
-    TFragmentStore      store;
+    TMasaiStore         store;
     TGenome             genome(store);
     TGenomeIndex        genomeIndex(genome);
     TReads              reads(store);
@@ -326,8 +326,8 @@ int runMapper(Options & options)
 {
     typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadStore;
     typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadNameStore;
-    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, FragStoreConfig>  TReadsConfig;
-    typedef GenomeConfig<FragStoreConfig>                                               TGenomeConfig;
+    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, MasaiStoreConfig>  TReadsConfig;
+    typedef GenomeConfig<MasaiStoreConfig>                                               TGenomeConfig;
     typedef ReadMapperConfig<TDistance, TStrategy, TBacktracking, TGenomeConfig>        TMapperConfig;
 
     return runMapper<TIndex, TFormat>(options, TMapperConfig(), TGenomeConfig(), TReadsConfig());

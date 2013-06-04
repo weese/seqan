@@ -71,7 +71,7 @@ struct Writer<TGenome, TReads, Raw, TDistance, TSpec>
     
     TGenome                 & genome;
     TReads                  * reads;
-    TFragmentStore          & _store;
+    TMasaiStore             & _store;
     TStream                 _stream;
     bool                    disabled;
 
@@ -86,13 +86,13 @@ struct Writer<TGenome, TReads, Raw, TDistance, TSpec>
 template <typename TGenome, typename TReads, typename TDistance, typename TSpec>
 struct Writer<TGenome, TReads, Sam, TDistance, TSpec>
 {
-    typedef BamIOContext<TFragmentStore::TContigNameStore>  TBamIOContext;
+    typedef BamIOContext<TMasaiStore::TContigNameStore>     TBamIOContext;
     typedef unsigned long                                   TWord;
     typedef Stream<FileStream<WriteOnly, File<> > >         TStream;
 
     TGenome                 & genome;
     TReads                  * reads;
-    TFragmentStore          & _store;
+    TMasaiStore             & _store;
     TStream                 _stream;
     TBamIOContext           _context;
     bool                    disabled;
@@ -314,7 +314,7 @@ inline void onMatch(Writer<TGenome, TReads, Sam, TDistance, TSpec> & writer,
                     TErrors errors,
                     bool reverseComplemented)
 {
-    typedef Align<TFragmentStore::TReadSeq, ArrayGaps>  TAlign;
+    typedef Align<TMasaiStore::TReadSeq, ArrayGaps>  TAlign;
 
     TAlignedReadStoreElement        alignedRead;
     TAlignedReadStoreElement        alignedMate;
@@ -364,7 +364,7 @@ inline void onMatch(Writer<TGenome, TReads, Sam, TDistance, TSpec> & writer,
                     TReadId readIdRev,
                     TErrors errorsRev)
 {
-    typedef Align<TFragmentStore::TReadSeq, ArrayGaps>  TAlign;
+    typedef Align<TMasaiStore::TReadSeq, ArrayGaps>  TAlign;
 
     TAlignedReadStoreElement        alignedFwdMate;
     TAlignedReadStoreElement        alignedRevMate;
@@ -454,7 +454,7 @@ inline void _alignRead(Writer<TGenome, TReads, TFormat, HammingDistance, TSpec> 
                        TAlignQualityStoreElement &,
                        bool reverseComplemented)
 {
-    typedef TFragmentStore::TReadSeq    TReadSeq;
+    typedef TMasaiStore::TReadSeq    TReadSeq;
 
     resize(rows(align), 2);
 
@@ -481,7 +481,7 @@ inline void _alignRead(Writer<TGenome, TReads, TFormat, EditDistance, TSpec> & w
                        TAlignQualityStoreElement & alignQuality,
                        bool reverseComplemented)
 {
-    typedef TFragmentStore::TReadSeq    TReadSeq;
+    typedef TMasaiStore::TReadSeq    TReadSeq;
 
     resize(rows(align), 2);
 

@@ -56,7 +56,7 @@ using namespace seqan;
 // Fragment Store Configuration
 // ----------------------------------------------------------------------------
 
-struct FragStoreConfig
+struct MasaiStoreConfig
 {
     typedef String<Dna5Q>           TReadSeq;
     typedef String<Dna5>            TContigSeq;
@@ -82,12 +82,12 @@ struct FragStoreConfig
 // Contigs Type
 // ----------------------------------------------------------------------------
 
-typedef StringSet<FragStoreConfig::TContigSeq, Dependent<> >                TContigs;
+typedef StringSet<MasaiStoreConfig::TContigSeq, Dependent<> >   TContigs;
 
 namespace seqan
 {
 template <>
-struct Size<FragStoreConfig::TContigSeq>
+struct Size<MasaiStoreConfig::TContigSeq>
 {
     typedef unsigned int            Type;
 };
@@ -104,16 +104,16 @@ struct StringSetLimits<TContigs>
 // Fragment Store Type
 // ----------------------------------------------------------------------------
 
-typedef FragmentStore<void, FragStoreConfig>            TFragmentStore;
+typedef FragmentStore<void, MasaiStoreConfig>           TMasaiStore;
 
 // ----------------------------------------------------------------------------
 // Fragment Store Contig Types
 // ----------------------------------------------------------------------------
 
-typedef TFragmentStore::TContigStore                    TContigStore;
+typedef TMasaiStore::TContigStore                       TContigStore;
 typedef Size<TContigStore>::Type                        TContigStoreSize;
 typedef Value<TContigStore>::Type                       TContigStoreElement;
-typedef TFragmentStore::TContigSeq                      TContigSeq;
+typedef TMasaiStore::TContigSeq                         TContigSeq;
 typedef Size<TContigSeq>::Type                          TContigSeqSize;
 typedef Segment<TContigSeq, InfixSegment>               TContigInfix;
 
@@ -121,10 +121,10 @@ typedef Segment<TContigSeq, InfixSegment>               TContigInfix;
 // Fragment Store Reads Types
 // ----------------------------------------------------------------------------
 
-typedef TFragmentStore::TReadStore                      TReadStore;
+typedef TMasaiStore::TReadStore                         TReadStore;
 typedef Value<TReadStore>::Type                         TReadStoreElement;
-typedef TFragmentStore::TReadNameStore                  TReadNameStore;
-typedef TFragmentStore::TReadSeqStore                   TReadSeqStore;
+typedef TMasaiStore::TReadNameStore                     TReadNameStore;
+typedef TMasaiStore::TReadSeqStore                      TReadSeqStore;
 typedef Size<TReadSeqStore>::Type                       TReadSeqStoreSize;
 typedef Value<TReadSeqStore>::Type const                TReadSeq;
 typedef Size<TReadSeq>::Type                            TReadSeqSize;
@@ -133,11 +133,11 @@ typedef Size<TReadSeq>::Type                            TReadSeqSize;
 // Fragment Store Mapped Reads Types
 // ----------------------------------------------------------------------------
 
-typedef TFragmentStore::TAlignedReadStore               TAlignedReadStore;
+typedef TMasaiStore::TAlignedReadStore                  TAlignedReadStore;
 typedef Value<TAlignedReadStore>::Type                  TAlignedReadStoreElement;
-typedef TFragmentStore::TAlignQualityStore              TAlignQualityStore;
+typedef TMasaiStore::TAlignQualityStore                 TAlignQualityStore;
 typedef Value<TAlignQualityStore>::Type                 TAlignQualityStoreElement;
-typedef TFragmentStore::TAlignedReadTagStore            TAlignedReadTagStore;
+typedef TMasaiStore::TAlignedReadTagStore               TAlignedReadTagStore;
 typedef Value<TAlignedReadTagStore>::Type               TAlignedReadTagStoreElement;
 
 // ============================================================================

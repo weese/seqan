@@ -196,7 +196,7 @@ int runPairer(Options & options, TReadsConfig const & /* config */, TGenomeConfi
     typedef Writer<TGenome, TReads, TFormat, TDistance, void>                   TWriter;
     typedef Pairer<TReads, TWriter, void>                                       TPairer;
 
-    TFragmentStore      store;
+    TMasaiStore         store;
     TGenome             genome(store);
     TReads              reads(store);
     TReadsLoader        readsLoader(reads);
@@ -283,8 +283,8 @@ int runPairer(Options & options)
 {
     typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadStore;
     typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadNameStore;
-    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, FragStoreConfig>  TReadsConfig;
-    typedef GenomeConfig<FragStoreConfig>                                               TGenomeConfig;
+    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, MasaiStoreConfig>  TReadsConfig;
+    typedef GenomeConfig<MasaiStoreConfig>                                               TGenomeConfig;
 
     return runPairer<TDistance, TFormat>(options, TReadsConfig(), TGenomeConfig());
 }

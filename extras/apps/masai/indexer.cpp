@@ -133,11 +133,11 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 template <typename TIndexSpec>
 int runIndexer(Options & options)
 {
-    typedef GenomeConfig<FragStoreConfig>       TGenomeConfig;
+    typedef GenomeConfig<MasaiStoreConfig>      TGenomeConfig;
     typedef Genome<void, TGenomeConfig>         TGenome;
     typedef GenomeIndex<TGenome, TIndexSpec>    TGenomeIndex;
 
-    TFragmentStore      store;
+    TMasaiStore         store;
     TGenome             genome(store);
     TGenomeIndex        genomeIndex(genome);
 
