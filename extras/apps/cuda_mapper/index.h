@@ -53,7 +53,7 @@ using namespace seqan;
 
 struct CUDAStoreConfig
 {
-    typedef String<Dna5Q>           TReadSeq;
+    typedef String<Dna>             TReadSeq;
     typedef String<Dna>             TContigSeq;
 
     typedef double                  TMean;
@@ -77,9 +77,9 @@ struct CUDAStoreConfig
 // Other Store Types
 // ============================================================================
 
-typedef GenomeConfig<CUDAStoreConfig>                   TGenomeConfig;
-typedef Genome<void, TGenomeConfig>                     TGenome;
-typedef typename Contigs<TGenome>::Type                 TContigs;
+typedef GenomeConfig<CUDAStoreConfig>                           TGenomeConfig;
+typedef Genome<void, TGenomeConfig>                             TGenome;
+typedef StringSet<CUDAStoreConfig::TContigSeq, Dependent<> >    TContigs;
 
 // ============================================================================
 // Index Types

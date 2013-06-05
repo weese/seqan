@@ -1,1 +1,1 @@
-#include "cuda_mapper.cpp"
+#include "cuda_mapper.h"

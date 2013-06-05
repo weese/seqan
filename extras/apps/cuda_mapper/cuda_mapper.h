@@ -36,7 +36,7 @@
 #include <seqan/sequence_extras.h>
 #include <seqan/store.h>
 
-#include "../masai/options.h"
+//#include "../masai/options.h"
 #include "../masai/tags.h"
 #include "../masai/store/reads.h"
 #include "../masai/store/genome.h"
@@ -77,68 +77,68 @@ struct Options
 // Function setupArgumentParser()                              [ArgumentParser]
 // ----------------------------------------------------------------------------
 
-void setupArgumentParser(ArgumentParser & parser, Options const & options)
-{
-    setAppName(parser, "cuda_mapper");
-    setShortDescription(parser, "CUDA Mapper");
-    setCategory(parser, "Read Mapping");
-
-    setDateAndVersion(parser);
-    setDescription(parser);
-
-    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
-
-    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
-    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
-    setValidValues(parser, 0, "fasta fa");
-    setValidValues(parser, 1, "fastq fasta fa");
-
-    addSection(parser, "Mapping Options");
-
-    addOption(parser, ArgParseOption("mb", "mapping-block", "Maximum number of reads to be mapped at once.", ArgParseOption::INTEGER));
-    setMinValue(parser, "mapping-block", "10000");
-    setDefaultValue(parser, "mapping-block", options.mappingBlock);
-
-    addOption(parser, ArgParseOption("sl", "seed-length", "Minimum seed length.", ArgParseOption::INTEGER));
-    setMinValue(parser, "seed-length", "10");
-    setMaxValue(parser, "seed-length", "100");
-    setDefaultValue(parser, "seed-length", options.seedLength);
-
-
-    addSection(parser, "Genome Index Options");
-
-    setIndexPrefix(parser);
-}
+//void setupArgumentParser(ArgumentParser & parser, Options const & options)
+//{
+//    setAppName(parser, "cuda_mapper");
+//    setShortDescription(parser, "CUDA Mapper");
+//    setCategory(parser, "Read Mapping");
+//
+//    setDateAndVersion(parser);
+//    setDescription(parser);
+//
+//    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
+//
+//    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
+//    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
+//    setValidValues(parser, 0, "fasta fa");
+//    setValidValues(parser, 1, "fastq fasta fa");
+//
+//    addSection(parser, "Mapping Options");
+//
+//    addOption(parser, ArgParseOption("mb", "mapping-block", "Maximum number of reads to be mapped at once.", ArgParseOption::INTEGER));
+//    setMinValue(parser, "mapping-block", "10000");
+//    setDefaultValue(parser, "mapping-block", options.mappingBlock);
+//
+//    addOption(parser, ArgParseOption("sl", "seed-length", "Minimum seed length.", ArgParseOption::INTEGER));
+//    setMinValue(parser, "seed-length", "10");
+//    setMaxValue(parser, "seed-length", "100");
+//    setDefaultValue(parser, "seed-length", options.seedLength);
+//
+//
+//    addSection(parser, "Genome Index Options");
+//
+//    setIndexPrefix(parser);
+//}
 
 // ----------------------------------------------------------------------------
 // Function parseCommandLine()                                        [Options]
 // ----------------------------------------------------------------------------
 
-ArgumentParser::ParseResult
-parseCommandLine(Options & options, ArgumentParser & parser, int argc, char const ** argv)
-{
-    ArgumentParser::ParseResult res = parse(parser, argc, argv);
-
-    if (res != seqan::ArgumentParser::PARSE_OK)
-        return res;
-
-    // Parse genome input file.
-    getArgumentValue(options.genomeFile, parser, 0);
-
-    // Parse reads input file.
-    getArgumentValue(options.readsFile, parser, 1);
-
-    // Parse mapping block.
-    getOptionValue(options.mappingBlock, parser, "mapping-block");
-
-    // Parse mapping options.
-    getOptionValue(options.seedLength, parser, "seed-length");
-
-    // Parse genome index prefix.
-    getIndexPrefix(options, parser);
-
-    return seqan::ArgumentParser::PARSE_OK;
-}
+//ArgumentParser::ParseResult
+//parseCommandLine(Options & options, ArgumentParser & parser, int argc, char const ** argv)
+//{
+//    ArgumentParser::ParseResult res = parse(parser, argc, argv);
+//
+//    if (res != seqan::ArgumentParser::PARSE_OK)
+//        return res;
+//
+//    // Parse genome input file.
+//    getArgumentValue(options.genomeFile, parser, 0);
+//
+//    // Parse reads input file.
+//    getArgumentValue(options.readsFile, parser, 1);
+//
+//    // Parse mapping block.
+//    getOptionValue(options.mappingBlock, parser, "mapping-block");
+//
+//    // Parse mapping options.
+//    getOptionValue(options.seedLength, parser, "seed-length");
+//
+//    // Parse genome index prefix.
+//    getIndexPrefix(options, parser);
+//
+//    return seqan::ArgumentParser::PARSE_OK;
+//}
 
 // --------------------------------------------------------------------------
 // Function mapReadsKernel()
@@ -251,14 +251,14 @@ int runMapper(Options & options)
 
 int main(int argc, char const ** argv)
 {
-    ArgumentParser parser;
+//    ArgumentParser parser;
     Options options;
-    setupArgumentParser(parser, options);
-
-    ArgumentParser::ParseResult res = parseCommandLine(options, parser, argc, argv);
-
-    if (res != seqan::ArgumentParser::PARSE_OK)
-        return res == seqan::ArgumentParser::PARSE_ERROR;
+//    setupArgumentParser(parser, options);
+//
+//    ArgumentParser::ParseResult res = parseCommandLine(options, parser, argc, argv);
+//
+//    if (res != seqan::ArgumentParser::PARSE_OK)
+//        return res == seqan::ArgumentParser::PARSE_ERROR;
 
     return runMapper(options);
 }
