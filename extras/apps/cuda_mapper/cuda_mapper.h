@@ -195,7 +195,19 @@ template <typename TIndex, typename TReadSeqs>
 inline void
 mapReads(TIndex /* const */ & index, TReadSeqs /* const */ & readSeqs, GPU const & /* tag */)
 {
-    _mapReadsGPU<<<10,100>>>(view(index), view(readSeqs));
+    typedef typename Device<TIndex>::Type               TDeviceIndex;
+    typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
+
+    // Copy index to device.
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
+
+    // Copy read seqs to device.
+    TDeviceReadSeqs deviceReadSeqs;
+    assign(deviceReadSeqs, readSeqs);
+
+    // Launch kernel.
+    _mapReadsGPU<<<10,100>>>(view(deviceIndex), view(deviceReadSeqs));
     cudaDeviceSynchronize();
 }
 #endif
