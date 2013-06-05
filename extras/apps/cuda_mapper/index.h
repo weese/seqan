@@ -55,6 +55,7 @@ struct CUDAStoreConfig
 {
     typedef String<Dna>             TReadSeq;
     typedef String<Dna>             TContigSeq;
+    typedef Owner<ConcatDirect<> >  TContigSpec;
 
     typedef double                  TMean;
     typedef double                  TStd;
@@ -77,9 +78,7 @@ struct CUDAStoreConfig
 // Other Store Types
 // ============================================================================
 
-typedef GenomeConfig<CUDAStoreConfig>                           TGenomeConfig;
-typedef Genome<void, TGenomeConfig>                             TGenome;
-typedef StringSet<CUDAStoreConfig::TContigSeq, Dependent<> >    TContigs;
+typedef StringSet<CUDAStoreConfig::TContigSeq, CUDAStoreConfig::TContigSpec>    TContigs;
 
 // ============================================================================
 // Index Types

@@ -166,25 +166,35 @@ mapReadsKernel(TIndex index, TPattern pattern)
 
 int runMapper(Options & options)
 {
-    typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
-    typedef Genome<void, TGenomeConfig>                             TGenome;
+    typedef Genome<void, CUDAStoreConfig>                           TGenome;
+    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
     typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>            TGenomeIndex;
+
+    typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
     typedef ReadsConfig<False, False, True, True, CUDAStoreConfig>  TReadsConfig;
     typedef Reads<void, TReadsConfig>                               TReads;
     typedef ReadsLoader<void, TReadsConfig>                         TReadsLoader;
 
-    TStore              store;
-    TGenome             genome(store);
+    TGenome             genome;
+    TGenomeLoader       genomeLoader(genome);
     TGenomeIndex        genomeIndex(genome);
+
+    TStore              store;
     TReads              reads(store);
     TReadsLoader        readsLoader(reads);
 
     double start, finish;
 
     // Load genome.
+    if (!open(genomeLoader, options.genomeFile))
+    {
+        std::cerr << "Error while loading genome" << std::endl;
+        return 1;
+    }
+
     std::cout << "Loading genome:\t\t\t" << std::flush;
     start = sysTime();
-    if (!load(genome, options.genomeFile))
+    if (!load(genomeLoader))
     {
         std::cerr << "Error while loading genome" << std::endl;
         return 1;
