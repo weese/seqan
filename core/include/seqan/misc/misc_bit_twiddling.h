@@ -207,7 +207,7 @@ isBitSet(TWord word, TIndex index)
 // ----------------------------------------------------------------------------
 
 template <typename TWord, typename TPos>
-inline TWord
+SEQAN_FUNC TWord
 hiBits(TWord word, TPos index)
 {
     return word & ~((TWord(1) << (BitsPerValue<TWord>::VALUE - index)) - TWord(1));
