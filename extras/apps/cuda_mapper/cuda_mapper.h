@@ -47,6 +47,16 @@
 using namespace seqan;
 
 // ============================================================================
+// Tags
+// ============================================================================
+
+struct CPU_;
+struct GPU_;
+
+typedef Tag<CPU_>     CPU;
+typedef Tag<GPU_>     GPU;
+
+// ============================================================================
 // Classes
 // ============================================================================
 
@@ -144,28 +154,69 @@ struct Options
 //}
 
 // --------------------------------------------------------------------------
-// Function mapReadsKernel()
+// Function mapRead()
 // --------------------------------------------------------------------------
 
-#ifdef __CUDACC__
-template <typename TIndex, typename TReads>
-__global__ void
-mapReadsKernel(TIndex index, TReads reads)
+template <typename TIndex, typename TReadSeq>
+SEQAN_FUNC void
+mapRead(TIndex const & index, TReadSeq const & readSeq)
 {
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
 
+    TIterator it(index);
+    goDown(it, readSeq);
+}
+
+// --------------------------------------------------------------------------
+// Function _mapReadsGPU()
+// --------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TIndexView, typename TReadSeqsView>
+__global__ void
+_mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
+{
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-//    TIterator it(index);
-//    goDown(it, reads[idx]);
+//    mapRead(index, readSeqs[idx]);
+
+    typename Iterator<TIndexView, TopDown<> >::Type it(index);
+    goDown(it, readSeqs[idx]);
 }
 #endif
+
+// --------------------------------------------------------------------------
+// Function mapReads()                                                  [GPU]
+// --------------------------------------------------------------------------
+
+#ifdef __CUDACC__
+template <typename TIndex, typename TReadSeqs>
+inline void
+mapReads(TIndex /* const */ & index, TReadSeqs /* const */ & readSeqs, GPU const & /* tag */)
+{
+    _mapReadsGPU<<<10,100>>>(view(index), view(readSeqs));
+    cudaDeviceSynchronize();
+}
+#endif
+
+// --------------------------------------------------------------------------
+// Function mapReads()                                                  [CPU]
+// --------------------------------------------------------------------------
+
+template <typename TIndex, typename TReadSeqs>
+inline void
+mapReads(TIndex const & index, TReadSeqs const & readSeqs, CPU const & /* tag */)
+{
+    for (unsigned i = 0; i < length(readSeqs); i++)
+        mapRead(index, readSeqs[i]);
+}
 
 // ----------------------------------------------------------------------------
 // Function runMapper()
 // ----------------------------------------------------------------------------
 
+template <typename TCPUGPU>
 int runMapper(Options & options)
 {
     typedef Genome<void, CUDAStoreConfig>                           TGenome;
@@ -246,7 +297,7 @@ int runMapper(Options & options)
 
         // Map reads.
         start = sysTime();
-        mapReadsKernel<<<32,512>>>(view(genomeIndex.index), view(getSeqs(reads)));
+        mapReads(genomeIndex.index, getSeqs(reads), TCPUGPU());
         finish = sysTime();
         std::cout << "Mapping time:\t\t\t" << std::flush;
         std::cout << finish - start << " sec" << std::endl;
@@ -276,5 +327,5 @@ int main(int argc, char const ** argv)
 //    if (res != seqan::ArgumentParser::PARSE_OK)
 //        return res == seqan::ArgumentParser::PARSE_ERROR;
 
-    return runMapper(options);
+    return runMapper<GPU>(options);
 }
