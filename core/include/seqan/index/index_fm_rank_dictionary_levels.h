@@ -354,14 +354,14 @@ _toPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TBlockPos b
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord &
+SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord
 _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return _valuesAt(dict, blockPos, wordPos).i;
 }
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord const &
+SEQAN_FUNC typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord const
 _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return _valuesAt(dict, blockPos, wordPos).i;
