@@ -29,7 +29,8 @@ include_directories (${SEQAN_INCLUDE_DIRS})
 add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
-seqan_add_cuda_executable(cuda_mapper cuda_mapper.cu cuda_mapper.h)
+seqan_add_cuda_executable(cuda_mapper cuda_mapper.cu
+                                      cuda_mapper.cpp)
 
 
 # Add dependencies found by find_package (SeqAn).
