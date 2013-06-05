@@ -157,6 +157,8 @@ mapReadsKernel(TIndex index, TReads reads)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
+//    TIterator it(index);
+//    goDown(it, reads[idx]);
 }
 #endif
 
@@ -205,6 +207,7 @@ int runMapper(Options & options)
     // Load genome index.
     std::cout << "Loading genome index:\t\t" << std::flush;
     start = sysTime();
+//    build(genomeIndex);
     if (!load(genomeIndex, options.genomeIndexFile))
     {
         std::cout << "Error while loading genome index" << std::endl;
@@ -243,7 +246,7 @@ int runMapper(Options & options)
 
         // Map reads.
         start = sysTime();
-        mapReadsKernel<<<1,1>>>(view(genomeIndex.index), view(getSeqs(reads)));
+        mapReadsKernel<<<32,512>>>(view(genomeIndex.index), view(getSeqs(reads)));
         finish = sysTime();
         std::cout << "Mapping time:\t\t\t" << std::flush;
         std::cout << finish - start << " sec" << std::endl;
