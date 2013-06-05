@@ -351,14 +351,14 @@ _toPos(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TBlockPos b
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord &
+inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord
 _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return _valuesAt(dict, blockPos, wordPos).i;
 }
 
 template <typename TValue, typename TSpec, typename TBlockPos, typename TWordPos>
-inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord const &
+inline typename RankDictionaryValues_<TwoLevels<TValue, TSpec> >::TWord const
 _wordAt(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TBlockPos blockPos, TWordPos wordPos)
 {
     return _valuesAt(dict, blockPos, wordPos).i;
