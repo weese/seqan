@@ -1,7 +1,7 @@
 // ==========================================================================
 //                                cuda_mapper
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,196 +34,231 @@
 
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
-#include <seqan/index_extras.h>
+#include <seqan/store.h>
+
+#include "../masai/options.h"
+#include "../masai/tags.h"
+#include "../masai/store/reads.h"
+#include "../masai/store/genome.h"
+#include "../masai/index/genome_index.h"
+
+#include "index.h"
 
 using namespace seqan;
 
-// ==========================================================================
-// Metafunctions
-// ==========================================================================
+// ============================================================================
+// Classes
+// ============================================================================
 
-// --------------------------------------------------------------------------
-// Metafunction Size
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// Class Options
+// ----------------------------------------------------------------------------
 
-namespace seqan {
-template <typename TSpec>
-struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
+struct Options
 {
-    typedef unsigned Type;
+    CharString  genomeFile;
+    CharString  genomeIndexFile;
+    CharString  readsFile;
+    int         mappingBlock;
+
+    unsigned    seedLength;
+
+    Options() :
+        mappingBlock(MaxValue<int>::VALUE),
+        seedLength(33)
+    {}
 };
 
-template <typename TSpec>
-struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function setupArgumentParser()                              [ArgumentParser]
+// ----------------------------------------------------------------------------
+
+void setupArgumentParser(ArgumentParser & parser, Options const & options)
 {
-    typedef unsigned Type;
-};
+    setAppName(parser, "cuda_mapper");
+    setShortDescription(parser, "CUDA Mapper");
+    setCategory(parser, "Read Mapping");
+
+    setDateAndVersion(parser);
+    setDescription(parser);
+
+    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
+
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
+    setValidValues(parser, 0, "fasta fa");
+    setValidValues(parser, 1, "fastq fasta fa");
+
+    addSection(parser, "Mapping Options");
+
+    addOption(parser, ArgParseOption("mb", "mapping-block", "Maximum number of reads to be mapped at once.", ArgParseOption::INTEGER));
+    setMinValue(parser, "mapping-block", "10000");
+    setDefaultValue(parser, "mapping-block", options.mappingBlock);
+
+    addOption(parser, ArgParseOption("sl", "seed-length", "Minimum seed length.", ArgParseOption::INTEGER));
+    setMinValue(parser, "seed-length", "10");
+    setMaxValue(parser, "seed-length", "100");
+    setDefaultValue(parser, "seed-length", options.seedLength);
+
+
+    addSection(parser, "Genome Index Options");
+
+    setIndexPrefix(parser);
 }
 
-// ==========================================================================
-// Functions
-// ==========================================================================
+// ----------------------------------------------------------------------------
+// Function parseCommandLine()                                        [Options]
+// ----------------------------------------------------------------------------
+
+ArgumentParser::ParseResult
+parseCommandLine(Options & options, ArgumentParser & parser, int argc, char const ** argv)
+{
+    ArgumentParser::ParseResult res = parse(parser, argc, argv);
+
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res;
+
+    // Parse genome input file.
+    getArgumentValue(options.genomeFile, parser, 0);
+
+    // Parse reads input file.
+    getArgumentValue(options.readsFile, parser, 1);
+
+    // Parse mapping block.
+    getOptionValue(options.mappingBlock, parser, "mapping-block");
+
+    // Parse mapping options.
+    getOptionValue(options.seedLength, parser, "seed-length");
+
+    // Parse genome index prefix.
+    getIndexPrefix(options, parser);
+
+    return seqan::ArgumentParser::PARSE_OK;
+}
 
 // --------------------------------------------------------------------------
-// Function findCUDA()
+// Function mapReadsKernel()
 // --------------------------------------------------------------------------
 
 #ifdef __CUDACC__
 template <typename TIndex, typename TPattern>
 __global__ void
-findCUDA(TIndex index, TPattern pattern)
+mapReadsKernel(TIndex index, TPattern pattern)
 {
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
-    typedef typename EdgeLabel<TIterator>::Type         TEdgeLabel;
-    typedef typename Fibre<TIndex, FibreText>::Type     TTextFibre;
-    typedef typename Infix<TTextFibre const>::Type      TRepresentative;
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     printf("index=%i\n", idx);
 
-    // Print the Compressed SA values.
-    printf("lengthSA=%ld\n", length(indexSA(index)));
-    for (unsigned i = 0; i < length(indexSA(index)); ++i)
-        printf("<%ld,%ld>\n", indexSA(index)[i].i1, indexSA(index)[i].i2);
-//        printf("%ld\n", indexSA(index)[i]);
+}
+#endif
 
-    // Instantiate a virtual suffix tree iterator.
-    TIterator it(index);
+// ----------------------------------------------------------------------------
+// Function runMapper()
+// ----------------------------------------------------------------------------
 
-    // At root.
-    printf("isRoot()=%d\n", isRoot(it));
-    printf("repLength()=%ld\n", repLength(it));
-    printf("countOccurrences()=%ld\n", countOccurrences(it));
+int runMapper(Options & options)
+{
+    typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
+    typedef Genome<void, TGenomeConfig>                             TGenome;
+    typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>            TGenomeIndex;
+    typedef ReadsConfig<False, False, True, True, CUDAStoreConfig>  TReadsConfig;
+    typedef Reads<void, TReadsConfig>                               TReads;
+    typedef ReadsLoader<void, TReadsConfig>                         TReadsLoader;
 
-    // Visit the leftmost children of the root.
-    if (goDown(it))
+    TStore              store;
+    TGenome             genome(store);
+    TGenomeIndex        genomeIndex(genome);
+    TReads              reads(store);
+    TReadsLoader        readsLoader(reads);
+
+    double start, finish;
+
+    // Load genome.
+    std::cout << "Loading genome:\t\t\t" << std::flush;
+    start = sysTime();
+    if (!load(genome, options.genomeFile))
     {
-        // Visit all the siblings at depth one.
-        do
-        {
-            printf("repLength()=%ld\n", repLength(it));
-            printf("parentEdgeLabel()=%c\n", static_cast<char>(parentEdgeLabel(it)));
-            printf("countOccurrences()=%ld\n", countOccurrences(it));
-            printf("isLeaf()=%d\n", isLeaf(it));
-        }
-        while (goRight(it));
+        std::cerr << "Error while loading genome" << std::endl;
+        return 1;
+    }
+    finish = sysTime();
+    std::cout << finish - start << " sec" << std::endl;
+
+    // Load genome index.
+    std::cout << "Loading genome index:\t\t" << std::flush;
+    start = sysTime();
+    if (!load(genomeIndex, options.genomeIndexFile))
+    {
+        std::cout << "Error while loading genome index" << std::endl;
+        return 1;
+    }
+    finish = sysTime();
+    std::cout << finish - start << " sec" << std::endl;
+
+    // Open reads file.
+    start = sysTime();
+    if (!open(readsLoader, options.readsFile))
+    {
+        std::cerr << "Error while opening reads file" << std::endl;
+        return 1;
     }
 
-    // Restart from root.
-    goRoot(it);
-    printf("goRoot()\n");
+    // Reserve space for reads.
+    if (options.mappingBlock < MaxValue<int>::VALUE)
+        reserve(reads, options.mappingBlock);
+    else
+        reserve(reads);
 
-    // Search the pattern.
-    printf("goDown(pattern)=%d\n", goDown(it, pattern));
-    printf("repLength()=%ld\n", repLength(it));
-    printf("countOccurrences()=%ld\n", countOccurrences(it));
-    printf("isLeaf()=%d\n", isLeaf(it));
-}
-#endif
+    // Process reads in blocks.
+    while (!atEnd(readsLoader))
+    {
+        // Load reads.
+        std::cout << "Loading reads:\t\t\t" << std::flush;
+        if (!load(readsLoader, options.mappingBlock))
+        {
+            std::cerr << "Error while loading reads" << std::endl;
+            return 1;
+        }
+        finish = sysTime();
+        std::cout << finish - start << " sec" << std::endl;
+        std::cout << "Reads count:\t\t\t" << reads.readsCount << std::endl;
 
-// --------------------------------------------------------------------------
-// Function testInfix()
-// --------------------------------------------------------------------------
+        // Map reads.
+        start = sysTime();
+//        mapReads(mapper, genomeIndex);
+        finish = sysTime();
+        std::cout << "Mapping time:\t\t\t" << std::flush;
+        std::cout << finish - start << " sec" << std::endl;
 
-template <typename TAlphabet>
-void testInfix()
-{
-    typedef String<TAlphabet>                           TString;
-    typedef typename View<TString>::Type                TStringView;
-    typedef typename Infix<TString>::Type               TStringInfix;
-    typedef typename Infix<TStringView>::Type           TStringViewInfix;
+        // Clear mapped reads.
+        clear(reads);
+    }
 
-    TString s = "AAACCCGGGTTT";
-    TStringInfix sInfix = infix(s, 3, 6);
+    // Close reads file.
+    close(readsLoader);
 
-    TStringView sView = view(s);
-    TStringViewInfix sViewInfix = infix(sView, 3, 6);
-
-    SEQAN_ASSERT(isEqual(sInfix, sViewInfix));
-}
-
-// --------------------------------------------------------------------------
-// Function testStringSet()
-// --------------------------------------------------------------------------
-
-template <typename TAlphabet>
-void testStringSet()
-{
-    typedef String<TAlphabet>                           TString;
-    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
-    typedef typename View<TString>::Type                TStringView;
-    typedef typename View<TStringSet>::Type             TStringSetView;
-    typedef typename View<TDeviceStringSet>::Type       TDeviceStringSetView;
-
-    TStringSet ss;
-    appendValue(ss, "AAAAAAAA");
-    appendValue(ss, "CCCCCCC");
-    appendValue(ss, "GGGGGGGGGGGGGG");
-    appendValue(ss, "T");
-
-    TStringSetView ssView = view(ss);
-
-    SEQAN_ASSERT_EQ(length(ss), length(ssView));
-    for (unsigned i = 0; i < length(ss); ++i)
-        SEQAN_ASSERT(isEqual(ss[i], ssView[i]));
-
-    TDeviceStringSet deviceSs;
-    assign(deviceSs, ss);
-    TDeviceStringSetView deviceSsView = view(deviceSs);
+    return 0;
 }
 
-// --------------------------------------------------------------------------
-// Function testIndex()
-// --------------------------------------------------------------------------
-
-template <typename TAlphabet, typename TIndexSpec>
-void testIndex()
-{
-    typedef String<TAlphabet>                           TString;
-    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-//    typedef Index<TString, TIndexSpec>                  TIndex;
-    typedef Index<TStringSet, TIndexSpec>               TIndex;
-    typedef typename Device<TString>::Type              TDeviceString;
-    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
-    typedef typename Device<TIndex>::Type               TDeviceIndex;
-
-    // Instantiate an index over a text.
-//    TString text("ACGTACGTACGT");
-    TStringSet text;
-    appendValue(text, "ATAAAAAAAAA");
-    appendValue(text, "CCCCTACCC");
-
-    TIndex index(text);
-
-    // Create the index on the reversed text.
-    reverse(text);
-    indexCreate(index);
-    reverse(text);
-
-    // Copy index to device.
-    TDeviceIndex deviceIndex;
-    assign(deviceIndex, index);
-
-    // Create a pattern.
-    TString pattern("TA");
-    TDeviceString devicePattern;
-    assign(devicePattern, pattern);
-
-#ifdef __CUDACC__
-    // Find on GPU.
-    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
-    cudaDeviceSynchronize();
-#endif
-}
-
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Function main()
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 int main(int argc, char const ** argv)
 {
-    testInfix<Dna>();
-    testStringSet<Dna>();
-    testIndex<Dna, FMIndex<> >();
-};
+    ArgumentParser parser;
+    Options options;
+    setupArgumentParser(parser, options);
+
+    ArgumentParser::ParseResult res = parseCommandLine(options, parser, argc, argv);
+
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res == seqan::ArgumentParser::PARSE_ERROR;
+
+    return runMapper(options);
+}

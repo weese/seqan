@@ -41,23 +41,52 @@
 #include <seqan/sequence.h>
 #include <seqan/index_extras.h>
 
-#include "store.h"
-
-#include "../masai/index/genome_index.h"
-#include "../masai/index/reads_index.h"
-
 using namespace seqan;
 
 // ============================================================================
-// Types
-// ============================================================================
-
-// ============================================================================
-// Contigs Index Fibres
+// Global Types
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Contigs Suffix Array Value Type
+// Fragment Store Configuration
+// ----------------------------------------------------------------------------
+
+struct CUDAStoreConfig
+{
+    typedef String<Dna5Q>           TReadSeq;
+    typedef String<Dna>             TContigSeq;
+
+    typedef double                  TMean;
+    typedef double                  TStd;
+    typedef signed char             TMappingQuality;
+
+    typedef void                    TReadStoreElementSpec;
+    typedef Owner<ConcatDirect<> >  TReadSeqStoreSpec;
+    typedef Alloc<>                 TReadNameSpec;
+    typedef Owner<ConcatDirect<> >  TReadNameStoreSpec;
+    typedef void                    TMatePairStoreElementSpec;
+    typedef void                    TLibraryStoreElementSpec;
+    typedef void                    TContigStoreElementSpec;
+    typedef void                    TContigFileSpec;
+    typedef void                    TAlignedReadStoreElementSpec;
+    typedef Owner<ConcatDirect<> >  TAlignedReadTagStoreSpec;
+    typedef void                    TAnnotationStoreElementSpec;
+};
+
+// ============================================================================
+// Other Store Types
+// ============================================================================
+
+typedef GenomeConfig<CUDAStoreConfig>                   TGenomeConfig;
+typedef Genome<void, TGenomeConfig>                     TGenome;
+typedef typename Contigs<TGenome>::Type                 TContigs;
+
+// ============================================================================
+// Index Types
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Suffix Array Value Type
 // ----------------------------------------------------------------------------
 
 namespace seqan {
@@ -69,11 +98,28 @@ struct SAValue<TContigs>
 }
 
 // ----------------------------------------------------------------------------
-// Contigs FM Index Fibres
+// FM Index Fibres
 // ----------------------------------------------------------------------------
 
-typedef FMIndex<>                           TGenomeFMSpec;
-typedef Index<TContigs, TGenomeFMSpec>      TGenomeFM;
+typedef FMIndex<>                           TGenomeIndexSpec;
+typedef Index<TContigs, TGenomeIndexSpec>   TGenomeIndex;
 
+// ----------------------------------------------------------------------------
+// FM Index Size
+// ----------------------------------------------------------------------------
+
+namespace seqan {
+template <typename TSpec>
+struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
+{
+    typedef unsigned Type;
+};
+
+template <typename TSpec>
+struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
+{
+    typedef unsigned Type;
+};
+}
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
