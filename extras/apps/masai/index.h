@@ -159,7 +159,7 @@ struct Fibre<TGenomeBaseQGram, FibreDir>
 // Contigs FM Index Fibres
 // ----------------------------------------------------------------------------
 
-typedef IndexSa<>                           TGenomeFMSpec;
+typedef FMIndex<>                           TGenomeFMSpec;
 typedef Index<TContigs, TGenomeFMSpec>      TGenomeFM;
 
 // ----------------------------------------------------------------------------
