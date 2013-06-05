@@ -91,9 +91,7 @@ struct GenomeHost<GenomeIndex<TGenome, TIndexSpec, TSpec> >
 template <typename TGenome, typename TIndexSpec, typename TSpec, typename TString>
 bool load(GenomeIndex<TGenome, TIndexSpec, TSpec> & genomeIndex, TString const & genomeIndexFile)
 {
-    typedef typename GenomeIndex<TGenome, TIndexSpec, TSpec>::TIndex    TIndex;
-
-    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
+    setValue(genomeIndex.index.text, getContigs(getGenome(genomeIndex)));
 
     return open(genomeIndex.index, toCString(genomeIndexFile));
 }
@@ -107,7 +105,7 @@ void build(GenomeIndex<TGenome, TIndexSpec, TSpec> & genomeIndex)
 {
     typedef typename GenomeIndex<TGenome, TIndexSpec, TSpec>::TIndex    TIndex;
 
-    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
+    setValue(genomeIndex.index.text, getContigs(getGenome(genomeIndex)));
 
     // Iterator instantiation calls automatic index construction.
     typename Iterator<TIndex, TopDown<> >::Type it(genomeIndex.index);
@@ -116,12 +114,12 @@ void build(GenomeIndex<TGenome, TIndexSpec, TSpec> & genomeIndex)
 template <typename TGenome, typename TIndexSpec, typename TSpec>
 void build(GenomeIndex<TGenome, FMIndex<TIndexSpec>, TSpec> & genomeIndex)
 {
-    typedef typename GenomeIndex<TGenome, TIndexSpec, TSpec>::TIndex    TIndex;
+    typedef typename GenomeIndex<TGenome, FMIndex<TIndexSpec>, TSpec>::TIndex   TIndex;
 
     // IndexFM is built on the reversed genome.
     reverse(getGenome(genomeIndex));
 
-    genomeIndex.index = TIndex(getContigs(getGenome(genomeIndex)));
+    setValue(genomeIndex.index.text, getContigs(getGenome(genomeIndex)));
 
     // Iterator instantiation calls automatic index construction.
     typename Iterator<TIndex, TopDown<> >::Type it(genomeIndex.index);
