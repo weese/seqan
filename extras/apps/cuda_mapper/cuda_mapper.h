@@ -148,9 +148,9 @@ struct Options
 // --------------------------------------------------------------------------
 
 #ifdef __CUDACC__
-template <typename TIndex, typename TPattern>
+template <typename TIndex, typename TReads>
 __global__ void
-mapReadsKernel(TIndex index, TPattern pattern)
+mapReadsKernel(TIndex index, TReads reads)
 {
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
 
@@ -243,7 +243,7 @@ int runMapper(Options & options)
 
         // Map reads.
         start = sysTime();
-//        mapReads(mapper, genomeIndex);
+        mapReadsKernel<<<1,1>>>(view(genomeIndex.index), view(getSeqs(reads)));
         finish = sysTime();
         std::cout << "Mapping time:\t\t\t" << std::flush;
         std::cout << finish - start << " sec" << std::endl;
