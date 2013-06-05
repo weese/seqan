@@ -107,7 +107,7 @@ public:
     // ----------------------------------------------------------------------
 
     template <typename TPos>
-    inline typename Reference<StringSet>::Type
+    SEQAN_FUNC typename Reference<StringSet>::Type
     operator[](TPos pos)
     {
         SEQAN_CHECKPOINT;
@@ -115,7 +115,7 @@ public:
     }
 
     template <typename TPos>
-    inline typename Reference<StringSet const>::Type
+    SEQAN_FUNC typename Reference<StringSet const>::Type
     operator[](TPos pos) const
     {
         SEQAN_CHECKPOINT;
