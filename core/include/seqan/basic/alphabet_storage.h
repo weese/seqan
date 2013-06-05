@@ -162,18 +162,6 @@ struct BytesPerValue
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction WordSize
-// ----------------------------------------------------------------------------
-
-#if defined(__CUDA_ARCH__)
-template <typename TSpec = void>
-struct WordSize : BitsPerValue<__uint32> {};
-#else
-template <typename TSpec = void>
-struct WordSize : BitsPerValue<unsigned long> {};
-#endif
-
-// ----------------------------------------------------------------------------
 // Metafunction IntegralForValue
 // ----------------------------------------------------------------------------
 
