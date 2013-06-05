@@ -49,6 +49,13 @@ template <typename TSpec>
 struct RankDictionaryBitMask_;
 
 // ----------------------------------------------------------------------------
+// Metafunction RankDictionaryWordSize_
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+struct RankDictionaryWordSize_;
+
+// ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitsPerBlock_
 // ----------------------------------------------------------------------------
 
@@ -101,6 +108,20 @@ struct TwoLevels {};
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Metafunction Value                                          [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
+{
+    typedef TValue  Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Value<RankDictionary<TwoLevels<TValue, TSpec> > const> :
+    Value<RankDictionary<TwoLevels<TValue, TSpec> > > {};
+
+// ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitMask_
 // ----------------------------------------------------------------------------
 
@@ -117,18 +138,18 @@ struct RankDictionaryBitMask_<__uint64>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Value                                          [RankDictionary]
+// Metafunction RankDictionaryWordSize_                             [TwoLevels]
 // ----------------------------------------------------------------------------
 
+#ifdef __CUDACC__
 template <typename TValue, typename TSpec>
-struct Value<RankDictionary<TwoLevels<TValue, TSpec> > >
-{
-    typedef TValue  Type;
-};
-
+struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
+    BitsPerValue<__uint32> {};
+#else
 template <typename TValue, typename TSpec>
-struct Value<RankDictionary<TwoLevels<TValue, TSpec> > const> :
-    Value<RankDictionary<TwoLevels<TValue, TSpec> > > {};
+struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
+    BitsPerValue<unsigned long> {};
+#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitsPerBlock_                         [TwoLevels]
@@ -229,7 +250,7 @@ struct RankDictionary<TwoLevels<TValue, TSpec> >
 
     static const unsigned _BITS_PER_VALUE   = BitsPerValue<TValue>::VALUE;
     static const unsigned _BITS_PER_BLOCK   = RankDictionaryBitsPerBlock_<TwoLevels<TValue, TSpec> >::VALUE;
-    static const unsigned _BITS_PER_WORD    = Min<WordSize<>::VALUE, _BITS_PER_BLOCK>::VALUE;
+    static const unsigned _BITS_PER_WORD    = Min<RankDictionaryWordSize_<TwoLevels<TValue, TSpec> >::VALUE, _BITS_PER_BLOCK>::VALUE;
     static const unsigned _VALUES_PER_WORD  = _BITS_PER_WORD  / _BITS_PER_VALUE;
     static const unsigned _VALUES_PER_BLOCK = _BITS_PER_BLOCK / _BITS_PER_VALUE;
     static const unsigned _WORDS_PER_BLOCK  = _BITS_PER_BLOCK / _BITS_PER_WORD;
