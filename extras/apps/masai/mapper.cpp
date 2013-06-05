@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -209,23 +209,26 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runMapper()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex, typename TFormat, typename TMapperConfig, typename TReadsConfig>
-int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfig const & /* config */)
+template <typename TIndex, typename TFormat, typename TMapperConfig, typename TGenomeConfig, typename TReadsConfig>
+int runMapper(Options & options,
+              TMapperConfig const & /* config */,
+              TGenomeConfig const & /* config */,
+              TReadsConfig const & /* config */)
 {
-    typedef Genome<void>                                                            TGenome;
-    typedef GenomeIndex<TGenome, TIndex>                                            TGenomeIndex;
-    typedef Reads<void, TReadsConfig>                                               TReads;
-    typedef ReadsLoader<void, TReadsConfig>                                         TReadsLoader;
-    typedef Writer<TGenome, TReads, TFormat, typename TMapperConfig::TDistance>     TWriter;
-    typedef Mapper<TReads, TWriter, void, TMapperConfig>                            TMapper;
+    typedef Genome<void, TGenomeConfig>                                                 TGenome;
+    typedef GenomeIndex<TGenome, TIndex, void>                                          TGenomeIndex;
+    typedef Reads<void, TReadsConfig>                                                   TReads;
+    typedef ReadsLoader<void, TReadsConfig>                                             TReadsLoader;
+    typedef Writer<TGenome, TReads, TFormat, typename TMapperConfig::TDistance, void>   TWriter;
+    typedef Mapper<TReads, TWriter, void, TMapperConfig>                                TMapper;
 
-    TFragmentStore      store;
+    TMasaiStore         store;
     TGenome             genome(store);
     TGenomeIndex        genomeIndex(genome);
     TReads              reads(store);
     TReadsLoader        readsLoader(reads);
     TWriter             writer(genome, options.noDump);
-//    TMapper             mapper(writer, options.noVerify);
+    TMapper             mapper(writer, options.noVerify);
 
     double start, finish;
 
@@ -266,6 +269,9 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
         return 1;
     }
 
+    // Configure mapper.
+    setSeedLength(mapper, options.seedLength);
+
     // Configure writer.
     writeAlignments(writer, options.outputCigar);
 
@@ -289,13 +295,11 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
         std::cout << finish - start << " sec" << std::endl;
         std::cout << "Reads count:\t\t\t" << reads.readsCount << std::endl;
 
+        // Pass reads to mapper.
+        setReads(mapper, reads);
+
         // Pass reads to writer.
         setReads(writer, reads);
-
-        // Configure mapper.
-        TMapper mapper(reads, writer, options.noVerify);
-        setSeedLength(mapper, options.seedLength);
-        setReads(mapper, reads);
 
         // Map reads.
         start = sysTime();
@@ -320,13 +324,13 @@ int runMapper(Options & options, TMapperConfig const & /* config */, TReadsConfi
 template <typename TIndex, typename TFormat, typename TDistance, typename TStrategy, typename TBacktracking>
 int runMapper(Options & options)
 {
-    typedef ReadMapperConfig<TDistance, TStrategy, MultipleBacktracking>    TMapperConfig;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadStore;
+    typedef typename IsSameType<TFormat, Sam>::Type                                     TUseReadNameStore;
+    typedef ReadsConfig<TUseReadStore, TUseReadNameStore, True, True, MasaiStoreConfig>  TReadsConfig;
+    typedef GenomeConfig<MasaiStoreConfig>                                               TGenomeConfig;
+    typedef ReadMapperConfig<TDistance, TStrategy, TBacktracking, TGenomeConfig>        TMapperConfig;
 
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadStore;
-    typedef typename IsSameType<TFormat, Sam>::Type                         TUseReadNameStore;
-    typedef ReadsConfig<TUseReadStore, TUseReadNameStore>                   TReadsConfig;
-
-    return runMapper<TIndex, TFormat>(options, TMapperConfig(), TReadsConfig());
+    return runMapper<TIndex, TFormat>(options, TMapperConfig(), TGenomeConfig(), TReadsConfig());
 }
 
 // ----------------------------------------------------------------------------
@@ -391,16 +395,16 @@ int configureGenomeIndex(Options & options)
     switch (options.genomeIndexType)
     {
         case Options::INDEX_ESA:
-            return configureOutputFormat<TGenomeEsa>(options);
+            return configureOutputFormat<TGenomeEsaSpec>(options);
 
         case Options::INDEX_SA:
-            return configureOutputFormat<TGenomeSa>(options);
+            return configureOutputFormat<TGenomeSaSpec>(options);
 
 //    case Options::INDEX_QGRAM:
-//        return configureOutputFormat<TGenomeQGram>(options);
+//        return configureOutputFormat<TGenomeQGramSpec>(options);
 
         case Options::INDEX_FM:
-            return configureOutputFormat<TGenomeFM>(options);
+            return configureOutputFormat<TGenomeFMSpec>(options);
 
         default:
             return 1;

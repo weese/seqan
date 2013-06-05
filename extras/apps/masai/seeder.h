@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -46,37 +46,41 @@
 using namespace seqan;
 
 // ============================================================================
-// Forwards
-// ============================================================================
-
-// ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class SeederConfig
+// ----------------------------------------------------------------------------
+
+template <typename TDistance_       = HammingDistance,
+          typename TAlgorithm_      = MultipleBacktracking,
+          typename TReadsIndexSpec_ = TReadsWotdSpec>
+struct SeederConfig
+{
+    typedef TDistance_          TDistance;
+    typedef TAlgorithm_         TAlgorithm;
+    typedef TReadsIndexSpec_    TReadsIndexSpec;
+};
 
 // ----------------------------------------------------------------------------
 // Class Seeder
 // ----------------------------------------------------------------------------
 
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec = MultipleBacktracking>
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec = void, typename TConfig = SeederConfig<> >
 struct Seeder
 {
-    TFragmentStore &    store;
-    TReadsDelegate &    readsDelegate;
-    THitsDelegate &     hitsDelegate;
+    typedef ReadsIndex<TReads, typename TConfig::TReadsIndexSpec>   TReadsIndex;
 
-    TReadsWotd          readsWotd;
-    TReadsQGram         readsQGram;
-
-    unsigned            readsCount;
-    unsigned            seedsCount;
+    Holder<TReads>      reads;
+    TReadsIndex         readsIndex;
+    TManager            & manager;
+    TDelegate           & delegate;
     unsigned long       hitsCount;
 
-    Seeder(TFragmentStore & store, TReadsDelegate & readsDelegate, THitsDelegate & hitsDelegate) :
-        store(store),
-        readsDelegate(readsDelegate),
-        hitsDelegate(hitsDelegate),
-        readsCount(0),
-        seedsCount(0),
+    Seeder(TManager & manager, TDelegate & delegate) :
+        manager(manager),
+        delegate(delegate),
         hitsCount(0)
     {}
 };
@@ -85,307 +89,119 @@ struct Seeder
 // Metafunctions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Metafunction ReadsHost<T>::Type                                     [Seeder]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig>
+struct ReadsHost<Seeder<TReads, TManager, TDelegate, TSpec, TConfig> >
+{
+    typedef TReads  Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function indexSeedsExact()                                          [Seeder]
+// Function clear()                                                    [Seeder]
 // ----------------------------------------------------------------------------
 
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec>
-void indexSeedsExact(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder,
-                     TReadSeqSize seedsLength,
-                     TReadSeqSize firstSeed,
-                     TReadSeqSize lastSeed)
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig>
+void clear(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder)
 {
-    typedef typename Fibre<TReadsQGram, QGramSA>::Type          TReadsIndexSAFibre;
-    typedef typename Fibre<TReadsQGram, QGramDir>::Type         TReadsIndexDirFibre;
-    typedef typename Fibre<TReadsQGram, QGramShape>::Type       TReadsIndexShape;
-    typedef typename Fibre<TReadsQGram, QGramBucketMap>::Type   TReadsIndexBucketMap;
-
-    typedef typename Value<TReadsIndexDirFibre>::Type           TSize;
-    typedef Iterator<TReadSeq, Standard>::Type                  TReadSeqIterator;
-
-    TReadSeqStoreSize readsCount = seeder.readsCount * 2;
-
-    seeder.readsQGram = TReadsQGram(seeder.store.readSeqStore);
-
-    setStepSize(seeder.readsQGram, seedsLength);
-
-    TReadsIndexSAFibre & sa = indexSA(seeder.readsQGram);
-    TReadsIndexDirFibre & dir = indexDir(seeder.readsQGram);
-    TReadsIndexShape & shape = indexShape(seeder.readsQGram);
-    TReadsIndexBucketMap & bucketMap = indexBucketMap(seeder.readsQGram);
-
-    // Resize suffix array and directory.
-    resize(sa, (lastSeed - firstSeed) * readsCount, Exact());
-    resize(dir, _fullDirLength(seeder.readsQGram), Exact());
-
-    // Clear directory.
-    _qgramClearDir(dir, bucketMap);
-
-    // Count qgrams.
-    for (TReadSeqStoreSize readId = 0; readId < readsCount; ++readId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, readId))
-            continue;
-
-        TReadSeq & read = seeder.store.readSeqStore[readId];
-        TReadSeqIterator itText = begin(read, Standard());
-
-        itText += seedsLength * firstSeed;
-        for (TSize i = firstSeed; i < lastSeed; ++i)
-        {
-            ++dir[requestBucket(bucketMap, hash(shape, itText))];
-            itText += seedsLength;
-        }
-    }
-
-    // Compute cumulative sum.
-    _qgramCummulativeSum(dir, False());
-
-    // Fill suffix array.
-    for (TReadSeqStoreSize readId = 0; readId < readsCount; ++readId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, readId))
-            continue;
-
-        TReadSeq & read = seeder.store.readSeqStore[readId];
-        TReadSeqIterator itText = begin(read, Standard());
-
-        typename Value<TReadsIndexSAFibre>::Type localPos;
-        assignValueI1(localPos, readId);
-        assignValueI2(localPos, 0);
-
-        itText += seedsLength * firstSeed;
-        for (TSize i = firstSeed; i < lastSeed; ++i)
-        {
-            assignValueI2(localPos, seedsLength * i);
-
-            sa[dir[getBucket(bucketMap, hash(shape, itText)) + 1]++] = localPos;
-
-            itText += seedsLength;
-        }
-    }
-
-    // Refine buckets.
-//    _refineQGramIndex(sa, dir, indexText(seeder.readsQGram), weight(shape), seedsLength);
-//    _setHost(seeder.readsQGram);
+    clear(seeder.reads);
+    clear(seeder.readsIndex);
+    seeder.hitsCount = 0;
 }
 
 // ----------------------------------------------------------------------------
-// Function indexSeedsApproximate()                                    [Seeder]
+// Function setReads()                                                 [Seeder]
 // ----------------------------------------------------------------------------
 
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec>
-void indexSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder,
-                           TReadSeqSize seedsLength,
-                           TReadSeqSize firstSeed,
-                           TReadSeqSize lastSeed)
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig>
+void setReads(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder, TReads & reads)
 {
-    typedef typename Fibre<TReadsWotd, FibreSA>::Type           TReadsIndexSAFibre;
-    typedef typename Value<TReadsIndexSAFibre>::Type            TReadsIndexSAPos;
-
-//    clear(seeder.readsWotd);
-    seeder.readsWotd = TReadsWotd(seeder.store.readSeqStore);
-    TReadSeqStoreSize readsCount = seeder.readsCount * 2;
-
-    TReadsIndexSAFibre & sa = indexSA(seeder.readsWotd);
-
-    reserve(sa, (lastSeed - firstSeed) * readsCount, Exact());
-
-    for (TReadSeqStoreSize readId = 0; readId < readsCount; ++readId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, readId))
-            continue;
-
-        for (TReadSeqSize seed = firstSeed; seed < lastSeed; ++seed)
-        {
-            TReadsIndexSAPos localPos;
-            assignValueI1(localPos, readId);
-            assignValueI2(localPos, seed * seedsLength);
-            appendValue(sa, localPos, Exact());
-        }
-    }
+    clear(seeder);
+    setValue(seeder.reads, reads);
+    setReads(seeder.readsIndex, reads);
 }
 
 // ----------------------------------------------------------------------------
-// Function visitSeedsApproximate()                                    [Seeder]
+// Function find()                                                     [Seeder]
 // ----------------------------------------------------------------------------
 
-// NOTE(esiragusa): Debug stuff.
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec, typename TDepth>
-void visitSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder, TDepth depth)
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex>
+void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
+          TGenomeIndex & genomeIndex,
+          TReadSeqSize seedsLength,
+          TReadSeqSize errorsPerSeed,
+          TReadSeqSize firstSeed,
+          TReadSeqSize lastSeed)
 {
-    typedef typename Iterator<TReadsWotd, TopDown<ParentLinks<> > >::Type  TReadsIndexIterator;
-    TReadsIndexIterator readsIt(seeder.readsWotd);
-
-    do
-    {
-        std::cout << representative(readsIt) << std::endl;
-        if (repLength(readsIt) >= depth || !goDown(readsIt))
-            if (!goRight(readsIt))
-                while (goUp(readsIt) && !goRight(readsIt)) ;
-    }
-    while (!isRoot(readsIt));
+    find(seeder, genomeIndex, seedsLength, firstSeed, lastSeed, errorsPerSeed, typename TConfig::TDistance(), typename TConfig::TAlgorithm());
 }
 
 // ----------------------------------------------------------------------------
-// Function visitSeedsExact()                                          [Seeder]
+// Function find()                               [Seeder<MultipleBacktracking>]
 // ----------------------------------------------------------------------------
 
-// NOTE(esiragusa): Debug stuff.
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec, typename TDepth>
-void visitSeedsExact(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder, TDepth depth)
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex, typename TDistance>
+void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
+          TGenomeIndex & genomeIndex,
+          TReadSeqSize seedsLength,
+          TReadSeqSize firstSeed,
+          TReadSeqSize lastSeed,
+          TReadSeqSize errorsPerSeed,
+          TDistance const & /* tag */,
+          MultipleBacktracking const & /* tag */)
 {
-    typedef typename Iterator<TReadsQGram, TopDown<ParentLinks<> > >::Type  TReadsIndexIterator;
+    typedef Seeder<TReads, TManager, TDelegate, TSpec, TConfig>     TSeeder;
+    typedef typename TSeeder::TReadsIndex::TIndex                   TReadsIndex;
+    typedef Backtracking<TDistance>                                 TBacktracking;
+    typedef Finder<TGenomeIndex, TBacktracking>                     TFinder;
+    typedef Pattern<TReadsIndex, TBacktracking>                     TPattern;
 
-    TReadsIndexIterator readsIt(seeder.readsQGram);
-
-    do
-    {
-        std::cout << representative(readsIt) << std::endl;
-        if (repLength(readsIt) >= depth || !goDown(readsIt))
-            if (!goRight(readsIt))
-                while (goUp(readsIt) && !goRight(readsIt)) ;
-    }
-    while (!isRoot(readsIt));
-}
-
-// ----------------------------------------------------------------------------
-// Function findSeedsExact()                                           [Seeder]
-// ----------------------------------------------------------------------------
-
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec, typename TGenomeIndex, typename TDistance>
-void findSeedsExact(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder,
-                    TGenomeIndex & genomeIndex,
-                    TReadSeqSize seedsLength,
-                    TReadSeqSize errorsPerSeed,
-                    TDistance const & /* tag */)
-{
-    typedef Backtracking<TDistance, Stretched<> >           TBacktracking;
-//	typedef Backtracking<TDistance>                         TBacktracking;
-    typedef Finder<TGenomeIndex, TBacktracking>             TFinder;
-    typedef Pattern<TReadsQGram, TBacktracking>             TPattern;
+    build(seeder.readsIndex, seeder.manager, seedsLength, firstSeed, lastSeed);
 
     TFinder finder(genomeIndex);
-    TPattern pattern(seeder.readsQGram, seedsLength);
-
-//    seeder.hitsCount = count_exact_iterative(finder, pattern, 0);
+    TPattern pattern(seeder.readsIndex.index, seedsLength);
 
     while (find(finder, pattern, errorsPerSeed))
     {
+        TReadSeqStoreSize seqId = getValueI1(position(pattern));
+
         // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, getValueI1(position(pattern))))
+        if (isDisabled(seeder.manager, getReadId(getReads(seeder), seqId)))
             continue;
 
         ++seeder.hitsCount;
 
-        onSeedHit(seeder.hitsDelegate,
+//        seeder.delegate.minErrorsPerRead = minErrors(seeder.manager, position(pattern).i1);
+//        seeder.delegate.maxErrorsPerRead = maxErrors(seeder.manager, position(pattern).i1);
+
+        onSeedHit(seeder.delegate,
                   getValueI1(position(finder)),
                   getValueI2(toSuffixPosition(host(finder), beginPosition(finder), length(finder))),
-                  getValueI1(position(pattern)),
-                  getValueI2(beginPosition(pattern)),
-                  0);
-    }
-}
-
-template <typename TReadsDelegate, typename THitsDelegate, typename TGenomeIndex, typename TDistance>
-void findSeedsExact(Seeder<TReadsDelegate, THitsDelegate, SingleBacktracking> & seeder,
-                    TGenomeIndex & genomeIndex,
-                    TReadSeqSize seedsLength,
-                    TReadSeqSize firstSeed,
-                    TReadSeqSize lastSeed,
-                    TDistance const & /* tag */)
-{
-    typedef Finder<TGenomeIndex, FinderSTree>       TFinder;
-    typedef Pattern<TReadSeq>                       TPattern;
-
-    TFinder finder(genomeIndex);
-
-    TReadSeqStoreSize readsCount = seeder.readsCount * 2;
-
-    for (TReadSeqStoreSize readId = 0; readId < readsCount; ++readId)
-    {
-        // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, readId))
-            continue;
-
-        TReadSeq & read = seeder.store.readSeqStore[readId];
-
-        for (TReadSeqSize seed = firstSeed; seed < lastSeed; ++seed)
-        {
-            TPattern pattern(infix(read, seedsLength * seed, seedsLength * (seed + 1)));
-
-            clear(finder);
-
-            while (find(finder, pattern))
-            {
-                ++seeder.hitsCount;
-
-                onSeedHit(seeder.hitsDelegate,
-                          getValueI1(position(finder)),
-                          getValueI2(toSuffixPosition(host(finder), beginPosition(finder), length(finder))),
-                          readId,
-                          seedsLength * seed,
-                          0);
-            }
-        }
-    }
-}
-
-// ----------------------------------------------------------------------------
-// Function findSeedsApproximate()                                     [Seeder]
-// ----------------------------------------------------------------------------
-
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec, typename TGenomeIndex, typename TDistance>
-void findSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder,
-                          TGenomeIndex & genomeIndex,
-                          TReadSeqSize seedsLength,
-                          TReadSeqSize errorsPerSeed,
-                          TDistance const & /* tag */)
-{
-    typedef Backtracking<TDistance>                         TBacktracking;
-    typedef Finder<TGenomeIndex, TBacktracking>             TFinder;
-    typedef Pattern<TReadsWotd, TBacktracking>              TPattern;
-
-    TFinder finder(genomeIndex);
-    TPattern pattern(seeder.readsWotd, seedsLength);
-
-//    seeder.hitsCount = count_iterative(finder, pattern, errorsPerSeed);
-
-    while (find(finder, pattern, errorsPerSeed))
-    {
-        // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, getValueI1(position(pattern))))
-            continue;
-
-        ++seeder.hitsCount;
-
-//        seeder.hitsDelegate.minErrorsPerRead = minErrors(seeder.readsDelegate, position(pattern).i1);
-//        seeder.hitsDelegate.maxErrorsPerRead = maxErrors(seeder.readsDelegate, position(pattern).i1);
-
-        onSeedHit(seeder.hitsDelegate,
-                  getValueI1(position(finder)),
-                  getValueI2(toSuffixPosition(host(finder), beginPosition(finder), length(finder))),
-                  getValueI1(position(pattern)),
+                  seqId,
                   getValueI2(beginPosition(pattern)),
                   pattern.prefix_aligner.errors);
     }
 }
 
-template <typename TReadsDelegate, typename THitsDelegate, typename TGenomeIndex, typename TDistance>
-void findSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, SingleBacktracking> & seeder,
-                          TGenomeIndex & genomeIndex,
-                          TReadSeqSize seedsLength,
-                          TReadSeqSize errorsPerSeed,
-                          TReadSeqSize firstSeed,
-                          TReadSeqSize lastSeed,
-                          TDistance const & /* tag */)
+// ----------------------------------------------------------------------------
+// Function find()                                 [Seeder<SingleBacktracking>]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex, typename TDistance>
+void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
+          TGenomeIndex & genomeIndex,
+          TReadSeqSize seedsLength,
+          TReadSeqSize firstSeed,
+          TReadSeqSize lastSeed,
+          TReadSeqSize errorsPerSeed,
+          TDistance const & /* tag */,
+          SingleBacktracking const & /* tag */)
 {
     typedef Backtracking<TDistance>                 TBacktracking;
     typedef Finder<TGenomeIndex, TBacktracking>     TFinder;
@@ -394,15 +210,15 @@ void findSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, SingleBacktracki
     TFinder finder(genomeIndex);
     TPattern pattern;
 
-    TReadSeqStoreSize readsCount = seeder.readsCount * 2;
+    TReadSeqStoreSize seqsCount = length(getSeqs(getReads(seeder)));
 
-    for (TReadSeqStoreSize readId = 0; readId < readsCount; ++readId)
+    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
     {
         // Skip disabled reads.
-        if (isDisabled(seeder.readsDelegate, readId))
+        if (isDisabled(seeder.manager, getReadId(getReads(seeder), seqId)))
             continue;
 
-        TReadSeq & read = seeder.store.readSeqStore[readId];
+        TReadSeq & read = getSeqs(getReads(seeder))[seqId];
 
         for (TReadSeqSize seed = firstSeed; seed < lastSeed; ++seed)
         {
@@ -414,13 +230,13 @@ void findSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, SingleBacktracki
             {
                 ++seeder.hitsCount;
 
-//                seeder.hitsDelegate.minErrorsPerRead = minErrors(seeder.readsDelegate, readId);
-//                seeder.hitsDelegate.maxErrorsPerRead = maxErrors(seeder.readsDelegate, readId);
+//                seeder.delegate.minErrorsPerRead = minErrors(seeder.manager, seqId);
+//                seeder.delegate.maxErrorsPerRead = maxErrors(seeder.manager, seqId);
 
-                onSeedHit(seeder.hitsDelegate,
+                onSeedHit(seeder.delegate,
                           getValueI1(position(finder)),
                           getValueI2(toSuffixPosition(host(finder), beginPosition(finder), length(finder))),
-                          readId,
+                          seqId,
                           seedsLength * seed,
                           pattern.prefix_aligner.errors);
             }
@@ -429,43 +245,97 @@ void findSeedsApproximate(Seeder<TReadsDelegate, THitsDelegate, SingleBacktracki
 }
 
 // ----------------------------------------------------------------------------
-// Function find()                                                     [Seeder]
+// Function find()                         [Seeder<MultipleBacktracking,Exact>]
 // ----------------------------------------------------------------------------
 
-template <typename TReadsDelegate, typename THitsDelegate, typename TSpec, typename TGenomeIndex, typename TDistance>
-void find(Seeder<TReadsDelegate, THitsDelegate, TSpec> & seeder,
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex>
+void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
           TGenomeIndex & genomeIndex,
           TReadSeqSize seedsLength,
-          TReadSeqSize errorsPerSeed,
           TReadSeqSize firstSeed,
           TReadSeqSize lastSeed,
-          TDistance const & /* tag */)
+          TReadSeqSize /* errorsPerSeed */,
+          Nothing const & /* tag */,
+          MultipleBacktracking const & /* tag */)
 {
-    if (errorsPerSeed > 0)
+    typedef Seeder<TReads, TManager, TDelegate, TSpec, TConfig>     TSeeder;
+    typedef typename TSeeder::TReadsIndex::TIndex                   TReadsIndex;
+    typedef Backtracking<HammingDistance, Stretched<> >             TBacktracking;
+    typedef Finder<TGenomeIndex, TBacktracking>                     TFinder;
+    typedef Pattern<TReadsIndex, TBacktracking>                     TPattern;
+
+    build(seeder.readsIndex, seeder.manager, seedsLength, firstSeed, lastSeed);
+
+    TFinder finder(genomeIndex);
+    TPattern pattern(seeder.readsIndex.index, seedsLength);
+
+    while (find(finder, pattern, 0u))
     {
-        indexSeedsApproximate(seeder, seedsLength, firstSeed, lastSeed);
-        findSeedsApproximate(seeder, genomeIndex, seedsLength, errorsPerSeed, TDistance());
-    }
-    else
-    {
-        indexSeedsExact(seeder, seedsLength, firstSeed, lastSeed);
-        findSeedsExact(seeder, genomeIndex, seedsLength, errorsPerSeed, TDistance());
+        TReadSeqStoreSize seqId = getValueI1(position(pattern));
+
+        // Skip disabled reads.
+        if (isDisabled(seeder.manager, getReadId(getReads(seeder), seqId)))
+            continue;
+
+        ++seeder.hitsCount;
+
+        onSeedHit(seeder.delegate,
+                  getValueI1(position(finder)),
+                  getValueI2(toSuffixPosition(host(finder), beginPosition(finder), length(finder))),
+                  seqId,
+                  getValueI2(beginPosition(pattern)),
+                  0u);
     }
 }
 
-template <typename TReadsDelegate, typename THitsDelegate, typename TGenomeIndex, typename TDistance>
-void find(Seeder<TReadsDelegate, THitsDelegate, SingleBacktracking> & seeder,
+// ----------------------------------------------------------------------------
+// Function find()                           [Seeder<SingleBacktracking,Exact>]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TManager, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex>
+void find(Seeder<TReads, TManager, TDelegate, TSpec, TConfig> & seeder,
           TGenomeIndex & genomeIndex,
           TReadSeqSize seedsLength,
-          TReadSeqSize errorsPerSeed,
           TReadSeqSize firstSeed,
           TReadSeqSize lastSeed,
-          TDistance const & /* tag */)
+          TReadSeqSize /* errorsPerSeed */,
+          Nothing const & /* tag */,
+          SingleBacktracking const & /* tag */)
 {
-    if (errorsPerSeed > 0)
-        findSeedsApproximate(seeder, genomeIndex, seedsLength, errorsPerSeed, firstSeed, lastSeed, TDistance());
-    else
-        findSeedsExact(seeder, genomeIndex, seedsLength, firstSeed, lastSeed, TDistance());
+    typedef Finder<TGenomeIndex, FinderSTree>       TFinder;
+    typedef Pattern<TReadSeq>                       TPattern;
+
+    TFinder finder(genomeIndex);
+
+    TReadSeqStoreSize seqsCount = length(getSeqs(getReads(seeder)));
+
+    for (TReadSeqStoreSize seqId = 0; seqId < seqsCount; ++seqId)
+    {
+        // Skip disabled reads.
+        if (isDisabled(seeder.manager, getReadId(getReads(seeder), seqId)))
+            continue;
+
+        TReadSeq & read = getSeqs(getReads(seeder))[seqId];
+
+        for (TReadSeqSize seed = firstSeed; seed < lastSeed; ++seed)
+        {
+            TPattern pattern(infix(read, seedsLength * seed, seedsLength * (seed + 1)));
+
+            clear(finder);
+
+            while (find(finder, pattern))
+            {
+                ++seeder.hitsCount;
+
+                onSeedHit(seeder.delegate,
+                          getValueI1(position(finder)),
+                          getValueI2(toSuffixPosition(host(finder), beginPosition(finder), length(finder))),
+                          seqId,
+                          seedsLength * seed,
+                          0u);
+            }
+        }
+    }
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_MASAI_SEEDER_H_

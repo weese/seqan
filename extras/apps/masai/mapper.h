@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,6 @@
 using namespace seqan;
 
 // ============================================================================
-// Forwards
-// ============================================================================
-
-// ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
 
@@ -62,12 +58,14 @@ using namespace seqan;
 
 template <typename TDistance_       = EditDistance,
           typename TStrategy_       = AnyBest,
-          typename TBacktracking_   = MultipleBacktracking>
+          typename TBacktracking_   = MultipleBacktracking,
+          typename TGenomeConfig_   = GenomeConfig<> >
 struct ReadMapperConfig
 {
 	typedef TDistance_          TDistance;
 	typedef TStrategy_          TStrategy;
     typedef TBacktracking_      TBacktracking;
+    typedef TGenomeConfig_      TGenomeConfig;
 };
 
 // ----------------------------------------------------------------------------
@@ -77,27 +75,30 @@ struct ReadMapperConfig
 template <typename TReads, typename TDelegate, typename TSpec = void, typename TConfig = ReadMapperConfig<> >
 struct Mapper
 {
-    typedef MatchManager<TDelegate, typename TConfig::TStrategy>            TManager;
-    typedef Extender<TManager, typename TConfig::TDistance>                 TExtender;
-    typedef Seeder<TManager, TExtender, typename TConfig::TBacktracking>    TSeeder;
+    typedef typename GenomeHost<Mapper>::Type                                                       TGenome;
+    typedef Manager<TReads, TDelegate, typename TConfig::TStrategy>                                 TManager;
+    typedef Extender<TGenome, TReads, TManager, typename TConfig::TDistance>                        TExtender;
+    typedef SeederConfig<Nothing, typename TConfig::TBacktracking, TReadsQGramSpec>                 TSeederConfigExt;
+    typedef SeederConfig<HammingDistance, typename TConfig::TBacktracking, TReadsWotdSpec>          TSeederConfigApx;
+    typedef Seeder<TReads, TManager, TExtender, void, TSeederConfigExt>                             TSeederExt;
+    typedef Seeder<TReads, TManager, TExtender, void, TSeederConfigApx>                             TSeederApx;
 
     Holder<TReads>      reads;
     TDelegate           & delegate;
     TManager            _manager;
     TExtender           _extender;
-    TSeeder             _seeder;
+    TSeederExt          _seederExt;
+    TSeederApx          _seederApx;
     TReadSeqSize        _seedLength;
 
-    Mapper(TReads & reads, TDelegate & delegate, bool disableExtender = false) :
-        reads(reads),
+    Mapper(TDelegate & delegate, bool disableExtender = false) :
         delegate(delegate),
-        _manager(delegate, reads.readsCount),
-        _extender(value(reads._store), _manager, reads.readsCount, disableExtender),
-        _seeder(value(reads._store), _manager, _extender),
+        _manager(delegate),
+        _extender(_manager, disableExtender),
+        _seederExt(_manager, _extender),
+        _seederApx(_manager, _extender),
         _seedLength(0)
-    {
-        _seeder.readsCount = reads.readsCount;
-    }
+    {}
 };
 
 // ----------------------------------------------------------------------------
@@ -124,6 +125,26 @@ struct Seeding_
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction ReadsHost<T>::Type                                     [Mapper]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
+struct ReadsHost<Mapper<TReads, TDelegate, TSpec, TConfig> >
+{
+    typedef TReads  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction GenomeHost<T>::Type                                    [Mapper]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
+struct GenomeHost<Mapper<TReads, TDelegate, TSpec, TConfig> >
+{
+    typedef Genome<TSpec, typename TConfig::TGenomeConfig>  Type;
+};
 
 // ============================================================================
 // Functions
@@ -186,26 +207,27 @@ void setSeedLength(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TSize see
 template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
 void setReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TReads & reads)
 {
+    clear(mapper);
+
     setValue(mapper.reads, reads);
-
-    mapper._seeder.readsCount = reads.readsCount;
-    mapper._extender.readsCount = reads.readsCount;
-    mapper._manager.readsCount = reads.readsCount;
-
-//    setReads(mapper._seeder, reads);
-//    setReads(mapper._extender, reads);
-//    setReads(mapper._manager, reads);
+    setReads(mapper._seederExt, reads);
+    setReads(mapper._seederApx, reads);
+    setReads(mapper._extender, reads);
+    setReads(mapper._manager, reads);
 }
 
 // ----------------------------------------------------------------------------
-// Function getReads()                                                 [Mapper]
+// Function clear()                                                    [Mapper]
 // ----------------------------------------------------------------------------
 
 template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
-inline typename Reference<TReads>::Type
-getReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper)
+void clear(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper)
 {
-    return value(mapper.reads);
+    clear(mapper.reads);
+    clear(mapper._seederExt);
+    clear(mapper._seederApx);
+//    clear(mapper._extender);
+    clear(mapper._manager);
 }
 
 // ----------------------------------------------------------------------------
@@ -224,7 +246,7 @@ getReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper)
 template <typename TReads, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex, typename TErrors>
 void mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex & genomeIndex, TErrors errors)
 {
-//    mapper._extender.genome = genomeIndex.genome;
+    setGenome(mapper._extender, getGenome(genomeIndex));
     _mapReads(mapper, genomeIndex, errors, typename TConfig::TStrategy());
 }
 
@@ -252,10 +274,7 @@ void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex 
 
     for (TSeedsIterator seedsIt = begin(seeding.seeds, Standard()); seedsIt != seedsEnd; ++seedsIt)
     {
-        find(mapper._seeder, genomeIndex.index,
-             getValueI1(*seedsIt), getValueI2(*seedsIt),
-             position, position + 1,
-             HammingDistance());
+        _findSeeds(mapper, genomeIndex, *seedsIt, position, position + 1);
 
         // TODO(esiragusa):Compute minErrorsPerRead from seeds.
 //        mapper._extender.minErrorsPerRead += getValueI2(*seedsIt);
@@ -264,8 +283,8 @@ void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex 
         ++position;
     }
 
-    std::cout << "Hits:\t\t\t\t" << mapper._seeder.hitsCount << std::endl;
-    std::cout << "Matches:\t\t\t" << mapper._manager.matchesCount << std::endl;
+    std::cout << "Hits:\t\t\t\t" << hitsCount(mapper) << std::endl;
+    std::cout << "Matches:\t\t\t" << matchesCount(mapper) << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -305,10 +324,7 @@ void _mapReadsBySeed(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenome
     {
         std::cout << "Errors:\t\t\t\t" << mapper._extender.minErrorsPerRead << std::endl;
 
-        find(mapper._seeder, genomeIndex.index,
-             getValueI1(*seedsIt), getValueI2(*seedsIt),
-             position, position + 1,
-             HammingDistance());
+        _findSeeds(mapper, genomeIndex, *seedsIt, position, position + 1);
 
         ++position;
 
@@ -316,8 +332,8 @@ void _mapReadsBySeed(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenome
 //        mapper._extender.minErrorsPerRead += getValueI2(*seedsIt);
         mapper._extender.minErrorsPerRead++;
 
-        std::cout << "Hits:\t\t\t\t" << mapper._seeder.hitsCount << std::endl;
-        std::cout << "Matches:\t\t\t" << mapper._manager.matchesCount << std::endl;
+        std::cout << "Hits:\t\t\t\t" << hitsCount(mapper) << std::endl;
+        std::cout << "Matches:\t\t\t" << matchesCount(mapper) << std::endl;
 
 //        mapper._manager.errors += getValueI2(*seedsIt);
 //        raiseErrorThreshold(mapper._manager);
@@ -350,10 +366,7 @@ void _mapReadsByStratum(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGen
 
         for (TSeedsIterator seedsIt = begin(seeding.seeds, Standard()); seedsIt != seedsEnd; ++seedsIt)
         {
-            find(mapper._seeder, genomeIndex.index,
-                 getValueI1(*seedsIt), getValueI2(*seedsIt),
-                 position, position + 1,
-                 HammingDistance());
+            _findSeeds(mapper, genomeIndex, *seedsIt, position, position + 1);
 
             ++position;
         }
@@ -363,8 +376,8 @@ void _mapReadsByStratum(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGen
 
         raiseErrorThreshold(mapper._manager);
 
-        std::cout << "Hits:\t\t\t\t" << mapper._seeder.hitsCount << std::endl;
-        std::cout << "Matches:\t\t\t" << mapper._manager.matchesCount << std::endl;
+        std::cout << "Hits:\t\t\t\t" << hitsCount(mapper) << std::endl;
+        std::cout << "Matches:\t\t\t" << matchesCount(mapper) << std::endl;
     }
 }
 
@@ -376,9 +389,8 @@ template <typename TReads, typename TDelegate, typename TSpec, typename TConfig,
 void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex & genomeIndex, TErrors errors,
                KBest const & /*tag*/)
 {
-    //typedef Seeding_<>                          TSeeding_;
-    //typedef TSeeding_::TSeeds                   TSeeds;
-    //typedef Iterator<TSeeds, Standard>::Type    TSeedsIterator;
+    typedef Seeding_<>                         TSeeding_;
+    typedef TSeeding_::TSeed                   TSeed;
 
     TReadSeqSize readsLength = avgSeqLength(getReads(mapper));
     TReadSeqSize seedLength  = mapper._seedLength;
@@ -397,10 +409,10 @@ void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex 
         mapper._extender.minErrorsPerRead = seed;
         mapper._extender.maxErrorsPerRead = std::min(errors, errors_ + stratumDelta);
 
-        find(mapper._seeder, genomeIndex.index, seedLength, seedErrors_, seed, seed + 1, HammingDistance());
+        _findSeeds(mapper, genomeIndex, TSeed(seedLength, seedErrors_), seed, seed + 1);
 
-        std::cout << "Hits:\t\t\t\t" << mapper._seeder.hitsCount << std::endl;
-        std::cout << "Matches:\t\t\t" << mapper._manager.matchesCount << std::endl;
+        std::cout << "Hits:\t\t\t\t" << hitsCount(mapper) << std::endl;
+        std::cout << "Matches:\t\t\t" << matchesCount(mapper) << std::endl;
 
         raiseErrorThreshold(mapper._manager);
     }
@@ -414,9 +426,8 @@ template <typename TReads, typename TDelegate, typename TSpec, typename TConfig,
 void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex & genomeIndex, TErrors errors,
                AnyBest const & /*tag*/)
 {
-    //typedef Seeding_<>                          TSeeding_;
-    //typedef TSeeding_::TSeeds                   TSeeds;
-    //typedef Iterator<TSeeds, Standard>::Type    TSeedsIterator;
+    typedef Seeding_<>                          TSeeding_;
+    typedef TSeeding_::TSeed                    TSeed;
 
     TReadSeqSize readsLength = avgSeqLength(getReads(mapper));
     TReadSeqSize seedLength  = mapper._seedLength;
@@ -438,10 +449,10 @@ void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex 
 //        if (mapper._extender.maxErrorsPerRead == errors)
 //            mapper._extender.maxErrorsPerRead = errorsLossy;
 
-        find(mapper._seeder, genomeIndex.index, seedLength, seedErrors_, seed, seed + 1, HammingDistance());
+        _findSeeds(mapper, genomeIndex, TSeed(seedLength, seedErrors_), seed, seed + 1);
 
-        std::cout << "Hits:\t\t\t\t" << mapper._seeder.hitsCount << std::endl;
-        std::cout << "Matches:\t\t\t" << mapper._manager.matchesCount << std::endl;
+        std::cout << "Hits:\t\t\t\t" << hitsCount(mapper) << std::endl;
+        std::cout << "Matches:\t\t\t" << matchesCount(mapper) << std::endl;
 
         raiseErrorThreshold(mapper._manager);
     }
@@ -449,10 +460,43 @@ void _mapReads(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex 
 //    for (TErrors errors_ = errors + 1; errors_ <= errorsLossy; ++errors_)
 //    {
 //        std::cout << "Errors:\t\t\t\t" << errors_ << std::endl;
-//        std::cout << "Matches:\t\t\t" << mapper._manager.matchesCount << std::endl;
+//        std::cout << "Matches:\t\t\t" << matchesCount(mapper) << std::endl;
 //
 //        raiseErrorThreshold(mapper._manager);
 //    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _findSeeds()                                               [Mapper]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TDelegate, typename TSpec, typename TConfig, typename TGenomeIndex, typename TSeed, typename TPosition>
+void _findSeeds(Mapper<TReads, TDelegate, TSpec, TConfig> & mapper, TGenomeIndex & genomeIndex, TSeed seed, TPosition firstSeed, TPosition lastSeed)
+{
+    if (getValueI2(seed) > 0u)
+        find(mapper._seederApx, genomeIndex.index, getValueI1(seed), getValueI2(seed), firstSeed, lastSeed);
+    else
+        find(mapper._seederExt, genomeIndex.index, getValueI1(seed), getValueI2(seed), firstSeed, lastSeed);
+}
+
+// ----------------------------------------------------------------------------
+// Function hitsCount()                                                [Mapper]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
+unsigned long hitsCount(Mapper<TReads, TDelegate, TSpec, TConfig> const & mapper)
+{
+    return mapper._seederExt.hitsCount + mapper._seederApx.hitsCount;
+}
+
+// ----------------------------------------------------------------------------
+// Function matchesCount()                                             [Mapper]
+// ----------------------------------------------------------------------------
+
+template <typename TReads, typename TDelegate, typename TSpec, typename TConfig>
+unsigned long matchesCount(Mapper<TReads, TDelegate, TSpec, TConfig> const & mapper)
+{
+    return mapper._manager.matchesCount;
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_MASAI_MAPPER_H_
