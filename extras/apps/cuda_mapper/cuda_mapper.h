@@ -161,11 +161,11 @@ template <typename TIndex, typename TReadSeq>
 SEQAN_FUNC void
 mapRead(TIndex & index, TReadSeq const & readSeq)
 {
-    typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
+    typename Iterator<TIndex, TopDown<> >::Type it(index);
 
-    TIterator it(index);
-    goDown(it, readSeq);
-    printf("occurrences=%ld\n", countOccurrences(it));
+    unsigned occurrences = goDown(it, readSeq) ? countOccurrences(it) : 0;
+
+    printf("occurrences=%ld\n", occurrences);
 }
 
 // --------------------------------------------------------------------------
@@ -182,8 +182,10 @@ _mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
 //    mapRead(index, readSeqs[idx]);
 
     typename Iterator<TIndexView, TopDown<> >::Type it(index);
-    goDown(it, readSeqs[idx]);
-    printf("index=%i, occurrences=%ld\n", idx, countOccurrences(it));
+
+    unsigned occurrences = goDown(it, readSeqs[idx]) ? countOccurrences(it) : 0;
+
+    printf("index=%i, occurrences=%ld\n", idx, occurrences);
 }
 #endif
 
