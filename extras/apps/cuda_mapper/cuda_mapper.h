@@ -177,12 +177,12 @@ __global__ void
 _mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("index=%i\n", idx);
 
 //    mapRead(index, readSeqs[idx]);
 
     typename Iterator<TIndexView, TopDown<> >::Type it(index);
     goDown(it, readSeqs[idx]);
+    printf("index=%i, occurrences=%ld\n", idx, countOccurrences(it));
 }
 #endif
 
