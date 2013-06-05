@@ -158,7 +158,8 @@ struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
 
 template <typename TValue, typename TSpec>
 struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, TSpec> > :
-    BitsPerValue<typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type> {};
+    RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > {};
+//    BitsPerValue<typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBlock_                                [TwoLevels]
