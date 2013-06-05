@@ -92,7 +92,7 @@ namespace seqan {
 template <>
 struct SAValue<TContigs>
 {
-    typedef Pair<unsigned char, unsigned int, Pack> Type;
+    typedef Pair<__uint8, __uint32, Pack> Type;
 };
 }
 
@@ -111,13 +111,13 @@ namespace seqan {
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
 {
-    typedef unsigned Type;
+    typedef __uint32 Type;
 };
 
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
 {
-    typedef unsigned Type;
+    typedef __uint32 Type;
 };
 }
 
