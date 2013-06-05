@@ -159,12 +159,13 @@ struct Options
 
 template <typename TIndex, typename TReadSeq>
 SEQAN_FUNC void
-mapRead(TIndex const & index, TReadSeq const & readSeq)
+mapRead(TIndex & index, TReadSeq const & readSeq)
 {
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
 
     TIterator it(index);
     goDown(it, readSeq);
+    printf("occurrences=%ld\n", countOccurrences(it));
 }
 
 // --------------------------------------------------------------------------
@@ -193,7 +194,7 @@ _mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
 #ifdef __CUDACC__
 template <typename TIndex, typename TReadSeqs>
 inline void
-mapReads(TIndex /* const */ & index, TReadSeqs /* const */ & readSeqs, GPU const & /* tag */)
+mapReads(TIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
     typedef typename Device<TIndex>::Type               TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
@@ -218,7 +219,7 @@ mapReads(TIndex /* const */ & index, TReadSeqs /* const */ & readSeqs, GPU const
 
 template <typename TIndex, typename TReadSeqs>
 inline void
-mapReads(TIndex const & index, TReadSeqs const & readSeqs, CPU const & /* tag */)
+mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
 {
     for (unsigned i = 0; i < length(readSeqs); i++)
         mapRead(index, readSeqs[i]);
