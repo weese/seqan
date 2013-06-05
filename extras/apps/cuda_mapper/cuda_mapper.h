@@ -59,11 +59,14 @@ struct Options
     CharString  genomeFile;
     CharString  genomeIndexFile;
     CharString  readsFile;
-    int         mappingBlock;
 
+    int         mappingBlock;
     unsigned    seedLength;
 
     Options() :
+        genomeFile("genome.fasta"),
+        genomeIndexFile("genome"),
+        readsFile("reads.fastq"),
         mappingBlock(MaxValue<int>::VALUE),
         seedLength(33)
     {}
