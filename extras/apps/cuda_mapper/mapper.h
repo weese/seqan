@@ -76,9 +76,6 @@ struct Options
     unsigned    seedLength;
 
     Options() :
-        genomeFile("genome.fasta"),
-        genomeIndexFile("genome"),
-        readsFile("reads.fastq"),
         mappingBlock(MaxValue<int>::VALUE),
         seedLength(33)
     {}
@@ -152,12 +149,13 @@ int runMapper(Options & options)
     // Load genome index.
     std::cout << "Loading genome index:\t\t" << std::flush;
     start = sysTime();
-    build(genomeIndex);
-//    if (!load(genomeIndex, options.genomeIndexFile))
-//    {
-//        std::cout << "Error while loading genome index" << std::endl;
+    if (!load(genomeIndex, options.genomeIndexFile))
+    {
+        std::cout << "Error while loading genome index" << std::endl;
 //        return 1;
-//    }
+        std::cout << "Building genome index:\t\t" << std::flush;
+        build(genomeIndex);
+    }
     finish = sysTime();
     std::cout << finish - start << " sec" << std::endl;
 
