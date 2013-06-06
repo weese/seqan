@@ -51,7 +51,4 @@ typedef Tag<GPU_>     GPU;
 // Forwards
 // ============================================================================
 
-void
-mapReads(Index<StringSet<String<Dna>, Owner<ConcatDirect<> > >, FMIndex<> > & index,
-         StringSet<String<Dna>, Owner<ConcatDirect<> > > & readSeqs,
-         GPU const & /* tag */);
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */);

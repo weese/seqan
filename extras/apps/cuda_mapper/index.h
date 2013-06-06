@@ -82,7 +82,8 @@ struct CUDAStoreConfig
 // Other Store Types
 // ============================================================================
 
-typedef StringSet<CUDAStoreConfig::TContigSeq, CUDAStoreConfig::TContigSpec>    TContigs;
+typedef StringSet<CUDAStoreConfig::TContigSeq, CUDAStoreConfig::TContigSpec>        TContigs;
+typedef StringSet<CUDAStoreConfig::TReadSeq, CUDAStoreConfig::TReadSeqStoreSpec>    TReadSeqs;
 
 // ============================================================================
 // Index Types

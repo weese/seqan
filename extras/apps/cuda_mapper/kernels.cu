@@ -63,15 +63,9 @@ mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
 // Function mapReads()                                                  [GPU]
 // --------------------------------------------------------------------------
 
-void
-mapReads(Index<StringSet<String<Dna>, Owner<ConcatDirect<> > >, FMIndex<> > & index,
-         StringSet<String<Dna>, Owner<ConcatDirect<> > > & readSeqs,
-         GPU const & /* tag */)
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
-    typedef Index<StringSet<String<Dna>, Owner<ConcatDirect<> > >, FMIndex<> >  TIndex;
-    typedef StringSet<String<Dna>, Owner<ConcatDirect<> > >                     TReadSeqs;
-
-    typedef typename Device<TIndex>::Type               TDeviceIndex;
+    typedef typename Device<TGenomeIndex>::Type         TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
 
     // Copy index to device.
