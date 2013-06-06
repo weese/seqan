@@ -60,6 +60,10 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
     setValidValues(parser, 0, "fasta fa");
     setValidValues(parser, 1, "fastq fasta fa");
 
+    addSection(parser, "Global Options");
+
+    addOption(parser, ArgParseOption("nc", "no-cuda", "Do not use CUDA accelerated code."));
+
     addSection(parser, "Mapping Options");
 
     addOption(parser, ArgParseOption("mb", "mapping-block", "Maximum number of reads to be mapped at once.", ArgParseOption::INTEGER));
@@ -70,7 +74,6 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
     setMinValue(parser, "seed-length", "10");
     setMaxValue(parser, "seed-length", "100");
     setDefaultValue(parser, "seed-length", options.seedLength);
-
 
     addSection(parser, "Genome Index Options");
 
@@ -94,6 +97,9 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 
     // Parse reads input file.
     getArgumentValue(options.readsFile, parser, 1);
+
+    // Parse CUDA options.
+    getOptionValue(options.noCuda, parser, "no-cuda");
 
     // Parse mapping block.
     getOptionValue(options.mappingBlock, parser, "mapping-block");
@@ -122,5 +128,5 @@ int main(int argc, char const ** argv)
     if (res != seqan::ArgumentParser::PARSE_OK)
         return res == seqan::ArgumentParser::PARSE_ERROR;
 
-    return runMapper<GPU>(options);
+    return configureMapper(options);
 }

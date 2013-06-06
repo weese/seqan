@@ -72,10 +72,12 @@ struct Options
     CharString  genomeIndexFile;
     CharString  readsFile;
 
+    bool        noCuda;
     int         mappingBlock;
     unsigned    seedLength;
 
     Options() :
+        noCuda(false),
         mappingBlock(MaxValue<int>::VALUE),
         seedLength(33)
     {}
@@ -202,4 +204,17 @@ int runMapper(Options & options)
     close(readsLoader);
 
     return 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function configureMapper()
+// ----------------------------------------------------------------------------
+
+template <typename TOptions>
+int configureMapper(TOptions & options)
+{
+    if (options.noCuda)
+        return runMapper<CPU>(options);
+    else
+        return runMapper<GPU>(options);
 }
