@@ -41,16 +41,20 @@
 using namespace seqan;
 
 // --------------------------------------------------------------------------
-// Function mapReadsGPU()
+// Function _mapReadsKernel()
 // --------------------------------------------------------------------------
 
 template <typename TIndexView, typename TReadSeqsView>
 __global__ void
-_mapReadsKernel(TIndexView index, TReadSeqsView readSeqs)
+_mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, unsigned offset)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    mapRead(index, readSeqs[idx]);
+    // Return silently if there is no job left.
+    if (idx + offset > length(readSeqs)) return;
+
+    // Map a read.
+    mapRead(index, readSeqs[idx + offset], (unsigned)(idx + offset));
 }
 
 // --------------------------------------------------------------------------
@@ -61,6 +65,8 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
     typedef typename Device<TGenomeIndex>::Type         TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
+    typedef typename View<TDeviceIndex>::Type           TDeviceIndexView;
+    typedef typename View<TDeviceReadSeqs>::Type        TDeviceReadSeqsView;
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
@@ -70,7 +76,17 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
     TDeviceReadSeqs deviceReadSeqs;
     assign(deviceReadSeqs, readSeqs);
 
+    // Instantiate views of device objects.
+    TDeviceIndexView deviceIndexView = view(deviceIndex);
+    TDeviceReadSeqsView deviceReadSeqsView = view(deviceReadSeqs);
+
+    // Setup kernel parameters.
+    unsigned blocksPerGrid = 64;
+    unsigned threadsPerBlock = 256;
+
     // Launch kernel.
-    _mapReadsKernel<<<10,100>>>(view(deviceIndex), view(deviceReadSeqs));
+    for (unsigned offset = 0; offset < length(readSeqs); offset += blocksPerGrid * threadsPerBlock)
+        _mapReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceIndexView, deviceReadSeqsView, offset);
+
     cudaDeviceSynchronize();
 }

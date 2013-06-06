@@ -61,15 +61,17 @@ typedef Tag<CPU_>     CPU;
 // Function mapRead()
 // --------------------------------------------------------------------------
 
-template <typename TIndex, typename TReadSeq>
-SEQAN_FUNC void
-mapRead(TIndex & index, TReadSeq const & readSeq)
+template <typename TIndex, typename TReadSeq, typename TPos>
+SEQAN_FUNC unsigned
+mapRead(TIndex & index, TReadSeq const & readSeq, TPos pos)
 {
     typename Iterator<TIndex, TopDown<> >::Type it(index);
 
-    unsigned occurrences = goDown(it, readSeq) ? countOccurrences(it) : 0;
+    bool found = goDown(it, readSeq);
+    unsigned occurrences = found ? countOccurrences(it) : 0;
+    printf("pos=%d, occurrences=%d\n", pos, occurrences);
 
-    printf("occurrences=%d\n", occurrences);
+    return occurrences;
 }
 
 // --------------------------------------------------------------------------
@@ -81,7 +83,7 @@ inline void
 mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
 {
     for (unsigned i = 0; i < length(readSeqs); i++)
-        mapRead(index, readSeqs[i]);
+        mapRead(index, readSeqs[i], i);
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
