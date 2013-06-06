@@ -46,17 +46,11 @@ using namespace seqan;
 
 template <typename TIndexView, typename TReadSeqsView>
 __global__ void
-mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
+_mapReadsKernel(TIndexView index, TReadSeqsView readSeqs)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-//    mapRead(index, readSeqs[idx]);
-
-    typename Iterator<TIndexView, TopDown<> >::Type it(index);
-
-    unsigned occurrences = goDown(it, readSeqs[idx]) ? countOccurrences(it) : 0;
-
-    printf("index=%i, occurrences=%d\n", idx, occurrences);
+    mapRead(index, readSeqs[idx]);
 }
 
 // --------------------------------------------------------------------------
@@ -77,6 +71,6 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
     assign(deviceReadSeqs, readSeqs);
 
     // Launch kernel.
-    mapReadsGPU<<<10,100>>>(view(deviceIndex), view(deviceReadSeqs));
+    _mapReadsKernel<<<10,100>>>(view(deviceIndex), view(deviceReadSeqs));
     cudaDeviceSynchronize();
 }

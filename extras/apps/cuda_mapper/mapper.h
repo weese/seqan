@@ -32,6 +32,9 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+#ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
+#define SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
+
 // ============================================================================
 // Prerequisites
 // ============================================================================
@@ -55,6 +58,21 @@ typedef Tag<CPU_>     CPU;
 // ============================================================================
 
 // --------------------------------------------------------------------------
+// Function mapRead()
+// --------------------------------------------------------------------------
+
+template <typename TIndex, typename TReadSeq>
+SEQAN_FUNC void
+mapRead(TIndex & index, TReadSeq const & readSeq)
+{
+    typename Iterator<TIndex, TopDown<> >::Type it(index);
+
+    unsigned occurrences = goDown(it, readSeq) ? countOccurrences(it) : 0;
+
+    printf("occurrences=%d\n", occurrences);
+}
+
+// --------------------------------------------------------------------------
 // Function mapReads()                                                  [CPU]
 // --------------------------------------------------------------------------
 
@@ -63,11 +81,7 @@ inline void
 mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
 {
     for (unsigned i = 0; i < length(readSeqs); i++)
-    {
-        typename Iterator<TIndex, TopDown<> >::Type it(index);
-
-        unsigned occurrences = goDown(it, readSeqs[i]) ? countOccurrences(it) : 0;
-
-        printf("occurrences=%d\n", occurrences);
-    }
+        mapRead(index, readSeqs[i]);
 }
+
+#endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_

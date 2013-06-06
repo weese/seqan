@@ -32,13 +32,14 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+#ifndef SEQAN_EXTRAS_CUDAMAPPER_KERNELS_H_
+#define SEQAN_EXTRAS_CUDAMAPPER_KERNELS_H_
+
 // ============================================================================
 // Prerequisites
 // ============================================================================
 
-#include <seqan/basic_extras.h>
-#include <seqan/sequence_extras.h>
-#include "index.h"
+#include "mapper.h"
 
 // ============================================================================
 // Tags
@@ -56,3 +57,5 @@ typedef Tag<GPU_>     GPU;
 // --------------------------------------------------------------------------
 
 void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */);
+
+#endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_KERNELS_H_
