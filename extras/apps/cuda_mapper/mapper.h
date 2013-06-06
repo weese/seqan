@@ -32,17 +32,22 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+// ============================================================================
+// Prerequisites
+// ============================================================================
+
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
 #include <seqan/store.h>
 
-//#include "../masai/options.h"
 #include "../masai/tags.h"
+#include "../masai/options.h"
 #include "../masai/store/reads.h"
 #include "../masai/store/genome.h"
 #include "../masai/index/genome_index.h"
 
 #include "index.h"
+#include "kernels.h"
 
 using namespace seqan;
 
@@ -51,10 +56,7 @@ using namespace seqan;
 // ============================================================================
 
 struct CPU_;
-struct GPU_;
-
 typedef Tag<CPU_>     CPU;
-typedef Tag<GPU_>     GPU;
 
 // ============================================================================
 // Classes
@@ -86,135 +88,6 @@ struct Options
 // Functions
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// Function setupArgumentParser()                              [ArgumentParser]
-// ----------------------------------------------------------------------------
-
-//void setupArgumentParser(ArgumentParser & parser, Options const & options)
-//{
-//    setAppName(parser, "cuda_mapper");
-//    setShortDescription(parser, "CUDA Mapper");
-//    setCategory(parser, "Read Mapping");
-//
-//    setDateAndVersion(parser);
-//    setDescription(parser);
-//
-//    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
-//
-//    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
-//    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
-//    setValidValues(parser, 0, "fasta fa");
-//    setValidValues(parser, 1, "fastq fasta fa");
-//
-//    addSection(parser, "Mapping Options");
-//
-//    addOption(parser, ArgParseOption("mb", "mapping-block", "Maximum number of reads to be mapped at once.", ArgParseOption::INTEGER));
-//    setMinValue(parser, "mapping-block", "10000");
-//    setDefaultValue(parser, "mapping-block", options.mappingBlock);
-//
-//    addOption(parser, ArgParseOption("sl", "seed-length", "Minimum seed length.", ArgParseOption::INTEGER));
-//    setMinValue(parser, "seed-length", "10");
-//    setMaxValue(parser, "seed-length", "100");
-//    setDefaultValue(parser, "seed-length", options.seedLength);
-//
-//
-//    addSection(parser, "Genome Index Options");
-//
-//    setIndexPrefix(parser);
-//}
-
-// ----------------------------------------------------------------------------
-// Function parseCommandLine()                                        [Options]
-// ----------------------------------------------------------------------------
-
-//ArgumentParser::ParseResult
-//parseCommandLine(Options & options, ArgumentParser & parser, int argc, char const ** argv)
-//{
-//    ArgumentParser::ParseResult res = parse(parser, argc, argv);
-//
-//    if (res != seqan::ArgumentParser::PARSE_OK)
-//        return res;
-//
-//    // Parse genome input file.
-//    getArgumentValue(options.genomeFile, parser, 0);
-//
-//    // Parse reads input file.
-//    getArgumentValue(options.readsFile, parser, 1);
-//
-//    // Parse mapping block.
-//    getOptionValue(options.mappingBlock, parser, "mapping-block");
-//
-//    // Parse mapping options.
-//    getOptionValue(options.seedLength, parser, "seed-length");
-//
-//    // Parse genome index prefix.
-//    getIndexPrefix(options, parser);
-//
-//    return seqan::ArgumentParser::PARSE_OK;
-//}
-
-// --------------------------------------------------------------------------
-// Function mapRead()
-// --------------------------------------------------------------------------
-
-template <typename TIndex, typename TReadSeq>
-SEQAN_FUNC void
-mapRead(TIndex & index, TReadSeq const & readSeq)
-{
-    typename Iterator<TIndex, TopDown<> >::Type it(index);
-
-    unsigned occurrences = goDown(it, readSeq) ? countOccurrences(it) : 0;
-
-    printf("occurrences=%ld\n", occurrences);
-}
-
-// --------------------------------------------------------------------------
-// Function _mapReadsGPU()
-// --------------------------------------------------------------------------
-
-#ifdef __CUDACC__
-template <typename TIndexView, typename TReadSeqsView>
-__global__ void
-_mapReadsGPU(TIndexView index, TReadSeqsView readSeqs)
-{
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-//    mapRead(index, readSeqs[idx]);
-
-    typename Iterator<TIndexView, TopDown<> >::Type it(index);
-
-    unsigned occurrences = goDown(it, readSeqs[idx]) ? countOccurrences(it) : 0;
-
-    printf("index=%i, occurrences=%ld\n", idx, occurrences);
-}
-#endif
-
-// --------------------------------------------------------------------------
-// Function mapReads()                                                  [GPU]
-// --------------------------------------------------------------------------
-
-#ifdef __CUDACC__
-template <typename TIndex, typename TReadSeqs>
-inline void
-mapReads(TIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
-{
-    typedef typename Device<TIndex>::Type               TDeviceIndex;
-    typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
-
-    // Copy index to device.
-    TDeviceIndex deviceIndex;
-    assign(deviceIndex, index);
-
-    // Copy read seqs to device.
-    TDeviceReadSeqs deviceReadSeqs;
-    assign(deviceReadSeqs, readSeqs);
-
-    // Launch kernel.
-    _mapReadsGPU<<<10,100>>>(view(deviceIndex), view(deviceReadSeqs));
-    cudaDeviceSynchronize();
-}
-#endif
-
 // --------------------------------------------------------------------------
 // Function mapReads()                                                  [CPU]
 // --------------------------------------------------------------------------
@@ -224,7 +97,13 @@ inline void
 mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
 {
     for (unsigned i = 0; i < length(readSeqs); i++)
-        mapRead(index, readSeqs[i]);
+    {
+        typename Iterator<TIndex, TopDown<> >::Type it(index);
+
+        unsigned occurrences = goDown(it, readSeqs[i]) ? countOccurrences(it) : 0;
+
+        printf("occurrences=%d\n", occurrences);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -325,22 +204,4 @@ int runMapper(Options & options)
     close(readsLoader);
 
     return 0;
-}
-
-// ----------------------------------------------------------------------------
-// Function main()
-// ----------------------------------------------------------------------------
-
-int main(int argc, char const ** argv)
-{
-//    ArgumentParser parser;
-    Options options;
-//    setupArgumentParser(parser, options);
-//
-//    ArgumentParser::ParseResult res = parseCommandLine(options, parser, argc, argv);
-//
-//    if (res != seqan::ArgumentParser::PARSE_OK)
-//        return res == seqan::ArgumentParser::PARSE_ERROR;
-
-    return runMapper<GPU>(options);
 }

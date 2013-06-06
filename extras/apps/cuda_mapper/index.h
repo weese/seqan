@@ -37,8 +37,12 @@
 #ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
 #define SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
 
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
+// ============================================================================
+// Prerequisites
+// ============================================================================
+
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
 #include <seqan/index_extras.h>
 
 using namespace seqan;
@@ -120,13 +124,13 @@ struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
     typedef __uint32 Type;
 };
 
-template <typename TValue, typename TSpec>
-struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, Device<TSpec> > > :
-    BitsPerValue<__uint32> {};
-
-template <typename TValue, typename TSpec>
-struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, View<TSpec> > > :
-    BitsPerValue<__uint32> {};
+//template <typename TValue, typename TSpec>
+//struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, Device<TSpec> > > :
+//    BitsPerValue<__uint32> {};
+//
+//template <typename TValue, typename TSpec>
+//struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, View<TSpec> > > :
+//    BitsPerValue<__uint32> {};
 
 }
 

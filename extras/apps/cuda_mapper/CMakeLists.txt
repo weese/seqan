@@ -29,8 +29,10 @@ include_directories (${SEQAN_INCLUDE_DIRS})
 add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
-seqan_add_cuda_executable(cuda_mapper cuda_mapper.cu
-                                      cuda_mapper.h
+seqan_add_cuda_executable(cuda_mapper mapper.cpp
+                                      kernels.cu
+                                      mapper.h
+                                      kernels.h
                                       index.h
                                       ../masai/options.h
                                       ../masai/store/reads.h
