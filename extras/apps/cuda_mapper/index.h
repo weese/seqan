@@ -124,14 +124,15 @@ struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
     typedef __uint32 Type;
 };
 
-//template <typename TValue, typename TSpec>
-//struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, Device<TSpec> > > :
-//    BitsPerValue<__uint32> {};
-//
-//template <typename TValue, typename TSpec>
-//struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, View<TSpec> > > :
-//    BitsPerValue<__uint32> {};
+#ifdef __CUDACC__
+template <typename TValue, typename TSpec>
+struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, Device<TSpec> > > :
+    BitsPerValue<__uint32> {};
 
+template <typename TValue, typename TSpec>
+struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, View<TSpec> > > :
+    BitsPerValue<__uint32> {};
+#endif
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
