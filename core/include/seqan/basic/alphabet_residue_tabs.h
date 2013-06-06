@@ -54,7 +54,7 @@ translateDna5ToAscii_(unsigned char c)
     char const VALUE[5] = {'A', 'C', 'G', 'T', 'N'};
 
     return VALUE[c];
-};
+}
 
 template <typename T = void>
 struct TranslateTableDna5ToIupac_
@@ -99,7 +99,7 @@ translateAsciiToDna_(unsigned char c)
     };
 
     return VALUE[c];
-};
+}
 
 template <typename T = void>
 struct TranslateTableAsciiToDna5_
