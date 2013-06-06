@@ -32,9 +32,47 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
+#include <seqan/store.h>
+
+#include "../masai/tags.h"
+#include "../masai/options.h"
+#include "../masai/store/reads.h"
+#include "../masai/store/genome.h"
+#include "../masai/index/genome_index.h"
+
+#include "index.h"
 #include "mapper.h"
+#include "kernels.h"
 
 using namespace seqan;
+
+// ============================================================================
+// Classes
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class Options
+// ----------------------------------------------------------------------------
+
+struct Options
+{
+    CharString  genomeFile;
+    CharString  genomeIndexFile;
+    CharString  readsFile;
+
+    bool        noCuda;
+    int         mappingBlock;
+    unsigned    seedLength;
+
+    Options() :
+        noCuda(false),
+        mappingBlock(MaxValue<int>::VALUE),
+        seedLength(33)
+    {}
+};
 
 // ============================================================================
 // Functions
@@ -111,6 +149,120 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
     getIndexPrefix(options, parser);
 
     return seqan::ArgumentParser::PARSE_OK;
+}
+
+// ----------------------------------------------------------------------------
+// Function runMapper()
+// ----------------------------------------------------------------------------
+
+template <typename TCPUGPU>
+int runMapper(Options & options)
+{
+    typedef Genome<void, CUDAStoreConfig>                           TGenome;
+    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
+    typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>            TGenomeIndex;
+
+    typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
+    typedef ReadsConfig<False, False, True, True, CUDAStoreConfig>  TReadsConfig;
+    typedef Reads<void, TReadsConfig>                               TReads;
+    typedef ReadsLoader<void, TReadsConfig>                         TReadsLoader;
+
+    TGenome             genome;
+    TGenomeLoader       genomeLoader(genome);
+    TGenomeIndex        genomeIndex(genome);
+
+    TStore              store;
+    TReads              reads(store);
+    TReadsLoader        readsLoader(reads);
+
+    double start, finish;
+
+    // Load genome.
+    if (!open(genomeLoader, options.genomeFile))
+    {
+        std::cerr << "Error while loading genome" << std::endl;
+        return 1;
+    }
+
+    std::cout << "Loading genome:\t\t\t" << std::flush;
+    start = sysTime();
+    if (!load(genomeLoader))
+    {
+        std::cerr << "Error while loading genome" << std::endl;
+        return 1;
+    }
+    finish = sysTime();
+    std::cout << finish - start << " sec" << std::endl;
+
+    // Load genome index.
+    std::cout << "Loading genome index:\t\t" << std::flush;
+    start = sysTime();
+    if (!load(genomeIndex, options.genomeIndexFile))
+    {
+        std::cout << "Error while loading genome index" << std::endl;
+//        return 1;
+        std::cout << "Building genome index:\t\t" << std::flush;
+        build(genomeIndex);
+    }
+    finish = sysTime();
+    std::cout << finish - start << " sec" << std::endl;
+
+    // Open reads file.
+    start = sysTime();
+    if (!open(readsLoader, options.readsFile))
+    {
+        std::cerr << "Error while opening reads file" << std::endl;
+        return 1;
+    }
+
+    // Reserve space for reads.
+    if (options.mappingBlock < MaxValue<int>::VALUE)
+        reserve(reads, options.mappingBlock);
+    else
+        reserve(reads);
+
+    // Process reads in blocks.
+    while (!atEnd(readsLoader))
+    {
+        // Load reads.
+        std::cout << "Loading reads:\t\t\t" << std::flush;
+        if (!load(readsLoader, options.mappingBlock))
+        {
+            std::cerr << "Error while loading reads" << std::endl;
+            return 1;
+        }
+        finish = sysTime();
+        std::cout << finish - start << " sec" << std::endl;
+        std::cout << "Reads count:\t\t\t" << reads.readsCount << std::endl;
+
+        // Map reads.
+        start = sysTime();
+        mapReads(genomeIndex.index, getSeqs(reads), TCPUGPU());
+        finish = sysTime();
+        std::cout << "Mapping time:\t\t\t" << std::flush;
+        std::cout << finish - start << " sec" << std::endl;
+
+        // Clear mapped reads.
+        clear(reads);
+    }
+
+    // Close reads file.
+    close(readsLoader);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function configureMapper()
+// ----------------------------------------------------------------------------
+
+template <typename TOptions>
+int configureMapper(TOptions & options)
+{
+    if (options.noCuda)
+        return runMapper<CPU>(options);
+    else
+        return runMapper<GPU>(options);
 }
 
 // ----------------------------------------------------------------------------

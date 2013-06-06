@@ -30,8 +30,8 @@ add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
 seqan_add_cuda_executable(cuda_mapper mapper.cpp
-                                      kernels.cu
                                       mapper.h
+                                      kernels.cu
                                       kernels.h
                                       index.h
                                       ../masai/options.h
