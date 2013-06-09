@@ -52,6 +52,13 @@ include_directories (${SEQAN_INCLUDE_DIRS})
 add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
+# TODO(esiragusa): add indexer to install below, or better use masai indexer.
+add_executable(cuda_indexer indexer.cpp
+                            index.h
+                            ../masai/options.h
+                            genome.h
+                            genome_index.h)
+
 if (CUDA_FOUND)
   cuda_add_executable(cuda_mapper mapper.cpp
                                   mapper.h
@@ -73,6 +80,7 @@ else (CUDA_FOUND)
 endif (CUDA_FOUND)
 
 # Add dependencies found by find_package (SeqAn).
+target_link_libraries (cuda_indexer ${SEQAN_LIBRARIES})
 target_link_libraries (cuda_mapper ${SEQAN_LIBRARIES})
 
 # Add CXX flags found by find_package (SeqAn).
