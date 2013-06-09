@@ -623,10 +623,7 @@ value(PrefixSumTable<TChar, TSpec> const & pst, TPos const pos)
 template <typename TChar, typename TSpec>
 inline bool open(PrefixSumTable<TChar, TSpec> & pst, const char * fileName, int openMode)
 {
-    String<char> name = fileName;
-    append(name, ".pst");
-    
-    return open(getFibre(pst, FibreEntries()), toCString(name), openMode);
+    return open(getFibre(pst, FibreEntries()), fileName, openMode);
 }
 
 template <typename TChar, typename TSpec>
@@ -660,10 +657,7 @@ inline bool open(PrefixSumTable<TChar, TSpec> & pst, const char * fileName)
 template <typename TChar, typename TSpec>
 inline bool save(PrefixSumTable<TChar, TSpec> const & pst, const char * fileName, int openMode)
 {
-    String<char> name = fileName;
-    append(name, ".pst");
-
-    return save(getFibre(pst, FibreEntries()), toCString(name), openMode);
+    return save(getFibre(pst, FibreEntries()), fileName, openMode);
 }
 
 template <typename TChar, typename TSpec>
