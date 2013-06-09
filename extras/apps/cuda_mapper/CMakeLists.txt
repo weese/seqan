@@ -60,16 +60,16 @@ if (CUDA_FOUND)
                                   index.h
                                   ../masai/options.h
                                   ../masai/store/reads.h
-                                  ../masai/store/genome.h
-                                  ../masai/index/genome_index.h)
+                                  genome.h
+                                  genome_index.h)
 else (CUDA_FOUND)
   add_executable(cuda_mapper mapper.cpp
                              mapper.h
                              index.h
                              ../masai/options.h
                              ../masai/store/reads.h
-                             ../masai/store/genome.h
-                             ../masai/index/genome_index.h)
+                             genome.h
+                             genome_index.h)
 endif (CUDA_FOUND)
 
 # Add dependencies found by find_package (SeqAn).

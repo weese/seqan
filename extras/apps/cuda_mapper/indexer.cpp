@@ -1,7 +1,7 @@
 // ==========================================================================
-//                                cuda_mapper
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,26 +31,27 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
+// This file contains the cuda_indexer application.
+// ==========================================================================
 
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
 
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
 #include <seqan/store.h>
 
-#include "../masai/tags.h"
 #include "../masai/options.h"
-#include "../masai/store/reads.h"
 #include "genome.h"
 #include "genome_index.h"
 
 #include "index.h"
-#include "mapper.h"
-#include "kernels.h"
 
 using namespace seqan;
 
+
 // ============================================================================
-// Classes
+// Tags, Classes, Enums
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -59,19 +60,8 @@ using namespace seqan;
 
 struct Options
 {
-    CharString  genomeFile;
-    CharString  genomeIndexFile;
-    CharString  readsFile;
-
-    bool        noCuda;
-    int         mappingBlock;
-    unsigned    seedLength;
-
-    Options() :
-        noCuda(false),
-        mappingBlock(MaxValue<int>::VALUE),
-        seedLength(33)
-    {}
+    CharString genomeFile;
+    CharString genomeIndexFile;
 };
 
 // ============================================================================
@@ -84,38 +74,25 @@ struct Options
 
 void setupArgumentParser(ArgumentParser & parser, Options const & options)
 {
-    setAppName(parser, "cuda_mapper");
-    setShortDescription(parser, "CUDA Mapper");
+    setAppName(parser, "cuda_indexer");
+    setShortDescription(parser, "CUDA Indexer");
     setCategory(parser, "Read Mapping");
 
     setDateAndVersion(parser);
     setDescription(parser);
 
-    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
+    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP>");
 
-    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
     addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
     setValidValues(parser, 0, "fasta fa");
-    setValidValues(parser, 1, "fastq fasta fa");
-
-    addSection(parser, "Global Options");
-
-    addOption(parser, ArgParseOption("nc", "no-cuda", "Do not use CUDA accelerated code."));
-
-    addSection(parser, "Mapping Options");
-
-    addOption(parser, ArgParseOption("mb", "mapping-block", "Maximum number of reads to be mapped at once.", ArgParseOption::INTEGER));
-    setMinValue(parser, "mapping-block", "10000");
-    setDefaultValue(parser, "mapping-block", options.mappingBlock);
-
-    addOption(parser, ArgParseOption("sl", "seed-length", "Minimum seed length.", ArgParseOption::INTEGER));
-    setMinValue(parser, "seed-length", "10");
-    setMaxValue(parser, "seed-length", "100");
-    setDefaultValue(parser, "seed-length", options.seedLength);
 
     addSection(parser, "Genome Index Options");
 
     setIndexPrefix(parser);
+    
+    addSection(parser, "Output Options");
+
+    setTmpFolder(parser);
 }
 
 // ----------------------------------------------------------------------------
@@ -133,54 +110,36 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
     // Parse genome input file.
     getArgumentValue(options.genomeFile, parser, 0);
 
-    // Parse reads input file.
-    getArgumentValue(options.readsFile, parser, 1);
-
-    // Parse CUDA options.
-    getOptionValue(options.noCuda, parser, "no-cuda");
-
-    // Parse mapping block.
-    getOptionValue(options.mappingBlock, parser, "mapping-block");
-
-    // Parse mapping options.
-    getOptionValue(options.seedLength, parser, "seed-length");
-
     // Parse genome index prefix.
     getIndexPrefix(options, parser);
+
+    // Parse tmp folder.
+    getTmpFolder(options, parser);
 
     return seqan::ArgumentParser::PARSE_OK;
 }
 
 // ----------------------------------------------------------------------------
-// Function runMapper()
+// Function runIndexer()
 // ----------------------------------------------------------------------------
 
-template <typename TCPUGPU>
-int runMapper(Options & options)
+template <typename TIndexSpec>
+int runIndexer(Options & options)
 {
-    typedef Genome<void, CUDAStoreConfig>                           TGenome;
-    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
-    typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>            TGenomeIndex;
-
-    typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
-    typedef ReadsConfig<False, False, True, True, CUDAStoreConfig>  TReadsConfig;
-    typedef Reads<void, TReadsConfig>                               TReads;
-    typedef ReadsLoader<void, TReadsConfig>                         TReadsLoader;
+    typedef GenomeConfig<MasaiStoreConfig>      TGenomeConfig;
+    typedef Genome<void, TGenomeConfig>         TGenome;
+    typedef GenomeLoader<void, TGenomeConfig>   TGenomeLoader;
+    typedef GenomeIndex<TGenome, TIndexSpec>    TGenomeIndex;
 
     TGenome             genome;
     TGenomeLoader       genomeLoader(genome);
     TGenomeIndex        genomeIndex(genome);
 
-    TStore              store;
-    TReads              reads(store);
-    TReadsLoader        readsLoader(reads);
-
     double start, finish;
 
-    // Load genome.
     if (!open(genomeLoader, options.genomeFile))
     {
-        std::cerr << "Error while loading genome" << std::endl;
+        std::cerr << "Error while opening genome" << std::endl;
         return 1;
     }
 
@@ -194,75 +153,32 @@ int runMapper(Options & options)
     finish = sysTime();
     std::cout << finish - start << " sec" << std::endl;
 
-    // Load genome index.
-    std::cout << "Loading genome index:\t\t" << std::flush;
+    std::cout << "Building genome index:\t\t" << std::flush;
     start = sysTime();
-    if (!load(genomeIndex, options.genomeIndexFile))
-    {
-        std::cout << "Error while loading genome index" << std::endl;
-//        return 1;
-        std::cout << "Building genome index:\t\t" << std::flush;
-        build(genomeIndex);
-    }
+    build(genomeIndex);
     finish = sysTime();
     std::cout << finish - start << " sec" << std::endl;
 
-    // Open reads file.
+    std::cout << "Dumping genome index:\t\t" << std::flush;
     start = sysTime();
-    if (!open(readsLoader, options.readsFile))
+    if (!dump(genomeIndex, options.genomeIndexFile))
     {
-        std::cerr << "Error while opening reads file" << std::endl;
+        std::cerr << "Error while dumping genome index" << std::endl;
         return 1;
     }
-
-    // Reserve space for reads.
-    if (options.mappingBlock < MaxValue<int>::VALUE)
-        reserve(reads, options.mappingBlock);
-    else
-        reserve(reads);
-
-    // Process reads in blocks.
-    while (!atEnd(readsLoader))
-    {
-        // Load reads.
-        std::cout << "Loading reads:\t\t\t" << std::flush;
-        if (!load(readsLoader, options.mappingBlock))
-        {
-            std::cerr << "Error while loading reads" << std::endl;
-            return 1;
-        }
-        finish = sysTime();
-        std::cout << finish - start << " sec" << std::endl;
-        std::cout << "Reads count:\t\t\t" << reads.readsCount << std::endl;
-
-        // Map reads.
-        start = sysTime();
-        mapReads(genomeIndex.index, getSeqs(reads), TCPUGPU());
-        finish = sysTime();
-        std::cout << "Mapping time:\t\t\t" << std::flush;
-        std::cout << finish - start << " sec" << std::endl;
-
-        // Clear mapped reads.
-        clear(reads);
-    }
-
-    // Close reads file.
-    close(readsLoader);
+    finish = sysTime();
+    std::cout << finish - start << " sec" << std::endl;
 
     return 0;
 }
 
 // ----------------------------------------------------------------------------
-// Function configureMapper()
+// Functions configure*()
 // ----------------------------------------------------------------------------
 
-template <typename TOptions>
-int configureMapper(TOptions & options)
+int configureIndex(Options & options)
 {
-    if (options.noCuda)
-        return runMapper<CPU>(options);
-    else
-        return runMapper<GPU>(options);
+    return runIndexer<TGenomeFMSpec>(options);
 }
 
 // ----------------------------------------------------------------------------
@@ -280,5 +196,5 @@ int main(int argc, char const ** argv)
     if (res != seqan::ArgumentParser::PARSE_OK)
         return res == seqan::ArgumentParser::PARSE_ERROR;
 
-    return configureMapper(options);
+    return configureIndex(options);
 }
