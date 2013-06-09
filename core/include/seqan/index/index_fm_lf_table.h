@@ -646,19 +646,21 @@ inline bool open(LfTable<TText, TSpec> & lfTable, const char * fileName, int ope
 {
     String<char> name;
 
-    if (!open(getFibre(lfTable, FibrePrefixSum()), fileName, openMode)) return false;
+    name = fileName;
+    append(name, ".pst");
+    if (!open(getFibre(lfTable, FibrePrefixSum()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".drv");
-    if (!open(getFibre(lfTable, FibreValues()), fileName, openMode)) return false;
+    if (!open(getFibre(lfTable, FibreValues()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".drp");
-    if (!open(getFibre(lfTable, FibreSentinels()), fileName, openMode)) return false;
+    if (!open(getFibre(lfTable, FibreSentinels()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".drs");
-    if (!open(lfTable.sentinelSubstitute, fileName, openMode)) return false;
+    if (!open(lfTable.sentinelSubstitute, toCString(name), openMode)) return false;
 
     return true;
 }
@@ -696,19 +698,21 @@ inline bool save(LfTable<TText, TSpec> const & lfTable, const char * fileName, i
 {
     String<char> name;
 
-    if (!save(getFibre(lfTable, FibrePrefixSum()), fileName, openMode)) return false;
+    name = fileName;
+    append(name, ".pst");
+    if (!save(getFibre(lfTable, FibrePrefixSum()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".drv");
-    if (!save(getFibre(lfTable, FibreValues()), fileName, openMode)) return false;
+    if (!save(getFibre(lfTable, FibreValues()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".drp");
-    if (!save(getFibre(lfTable, FibreSentinels()), fileName, openMode)) return false;
+    if (!save(getFibre(lfTable, FibreSentinels()), toCString(name), openMode)) return false;
 
     name = fileName;
     append(name, ".drs");
-    if (!save(lfTable.sentinelSubstitute, fileName, openMode)) return false;
+    if (!save(lfTable.sentinelSubstitute, toCString(name), openMode)) return false;
 
     return true;
 }
