@@ -50,9 +50,6 @@ using namespace seqan;
 template <typename TObject>
 struct Contigs;
 
-template <typename TObject>
-struct GenomeHost;
-
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -61,50 +58,33 @@ struct GenomeHost;
 // Class GenomeConfig
 // ----------------------------------------------------------------------------
 
-template <typename TSpec = void>
+template <typename TFragStoreConfig_ = FragmentStoreConfig<> >
 struct GenomeConfig
 {
-    typedef String<Dna5>            TContigSeq;
-    typedef Owner<ConcatDirect<> >  TContigSpec;
+    typedef TFragStoreConfig_   TFragStoreConfig;
 };
 
 // ----------------------------------------------------------------------------
 // Class Genome
 // ----------------------------------------------------------------------------
 
-template <typename TSpec = void, typename TConfig = GenomeConfig<TSpec> >
+template <typename TSpec = void, typename TConfig = GenomeConfig<> >
 struct Genome
 {
-    Holder<typename Contigs<Genome>::Type>  _contigs;
+    typedef typename TConfig::TFragStoreConfig          TFragStoreConfig_;
+    typedef FragmentStore<void, TFragStoreConfig_>      TFragmentStore_;
 
-    Genome() {}
+    Holder<TFragmentStore_>                 _store;
+    typename Contigs<Genome>::Type          contigs;
+    String<typename Size<Genome>::Type>     contigsLength;
 
-    template <typename TContigs>
-    Genome(TContigs & contigs) :
-        _contigs(contigs)
+    Genome() :
+        _store()
     {}
-};
 
-// ----------------------------------------------------------------------------
-// Class GenomeLoader
-// ----------------------------------------------------------------------------
-
-template <typename TSpec = void, typename TConfig = GenomeConfig<> >
-struct GenomeLoader
-{
-    typedef std::fstream                            TStream;
-    typedef RecordReader<TStream, SinglePass<> >    TRecordReader;
-    typedef typename GenomeHost<GenomeLoader>::Type TGenome;
-
-    TStream                         _file;
-    unsigned long                   _fileSize;
-    AutoSeqStreamFormat             _fileFormat;
-    std::auto_ptr<TRecordReader>    _reader;
-    Holder<TGenome>                 genome;
-
-    GenomeLoader(TGenome & genome) :
-        _fileSize(0),
-        genome(genome)
+    template <typename TFragmentStore>
+    Genome(TFragmentStore & store) :
+        _store(store)
     {}
 };
 
@@ -126,16 +106,6 @@ struct GenomeHost<TObject const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction GenomeHost<T>::Type                              [GenomeLoader]
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TConfig>
-struct GenomeHost<GenomeLoader<TSpec, TConfig> >
-{
-    typedef Genome<TSpec, TConfig>  Type;
-};
-
-// ----------------------------------------------------------------------------
 // Metafunction Contigs                                               [TObject]
 // ----------------------------------------------------------------------------
 
@@ -149,35 +119,18 @@ struct Contigs<TObject const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Contig                                                [TObject]
-// ----------------------------------------------------------------------------
-
-template <typename TObject>
-struct Contig {};
-
-template <typename TObject>
-struct Contig<TObject const>
-{
-    typedef typename Contig<TObject>::Type const   Type;
-};
-
-// ----------------------------------------------------------------------------
 // Metafunction Contigs                                                [Genome]
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
 struct Contigs<Genome<TSpec, TConfig> >
 {
-    typedef StringSet<typename TConfig::TContigSeq, typename TConfig::TContigSpec>  Type;
+    typedef typename TConfig::TFragStoreConfig          TFragStoreConfig_;
+    typedef FragmentStore<TSpec, TFragStoreConfig_>     TFragmentStore_;
+    typedef typename TFragStoreConfig_::TContigSeq      TContigSeq_;
+
+    typedef StringSet<TContigSeq_, Dependent<> >        Type;
 };
-
-// ----------------------------------------------------------------------------
-// Metafunction Contig                                                 [Genome]
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TConfig>
-struct Contig<Genome<TSpec, TConfig> > :
-    Value<Contigs<Genome<TSpec, TConfig> > > {};
 
 // ----------------------------------------------------------------------------
 // Metafunction Size                                                   [Genome]
@@ -216,70 +169,52 @@ getGenome(TObject & object)
 }
 
 // ----------------------------------------------------------------------------
-// Function contigs()                                                  [Genome]
+// Function load()                                                     [Genome]
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename TConfig, typename TString>
+bool load(Genome<TSpec, TConfig> & genome, TString const & genomeFile)
+{
+    // TODO(esiragusa): Use record reader instead of loadContigs() from FragmentStore.
+    if (!loadContigs(value(genome._store), genomeFile))
+        return false;
+
+    // Shrink contigs.
+    for (unsigned contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+        shrinkToFit(value(genome._store).contigStore[contigId].seq);
+
+    _updateContigs(genome);
+    _updateContigsLength(genome);
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function _updateContigs()                                           [Genome]
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-inline typename Contigs<Genome<TSpec, TConfig> >::Type &
-contigs(Genome<TSpec, TConfig> & genome)
+void _updateContigs(Genome<TSpec, TConfig> & genome)
 {
-    return value(genome._contigs);
-}
+    clear(genome.contigs);
+    reserve(genome.contigs, length(value(genome._store).contigStore));
 
-template <typename TSpec, typename TConfig>
-inline typename Contigs<Genome<TSpec, TConfig> const>::Type &
-contigs(Genome<TSpec, TConfig> const & genome)
-{
-    return value(genome._contigs);
+    for (unsigned contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+        appendValue(genome.contigs, value(genome._store).contigStore[contigId].seq);
 }
 
 // ----------------------------------------------------------------------------
-// Function contigs()                                                  [Genome]
-// ----------------------------------------------------------------------------
-//
-//template <typename TSpec, typename TConfig, typename TContigId>
-//inline typename Contigs<Genome<TSpec, TConfig> >::Type &
-//contig(Genome<TSpec, TConfig> & genome, TContigId contigId)
-//{
-//    return contigs(genome)[contigId];
-//}
-//
-//template <typename TSpec, typename TConfig, typename TContigId>
-//inline typename Contigs<Genome<TSpec, TConfig> const>::Type &
-//contig(Genome<TSpec, TConfig> const & genome, TContigId contigId)
-//{
-//    return contigs(genome)[contigId];
-//}
-
-// ----------------------------------------------------------------------------
-// Function contigLength()                                             [Genome]
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TConfig, typename TContigId>
-inline typename Size<Genome<TSpec, TConfig> const>::Type
-contigLength(Genome<TSpec, TConfig> const & genome, TContigId contigId)
-{
-    return length(contigs(genome)[contigId]);
-}
-
-// ----------------------------------------------------------------------------
-// Function clear()                                                    [Genome]
+// Function _updateContigsLength()                                     [Genome]
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-void clear(Genome<TSpec, TConfig> & genome)
+void _updateContigsLength(Genome<TSpec, TConfig> & genome)
 {
-    clear(contigs(genome));
-}
+    clear(genome.contigsLength);
+    reserve(genome.contigsLength, length(genome.contigs), Exact());
 
-// ----------------------------------------------------------------------------
-// Function reserve()                                                  [Genome]
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TConfig, typename TSize>
-void reserve(Genome<TSpec, TConfig> & genome, TSize newCapacity)
-{
-    reserve(contigs(genome), newCapacity, Exact());
+    for (unsigned contigId = 0; contigId < length(genome.contigs); ++contigId)
+        appendValue(genome.contigsLength, length(genome.contigs[contigId]));
 }
 
 // ----------------------------------------------------------------------------
@@ -289,76 +224,48 @@ void reserve(Genome<TSpec, TConfig> & genome, TSize newCapacity)
 template <typename TSpec, typename TConfig>
 void reverse(Genome<TSpec, TConfig> & genome)
 {
-    for (unsigned contigId = 0; contigId < length(contigs(genome)); ++contigId)
-        reverse(contigs(genome)[contigId]);
+    for (unsigned contigId = 0; contigId < length(value(genome._store).contigStore); ++contigId)
+        reverse(value(genome._store).contigStore[contigId].seq);
 }
 
 // ----------------------------------------------------------------------------
-// Function open()                                               [GenomeLoader]
-// ----------------------------------------------------------------------------
-
-template <typename TSpec, typename TConfig, typename TString>
-bool open(GenomeLoader<TSpec, TConfig> & loader, TString const & genomeFile)
-{
-    typedef GenomeLoader<TSpec, TConfig>            TGenomeLoader;
-    typedef typename TGenomeLoader::TRecordReader   TRecordReader;
-
-    // Open file.
-    loader._file.open(toCString(genomeFile), std::ios::binary | std::ios::in);
-
-    if (!loader._file.is_open())
-        return false;
-
-    // Compute file size.
-    loader._file.seekg(0, std::ios::end);
-    loader._fileSize = loader._file.tellg();
-    loader._file.seekg(0, std::ios::beg);
-
-    // Initialize record reader.
-    loader._reader.reset(new TRecordReader(loader._file));
-
-    // Autodetect file format.
-    if (!guessStreamFormat(*(loader._reader), loader._fileFormat))
-        return false;
-
-    return true;
-}
-
-// ----------------------------------------------------------------------------
-// Function load()                                               [GenomeLoader]
+// Function getContigs()                                               [Genome]
 // ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TConfig>
-bool load(GenomeLoader<TSpec, TConfig> & loader)
+inline typename Contigs<Genome<TSpec, TConfig> >::Type &
+getContigs(Genome<TSpec, TConfig> & genome)
 {
-    switch (loader._fileFormat.tagId)
-    {
-    case Find<AutoSeqStreamFormat, Fasta>::VALUE:
-        return load(loader, Fasta());
-    default:
-        return false;
-    }
+    return genome.contigs;
 }
 
-template <typename TSpec, typename TConfig, typename TFormat>
-bool load(GenomeLoader<TSpec, TConfig> & loader, TFormat const & /* tag */)
+template <typename TSpec, typename TConfig>
+inline typename Contigs<Genome<TSpec, TConfig> const>::Type &
+getContigs(Genome<TSpec, TConfig> const & genome)
 {
-    // Reserve space for contigs.
-    reserve(getGenome(loader), loader._fileSize);
+    return genome.contigs;
+}
 
-    CharString contigName;
-    typename TConfig::TContigSeq contigSeq;
+// ----------------------------------------------------------------------------
+// Function contigLength()                                             [Genome]
+// ----------------------------------------------------------------------------
 
-    // Read records.
-    while (!atEnd(*(loader._reader)))
-    {
-        if (readRecord(contigName, contigSeq, *(loader._reader), TFormat()) != 0)
-            return false;
+template <typename TSpec, typename TConfig, typename TContigId>
+inline typename Size<Genome<TSpec, TConfig> const>::Type
+contigLength(Genome<TSpec, TConfig> const & genome, TContigId contigId)
+{
+    return genome.contigsLength[contigId];
+}
 
-        appendValue(contigs(getGenome(loader)), contigSeq);
-    }
+// ----------------------------------------------------------------------------
+// Function clear()                                                    [Genome]
+// ----------------------------------------------------------------------------
 
-    return true;
+template <typename TSpec, typename TConfig>
+void clear(Genome<TSpec, TConfig> & genome)
+{
+    clear(genome.contigs);
+    clearContigs(value(genome._store));
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_MASAI_GENOME_H_
