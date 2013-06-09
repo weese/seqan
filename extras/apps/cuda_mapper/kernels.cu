@@ -88,5 +88,7 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
     for (unsigned offset = 0; offset < length(readSeqs); offset += blocksPerGrid * threadsPerBlock)
         _mapReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceIndexView, deviceReadSeqsView, offset);
 
+#ifdef SEQAN_DEBUG
     cudaDeviceSynchronize();
+#endif
 }

@@ -69,7 +69,12 @@ mapRead(TIndex & index, TReadSeq const & readSeq, TPos pos)
 
     bool found = goDown(it, readSeq);
     unsigned occurrences = found ? countOccurrences(it) : 0;
+
+#ifdef SEQAN_DEBUG
     printf("pos=%d, occurrences=%d\n", pos, occurrences);
+#else
+    ignoreUnusedVariableWarning(pos);
+#endif
 
     return occurrences;
 }
