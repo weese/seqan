@@ -34,9 +34,6 @@
 // This file contains the cuda_indexer application.
 // ==========================================================================
 
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
-
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
 #include <seqan/store.h>
@@ -72,7 +69,7 @@ struct Options
 // Function setupArgumentParser()                              [ArgumentParser]
 // ----------------------------------------------------------------------------
 
-void setupArgumentParser(ArgumentParser & parser, Options const & options)
+void setupArgumentParser(ArgumentParser & parser, Options const & /* options */)
 {
     setAppName(parser, "cuda_indexer");
     setShortDescription(parser, "CUDA Indexer");
@@ -123,13 +120,11 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runIndexer()
 // ----------------------------------------------------------------------------
 
-template <typename TIndexSpec>
 int runIndexer(Options & options)
 {
-    typedef GenomeConfig<MasaiStoreConfig>      TGenomeConfig;
-    typedef Genome<void, TGenomeConfig>         TGenome;
-    typedef GenomeLoader<void, TGenomeConfig>   TGenomeLoader;
-    typedef GenomeIndex<TGenome, TIndexSpec>    TGenomeIndex;
+    typedef Genome<void, CUDAStoreConfig>                   TGenome;
+    typedef GenomeLoader<void, CUDAStoreConfig>             TGenomeLoader;
+    typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>    TGenomeIndex;
 
     TGenome             genome;
     TGenomeLoader       genomeLoader(genome);
@@ -173,15 +168,6 @@ int runIndexer(Options & options)
 }
 
 // ----------------------------------------------------------------------------
-// Functions configure*()
-// ----------------------------------------------------------------------------
-
-int configureIndex(Options & options)
-{
-    return runIndexer<TGenomeFMSpec>(options);
-}
-
-// ----------------------------------------------------------------------------
 // Function main()
 // ----------------------------------------------------------------------------
 
@@ -196,5 +182,5 @@ int main(int argc, char const ** argv)
     if (res != seqan::ArgumentParser::PARSE_OK)
         return res == seqan::ArgumentParser::PARSE_ERROR;
 
-    return configureIndex(options);
+    return runIndexer(options);
 }
