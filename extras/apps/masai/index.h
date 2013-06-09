@@ -313,13 +313,13 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
     typedef typename ValueSize<TAlphabet>::Type                 TAlphabetSize;
     typedef typename Size<TIndex>::Type                         TSize;
 
-    typedef typename Fibre<TIndex, FibreLfTable>::Type          TLfTable;
-    typedef typename Fibre<TLfTable, FibrePrefixSumTable>::Type TPrefixSumTable;
+    typedef typename Fibre<TIndex, FibreLF>::Type               TFibreLF;
+    typedef typename Fibre<TFibreLF, FibrePrefixSum>::Type      TFibrePrefixSum;
 
     if (__MASK_DNA5Q_LT[ordValue(c)] >= ValueSize<TAlphabet>::VALUE) return false;
 
     TIndex const & _index = container(it);
-    TPrefixSumTable const & pst = getFibre(getFibre(_index, FibreLfTable()), FibrePrefixSumTable());
+    TFibrePrefixSum const & pst = getFibre(indexLF(_index), FibrePrefixSum());
 
     TAlphabetSize cPosition = getCharacterPosition(pst, c);
 
@@ -331,8 +331,8 @@ inline bool _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VS
     else
     {
         TSize prefixSum = getPrefixSum(pst, cPosition);
-        _range.i1 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i1 - 1);
-        _range.i2 = prefixSum + countOccurrences(_index.lfTable.occTable, c, vDesc.range.i2 - 1);
+        _range.i1 = prefixSum + _getRank(indexLF(_index), vDesc.range.i1 - 1, c);
+        _range.i2 = prefixSum + _getRank(indexLF(_index), vDesc.range.i2 - 1, c);
     }
 
     return _range.i1 + 1 <= _range.i2;
