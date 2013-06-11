@@ -63,7 +63,7 @@ inline void cudaPrintFreeMemory()
     size_t free, total;
     cudaMemGetInfo(&free, &total);
 
-    std::cout << "Free" << free/1024/1024 <<  " of total " << total/1024/1024 << " MB\n";
+    std::cout << "Free " << free / 1024 / 1024 <<  " of " << total / 1024 / 1024 << " MB\n";
 }
 
 // --------------------------------------------------------------------------
