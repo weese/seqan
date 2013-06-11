@@ -32,7 +32,6 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
 #include <seqan/store.h>
@@ -159,7 +158,7 @@ template <typename TCPUGPU>
 int runMapper(Options & options)
 {
     typedef Genome<void, CUDAStoreConfig>                           TGenome;
-    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
+//    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
     typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>            TGenomeIndex;
 
     typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
@@ -168,7 +167,7 @@ int runMapper(Options & options)
     typedef ReadsLoader<void, TReadsConfig>                         TReadsLoader;
 
     TGenome             genome;
-    TGenomeLoader       genomeLoader(genome);
+//    TGenomeLoader       genomeLoader(genome);
     TGenomeIndex        genomeIndex(genome);
 
     TStore              store;
@@ -177,22 +176,22 @@ int runMapper(Options & options)
 
     double start, finish;
 
-    // Load genome.
-    if (!open(genomeLoader, options.genomeFile))
-    {
-        std::cerr << "Error while loading genome" << std::endl;
-        return 1;
-    }
-
-    std::cout << "Loading genome:\t\t\t" << std::flush;
-    start = sysTime();
-    if (!load(genomeLoader))
-    {
-        std::cerr << "Error while loading genome" << std::endl;
-        return 1;
-    }
-    finish = sysTime();
-    std::cout << finish - start << " sec" << std::endl;
+//    // Load genome.
+//    if (!open(genomeLoader, options.genomeFile))
+//    {
+//        std::cerr << "Error while loading genome" << std::endl;
+//        return 1;
+//    }
+//
+//    std::cout << "Loading genome:\t\t\t" << std::flush;
+//    start = sysTime();
+//    if (!load(genomeLoader))
+//    {
+//        std::cerr << "Error while loading genome" << std::endl;
+//        return 1;
+//    }
+//    finish = sysTime();
+//    std::cout << finish - start << " sec" << std::endl;
 
     // Load genome index.
     std::cout << "Loading genome index:\t\t" << std::flush;
@@ -200,9 +199,7 @@ int runMapper(Options & options)
     if (!load(genomeIndex, options.genomeIndexFile))
     {
         std::cout << "Error while loading genome index" << std::endl;
-//        return 1;
-        std::cout << "Building genome index:\t\t" << std::flush;
-        build(genomeIndex);
+        return 1;
     }
     finish = sysTime();
     std::cout << finish - start << " sec" << std::endl;
