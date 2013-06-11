@@ -36,7 +36,7 @@ endif (NOT CUDA_FOUND)
 list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
 
 # Activate verbose flag in ptxas to show register usage.
-list (APPEND CUDA_NVCC_FLAGS -Xptxas --verbose)
+#list (APPEND CUDA_NVCC_FLAGS -Xptxas --verbose)
 
 # Build from Kepler architecture upwards.
 list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
