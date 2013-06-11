@@ -67,7 +67,7 @@ mapRead(TIndex & index, TReadSeq const & readSeq, TPos pos)
 {
     typename Iterator<TIndex, TopDown<> >::Type it(index);
 
-    bool found = goDown(it, readSeq);
+    bool found = goDown(it, infix(readSeq, 0, 20));
     unsigned occurrences = found ? countOccurrences(it) : 0;
 
 #ifdef SEQAN_DEBUG
@@ -87,8 +87,12 @@ template <typename TIndex, typename TReadSeqs>
 inline void
 mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
 {
+    unsigned long occurrences = 0;
+
     for (unsigned i = 0; i < length(readSeqs); i++)
-        mapRead(index, readSeqs[i], i);
+        occurrences += mapRead(index, readSeqs[i], i);
+
+    std::cout << occurrences << std::endl;
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
