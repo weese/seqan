@@ -141,7 +141,7 @@ log2(T val)
 // to avoid conflicts with non-standard macros and namespaces
 // we define our own Min/Max functions
 
-template<typename Tx_> inline
+template<typename Tx_> SEQAN_FUNC
 const Tx_& _min(const Tx_& _Left, const Tx_& Right_)
 {   // return smaller of _Left and Right_
     if (_Left < Right_)
@@ -150,7 +150,7 @@ const Tx_& _min(const Tx_& _Left, const Tx_& Right_)
         return Right_;
 }
 
-template<typename Tx_, typename Ty_> inline
+template<typename Tx_, typename Ty_> SEQAN_FUNC
 Tx_ _min(const Tx_& _Left, const Ty_& Right_)
 {   // return smaller of _Left and Right_
     return (Right_ < _Left ? Right_ : _Left);
