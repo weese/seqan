@@ -76,7 +76,7 @@ inline float cudaOccupancy()
     return __popc(__ballot(true)) / 32.0f;
 #else
     return 1;
-#endif;
+#endif
 }
 
 // --------------------------------------------------------------------------
