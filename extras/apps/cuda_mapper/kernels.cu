@@ -38,6 +38,7 @@
 
 #include "kernels.h"
 #include <thrust/sort.h>
+#include <thrust/reduce.h>
 
 using namespace seqan;
 
@@ -69,9 +70,9 @@ _hashReadsKernel(TReadSeqsView readSeqs, THashes hashes, TIdx idxs)
 // Kernel _mapReadsKernel()
 // --------------------------------------------------------------------------
 
-template <typename TIndexView, typename TReadSeqsView, typename TIdxView>
+template <typename TIndexView, typename TReadSeqsView, typename TIdxView, typename TOccView>
 __global__ void
-_mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, TIdxView idxs)
+_mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, TIdxView idxs, TOccView occs)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -82,7 +83,7 @@ _mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, TIdxView idxs)
     idx = idxs[idx];
 
     // Map the read.
-    mapRead(index, readSeqs[idx], (unsigned)idx);
+    occs[idx] = mapRead(index, readSeqs[idx], (unsigned)idx);
 }
 
 // ============================================================================
@@ -123,7 +124,7 @@ void _mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */
     TDeviceReadSeqs deviceReadSeqs;
     assign(deviceReadSeqs, readSeqs);
 
-    cudaPrintFreeMemory();
+    cudaDeviceSynchronize();
 
     // Instantiate views of device objects.
     TDeviceIndexView deviceIndexView = view(deviceIndex);
@@ -135,30 +136,42 @@ void _mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */
 
     thrust::device_vector<__uint32> hashes(length(readSeqs));
     thrust::device_vector<__uint32> idx(length(readSeqs));
+    thrust::device_vector<__uint64> occs(length(readSeqs));
+
+    cudaDeviceSynchronize();
+    cudaPrintFreeMemory();
 
     // Launch kernel 10 times!
     double start, finish;
     start = sysTime();
 
-//    for (unsigned i = 0; i < 10; i++)
-//    {
+    unsigned n_tests = 10;
+    for (unsigned i = 0; i < n_tests; i++)
+    {
         // Sort reads.
         _hashReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceReadSeqsView, view(hashes), view(idx));
         cudaDeviceSynchronize();
         thrust::sort_by_key(hashes.begin(), hashes.end(), idx.begin());
+        cudaDeviceSynchronize();
 
         // Map reads.
-        _mapReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceIndexView, deviceReadSeqsView, view(idx));
-//    }
-
-    cudaDeviceSynchronize();
+        _mapReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceIndexView, deviceReadSeqsView, view(idx), view(occs));
+        cudaDeviceSynchronize();
+    }
 
     finish = sysTime();
-    std::cout << (finish - start)/10 << " sec" << std::endl;
+    std::cout << (finish - start)/n_tests << " sec" << std::endl;
+
+    thrust::host_vector<__uint64> h_occs(occs);
+    const __uint64 n_occ = thrust::reduce( h_occs.begin(), h_occs.end() );
+    std::cout << n_occ << std::endl;
+
+    cudaPrintFreeMemory();
 }
 
 void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
     _mapReads(index, readSeqs, GPU());
-    cudaDeviceReset();
+    std::cout << "Mapped!" << std::endl;
+//    cudaDeviceReset();
 }
