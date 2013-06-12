@@ -556,8 +556,8 @@ inline bool open(Index<TText, FMIndex<TOccSpec, TSpec> > & index, const char * f
 
     String<FmIndexInfo_> infoString;
 
-    name = fileName;    append(name, ".txt");
-    if (!open(getFibre(index, FibreText()), toCString(name), openMode)) return false;
+//    name = fileName;    append(name, ".txt");
+//    if (!open(getFibre(index, FibreText()), toCString(name), openMode)) return false;
 
     name = fileName;    append(name, ".sa");
     if (!open(getFibre(index, FibreSA()), toCString(name), openMode)) return false;
