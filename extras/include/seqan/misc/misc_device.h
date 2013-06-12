@@ -70,7 +70,7 @@ template <typename TObject>
 struct IsDevice<TObject const> : public IsDevice<TObject> {};
 
 // ----------------------------------------------------------------------------
-// Metafunction IsDevice                                 [thust::device_vector]
+// Metafunction IsDevice                                [thrust::device_vector]
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TAlloc>
@@ -81,17 +81,19 @@ struct IsDevice<thrust::device_vector<TValue, TAlloc> > : public True {};
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function view()                                       [thust::device_vector]
+// Function view()                                      [thrust::device_vector]
 // ----------------------------------------------------------------------------
 
 template <typename TContainer, typename TAlloc>
 inline typename View<thrust::device_vector<TContainer, TAlloc> >::Type
 view(thrust::device_vector<TContainer, TAlloc> & container)
 {
-    return typename View<thrust::device_vector<TContainer, TAlloc> >::Type(
-            thrust::raw_pointer_cast(container.data()),
-            thrust::raw_pointer_cast(&container[container.size()])
-    );
+    typedef typename View<thrust::device_vector<TContainer, TAlloc> >::Type TView;
+
+    if (empty(container)) return TView();
+
+    return TView(thrust::raw_pointer_cast(&container.front()),
+                 thrust::raw_pointer_cast(&container.front()) + container.size());
 }
 
 }  // namespace seqan

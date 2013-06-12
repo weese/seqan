@@ -35,8 +35,11 @@ endif (NOT CUDA_FOUND)
 # Activate debug symbols for device code and remove optimizations.
 list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
 
-# Build from Tesla architecture upwards.
-list (APPEND CUDA_NVCC_FLAGS -arch sm_20)
+# Activate verbose flag in ptxas to show register usage.
+#list (APPEND CUDA_NVCC_FLAGS -Xptxas --verbose)
+
+# Build from Kepler architecture upwards.
+list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
 
 # Produce an error on illegal calls, e.g. __host__ __device__ --> __host__.
 list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)

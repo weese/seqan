@@ -64,7 +64,10 @@ public:
     // ------------------------------------------------------------------------
 
     SEQAN_FUNC
-    ContainerView() {}
+    ContainerView() :
+        _begin(),
+        _end()
+    {}
 
     template <typename TOtherContainer>
     SEQAN_FUNC
