@@ -265,8 +265,8 @@ _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown
     {
         TSize prefixSum = getPrefixSum(prefixSumTable, cPosition);
         // TODO(esiragusa): Change this to getValue(lfTable) or something similar.
-        _range.i1 = prefixSum + _getRank(lfTable, vDesc.range.i1 - 1, c);
-        _range.i2 = prefixSum + _getRank(lfTable, vDesc.range.i2 - 1, c);
+        _range.i1 = prefixSum + (vDesc.range.i1 ? _getRank(lfTable, vDesc.range.i1 - 1, c) : 0);
+        _range.i2 = prefixSum + (vDesc.range.i2 ? _getRank(lfTable, vDesc.range.i2 - 1, c) : 0);
     }
 
     return _range.i1 + 1 <= _range.i2;
