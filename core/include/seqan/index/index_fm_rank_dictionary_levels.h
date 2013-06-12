@@ -496,11 +496,46 @@ _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
 // Function _getValueRank(Dna)                                 [RankDictionary]
 // ----------------------------------------------------------------------------
 
-template <typename TSpec, typename TBlockPos, typename TWordPos, typename TPosInWord>
+//template <typename TSpec, typename TBlockPos, typename TWordPos, typename TPosInWord>
+//SEQAN_FUNC typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
+//_getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict,
+//              TBlockPos blockPos,
+//              TWordPos wordPos,
+//              TPosInWord posInWord,
+//              Dna c)
+//{
+//    typedef TwoLevels<Dna, TSpec>                                       TRankDictionarySpec;
+//    typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
+//    typedef typename Size<TRankDictionary>::Type                        TSize;
+//    typedef typename RankDictionaryValues_<TRankDictionarySpec>::TWord  TWord;
+//
+//    TWord values = _wordAt(dict, blockPos, wordPos);
+//
+//    // Clear the last positions.
+//    TWord word = hiBits(values, TRankDictionary::_BITS_PER_VALUE * (posInWord + 1));
+//
+//    // And matches when c == G|T.
+//    TWord odd  = ((ordValue(c) & ordValue(Dna('G'))) ? word : ~word) >> 1;
+//
+//    // And matches when c == C|T.
+//    TWord even = ((ordValue(c) & ordValue(Dna('C'))) ? word : ~word);
+//
+//    // Apply the interleaved mask.
+//    TWord mask = odd & even & RankDictionaryBitMask_<TWord>::VALUE;
+//
+//    // The rank is the sum of the bits on.
+//    TSize valueRank = popCount(mask);
+//
+//    // If c == A then masked character positions must be subtracted from the count.
+//    if (c == Dna('A')) valueRank -= TRankDictionary::_VALUES_PER_WORD - (posInWord + 1);
+//
+//    return valueRank;
+//}
+
+template <typename TSpec, typename TValues, typename TPosInWord>
 SEQAN_FUNC typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
-_getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict,
-              TBlockPos blockPos,
-              TWordPos wordPos,
+_getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & /* dict */,
+              TValues values,
               TPosInWord posInWord,
               Dna c)
 {
@@ -508,8 +543,6 @@ _getValueRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict,
     typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
     typedef typename Size<TRankDictionary>::Type                        TSize;
     typedef typename RankDictionaryValues_<TRankDictionarySpec>::TWord  TWord;
-
-    TWord values = _wordAt(dict, blockPos, wordPos);
 
     // Clear the last positions.
     TWord word = hiBits(values, TRankDictionary::_BITS_PER_VALUE * (posInWord + 1));
@@ -646,6 +679,63 @@ SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar c)
 {
     return _getBlockRank(dict, pos, static_cast<TValue>(c)) + _getValueRank(dict, pos, static_cast<TValue>(c));
+}
+
+template <typename TSpec, typename TPos>
+SEQAN_FUNC typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
+getRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna c)
+{
+    typedef TwoLevels<Dna, TSpec>                                           TRankDictionarySpec;
+    typedef RankDictionary<TRankDictionarySpec> const                       TRankDictionary;
+    typedef typename Fibre<TRankDictionary, FibreRanks>::Type               TFibreRanks;
+    typedef typename Value<TFibreRanks>::Type                               TRankEntry;
+    typedef typename RankDictionaryBlock_<TRankDictionarySpec>::Type        TRankBlock;
+    typedef typename RankDictionaryValues_<TRankDictionarySpec>::Type       TRankValues;
+    typedef typename Size<TRankDictionary>::Type                            TSize;
+
+    TSize blockPos   = _toBlockPos(dict, pos);
+    TSize posInBlock = _toPosInBlock(dict, pos);
+    TSize wordPos    = _toWordPos(dict, posInBlock);
+    TSize posInWord  = _toPosInWord(dict, posInBlock);
+
+    TRankEntry const & entry = dict.ranks[blockPos];
+
+#ifdef __CUDA_ARCH__
+    TRankBlock block;
+    {
+        uint4 t = __ldg((uint4 *)entry.block.i);
+        block[0] = t.x;
+        block[1] = t.y;
+        block[2] = t.z;
+        block[3] = t.w;
+    }
+    unsigned cPos = ordValue(c);
+
+    TSize blockRank = cPos < 2 ?
+            (cPos == 0 ? block[0] : block[1]) :
+            (cPos == 2 ? block[2] : block[3]);
+
+    TRankValues values;
+    {
+        uint4 t = __ldg((uint4 *)entry.values.i);
+        values.i[0].i = t.x;
+        values.i[1].i = t.y;
+        values.i[2].i = t.z;
+        values.i[3].i = t.w;
+    }
+#else
+    TSize blockRank = entry.block[ordValue(c)];
+    TRankValues values = entry.values;
+#endif
+
+    TSize valueRank = 0;
+
+    for (TSize wordPrevPos = 0; wordPrevPos < wordPos; ++wordPrevPos)
+      valueRank += _getValueRank(dict, values[wordPrevPos].i, TRankDictionary::_VALUES_PER_WORD - 1, c);
+
+    valueRank += _getValueRank(dict, values[wordPos].i, posInWord, c);
+
+    return blockRank + valueRank;
 }
 
 // ----------------------------------------------------------------------------
