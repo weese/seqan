@@ -124,6 +124,12 @@ struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
 {
     typedef __uint32 Type;
 };
+
+template <typename TSpec>
+struct Size<RankDictionary<Naive<bool, TSpec> > >
+{
+    typedef __uint32 Type;
+};
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
