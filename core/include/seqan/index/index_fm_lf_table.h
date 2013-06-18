@@ -135,7 +135,8 @@ struct Fibre<LfTable<TText, TSpec>, FibreSentinels>
 template <typename TText, typename TSSetSpec, typename TSpec>
 struct Fibre<LfTable<StringSet<TText, TSSetSpec>, TSpec>, FibreSentinels>
 {
-    typedef RankDictionary<TwoLevels<bool, TSpec> >         Type;
+//    typedef RankDictionary<TwoLevels<bool, TSpec> >         Type;
+    typedef RankDictionary<Naive<bool, TSpec> >         Type;
 };
 
 template <typename TText, typename TSpec>
@@ -514,9 +515,10 @@ _createBwt(LfTable<StringSet<TText, TSSetSpec>, TSpec > & lfTable, TBwt & bwt, T
     typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
 
     TSize seqNum = countSequences(text);
-    TSize totalLen = lengthSum(text);
+//    TSize totalLen = lengthSum(text);
 
-    resize(lfTable.sentinels, seqNum + totalLen, Exact());
+//    resize(lfTable.sentinels, seqNum + totalLen, Exact());
+    resize(lfTable.sentinels, seqNum, Exact());
     
     TSAIter saIt = begin(sa, Standard());
     TSAIter saItEnd = end(sa, Standard());
