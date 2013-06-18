@@ -681,6 +681,24 @@ getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar 
     return _getBlockRank(dict, pos, static_cast<TValue>(c)) + _getValueRank(dict, pos, static_cast<TValue>(c));
 }
 
+template <typename TTuple>
+SEQAN_FUNC TTuple
+loadAndCache(TTuple const & tuple)
+{
+#ifdef __CUDA_ARCH__
+    union { TTuple t; uint4 v; } tmp;
+
+    tmp.v = __ldg((uint4 *)(tuple.i));
+
+    // This also works.
+//    tmp.v = __ldg(reinterpret_cast<uint4 const *>(tuple.i));
+
+    return tmp.t;
+#else
+    return tuple;
+#endif
+}
+
 template <typename TSpec, typename TPos>
 SEQAN_FUNC typename Size<RankDictionary<TwoLevels<Dna, TSpec> > const>::Type
 getRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna c)
@@ -701,28 +719,26 @@ getRank(RankDictionary<TwoLevels<Dna, TSpec> > const & dict, TPos pos, Dna c)
     TRankEntry const & entry = dict.ranks[blockPos];
 
 #ifdef __CUDA_ARCH__
-    TRankBlock block;
-    {
-        uint4 t = __ldg((uint4 *)entry.block.i);
-        block[0] = t.x;
-        block[1] = t.y;
-        block[2] = t.z;
-        block[3] = t.w;
-    }
-    unsigned cPos = ordValue(c);
 
-    TSize blockRank = cPos < 2 ?
-            (cPos == 0 ? block[0] : block[1]) :
-            (cPos == 2 ? block[2] : block[3]);
+// 0.194s
+//    union { TRankBlock block; uint4 v; } tmp;
+//    tmp.v = __ldg((uint4 *)entry.block.i);
+//    TSize blockRank = tmp.block[ordValue(c)];
 
-    TRankValues values;
-    {
-        uint4 t = __ldg((uint4 *)entry.values.i);
-        values.i[0].i = t.x;
-        values.i[1].i = t.y;
-        values.i[2].i = t.z;
-        values.i[3].i = t.w;
-    }
+// 0.194s
+//    TSize blockRank = loadAndCache(entry.block)[ordValue(c)];
+
+// 0.191s
+    TSize blockRank = __ldg(&entry.block.i[ordValue(c)]);
+
+// 0.191s
+//    union { TRankValues values; uint4 v; } tmp;
+//    tmp.v = __ldg((uint4 *)entry.values.i);
+//    TRankValues & values = tmp.values;
+
+// 0.192s
+    TRankValues values = loadAndCache(entry.values);
+
 #else
     TSize blockRank = entry.block[ordValue(c)];
     TRankValues values = entry.values;
