@@ -302,7 +302,7 @@ template <typename TValue, typename TSpec>
 inline typename Size<RankDictionary<Naive<TValue, TSpec> > >::Type
 length(RankDictionary<Naive<TValue, TSpec> > const & dict)
 {
-    return dict._length;
+    return length(dict.ranks);
 }
 
 // ----------------------------------------------------------------------------
