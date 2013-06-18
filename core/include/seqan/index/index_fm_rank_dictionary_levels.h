@@ -291,7 +291,7 @@ template <typename TValue>
 SEQAN_FUNC TValue
 loadAndCache(TValue const & value)
 {
-#ifdef __CUDA_ARCH__
+#if __CUDA_ARCH__ >= 350
     return __ldg(&value);
 #else
     return value;
@@ -307,19 +307,82 @@ template <typename TValue, unsigned SIZE, typename TSpec>
 SEQAN_FUNC Tuple<TValue, SIZE, TSpec>
 loadAndCache(Tuple<TValue, SIZE, TSpec> const & tuple)
 {
+#if __CUDA_ARCH__ >= 350
     typedef Tuple<TValue, SIZE, TSpec>  TTuple;
 
-#ifdef __CUDA_ARCH__
-    union { TTuple x; uint4 y; } tmp;
+    const unsigned UINTS = BytesPerValue<TTuple>::VALUE / 4;
 
-//    tmp.y = __ldg((uint4 *)(tuple.i));
-    tmp.y = __ldg(reinterpret_cast<uint4 const *>(tuple.i));
+    union { TTuple x; uint4 y[UINTS]; } tmp;
+
+    for (unsigned u = 0; u < UINTS; ++u)
+        tmp.y[u] = __ldg(reinterpret_cast<uint4 const *>(&tuple) + u);
 
     return tmp.x;
 #else
     return tuple;
 #endif
 }
+
+// ----------------------------------------------------------------------------
+// Function loadAndCache()                               [RankDictionaryEntry_]
+// ----------------------------------------------------------------------------
+//
+//template <typename TValue, typename TSpec>
+//SEQAN_FUNC RankDictionaryEntry_<TwoLevels<TValue, TSpec> >
+//loadAndCache(RankDictionaryEntry_<TwoLevels<TValue, TSpec> > const & entry)
+//{
+//#if __CUDA_ARCH__ >= 350
+//    typedef TwoLevels<TValue, TSpec>                    TRankDictionarySpec;
+//    typedef RankDictionaryEntry_<TRankDictionarySpec>   TEntry;
+//
+//    const unsigned UINTS = BytesPerValue<TEntry>::VALUE / 4;
+//
+//    union { TEntry x; uint4 y[UINTS]; } tmp;
+//
+//    for (unsigned u = 0; u < UINTS; ++u)
+//        tmp.y[u] = __ldg(reinterpret_cast<uint4 const *>(&entry) + u);
+//
+//    return tmp.x;
+//#else
+//    return entry;
+//#endif
+//}
+
+//template <unsigned SIZE, typename TSpec>
+//SEQAN_FUNC Tuple<Tuple<Dna, SIZE, BitPacked<> >, 4, TSpec>
+//loadAndCache(Tuple<Tuple<Dna, SIZE, BitPacked<> >, 4, TSpec> const & values)
+//{
+//#if __CUDA_ARCH__ >= 350
+//    Tuple<Tuple<Dna, SIZE, BitPacked<> >, 4, TSpec> tmp;
+//
+//    uint4 t = __ldg((uint4 *)values.i);
+//    tmp.i[0].i = t.x;
+//    tmp.i[1].i = t.y;
+//    tmp.i[2].i = t.z;
+//    tmp.i[3].i = t.w;
+//
+//    return tmp;
+//#else
+//    return values;
+//#endif
+//}
+
+//template <unsigned SIZE, typename TSpec>
+//SEQAN_FUNC Tuple<Tuple<bool, SIZE, BitPacked<> >, 1, TSpec>
+//loadAndCache(Tuple<Tuple<bool, SIZE, BitPacked<> >, 1, TSpec> const & values)
+//{
+//#if __CUDA_ARCH__ >= 350
+//    Tuple<Tuple<bool, SIZE, BitPacked<> >, 1, TSpec> tmp;
+//
+//    uint2 t = __ldg((uint2 *)values.i);
+//    tmp.i[0].i = t.x;
+//    tmp.i[1].i = t.y;
+//
+//    return tmp;
+//#else
+//    return values;
+//#endif
+//}
 
 // ----------------------------------------------------------------------------
 // Function getFibre()                                         [RankDictionary]
@@ -492,6 +555,7 @@ SEQAN_FUNC typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
 _getBlockRank(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */, TBlock const & block, TPos /* pos */, TChar c)
 {
     return loadAndCache(block[ordValue(c)]);
+//    return block[ordValue(c)];
 }
 
 // ----------------------------------------------------------------------------
@@ -506,6 +570,8 @@ _getBlockRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TBlock const
 
     // If c == false then return the complementary rank.
     return c ? rank : pos - _toPosInBlock(dict, pos) - rank;
+
+//    return c ? block : pos - _toPosInBlock(dict, pos) - block;
 }
 
 // ----------------------------------------------------------------------------
@@ -682,15 +748,10 @@ getRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict, TPos pos, TChar 
     TSize blockPos   = _toBlockPos(dict, pos);
     TSize posInBlock = _toPosInBlock(dict, pos);
 
+//    TRankEntry entry = loadAndCache(dict.ranks[blockPos]);
     TRankEntry const & entry = dict.ranks[blockPos];
 
-//#ifdef __CUDA_ARCH__
-//    TSize blockRank = __ldg(&entry.block.i[ordValue(c)]);
-//    union { TRankValues values; uint4 v; } tmp;
-//    tmp.v = __ldg((uint4 *)entry.values.i);
-//    TRankValues & values = tmp.values;
-//#endif
-
+//    TRankBlock block = loadAndCache(entry.block);
     TRankValues values = loadAndCache(entry.values);
 
     return _getBlockRank(dict, entry.block, pos, static_cast<TValue>(c)) +
