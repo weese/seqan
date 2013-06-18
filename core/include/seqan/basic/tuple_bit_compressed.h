@@ -99,10 +99,10 @@ struct Tuple<TValue, SIZE, BitPacked<> >
     // -----------------------------------------------------------------------
 
     // TODO(holtgrew): There is the unresolved issue whether the initialize costs critical performance. Since Tuples are PODs, it should be able to initialize Strings/arrays of them with memset().
-    SEQAN_FUNC Tuple() : i(0)
-    {
-        SEQAN_ASSERT_LEQ(static_cast<__uint64>(BitsPerValue<TValue>::VALUE * SIZE), static_cast<__uint64>(sizeof(TBitVector) * 8));
-    }
+//    SEQAN_FUNC Tuple() : i(0)
+//    {
+//        SEQAN_ASSERT_LEQ(static_cast<__uint64>(BitsPerValue<TValue>::VALUE * SIZE), static_cast<__uint64>(sizeof(TBitVector) * 8));
+//    }
 
     // -----------------------------------------------------------------------
     // Subscription Operators;  Have to be declared in class.
