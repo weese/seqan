@@ -193,7 +193,8 @@ struct Fibre<LfTable<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>
 template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
 struct Fibre<LfTable<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TSpec>, FibreSentinels>
 {
-    typedef RankDictionary<TwoLevels<bool, Device<TSpec> > >    Type;
+//    typedef RankDictionary<TwoLevels<bool, Device<TSpec> > >    Type;
+    typedef RankDictionary<Naive<bool, Device<TSpec> > >    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -216,6 +217,16 @@ struct Fibre<RankDictionary<TwoLevels<TValue, Device<TSpec> > >, FibreRanks>
     typedef TwoLevels<TValue, TSpec>        TRankDictionarySpec_;
 
     typedef thrust::device_vector<RankDictionaryEntry_<TRankDictionarySpec_> >  Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<Naive<TValue, Device<TSpec> > >, FibreRanks>
+{
+    typedef Naive<TValue, TSpec>                                TRankDictionarySpec_;
+    typedef RankDictionary<TRankDictionarySpec_>                TRankDictionary_;
+    typedef typename Size<TRankDictionary_>::Type               TSize_;
+
+    typedef thrust::device_vector<TSize_>                       Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -301,6 +312,14 @@ assign(PrefixSumTable<TChar, TSpec> & pst, PrefixSumTable<TChar2, TSpec2> & sour
 template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
 inline void
 assign(RankDictionary<TwoLevels<TValue, TSpec> > & dict, RankDictionary<TwoLevels<TValue2, TSpec2> > & source)
+{
+    assign(getFibre(dict, FibreRanks()), getFibre(source, FibreRanks()));
+    assign(dict._length, source._length);
+}
+
+template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
+inline void
+assign(RankDictionary<Naive<TValue, TSpec> > & dict, RankDictionary<Naive<TValue2, TSpec2> > & source)
 {
     assign(getFibre(dict, FibreRanks()), getFibre(source, FibreRanks()));
     assign(dict._length, source._length);
