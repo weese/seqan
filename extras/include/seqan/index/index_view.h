@@ -93,6 +93,12 @@ struct View<RankDictionary<TwoLevels<TValue, TSpec> > >
     typedef RankDictionary<TwoLevels<TValue, View<TSpec> > >        Type;
 };
 
+template <typename TValue, typename TSpec>
+struct View<RankDictionary<Naive<TValue, TSpec> > >
+{
+    typedef RankDictionary<Naive<TValue, View<TSpec> > >            Type;
+};
+
 // ----------------------------------------------------------------------------
 // Metafunction View                                             [SparseString]
 // ----------------------------------------------------------------------------
@@ -380,6 +386,18 @@ template <typename TValue, typename TSpec>
 struct Fibre<RankDictionary<TwoLevels<TValue, View<TSpec> > > const, FibreRanks>
 {
     typedef typename View<typename Fibre<RankDictionary<TwoLevels<TValue, TSpec> > const, FibreRanks>::Type>::Type  Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<Naive<TValue, View<TSpec> > >, FibreRanks>
+{
+    typedef typename View<typename Fibre<RankDictionary<Naive<TValue, TSpec> >, FibreRanks>::Type>::Type    Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Fibre<RankDictionary<Naive<TValue, View<TSpec> > > const, FibreRanks>
+{
+    typedef typename View<typename Fibre<RankDictionary<Naive<TValue, TSpec> > const, FibreRanks>::Type>::Type  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -779,6 +797,18 @@ typename View<RankDictionary<TwoLevels<TValue, TSpec> > >::Type
 view(RankDictionary<TwoLevels<TValue, TSpec> > & dict)
 {
     typename View<RankDictionary<TwoLevels<TValue, TSpec> > >::Type dictView;
+
+    getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
+    dictView._length = dict._length;
+
+    return dictView;
+}
+
+template <typename TValue, typename TSpec>
+typename View<RankDictionary<Naive<TValue, TSpec> > >::Type
+view(RankDictionary<Naive<TValue, TSpec> > & dict)
+{
+    typename View<RankDictionary<Naive<TValue, TSpec> > >::Type dictView;
 
     getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
     dictView._length = dict._length;
