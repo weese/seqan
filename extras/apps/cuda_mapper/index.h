@@ -132,4 +132,16 @@ struct Size<RankDictionary<Naive<bool, TSpec> > >
 };
 }
 
+// ----------------------------------------------------------------------------
+// Shape Size
+// ----------------------------------------------------------------------------
+
+namespace seqan {
+template <typename TValue, unsigned q>
+struct Value<Shape<TValue, UngappedShape<q> > >
+{
+    typedef __uint32    Type;
+};
+}
+
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
