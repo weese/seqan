@@ -54,13 +54,18 @@ template <typename TReadSeqsView, typename THashes, typename TIdx>
 __global__ void
 _hashReadsKernel(TReadSeqsView readSeqs, THashes hashes, TIdx idxs)
 {
+    typedef typename Value<TReadSeqsView>::Type         TReadSeq;
+    typedef typename Value<TReadSeq>::Type              TAlphabet;
+    typedef Shape<TAlphabet, UngappedShape<16> >        TShape;
+
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     // Return silently if there is no job left.
     if (idx >= length(readSeqs)) return;
 
     // Compute the hash of a read.
-    hashes[idx] = hashRead(infix(readSeqs[idx], 0, 20));
+    TShape shape;
+    hashes[idx] = hash(shape, begin(readSeqs[idx], Standard()));
 
     // Fill idxs with the identity permutation.
     idxs[idx] = idx;
@@ -90,31 +95,21 @@ _mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, TIdxView idxs, TOccVie
 // Functions
 // ============================================================================
 
-template <typename TReadSeq>
-SEQAN_FUNC __uint32
-hashRead(TReadSeq const & readSeq)
-{
-    __uint32 result = 0;
-
-    for (int i = 0; i < _min(16,length(readSeq)); ++i)
-    {
-        __uint32 c = ordValue(readSeq[i]);
-        result |= c << i*2;
-    }
-
-    return result;
-}
-
 // --------------------------------------------------------------------------
 // Function mapReads()                                                  [GPU]
 // --------------------------------------------------------------------------
 
-void _mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
     typedef typename Device<TGenomeIndex>::Type         TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
     typedef typename View<TDeviceIndex>::Type           TDeviceIndexView;
     typedef typename View<TDeviceReadSeqs>::Type        TDeviceReadSeqsView;
+
+    typedef typename Value<TReadSeqs>::Type             TReadSeq;
+    typedef typename Value<TReadSeq>::Type              TAlphabet;
+    typedef Shape<TAlphabet, UngappedShape<16> >        TShape;
+    typedef typename Value<TShape>::Type                THash;
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
@@ -134,7 +129,7 @@ void _mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */
     unsigned threadsPerBlock = 256;
     unsigned blocksPerGrid = (length(readSeqs) + threadsPerBlock - 1) / threadsPerBlock;
 
-    thrust::device_vector<__uint32> hashes(length(readSeqs));
+    thrust::device_vector<THash> hashes(length(readSeqs));
     thrust::device_vector<__uint32> idx(length(readSeqs));
     thrust::device_vector<__uint64> occs(length(readSeqs));
 
@@ -167,11 +162,4 @@ void _mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */
     std::cout << n_occ << std::endl;
 
     cudaPrintFreeMemory();
-}
-
-void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
-{
-    _mapReads(index, readSeqs, GPU());
-    std::cout << "Mapped!" << std::endl;
-//    cudaDeviceReset();
 }
