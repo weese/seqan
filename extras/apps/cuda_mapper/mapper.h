@@ -309,14 +309,14 @@ struct FinderPool_<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetS
 #endif
 
 // ----------------------------------------------------------------------------
-// Metafunction FinderBlockSize_
+// Metafunction FinderCTASize_
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPattern, typename TSpec>
-struct FinderBlockSize_ {};
+struct FinderCTASize_ {};
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-struct FinderBlockSize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
+struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 {
     static const unsigned VALUE = 256;
 };
@@ -337,7 +337,6 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 
     TIndex      * index;
     TPool       _pool;
-    unsigned    _poolSize;
 
 //    typename Member<Finder2, FinderPattern_>::Type    _patternsIt;
 //    typename Member<Finder2, FinderIndices_>::Type    _idxs;
@@ -345,13 +344,11 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 
     SEQAN_FUNC
     Finder2() :
-        index(),
-        _poolSize(0)
+        index()
     {}
 
     Finder2(TIndex & index) :
-        index(&index),
-        _poolSize(0)
+        index(&index)
     {}
 };
 
@@ -418,64 +415,18 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function _updatePoolSize()
+// Function _initPool()
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TSize>
 inline void
-_updatePoolSize(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder, TDelegate & /* delegate */)
-{
-    finder._poolSize = omp_get_max_threads();
-}
-
-#ifdef __CUDACC__
-template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-inline void
-_updatePoolSizeCuda(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder, TDelegate & delegate)
-{
-    typedef Index<TText, TIndexSpec>                    TIndex;
-    typedef Finder2<TIndex, TPattern, Multiple<TSpec> > TFinder;
-    typedef typename View<TFinder>::Type                TFinderView;
-    typedef typename View<TPattern>::Type               TPatternView;
-
-    unsigned blockSize = FinderBlockSize_<TIndex, TPattern, Multiple<TSpec> >::VALUE;
-
-    finder._poolSize = cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternView, TDelegate>, blockSize, 0);
-}
-
-template <typename TValue, typename TAlloc, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-inline void
-_updatePoolSize(Finder2<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
-                TDelegate & delegate)
-{
-    _updatePoolSizeCuda(finder, delegate);
-}
-
-template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-inline void
-_updatePoolSize(Finder2<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
-                TDelegate & delegate)
-{
-    _updatePoolSizeCuda(finder, delegate);
-}
-#endif
-
-// ----------------------------------------------------------------------------
-// Function _preparePool()
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-inline void
-_preparePool(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder, TDelegate & delegate)
+_initPool(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder, TSize newSize)
 {
     typedef Index<TText, TIndexSpec>                                    TIndex;
     typedef typename Finder_<TIndex, TPattern, Multiple<TSpec> >::Type  TFinder_;
 
-    _updatePoolSize(finder, delegate);
-    resize(finder._pool, finder._poolSize);
-//    resize(finder._pool, finder._poolSize, TFinder_(value(finder.index)));
-
-    std::cout << "Pool size:\t\t\t" << finder._poolSize << std::endl;
+    resize(finder._pool, newSize);
+//    resize(finder._pool, newSize, TFinder_(value(finder.index)));
 }
 
 // ----------------------------------------------------------------------------
@@ -509,8 +460,8 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TP
     // Use a delegator object to delegate this finder instead of the pooled finders.
     TDelegator delegator(finder, delegate);
 
-    // Resize the pool.
-    _preparePool(finder, delegator);
+    // Initialize the pool.
+    _initPool(finder, omp_get_max_threads());
 
     // Find all patterns in parallel.
     TPatternIter patternBegin = begin(pattern, Standard());
@@ -535,17 +486,24 @@ _find(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
       TPattern /* const */ & pattern,
       TDelegate & delegate)
 {
+    typedef Index<TText, TIndexSpec>                    TIndex;
+    typedef Finder2<TIndex, TPattern, Multiple<TSpec> > TFinder;
+    typedef typename View<TFinder>::Type                TFinderView;
+    typedef typename View<TPattern>::Type               TPatternView;
+
     // Preprocess patterns.
 //    _preprocess(finder, patterns);
 
-    // Resize the pool.
-    _preparePool(finder, delegate);
+    unsigned ctaSize = FinderCTASize_<TIndex, TPattern, Multiple<TSpec> >::VALUE;
+    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternView, TDelegate>, ctaSize, 0);
 
-    unsigned blockSize = FinderBlockSize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >::VALUE;
+    // Initialize the pool.
+    _initPool(finder, activeBlocks * ctaSize);
 
-    std::cout << "Block size:\t\t\t" << blockSize << std::endl;
+    std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
+    std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
 
-    _findKernel<<<finder._poolSize, blockSize>>>(view(finder), view(pattern), delegate);
+    _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), delegate);
 }
 #endif
 
