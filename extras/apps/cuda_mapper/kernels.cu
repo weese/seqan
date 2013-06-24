@@ -42,54 +42,6 @@
 
 using namespace seqan;
 
-// ============================================================================
-// Kernels
-// ============================================================================
-
-// --------------------------------------------------------------------------
-// Kernel _hashReadsKernel()
-// --------------------------------------------------------------------------
-
-template <typename TReadSeqsView, typename THashes, typename TIdx>
-__global__ void
-_hashReadsKernel(TReadSeqsView readSeqs, THashes hashes, TIdx idxs)
-{
-    typedef typename Value<TReadSeqsView>::Type         TReadSeq;
-    typedef typename Value<TReadSeq>::Type              TAlphabet;
-    typedef Shape<TAlphabet, UngappedShape<16> >        TShape;
-
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // Return silently if there is no job left.
-    if (idx >= length(readSeqs)) return;
-
-    // Compute the hash of a read.
-    TShape shape;
-    hashes[idx] = hash(shape, begin(readSeqs[idx], Standard()));
-
-    // Fill idxs with the identity permutation.
-    idxs[idx] = idx;
-}
-
-// --------------------------------------------------------------------------
-// Kernel _mapReadsKernel()
-// --------------------------------------------------------------------------
-
-template <typename TIndexView, typename TReadSeqsView, typename TIdxView, typename TOccView>
-__global__ void
-_mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, TIdxView idxs, TOccView occs)
-{
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // Return silently if there is no job left.
-    if (idx >= length(readSeqs)) return;
-
-    // Pick the read id to map.
-    idx = idxs[idx];
-
-    // Map the read.
-    occs[idx] = mapRead(index, readSeqs[idx], (unsigned)idx);
-}
 
 // ============================================================================
 // Functions
@@ -101,15 +53,10 @@ _mapReadsKernel(TIndexView index, TReadSeqsView readSeqs, TIdxView idxs, TOccVie
 
 void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
-    typedef typename Device<TGenomeIndex>::Type         TDeviceIndex;
-    typedef typename Device<TReadSeqs>::Type            TDeviceReadSeqs;
-    typedef typename View<TDeviceIndex>::Type           TDeviceIndexView;
-    typedef typename View<TDeviceReadSeqs>::Type        TDeviceReadSeqsView;
-
-    typedef typename Value<TReadSeqs>::Type             TReadSeq;
-    typedef typename Value<TReadSeq>::Type              TAlphabet;
-    typedef Shape<TAlphabet, UngappedShape<16> >        TShape;
-    typedef typename Value<TShape>::Type                THash;
+    typedef typename Device<TGenomeIndex>::Type                             TDeviceIndex;
+    typedef typename Device<TReadSeqs>::Type                                TDeviceReadSeqs;
+    typedef typename Value<TDeviceReadSeqs>::Type                           TDeviceReadSeq;
+    typedef Finder2<TDeviceIndex, TDeviceReadSeq, Multiple<FinderSTree> >   TFinder;
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
@@ -119,47 +66,14 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
     TDeviceReadSeqs deviceReadSeqs;
     assign(deviceReadSeqs, readSeqs);
 
+    // Wait for the copy to finish.
     cudaDeviceSynchronize();
 
-    // Instantiate views of device objects.
-    TDeviceIndexView deviceIndexView = view(deviceIndex);
-    TDeviceReadSeqsView deviceReadSeqsView = view(deviceReadSeqs);
+    // Instantiate a multiple finder.
+    TFinder finder(deviceIndex);
 
-    // Setup kernel parameters.
-    unsigned threadsPerBlock = 256;
-    unsigned blocksPerGrid = (length(readSeqs) + threadsPerBlock - 1) / threadsPerBlock;
-
-    thrust::device_vector<THash> hashes(length(readSeqs));
-    thrust::device_vector<__uint32> idx(length(readSeqs));
-    thrust::device_vector<__uint64> occs(length(readSeqs));
-
-    cudaDeviceSynchronize();
-    cudaPrintFreeMemory();
-
-    // Launch kernel 10 times!
-    double start, finish;
-    start = sysTime();
-
-    unsigned n_tests = 10;
-    for (unsigned i = 0; i < n_tests; i++)
-    {
-        // Sort reads.
-        _hashReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceReadSeqsView, view(hashes), view(idx));
-        cudaDeviceSynchronize();
-        thrust::sort_by_key(hashes.begin(), hashes.end(), idx.begin());
-        cudaDeviceSynchronize();
-
-        // Map reads.
-        _mapReadsKernel<<<blocksPerGrid, threadsPerBlock>>>(deviceIndexView, deviceReadSeqsView, view(idx), view(occs));
-        cudaDeviceSynchronize();
-    }
-
-    finish = sysTime();
-    std::cout << (finish - start)/n_tests << " sec" << std::endl;
-
-    thrust::host_vector<__uint64> h_occs(occs);
-    const __uint64 n_occ = thrust::reduce( h_occs.begin(), h_occs.end() );
-    std::cout << n_occ << std::endl;
-
-    cudaPrintFreeMemory();
+    // Count hits.
+    HitsCounter<> counter;
+    find(finder, deviceReadSeqs, counter);
+    std::cout << "Hits count:\t\t\t" << counter.hits << std::endl;
 }
