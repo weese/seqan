@@ -63,11 +63,13 @@ struct Options
     CharString  readsFile;
 
     bool        noCuda;
+    unsigned    threadsCount;
     int         mappingBlock;
     unsigned    seedLength;
 
     Options() :
         noCuda(false),
+        threadsCount(8),
         mappingBlock(MaxValue<int>::VALUE),
         seedLength(33)
     {}
@@ -100,6 +102,11 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
     addSection(parser, "Global Options");
 
     addOption(parser, ArgParseOption("nc", "no-cuda", "Do not use CUDA accelerated code."));
+
+    addOption(parser, ArgParseOption("t", "threads", "Specify the number of threads to use.", ArgParseOption::INTEGER));
+    setMinValue(parser, "threads", "1");
+    setMaxValue(parser, "threads", "2048");
+    setDefaultValue(parser, "threads", options.threadsCount);
 
     addSection(parser, "Mapping Options");
 
@@ -138,6 +145,9 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
     // Parse CUDA options.
     getOptionValue(options.noCuda, parser, "no-cuda");
 
+    // Parse the number of threads.
+    getOptionValue(options.threadsCount, parser, "threads");
+
     // Parse mapping block.
     getOptionValue(options.mappingBlock, parser, "mapping-block");
 
@@ -175,6 +185,10 @@ int runMapper(Options & options)
     TReadsLoader        readsLoader(reads);
 
     double start, finish;
+
+    // Set the number of threads that OpenMP can spawn.
+    omp_set_num_threads(options.threadsCount);
+    std::cout << "Max threads:\t\t\t" << omp_get_max_threads() << std::endl;
 
 //    // Load genome.
 //    if (!open(genomeLoader, options.genomeFile))
