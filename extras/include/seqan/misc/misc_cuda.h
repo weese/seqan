@@ -58,9 +58,38 @@ struct Arch
 };
 */
 
+// --------------------------------------------------------------------------
+// Type FunctionPointer
+// --------------------------------------------------------------------------
+
+typedef void (*FunctionPointer)();
+
+
 // ============================================================================
 // Functions
 // ============================================================================
+
+// --------------------------------------------------------------------------
+// Function divideRI()
+// --------------------------------------------------------------------------
+
+// Round x/y towards +infinity for integers, used to determine # of blocks/warps etc.
+template<typename L, typename R>
+inline L divideRI(const L x, const R y)
+{
+    return L((x + (y - 1)) / y);
+}
+
+// --------------------------------------------------------------------------
+// Function roundI()
+// --------------------------------------------------------------------------
+
+// Round x towards infinity to the next multiple of y.
+template<typename L, typename R>
+inline L roundI(L x, R y)
+{
+    return L(y * divideRI(x, y));
+}
 
 // --------------------------------------------------------------------------
 // Function cudaPrintFreeMemory()
@@ -88,6 +117,122 @@ inline float cudaOccupancy()
 }
 
 // --------------------------------------------------------------------------
+// Function cudaSmemAllocationUnit()
+// --------------------------------------------------------------------------
+// Granularity of shared memory allocation.
+
+inline size_t cudaSmemAllocationUnit(cudaDeviceProp const & /* properties */)
+{
+    return 512;
+}
+
+// --------------------------------------------------------------------------
+// Function cudaRegAllocationUnit()
+// --------------------------------------------------------------------------
+// Granularity of register allocation.
+
+inline size_t cudaRegAllocationUnit(cudaDeviceProp const & properties)
+{
+    return (properties.major <= 1) ? (properties.minor <= 1 ? 256 : 512) : 64;
+}
+
+// --------------------------------------------------------------------------
+// Function cudaWarpAllocationMultiple()
+// --------------------------------------------------------------------------
+// Granularity of warp allocation.
+
+inline size_t cudaWarpAllocationMultiple(cudaDeviceProp const & /* properties */)
+{
+    return 2;
+}
+
+// --------------------------------------------------------------------------
+// Function cudaMaxBlocksPerMultiprocessor()
+// --------------------------------------------------------------------------
+
+inline size_t cudaMaxBlocksPerMultiprocessor(cudaDeviceProp const & properties)
+{
+    return properties.major <= 2 ? 8 : 16;
+}
+
+// --------------------------------------------------------------------------
+// Function cudaKernelGetAttributes()
+// --------------------------------------------------------------------------
+
+template <typename TKernel>
+inline cudaFuncAttributes cudaKernelGetAttributes(TKernel kernel)
+{
+    FunctionPointer kernelPointer = reinterpret_cast<FunctionPointer>(kernel);
+
+    cudaFuncAttributes attributes;
+    cudaFuncGetAttributes(&attributes, kernelPointer);
+
+    return attributes;
+}
+
+// --------------------------------------------------------------------------
+// Function cudaRegistersUsed()
+// --------------------------------------------------------------------------
+
+template <typename TKernel>
+inline size_t cudaRegistersUsed(TKernel kernel)
+{
+    return cudaKernelGetAttributes(kernel).numRegs;
+}
+
+// --------------------------------------------------------------------------
+// Function cudaMaxActiveBlocks()
+// --------------------------------------------------------------------------
+
+template <typename TKernel, typename TCTASize, typename TSmemSize>
+inline size_t cudaMaxActiveBlocks(TKernel kernel, TCTASize ctaSize, TSmemSize dynamicSmemBytes)
+{
+    int device;
+    cudaGetDevice(&device);
+
+    cudaDeviceProp properties;
+    cudaGetDeviceProperties(&properties, device);
+
+    return properties.multiProcessorCount * cudaMaxActiveBlocksPerSM(kernel, ctaSize, dynamicSmemBytes, properties);
+}
+
+// --------------------------------------------------------------------------
+// Function cudaMaxActiveBlocksPerSM()
+// --------------------------------------------------------------------------
+
+template <typename TKernel, typename TCTASize, typename TSmemSize>
+inline size_t cudaMaxActiveBlocksPerSM(TKernel kernel, TCTASize ctaSize, TSmemSize dynamicSmemBytes,
+                                       cudaDeviceProp & properties)
+{
+    cudaFuncAttributes attributes = cudaKernelGetAttributes(kernel);
+
+    // Determine the maximum number of CTAs that can be run simultaneously per SM.
+    // This is equivalent to the calculation done in the CUDA Occupancy Calculator spreadsheet.
+    size_t regAllocationUnit      = cudaRegAllocationUnit(properties);
+    size_t warpAllocationMultiple = cudaWarpAllocationMultiple(properties);
+    size_t smemAllocationUnit     = cudaSmemAllocationUnit(properties);
+    size_t maxThreadsPerSM        = properties.maxThreadsPerMultiProcessor;  // 768, 1024, 1536, etc.
+    size_t maxBlocksPerSM         = cudaMaxBlocksPerMultiprocessor(properties);
+
+    // Number of warps (round up to nearest whole multiple of warp size & warp allocation multiple).
+    size_t numWarps = roundI(divideRI(ctaSize, properties.warpSize), warpAllocationMultiple);
+
+    // Number of regs is regs per thread times number of warps times warp size.
+    size_t regsPerCTA = properties.major < 2 ?
+            roundI(attributes.numRegs * properties.warpSize * numWarps, regAllocationUnit) :
+            roundI(attributes.numRegs * properties.warpSize, regAllocationUnit) * numWarps;
+
+    size_t smemBytes  = attributes.sharedSizeBytes + dynamicSmemBytes;
+    size_t smemPerCTA = roundI(smemBytes, smemAllocationUnit);
+
+    size_t ctaLimitRegs    = regsPerCTA > 0 ? properties.regsPerBlock      / regsPerCTA : maxBlocksPerSM;
+    size_t ctaLimitSMem    = smemPerCTA > 0 ? properties.sharedMemPerBlock / smemPerCTA : maxBlocksPerSM;
+    size_t ctaLimitThreads =                  maxThreadsPerSM              / ctaSize;
+
+  return _min(ctaLimitRegs, _min(ctaLimitSMem, _min(ctaLimitThreads, maxBlocksPerSM)));
+}
+
+// --------------------------------------------------------------------------
 // Function checkCudaError()
 // --------------------------------------------------------------------------
 
@@ -100,105 +245,11 @@ inline float cudaOccupancy()
 //    }
 //}
 
+// --------------------------------------------------------------------------
+// Functions not yet used.
+// --------------------------------------------------------------------------
+
 /*
-// granularity of shared memory allocation
-inline size_t smem_allocation_unit(const cudaDeviceProp& properties)
-{
-    return 512;
-}
-
-// granularity of register allocation
-inline size_t reg_allocation_unit(const cudaDeviceProp& properties)
-{
-    //return (properties.major < 2 && properties.minor < 2) ? 256 : 512;
-    return
-        (properties.major <= 1) ?
-            (properties.minor <= 1 ? 256 : 512) :
-            64;
-}
-
-// granularity of warp allocation
-inline size_t warp_allocation_multiple(const cudaDeviceProp& properties)
-{
-    return 2;
-}
-
-inline size_t max_blocks_per_multiprocessor(const cudaDeviceProp& properties)
-{
-    return properties.major <= 2 ? 8 : 16;
-}
-
-inline size_t max_active_blocks_per_multiprocessor(const cudaDeviceProp&        properties,
-                                                   const cudaFuncAttributes&    attributes,
-                                                   size_t CTA_SIZE,
-                                                   size_t dynamic_smem_bytes)
-{
-  // Determine the maximum number of CTAs that can be run simultaneously per SM
-  // This is equivalent to the calculation done in the CUDA Occupancy Calculator spreadsheet
-  const size_t regAllocationUnit      = reg_allocation_unit(properties);
-  const size_t warpAllocationMultiple = warp_allocation_multiple(properties);
-  const size_t smemAllocationUnit     = smem_allocation_unit(properties);
-  const size_t maxThreadsPerSM        = properties.maxThreadsPerMultiProcessor;  // 768, 1024, 1536, etc.
-  const size_t maxBlocksPerSM         = max_blocks_per_multiprocessor(properties);
-
-  // Number of warps (round up to nearest whole multiple of warp size & warp allocation multiple)
-  const size_t numWarps = util::round_i(util::divide_ri(CTA_SIZE, properties.warpSize), warpAllocationMultiple);
-
-  // Number of regs is regs per thread times number of warps times warp size
-  const size_t regsPerCTA = properties.major < 2 ?
-      util::round_i(attributes.numRegs * properties.warpSize * numWarps, regAllocationUnit) :
-      util::round_i(attributes.numRegs * properties.warpSize, regAllocationUnit) * numWarps;
-
-  const size_t smemBytes  = attributes.sharedSizeBytes + dynamic_smem_bytes;
-  const size_t smemPerCTA = util::round_i(smemBytes, smemAllocationUnit);
-
-  const size_t ctaLimitRegs    = regsPerCTA > 0 ? properties.regsPerBlock      / regsPerCTA : maxBlocksPerSM;
-  const size_t ctaLimitSMem    = smemPerCTA > 0 ? properties.sharedMemPerBlock / smemPerCTA : maxBlocksPerSM;
-  const size_t ctaLimitThreads =                  maxThreadsPerSM              / CTA_SIZE;
-
-  return _min( (__uint32)ctaLimitRegs, _min( (__uint32)ctaLimitSMem, _min((__uint32)ctaLimitThreads, (__uint32)maxBlocksPerSM)));
-}
-
-template <typename KernelFunction>
-size_t max_active_blocks(KernelFunction kernel, const size_t CTA_SIZE, const size_t dynamic_smem_bytes)
-{
-    int            device;
-    cudaGetDevice( &device );
-
-    cudaDeviceProp properties;
-    cudaGetDeviceProperties( &properties, device );
-
-#ifdef __CUDACC__
-    typedef void (*fun_ptr_type)();
-
-    fun_ptr_type fun_ptr = reinterpret_cast<fun_ptr_type>(kernel);
-
-    cudaFuncAttributes attributes;
-    cudaFuncGetAttributes(&attributes, fun_ptr);
-
-    return properties.multiProcessorCount * max_active_blocks_per_multiprocessor(properties, attributes, CTA_SIZE, dynamic_smem_bytes);
-#else
-    return 0u;
-#endif
-}
-
-template <typename KernelFunction>
-size_t num_registers(KernelFunction kernel)
-{
-#ifdef __CUDACC__
-    typedef void (*fun_ptr_type)();
-
-    fun_ptr_type fun_ptr = reinterpret_cast<fun_ptr_type>(kernel);
-
-    cudaFuncAttributes attributes;
-    cudaFuncGetAttributes(&attributes, fun_ptr);
-
-    return attributes.numRegs;
-#else
-    return 0u;
-#endif
-}
-
 template <typename KernelFunction>
 size_t auto_blocksize(KernelFunction kernel, size_t dynamic_smem_bytes_per_thread = 0)
 {
@@ -216,17 +267,6 @@ inline bool is_tcc_enabled()
     cudaGetDevice(&device);
     cudaGetDeviceProperties( &device_properties, device );
     return device_properties.tccDriver ? true : false;
-}
-
-struct cuda_error {};
-
-inline void check_error(const char *message)
-{
-	cudaError_t error = cudaGetLastError();
-	if(error!=cudaSuccess) {
-		log_error(stderr,"%s: %s\n", message, cudaGetErrorString(error) );
-        throw cuda_error();
-	}
 }
 
 /// a generic syncthreads() implementation to synchronize contiguous
