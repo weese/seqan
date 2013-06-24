@@ -141,6 +141,16 @@ struct View<TObject const>
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction View                                            [ContainerView]
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct View<ContainerView<TContainer, TSpec> >
+{
+    typedef ContainerView<TContainer, TSpec>    Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction IsView
 // ----------------------------------------------------------------------------
 
