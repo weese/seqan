@@ -44,6 +44,26 @@ using namespace seqan;
 
 
 // ============================================================================
+// Classes
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class HitsCounter
+// ----------------------------------------------------------------------------
+
+template <>
+struct HitsCounter<GPU> : HitsCounter<>
+{
+    template <typename TFinder>
+    SEQAN_FUNC void
+    operator() (TFinder const & /* finder */)
+    {
+//        SEQAN_OMP_PRAGMA(atomic)
+//        hits += countOccurrences(finder._pool[omp_get_thread_num()]._textIt);
+    }
+};
+
+// ============================================================================
 // Functions
 // ============================================================================
 
@@ -55,8 +75,7 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
     typedef typename Device<TGenomeIndex>::Type                             TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type                                TDeviceReadSeqs;
-    typedef typename Value<TDeviceReadSeqs>::Type                           TDeviceReadSeq;
-    typedef Finder2<TDeviceIndex, TDeviceReadSeq, Multiple<FinderSTree> >   TFinder;
+    typedef Finder2<TDeviceIndex, TDeviceReadSeqs, Multiple<FinderSTree> >  TFinder;
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
@@ -73,7 +92,7 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
     TFinder finder(deviceIndex);
 
     // Count hits.
-    HitsCounter<> counter;
+    HitsCounter<GPU> counter;
     find(finder, deviceReadSeqs, counter);
     std::cout << "Hits count:\t\t\t" << counter.hits << std::endl;
 }
