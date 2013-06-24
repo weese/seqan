@@ -397,17 +397,19 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 {
     typedef Delegator<TFinderView, TDelegateView>       TDelegator;
 
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // Return silently if there is no job left.
-    if (idx >= length(patterns)) return;
+    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned gridThreads = gridDim.x * blockDim.x;
 
     // Use a delegator object to delegate this finder instead of the pooled finders.
     TDelegator delegator(finder, delegate);
 
-    // Find a single pattern.
-//    find(finder._pool[idx], patterns[finder._idxs[idx]], delegator);
-    find(finder._pool[idx], patterns[idx], delegator);
+    unsigned patternsCount = length(patterns);
+	for (unsigned idx = threadId; idx < patternsCount; idx += gridThreads)
+    {
+        // Find a single pattern.
+    //    find(finder._pool[idx], patterns[finder._idxs[idx]], delegator);
+        find(finder._pool[idx], patterns[idx], delegator);
+    }
 }
 #endif
 
