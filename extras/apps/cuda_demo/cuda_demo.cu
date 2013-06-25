@@ -32,46 +32,21 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#include <seqan/basic_extras.h>
-#include <seqan/sequence_extras.h>
-#include <seqan/index_extras.h>
+#include "cuda_demo.h"
 
 using namespace seqan;
 
 // ==========================================================================
-// Metafunctions
+// Kernels
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// Metafunction Size
+// Kernel _findKernel()
 // --------------------------------------------------------------------------
 
-namespace seqan {
-template <typename TSpec>
-struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
-{
-    typedef unsigned Type;
-};
-
-template <typename TSpec>
-struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
-{
-    typedef unsigned Type;
-};
-}
-
-// ==========================================================================
-// Functions
-// ==========================================================================
-
-// --------------------------------------------------------------------------
-// Function findCUDA()
-// --------------------------------------------------------------------------
-
-#ifdef __CUDACC__
-template <typename TIndex, typename TPattern>
+template <typename TIndex, typename TString>
 __global__ void
-findCUDA(TIndex index, TPattern pattern)
+_findKernel(TIndex index, TString pattern)
 {
     typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
     typedef typename EdgeLabel<TIterator>::Type         TEdgeLabel;
@@ -119,111 +94,38 @@ findCUDA(TIndex index, TPattern pattern)
     printf("countOccurrences()=%ld\n", countOccurrences(it));
     printf("isLeaf()=%d\n", isLeaf(it));
 }
-#endif
+
+// ==========================================================================
+// Functions
+// ==========================================================================
 
 // --------------------------------------------------------------------------
-// Function testInfix()
+// Function findKernel()
 // --------------------------------------------------------------------------
 
-template <typename TAlphabet>
-void testInfix()
+void findKernel(Index<StringSet<DnaString, Owner<ConcatDirect<> > >, FMIndex<> > & index, DnaString & pattern)
 {
-    typedef String<TAlphabet>                           TString;
-    typedef typename View<TString>::Type                TStringView;
-    typedef typename Infix<TString>::Type               TStringInfix;
-    typedef typename Infix<TStringView>::Type           TStringViewInfix;
-
-    TString s = "AAACCCGGGTTT";
-    TStringInfix sInfix = infix(s, 3, 6);
-
-    TStringView sView = view(s);
-    TStringViewInfix sViewInfix = infix(sView, 3, 6);
-
-    SEQAN_ASSERT(isEqual(sInfix, sViewInfix));
-}
-
-// --------------------------------------------------------------------------
-// Function testStringSet()
-// --------------------------------------------------------------------------
-
-template <typename TAlphabet>
-void testStringSet()
-{
-    typedef String<TAlphabet>                           TString;
+    typedef DnaString                                   TString;
     typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
-    typedef typename View<TString>::Type                TStringView;
-    typedef typename View<TStringSet>::Type             TStringSetView;
-    typedef typename View<TDeviceStringSet>::Type       TDeviceStringSetView;
+    typedef Index<TStringSet, FMIndex<> >               TIndex;
 
-    TStringSet ss;
-    appendValue(ss, "AAAAAAAA");
-    appendValue(ss, "CCCCCCC");
-    appendValue(ss, "GGGGGGGGGGGGGG");
-    appendValue(ss, "T");
+//template <typename TIndex, typename TString>
+//void findKernel(TIndex & index, TString & pattern)
+//{
 
-    TStringSetView ssView = view(ss);
-
-    SEQAN_ASSERT_EQ(length(ss), length(ssView));
-    for (unsigned i = 0; i < length(ss); ++i)
-        SEQAN_ASSERT(isEqual(ss[i], ssView[i]));
-
-    TDeviceStringSet deviceSs;
-    assign(deviceSs, ss);
-    TDeviceStringSetView deviceSsView = view(deviceSs);
-}
-
-// --------------------------------------------------------------------------
-// Function testIndex()
-// --------------------------------------------------------------------------
-
-template <typename TAlphabet, typename TIndexSpec>
-void testIndex()
-{
-    typedef String<TAlphabet>                           TString;
-    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-//    typedef Index<TString, TIndexSpec>                  TIndex;
-    typedef Index<TStringSet, TIndexSpec>               TIndex;
-    typedef typename Device<TString>::Type              TDeviceString;
-    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
     typedef typename Device<TIndex>::Type               TDeviceIndex;
-
-    // Instantiate an index over a text.
-//    TString text("ACGTACGTACGT");
-    TStringSet text;
-    appendValue(text, "ATAAAAAAAAA");
-    appendValue(text, "CCCCTACCC");
-
-    TIndex index(text);
-
-    // Create the index on the reversed text.
-    reverse(text);
-    indexCreate(index);
-    reverse(text);
+    typedef typename Device<TString>::Type              TDeviceString;
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
     assign(deviceIndex, index);
 
-    // Create a pattern.
-    TString pattern("TA");
+    // Copy pattern to device.
     TDeviceString devicePattern;
     assign(devicePattern, pattern);
 
-#ifdef __CUDACC__
-    // Find on GPU.
-    findCUDA<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
+    _findKernel<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
     cudaDeviceSynchronize();
-#endif
 }
 
-// --------------------------------------------------------------------------
-// Function main()
-// --------------------------------------------------------------------------
-
-int main(int argc, char const ** argv)
-{
-    testInfix<Dna>();
-    testStringSet<Dna>();
-    testIndex<Dna, FMIndex<> >();
-};
+//void findKernel(Index<StringSet<DnaString, Owner<ConcatDirect<> > >, FMIndex<> > & index, DnaString & pattern);
