@@ -585,6 +585,10 @@ _getFlyweightFinder(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtra
     finderFlyweight._textIt.history._end = finderFlyweight._textIt.history._begin;
     finderFlyweight._textIt.history._capacity = finder._historyLength;
 
+    // TODO(esiragusa): Maybe use a StringSet of Histories and take a view of single Strings?
+//    finderFlyweight._textIt.history = finder._history[threadId];
+//    clear(finderFlyweight._textIt.history);
+
     return finderFlyweight;
 }
 
