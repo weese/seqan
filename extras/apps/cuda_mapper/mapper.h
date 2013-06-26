@@ -110,18 +110,20 @@ template <typename TText, typename TViewSpec, typename TIndexSpec, typename TSpe
 struct HistoryStack_<Iter<Index<ContainerView<TText, TViewSpec>, TIndexSpec>,
                      VSTree<TopDown<ParentLinks<TSpec> > > > >
 {
-    typedef Index<TText, TIndexSpec>                                    TIndex_;
-    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >       TIter_;
-    typedef typename View<typename HistoryStack_<TIter_>::Type>::Type   Type;
+    typedef Index<TText, TIndexSpec>                                TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >   TIter_;
+    typedef typename HistoryStack_<TIter_>::Type                    THistory_;
+    typedef ContainerView<THistory_, Resizable<TViewSpec> >         Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TSpec>
 struct HistoryStack_<Iter<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>,
                           VSTree<TopDown<ParentLinks<TSpec> > > > >
 {
-    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>              TIndex_;
-    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >       TIter_;
-    typedef typename View<typename HistoryStack_<TIter_>::Type>::Type   Type;
+    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>          TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >   TIter_;
+    typedef typename HistoryStack_<TIter_>::Type                    THistory_;
+    typedef ContainerView<THistory_, Resizable<TViewSpec> >         Type;
 };
 
 #ifdef __CUDACC__
@@ -480,7 +482,7 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
         finderProxy.patternId = patternId;
 
         // Find a single pattern.
-//        find(finderFlyweight, patterns[patternId], delegator);
+        find(finderFlyweight, patterns[patternId], delegator);
 //        find(finderFlyweight, patterns[finder._idxs[patternId]], delegator);
     }
 }
@@ -533,7 +535,8 @@ _computeHistoryLength(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backt
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TSize>
 inline void
-_resizeHistory(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & /* finder */, TSize /* threadsCount */)
+_resizeHistory(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & /* finder */,
+               TSize /* threadsCount */)
 {}
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TSize>
@@ -572,7 +575,8 @@ _getFlyweightFinder(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtra
     TFlyweightFinder finderFlyweight(finder._index);
 
     finderFlyweight._textIt.history._begin = begin(finder._history, Standard()) + finder._historyLength * threadId;
-    finderFlyweight._textIt.history._end = end(finder._history, Standard()) + finder._historyLength * (threadId + 1);
+    finderFlyweight._textIt.history._end = finderFlyweight._textIt.history._begin;
+    finderFlyweight._textIt.history._capacity = finder._historyLength;
 
     return finderFlyweight;
 }
