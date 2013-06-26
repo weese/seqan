@@ -57,10 +57,7 @@ struct HitsCounter<GPU> : HitsCounter<>
     template <typename TFinder>
     SEQAN_FUNC void
     operator() (TFinder const & /* finder */)
-    {
-//        SEQAN_OMP_PRAGMA(atomic)
-//        hits += countOccurrences(finder._pool[omp_get_thread_num()]._textIt);
-    }
+    {}
 };
 
 // ============================================================================
@@ -73,9 +70,10 @@ struct HitsCounter<GPU> : HitsCounter<>
 
 void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
-    typedef typename Device<TGenomeIndex>::Type                             TDeviceIndex;
-    typedef typename Device<TReadSeqs>::Type                                TDeviceReadSeqs;
-    typedef Finder2<TDeviceIndex, TDeviceReadSeqs, Multiple<FinderSTree> >  TFinder;
+    typedef typename Device<TGenomeIndex>::Type                 TDeviceIndex;
+    typedef typename Device<TReadSeqs>::Type                    TDeviceReadSeqs;
+    typedef Multiple<Backtracking<HammingDistance> >            TFinderSpec;
+    typedef Finder2<TDeviceIndex, TDeviceReadSeqs, TFinderSpec> TFinder;
 
     // Copy index to device.
     TDeviceIndex deviceIndex;
