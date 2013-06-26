@@ -52,6 +52,25 @@ namespace seqan {
 // ============================================================================
 
 // ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function getThreadId()
+// ----------------------------------------------------------------------------
+
+//SEQAN_FUNC unsigned getThreadId()
+//{
+//#ifdef _OPENMP
+//    return omp_get_thread_num();
+//#elif __CUDA_ARCH__
+//    return blockIdx.x * blockDim.x + threadIdx.x;
+//#else
+//    return 0;
+//#endif
+//}
+
+// ============================================================================
 // Classes
 // ============================================================================
 
@@ -253,23 +272,17 @@ struct Multiple;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction Finder_
+// Metafunction FinderFlyweight_
 // ----------------------------------------------------------------------------
 
 template <typename TFinder>
-struct Finder_;
+struct FinderFlyweight_;
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-struct Finder_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
+struct FinderFlyweight_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
 {
     typedef Finder2<Index<TText, TIndexSpec>, typename Value<TPattern>::Type, TSpec>    Type;
 };
-
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
-//struct Finder_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >
-//{
-//    typedef Finder2<Index<TText, TIndexSpec>, typename Value<TPattern>::Type, Backtracking<TDistance, Pooled<TSpec> > > Type;
-//};
 
 // ----------------------------------------------------------------------------
 // Metafunction FinderCTASize_
@@ -370,6 +383,8 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistan
 
     typename Member<Finder2, FinderText_>::Type     _index;
     typename Member<Finder2, FinderHistory_>::Type  _history;
+    typename Size<TPattern>::Type                   _historyLength;
+    // TODO(esiragusa): change type to typename Size<typename Value<TPattern>::Type>::Type.
 
     Finder2() :
         _index()
@@ -442,53 +457,38 @@ template <typename TFinderView, typename TPatternsView, typename TDelegateView>
 __global__ void
 _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 {
-//    typedef Proxy<TFinderView>                          TFinderProxy;
-//    typedef Delegator<TFinderProxy, TDelegateView>      TDelegator;
-//    typedef typename Finder_<TFinderView>::Type         TFinder;
-//
-//    // Instantiate a flyweight finder.
-//    TFinder finderFlyweight(finder._index);
-//
-//    // Instantiate a finder proxy to be delegated.
-//    TFinderProxy finderProxy(finderFlyweight);
-//
-//    // Instantiate a delegator object to delegate the finder proxy instead of the flyweight finder.
-//    TDelegator delegator(finderProxy, delegate);
-//
-//    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
-//    unsigned gridThreads = gridDim.x * blockDim.x;
-//    unsigned patternsCount = length(patterns);
-//
-//	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
-//    {
-//        finderProxy.patternId = patternId;
-//
-//        // Find a single pattern.
+    typedef Proxy<TFinderView>                              TFinderProxy;
+    typedef Delegator<TFinderProxy, TDelegateView>          TDelegator;
+    typedef typename FinderFlyweight_<TFinderView>::Type    TFlyweightFinder;
+
+    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned gridThreads = gridDim.x * blockDim.x;
+
+    // Instantiate a flyweight finder.
+    TFlyweightFinder finderFlyweight = _getFlyweightFinder(finder, threadId);
+
+    // Instantiate a finder proxy to be delegated.
+    TFinderProxy finderProxy(finderFlyweight);
+
+    // Instantiate a delegator object to delegate the finder proxy instead of the flyweight finder.
+    TDelegator delegator(finderProxy, delegate);
+
+    unsigned patternsCount = length(patterns);
+
+	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
+    {
+        finderProxy.patternId = patternId;
+
+        // Find a single pattern.
 //        find(finderFlyweight, patterns[patternId], delegator);
-//
-//    //    find(finder._pool[threadId], patterns[finder._idxs[patternId]], delegator);
-//    }
+//        find(finderFlyweight, patterns[finder._idxs[patternId]], delegator);
+    }
 }
 #endif
 
 // ============================================================================
 // Functions
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Function _initPool()
-// ----------------------------------------------------------------------------
-
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TSize>
-//inline void
-//_initPool(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder, TSize newSize)
-//{
-//    typedef Index<TText, TIndexSpec>                                    TIndex;
-//    typedef typename Finder_<TIndex, TPattern, Multiple<TSpec> >::Type  TFinder_;
-//
-//    resize(finder._pool, newSize);
-////    resize(finder._pool, newSize, TFinder_(value(finder.index)));
-//}
 
 // ----------------------------------------------------------------------------
 // Function _preprocess()
@@ -506,35 +506,76 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 //}
 
 // ----------------------------------------------------------------------------
-// Function find()
+// Function _computeHistoryLength()
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-//inline void
-//find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TPattern & pattern, TDelegate & delegate)
-//{
-//    typedef Index<TText, TIndexSpec>                                        TIndex;
-//    typedef Finder2<TIndex, TPattern,  Multiple<TSpec> >                    TFinder;
-//    typedef Delegator<TFinder, TDelegate>                                   TDelegator;
-//    typedef typename Iterator<TPattern, Standard>::Type                     TPatternIter;
-//
-//    // Use a delegator object to delegate this finder instead of the pooled finders.
-//    TDelegator delegator(finder, delegate);
-//
-//    // Initialize the pool.
-//    _initPool(finder, omp_get_max_threads());
-//
-//    // Find all patterns in parallel.
-//    TPatternIter patternBegin = begin(pattern, Standard());
-//    TPatternIter patternEnd = end(pattern, Standard());
-//    SEQAN_OMP_PRAGMA(parallel for schedule(dynamic))
-//    for (TPatternIter patternIt = patternBegin; patternIt != patternEnd; ++patternIt)
-//    {
-////        finder._patternIt[omp_get_thread_num()] = patternIt;
-//        clear(finder._pool[omp_get_thread_num()]);
-//        find(finder._pool[omp_get_thread_num()], value(patternIt), delegator);
-//    }
-//}
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
+inline void
+_computeHistoryLength(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > & finder,
+                      TPattern const & pattern)
+{
+    typedef typename Iterator<TPattern const, Standard>::Type   TIterator;
+    typedef typename Size<TPattern>::Type                       TPatternSize;
+
+    TPatternSize maxPatternLength = MinValue<TPatternSize>::VALUE;
+
+    // TODO(esiragusa): Add a kernel to get the max string length.
+    TIterator patternEnd = end(pattern, Standard());
+    for (TIterator patternIt = begin(pattern, Standard()); patternIt != patternEnd; ++patternIt)
+        std::max(maxPatternLength, length(value(patternIt)));
+
+    finder._historyLength = maxPatternLength;
+}
+
+// ----------------------------------------------------------------------------
+// Function _resizeHistory()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TSize>
+inline void
+_resizeHistory(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & /* finder */, TSize /* threadsCount */)
+{}
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TSize>
+inline void
+_resizeHistory(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > & finder,
+               TSize threadsCount)
+{
+    resize(finder._history, threadsCount * finder._historyLength, Exact());
+}
+
+// ----------------------------------------------------------------------------
+// Function _getFlyweightFinder()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TId>
+SEQAN_FUNC typename FinderFlyweight_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >::Type
+_getFlyweightFinder(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder, TId /* threadId */)
+{
+    typedef Index<TText, TIndexSpec>                    TIndex;
+    typedef Multiple<TSpec>                             TFinderSpec;
+    typedef Finder2<TIndex, TPattern, TFinderSpec>      TFinder;
+
+    return TFlyweightFinder(finder._index);
+}
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TId>
+SEQAN_FUNC typename FinderFlyweight_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >::Type
+_getFlyweightFinder(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > & finder,
+                    TId threadId)
+{
+    typedef Index<TText, TIndexSpec>                    TIndex;
+    typedef Multiple<Backtracking<TDistance, TSpec> >   TFinderSpec;
+    typedef Finder2<TIndex, TPattern, TFinderSpec>      TFinder;
+    typedef typename FinderFlyweight_<TFinder>::Type    TFlyweightFinder;
+
+    TFlyweightFinder finderFlyweight(finder._index);
+
+    finderFlyweight._textIt.history._begin = begin(finder._history, Standard()) + finder._historyLength * threadId;
+    finderFlyweight._textIt.history._end = end(finder._history, Standard()) + finder._historyLength * (threadId + 1);
+
+    return finderFlyweight;
+}
 
 // ----------------------------------------------------------------------------
 // Function find()
@@ -573,18 +614,52 @@ _find(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
     // Preprocess patterns.
 //    _preprocess(finder, patterns);
 
+    // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TIndex, TPattern, Multiple<TSpec> >::VALUE;
     unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternView, TDelegate>, ctaSize, 0);
-
-    // Initialize the pool.
-//    _initPool(finder, activeBlocks * ctaSize);
 
     std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
     std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
 
+    // Initialize the history.
+    _computeHistoryLength(finder, pattern);
+    _resizeHistory(finder, activeBlocks * ctaSize);
+
+    // Launch the find kernel.
     _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), delegate);
 }
 #endif
+
+// ----------------------------------------------------------------------------
+// Function find()
+// ----------------------------------------------------------------------------
+
+//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
+//inline void
+//find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TPattern & pattern, TDelegate & delegate)
+//{
+//    typedef Index<TText, TIndexSpec>                                        TIndex;
+//    typedef Finder2<TIndex, TPattern,  Multiple<TSpec> >                    TFinder;
+//    typedef Delegator<TFinder, TDelegate>                                   TDelegator;
+//    typedef typename Iterator<TPattern, Standard>::Type                     TPatternIter;
+//
+//    // Use a delegator object to delegate this finder instead of the pooled finders.
+//    TDelegator delegator(finder, delegate);
+//
+//    // Initialize the pool.
+//    _initPool(finder, omp_get_max_threads());
+//
+//    // Find all patterns in parallel.
+//    TPatternIter patternBegin = begin(pattern, Standard());
+//    TPatternIter patternEnd = end(pattern, Standard());
+//    SEQAN_OMP_PRAGMA(parallel for schedule(dynamic))
+//    for (TPatternIter patternIt = patternBegin; patternIt != patternEnd; ++patternIt)
+//    {
+////        finder._patternIt[omp_get_thread_num()] = patternIt;
+//        clear(finder._pool[omp_get_thread_num()]);
+//        find(finder._pool[omp_get_thread_num()], value(patternIt), delegator);
+//    }
+//}
 
 // ----------------------------------------------------------------------------
 // Function view()
@@ -646,10 +721,10 @@ struct HitsCounter
 
     template <typename TFinder>
     SEQAN_FUNC void
-    operator() (TFinder const & finder)
+    operator() (TFinder const & /* finder */)
     {
-        SEQAN_OMP_PRAGMA(atomic)
-        hits += countOccurrences(finder._pool[omp_get_thread_num()]._textIt);
+//        SEQAN_OMP_PRAGMA(atomic)
+//        hits += countOccurrences(finder._pool[omp_get_thread_num()]._textIt);
     }
 };
 
