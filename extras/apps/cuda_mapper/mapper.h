@@ -350,7 +350,7 @@ struct PooledFinder_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec>
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPattern, typename TSpec>
-struct FinderCTASize_ {};
+struct FinderCTASize_;
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
 struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
@@ -427,6 +427,28 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 //    {}
 //};
 
+// ----------------------------------------------------------------------------
+// Class Proxy
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
+class Proxy<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
+{
+public:
+    typedef Index<TText, TIndexSpec>                    TIndex;
+    typedef typename TextIterator_<TIndex, TSpec>::Type TTextIterator;
+    typedef typename Size<TPattern>::Type               TSize;
+
+    TTextIterator const & _textIt;
+    TSize patternId;
+
+    template <typename TFinder>
+    SEQAN_FUNC
+    Proxy(TFinder const & finder) :
+        _textIt(finder._textIt)
+    {}
+};
+
 // ============================================================================
 // Kernels
 // ============================================================================
@@ -467,20 +489,28 @@ template <typename TFinderView, typename TPatternsView, typename TDelegateView>
 __global__ void
 _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 {
-    typedef Delegator<TFinderView, TDelegateView>       TDelegator;
+    typedef Proxy<TFinderView>                          TFinderProxy;
+    typedef Delegator<TFinderProxy, TDelegateView>      TDelegator;
     typedef typename PooledFinder_<TFinderView>::Type   TPooledFinder;
 
     unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned gridThreads = gridDim.x * blockDim.x;
 
-    // Use a delegator object to delegate this finder instead of the pooled finders.
-    TDelegator delegator(finder, delegate);
-
+    // Instantiate a lightweight pooled finder.
     TPooledFinder pooledFinder(finder._index);
 
+    // Instantiate a finder proxy to be delegated.
+    TFinderProxy finderProxy(pooledFinder);
+
+    // Instantiate a delegator object to delegate the finder proxy instead of the pooled finder.
+    TDelegator delegator(finderProxy, delegate);
+
+    // Statically load balance work.
     unsigned patternsCount = length(patterns);
 	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
     {
+        finderProxy.patternId = patternId;
+
         // Find a single pattern.
         find(pooledFinder, patterns[patternId], delegator);
 
