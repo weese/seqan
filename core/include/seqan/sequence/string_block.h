@@ -587,9 +587,9 @@ topPrev(String<TValue, Block<SPACE> > const& me)
 // Function pop()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec>
-inline void
-pop(String<TValue, TSpec> & me)
+template <typename T>
+SEQAN_FUNC void
+pop(T & me)
 {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_NOT_MSG(empty(me), "pop() called on an empty string.");
