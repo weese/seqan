@@ -359,6 +359,16 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 		typedef HistoryStackEsa_<typename Size<TIndex>::Type>	Type;
 	};
 
+	template <typename TVSTreeIter>
+	struct HistoryStack_;
+
+	template <typename TIndex, typename TSpec>
+	struct HistoryStack_<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > >
+	{
+        typedef Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > >            TIter_;
+		typedef String<typename HistoryStackEntry_<TIter_>::Type, Block<> >     Type;
+	};
+
 	template < typename TIndex, class TSpec >
 	class Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > >:
 		public Iter< TIndex, VSTree< TopDown<> > >
@@ -366,8 +376,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	public:
 
 		typedef Iter< TIndex, VSTree< TopDown<> > >		TBase;
-		typedef	typename HistoryStackEntry_<Iter>::Type	TStackEntry;
-		typedef String<TStackEntry, Block<> >			TStack;
+		typedef	typename HistoryStack_<Iter>::Type      TStack;
 		typedef Iter									iterator;
 
 		TStack			history;	// contains all previously visited intervals (allows to go up)
