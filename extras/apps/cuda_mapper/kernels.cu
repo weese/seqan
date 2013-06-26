@@ -72,7 +72,8 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 {
     typedef typename Device<TGenomeIndex>::Type                 TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type                    TDeviceReadSeqs;
-    typedef Multiple<Backtracking<HammingDistance> >            TFinderSpec;
+//    typedef Multiple<Backtracking<HammingDistance> >            TFinderSpec;
+    typedef Multiple<FinderSTree>                               TFinderSpec;
     typedef Finder2<TDeviceIndex, TDeviceReadSeqs, TFinderSpec> TFinder;
 
     // Copy index to device.
