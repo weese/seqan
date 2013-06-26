@@ -511,6 +511,12 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 // Function _computeHistoryLength()
 // ----------------------------------------------------------------------------
 
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
+inline void
+_computeHistoryLength(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & /* finder */,
+                      TPattern const & /* pattern */)
+{}
+
 template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
 inline void
 _computeHistoryLength(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > & finder,
@@ -558,6 +564,7 @@ _getFlyweightFinder(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> 
     typedef Index<TText, TIndexSpec>                    TIndex;
     typedef Multiple<TSpec>                             TFinderSpec;
     typedef Finder2<TIndex, TPattern, TFinderSpec>      TFinder;
+    typedef typename FinderFlyweight_<TFinder>::Type    TFlyweightFinder;
 
     return TFlyweightFinder(finder._index);
 }
