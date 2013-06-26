@@ -47,6 +47,13 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Tag Resizable
+// ----------------------------------------------------------------------------
+
+template <typename TSpec = void>
+struct Resizable;
+
+// ----------------------------------------------------------------------------
 // Class ContainerView
 // ----------------------------------------------------------------------------
 
@@ -73,18 +80,21 @@ public:
     SEQAN_FUNC
     ContainerView(TOtherContainer & cont):
         _begin(begin(cont, Standard())),
-        _end(end(cont, Standard())) {}
+        _end(end(cont, Standard()))
+    {}
 
     template <typename TOtherContainer>
     SEQAN_FUNC
     ContainerView(TOtherContainer const & cont):
         _begin(begin(cont, Standard())),
-        _end(end(cont, Standard())) {}
+        _end(end(cont, Standard()))
+    {}
 
     SEQAN_FUNC
     ContainerView(TIterator const & begin, TIterator const & end):
         _begin(begin),
-        _end(end) {}
+        _end(end)
+    {}
 
     // ------------------------------------------------------------------------
     // Operator =
@@ -118,6 +128,52 @@ public:
     {
         return getValue(*this, pos);
     }
+};
+
+// ----------------------------------------------------------------------------
+// Class Resizable ContainerView
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+class ContainerView<TContainer, Resizable<TSpec> > :
+    public ContainerView<TContainer, TSpec>
+{
+public:
+    typedef ContainerView<TContainer, TSpec>    TBase;
+    typedef typename TBase::TIterator           TIterator;
+    typedef typename Size<TContainer>::Type     TSize;
+
+    TSize _capacity;
+
+    // ------------------------------------------------------------------------
+    // ContainerView Constructors
+    // ------------------------------------------------------------------------
+
+    SEQAN_FUNC
+    ContainerView() :
+        TBase(),
+        _capacity(0)
+    {}
+
+    template <typename TOtherContainer>
+    SEQAN_FUNC
+    ContainerView(TOtherContainer & cont) :
+        TBase(cont),
+        _capacity(capacity(cont))
+    {}
+
+    template <typename TOtherContainer>
+    SEQAN_FUNC
+    ContainerView(TOtherContainer const & cont) :
+        TBase(cont),
+        _capacity(capacity(cont))
+    {}
+
+    SEQAN_FUNC
+    ContainerView(TIterator const & begin, TIterator const & end) :
+        TBase(begin, end),
+        _capacity(end - begin)
+    {}
 };
 
 // ============================================================================
@@ -394,6 +450,38 @@ resize(ContainerView<TContainer, TSpec> & me, TSize new_length, Tag<TExpand> tag
 }
 
 // ----------------------------------------------------------------------------
+// Function resize(); Resizable ContainerView
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec, typename TSize, typename TValue, typename TExpand>
+SEQAN_FUNC typename Size< ContainerView<TContainer, Resizable<TSpec> > >::Type
+resize(ContainerView<TContainer, Resizable<TSpec> > & me, TSize new_length, TValue /* val */, Tag<TExpand>)
+{
+    SEQAN_ASSERT_LEQ(new_length, (TSize)capacity(me));
+
+    me._end = me._begin + new_length;
+
+    return length(me);
+}
+
+template <typename TContainer, typename TSpec, typename TSize, typename TExpand>
+SEQAN_FUNC typename Size< ContainerView<TContainer, Resizable<TSpec> > >::Type
+resize(ContainerView<TContainer, Resizable<TSpec> > & me, TSize new_length, Tag<TExpand> tag)
+{
+    return resize(me, new_length, Nothing(), tag);
+}
+
+// NOTE(esiragusa): It is not necessary to overload it, but otherwise I had to qualify the generic one :(
+template <typename TContainer, typename TSpec, typename TSize>
+SEQAN_FUNC typename Size< ContainerView<TContainer, Resizable<TSpec> > >::Type
+resize(ContainerView<TContainer, Resizable<TSpec> > & me, TSize new_length)
+{
+    typedef ContainerView<TContainer, Resizable<TSpec> >    TView;
+
+    return resize(me, new_length, Nothing(), typename DefaultOverflowImplicit<TView>::Type());
+}
+
+// ----------------------------------------------------------------------------
 // Function infix()
 // ----------------------------------------------------------------------------
 
@@ -430,6 +518,14 @@ inline void assign(ContainerView<TContainer, TSpec> & view, TOtherContainer cons
     view._end = end(cont, Standard());
 }
 
+template <typename TContainer, typename TSpec, typename TOtherContainer>
+inline void assign(ContainerView<TContainer, Resizable<TSpec> > & view, TOtherContainer const & cont)
+{
+    view._begin = begin(cont, Standard());
+    view._end = end(cont, Standard());
+    view._capacity = capacity(cont, Standard());
+}
+
 // ----------------------------------------------------------------------------
 // Function view()
 // ----------------------------------------------------------------------------
@@ -439,6 +535,28 @@ inline ContainerView<TContainer>
 view(TContainer & container)
 {
     return ContainerView<TContainer>(container);
+}
+
+// ----------------------------------------------------------------------------
+// Function appendValue()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec, typename TValue, typename TExpand>
+SEQAN_FUNC void
+appendValue(ContainerView<TContainer, Resizable<TSpec> > & view, TValue const & _value, Tag<TExpand> tag)
+{
+    resize(view, length(view) + 1, tag);
+    value(view, length(view) - 1) = _value;
+}
+
+// NOTE(esiragusa): It is not necessary to overload it, but otherwise I had to qualify the generic one :(
+template <typename TContainer, typename TSpec, typename TValue>
+SEQAN_FUNC void
+appendValue(ContainerView<TContainer, Resizable<TSpec> > & view, TValue const & _value)
+{
+    typedef ContainerView<TContainer, Resizable<TSpec> >    TView;
+
+    appendValue(view, _value, typename DefaultOverflowImplicit<TView>::Type());
 }
 
 // ----------------------------------------------------------------------------
