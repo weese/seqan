@@ -103,15 +103,18 @@ struct HistoryStackFmi_
     Pair<TSize> range;
     TAlphabet   lastChar;
 
+    SEQAN_FUNC
     HistoryStackFmi_() {}
 
     template <typename TAlphabet_, typename TSize_>
+    SEQAN_FUNC
     HistoryStackFmi_(TAlphabet_ const _lastChar, Pair<TSize_> const &_range):
         range(_range),
         lastChar(_lastChar)
     {}
 
-    inline HistoryStackFmi_ const &
+    SEQAN_FUNC
+    HistoryStackFmi_ const &
     operator=(HistoryStackFmi_ const & _origin)
     {
         range = _origin.range;
@@ -443,7 +446,7 @@ _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> >
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-inline bool
+SEQAN_FUNC bool
 _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
 {
     if (!isRoot(it))
@@ -463,7 +466,7 @@ _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLi
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, class TSpec>
-inline typename VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type
+SEQAN_FUNC typename VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >::Type
 nodeUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > const & it)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >    TIndex;
@@ -487,7 +490,7 @@ _historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<
 }
 
 template < typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-inline void
+SEQAN_FUNC void
 _historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
 {
     typedef Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<ParentLinks<TSpec> > > > TIter;

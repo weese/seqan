@@ -348,8 +348,12 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	struct HistoryStackEsa_
 	{
 		Pair<TSize> range;		// current SA interval of hits
+
+        SEQAN_FUNC
 		HistoryStackEsa_() {}
+
 		template <typename TSize_>
+        SEQAN_FUNC
 		HistoryStackEsa_(Pair<TSize_> const &_range): range(_range) {}
 	};
 
@@ -383,23 +387,28 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 //____________________________________________________________________________
 
+        SEQAN_FUNC
         Iter() :
             TBase()
         {}
 
+        SEQAN_FUNC
 		Iter(TIndex &_index):
 			TBase(_index) {}
 
+        SEQAN_FUNC
 		Iter(TIndex &_index, MinimalCtor):
 			TBase(_index, MinimalCtor()) {}
 
+        SEQAN_FUNC
 		Iter(Iter const &_origin):
 			TBase((TBase const &)_origin),
 			history(_origin.history) {}
 
 //____________________________________________________________________________
 
-		inline Iter const &
+        SEQAN_FUNC
+		Iter const &
 		operator = (Iter const &_origin)
 		{
 			*(TBase*)(this) = _origin;
@@ -2066,7 +2075,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		value(it).parentRight = value(it).range.i2;
 	}
 	template < typename TText, class TIndexSpec, class TSpec >
-	inline void 
+	SEQAN_FUNC void 
 	_historyPush(Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
 		typedef Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > TIter;
