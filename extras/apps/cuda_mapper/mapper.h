@@ -84,41 +84,46 @@ struct Delegator
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Tag Pooled
-// ----------------------------------------------------------------------------
-
-//template <typename TSpec>
-//struct Pooled;
-
-// ----------------------------------------------------------------------------
 // Metafunction HistoryStack_
 // ----------------------------------------------------------------------------
 
-//#ifdef __CUDACC__
-//template <typename TValue, typename TAlloc, typename TIndexSpec, typename TSpec>
-//struct HistoryStack_<Iter<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>, VSTree<TopDown<ParentLinks<TSpec> > > > >
-//{
-//    typedef Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>            TIndex_;
-//    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >               TIter_;
-//    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>    Type;
-//};
-//
-//template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TSpec>
-//struct HistoryStack_<Iter<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>, VSTree<TopDown<ParentLinks<TSpec> > > > >
-//{
-//    typedef Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>  TIndex_;
-//    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >                           TIter_;
-//    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>                Type;
-//};
-//#endif
-//
-//template <typename TIndex, typename TSpec>
-//struct HistoryStack_<Iter<TIndex, VSTree<TopDown<ParentLinks<Pooled<TSpec> > > > > >
-//{
-//    typedef Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > >        TIter_;
-//    // TODO(esiragusa): Change View to ContainerView<THistoryStack, Resizable>.
-//    typedef typename View<typename HistoryStack_<TIter_>::Type>::Type   Type;
-//};
+template <typename TText, typename TViewSpec, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<ContainerView<TText, TViewSpec>, TIndexSpec>,
+                     VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<TText, TIndexSpec>                                    TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >       TIter_;
+    typedef typename View<typename HistoryStack_<TIter_>::Type>::Type   Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>,
+                          VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>              TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >       TIter_;
+    typedef typename View<typename HistoryStack_<TIter_>::Type>::Type   Type;
+};
+
+#ifdef __CUDACC__
+template <typename TValue, typename TAlloc, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>,
+                     VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>            TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >               TIter_;
+    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>    Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>,
+                          VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>  TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >                           TIter_;
+    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>                Type;
+};
+#endif
 
 // ============================================================================
 // ============================================================================
@@ -143,7 +148,7 @@ struct TextIterator_<Index<TText, TIndexSpec>, TSpec>
 template <typename TText, typename TIndexSpec, typename TDistance, typename TSpec>
 struct TextIterator_<Index<TText, TIndexSpec>, Backtracking<TDistance, TSpec> >
 {
-    typedef typename Iterator<Index<TText, TIndexSpec>, TopDown<ParentLinks<TSpec> > >::Type  Type;
+    typedef typename Iterator<Index<TText, TIndexSpec>, TopDown<ParentLinks<> > >::Type  Type;
 };
 
 // ============================================================================
@@ -155,8 +160,7 @@ struct TextIterator_<Index<TText, TIndexSpec>, Backtracking<TDistance, TSpec> >
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPattern, typename TSpec = void>
-struct Finder2
-{};
+struct Finder2;
 
 // ----------------------------------------------------------------------------
 // Class Finder
@@ -220,14 +224,14 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, FinderSTree> & finder,
     if (goDown(finder._textIt, pattern)) delegate(finder);
 }
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TDelegate>
-//SEQAN_FUNC void
-//find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<TDistance, TSpec> > & finder,
-//     TPattern const & pattern,
-//     TDelegate & delegate)
-//{
-//    if (goDown(finder._textIt, pattern)) delegate(finder);
-//}
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TDelegate>
+SEQAN_FUNC void
+find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<TDistance, TSpec> > & finder,
+     TPattern const & pattern,
+     TDelegate & delegate)
+{
+    if (goDown(finder._textIt, pattern)) delegate(finder);
+}
 
 // ============================================================================
 // ============================================================================
@@ -252,98 +256,20 @@ struct Multiple;
 // Metafunction Finder_
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TPattern, typename TSpec>
-//struct Finder_;
-//
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct Finder_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef Index<TText, TIndexSpec>            TIndex_;
-//    typedef typename Value<TPattern>::Type      TPattern_;
-//    typedef Finder2<TIndex_, TPattern_, TSpec>  Type;
-//};
-//
-//#ifdef __CUDACC__
-//template <typename TValue, typename TAlloc, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct Finder_<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef thrust::device_vector<TValue, TAlloc>   TText_;
-//    typedef Index<TText_, TIndexSpec>               TIndex_;
-//    typedef typename View<TPattern>::Type           TPatternView_;
-//    typedef typename Value<TPatternView_>::Type     TPattern_;
-//    typedef Finder2<TIndex_, TPattern_, TSpec>      Type;
-//};
-//
-//template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct Finder_<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec> TText_;
-//    typedef Index<TText_, TIndexSpec>                                   TIndex_;
-//    typedef typename View<TPattern>::Type                               TPatternView_;
-//    typedef typename Value<TPatternView_>::Type                         TPattern_;
-//    typedef Finder2<TIndex_, TPattern_, TSpec>                          Type;
-//};
-//#endif
-
-// ----------------------------------------------------------------------------
-// Metafunction FinderPool_
-// ----------------------------------------------------------------------------
-
-//template <typename TText, typename TPattern, typename TSpec>
-//struct FinderPool_;
-//
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct FinderPool_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef String<typename Finder_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >::Type>    Type;
-//};
-//
-//template <typename TText, typename TViewSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct FinderPool_<Index<ContainerView<TText, TViewSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef typename View<typename FinderPool_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >::Type>::Type Type;
-//};
-//
-//template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct FinderPool_<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef typename View<typename FinderPool_<Index<StringSet<TText, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >::Type>::Type Type;
-//};
-//
-//#ifdef __CUDACC__
-//template <typename TValue, typename TAlloc, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct FinderPool_<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef thrust::device_vector<TValue, TAlloc>                       TText_;
-//    typedef Index<TText_, TIndexSpec>                                   TIndex_;
-//    typedef typename Finder_<TIndex_, TPattern, Multiple<TSpec> >::Type TFinder_;
-//    typedef typename View<TFinder_>::Type                               TFinderView_;
-//    typedef thrust::device_vector<TFinderView_>                         Type;
-//};
-//
-//template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct FinderPool_<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >
-//{
-//    typedef StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec> TText_;
-//    typedef Index<TText_, TIndexSpec>                                   TIndex_;
-//    typedef typename Finder_<TIndex_, TPattern, Multiple<TSpec> >::Type TFinder_;
-//    typedef typename View<TFinder_>::Type                               TFinderView_;
-//    typedef thrust::device_vector<TFinderView_>                         Type;
-//};
-//#endif
-
-// ----------------------------------------------------------------------------
-// Metafunction PooledFinder_
-// ----------------------------------------------------------------------------
-
 template <typename TFinder>
-struct PooledFinder_;
+struct Finder_;
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-struct PooledFinder_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
+struct Finder_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
 {
     typedef Finder2<Index<TText, TIndexSpec>, typename Value<TPattern>::Type, TSpec>    Type;
 };
+
+//template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
+//struct Finder_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >
+//{
+//    typedef Finder2<Index<TText, TIndexSpec>, typename Value<TPattern>::Type, Backtracking<TDistance, Pooled<TSpec> > > Type;
+//};
 
 // ----------------------------------------------------------------------------
 // Metafunction FinderCTASize_
@@ -382,6 +308,37 @@ struct Member<Finder2<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec
     typedef typename View<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec> >::Type  Type;
 };
 
+// ----------------------------------------------------------------------------
+// Member FinderHistory_
+// ----------------------------------------------------------------------------
+
+struct FinderHistory_;
+
+template <typename TText, typename TPattern, typename TSpec>
+struct Member<Finder2<TText, TPattern, Multiple<TSpec> >, FinderHistory_>
+{
+    typedef typename TextIterator_<TText, TSpec>::Type      TTextIterator_;
+    typedef typename HistoryStack_<TTextIterator_>::Type    Type;
+};
+
+template <typename TText, typename TViewSpec, typename TIndexSpec, typename TPattern, typename TSpec>
+struct Member<Finder2<Index<ContainerView<TText, TViewSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >, FinderHistory_>
+{
+    typedef Index<TText, TIndexSpec>                        TIndex_;
+    typedef Finder2<TIndex_, TPattern, Multiple<TSpec> >    TFinder_;
+    typedef typename Member<TFinder_, FinderHistory_>::Type TFinderHistory_;
+    typedef typename View<TFinderHistory_>::Type            Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec>
+struct Member<Finder2<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >, FinderHistory_>
+{
+    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>  TIndex_;
+    typedef Finder2<TIndex_, TPattern, Multiple<TSpec> >    TFinder_;
+    typedef typename Member<TFinder_, FinderHistory_>::Type TFinderHistory_;
+    typedef typename View<TFinderHistory_>::Type            Type;
+};
+
 // ============================================================================
 // Classes
 // ============================================================================
@@ -406,29 +363,25 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
     {}
 };
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
-//struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> >
-//{
-//    typedef Index<TText, TIndexSpec>                    TIndex;
-//    typedef Finder2<TIndex, TPattern, Pooled<TSpec> >   TPooledFinder;
-//    typedef Finder2<TIndex, TPattern, TSpec>            TSerialFinder;
-//    typedef Finder2<TIndex, TPattern, TSpec>            THistory;
-//
-//    typename Member<Finder2, FinderText_>::Type   _index;
-////    TPool           _pool;
-//
-//    SEQAN_FUNC
-//    Finder2() :
-//        _index()
-//    {}
-//
-//    Finder2(TIndex & index) :
-//        _index(index)
-//    {}
-//};
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
+struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > >
+{
+    typedef Index<TText, TIndexSpec>                TIndex;
+
+    typename Member<Finder2, FinderText_>::Type     _index;
+    typename Member<Finder2, FinderHistory_>::Type  _history;
+
+    Finder2() :
+        _index()
+    {}
+
+    Finder2(TIndex & index) :
+        _index(index)
+    {}
+};
 
 // ----------------------------------------------------------------------------
-// Class Proxy
+// Class Proxy                                                         [Finder]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
@@ -489,33 +442,32 @@ template <typename TFinderView, typename TPatternsView, typename TDelegateView>
 __global__ void
 _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 {
-    typedef Proxy<TFinderView>                          TFinderProxy;
-    typedef Delegator<TFinderProxy, TDelegateView>      TDelegator;
-    typedef typename PooledFinder_<TFinderView>::Type   TPooledFinder;
-
-    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
-	unsigned gridThreads = gridDim.x * blockDim.x;
-
-    // Instantiate a lightweight pooled finder.
-    TPooledFinder pooledFinder(finder._index);
-
-    // Instantiate a finder proxy to be delegated.
-    TFinderProxy finderProxy(pooledFinder);
-
-    // Instantiate a delegator object to delegate the finder proxy instead of the pooled finder.
-    TDelegator delegator(finderProxy, delegate);
-
-    // Statically load balance work.
-    unsigned patternsCount = length(patterns);
-	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
-    {
-        finderProxy.patternId = patternId;
-
-        // Find a single pattern.
-        find(pooledFinder, patterns[patternId], delegator);
-
-    //    find(finder._pool[threadId], patterns[finder._idxs[patternId]], delegator);
-    }
+//    typedef Proxy<TFinderView>                          TFinderProxy;
+//    typedef Delegator<TFinderProxy, TDelegateView>      TDelegator;
+//    typedef typename Finder_<TFinderView>::Type         TFinder;
+//
+//    // Instantiate a flyweight finder.
+//    TFinder finderFlyweight(finder._index);
+//
+//    // Instantiate a finder proxy to be delegated.
+//    TFinderProxy finderProxy(finderFlyweight);
+//
+//    // Instantiate a delegator object to delegate the finder proxy instead of the flyweight finder.
+//    TDelegator delegator(finderProxy, delegate);
+//
+//    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
+//    unsigned gridThreads = gridDim.x * blockDim.x;
+//    unsigned patternsCount = length(patterns);
+//
+//	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
+//    {
+//        finderProxy.patternId = patternId;
+//
+//        // Find a single pattern.
+//        find(finderFlyweight, patterns[patternId], delegator);
+//
+//    //    find(finder._pool[threadId], patterns[finder._idxs[patternId]], delegator);
+//    }
 }
 #endif
 
@@ -649,19 +601,19 @@ view(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder)
     return finderView;
 }
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
-//inline typename View<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >::Type
-//view(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > & finder)
-//{
-//    typename View<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >::Type finderView;
-//
-//    finderView._index = view(finder._index);
-//    finderView._pool = view(finder._pool);
-////    finderView._idxs = view(finder._idxs);
-////    finderView._hashes = view(finder._hashes);
-//
-//    return finderView;
-//}
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec>
+inline typename View<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >::Type
+view(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > & finder)
+{
+    typename View<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtracking<TDistance, TSpec> > > >::Type finderView;
+
+    finderView._index = view(value(finder._index));
+    finderView._history = view(finder._history);
+//    finderView._idxs = view(finder._idxs);
+//    finderView._hashes = view(finder._hashes);
+
+    return finderView;
+}
 
 }
 
