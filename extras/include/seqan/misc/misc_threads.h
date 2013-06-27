@@ -32,74 +32,30 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
-#define SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
+#ifndef SEQAN_HEADER_MISC_THREADS_H
+#define SEQAN_HEADER_MISC_THREADS_H
 
-// ============================================================================
-// Prerequisites
-// ============================================================================
-
-#include "index.h"
-
-using namespace seqan;
-
-// ============================================================================
-// Tags
-// ============================================================================
-
-struct CPU_;
-typedef Tag<CPU_>     CPU;
-
-// ============================================================================
-// Classes
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// Class HitsCounter
-// ----------------------------------------------------------------------------
-
-template <typename TSpec = void>
-struct HitsCounter
-{
-//    typedef typename Delegated<TFinder>::Type   TDelegated;
-
-    unsigned long hits;
-
-    HitsCounter() :
-        hits(0)
-    {}
-
-    template <typename TFinder>
-    SEQAN_FUNC void
-    operator() (TFinder const & /* finder */)
-    {
-//        SEQAN_OMP_PRAGMA(atomic)
-//        hits += countOccurrences(finder._pool[omp_get_thread_num()]._textIt);
-    }
-};
+namespace seqan {
 
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function mapReads()                                                    [CPU]
+// Function getThreadId()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex, typename TReadSeqs>
-inline void
-mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
+SEQAN_FUNC unsigned getThreadId()
 {
-//    typedef Finder2<TIndex, TReadSeqs, Multiple<FinderSTree> >  TFinder;
-//
-//    // Instantiate a multiple finder.
-//    TFinder finder(index);
-//
-//    // Count hits.
-//    HitsCounter<> counter;
-//    find(finder, readSeqs, counter);
-//    std::cout << "Hits count:\t\t\t" << counter.hits << std::endl;
+#ifdef _OPENMP
+    return omp_get_thread_num();
+#elif __CUDA_ARCH__
+    return blockIdx.x * blockDim.x + threadIdx.x;
+#else
+    return 0;
+#endif
 }
 
+}  // namespace seqan
 
-#endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
+#endif  // #ifndef SEQAN_HEADER_MISC_THREADS_H

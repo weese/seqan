@@ -476,6 +476,30 @@ struct Fibre<SparseString<ContainerView<TString>, TSpec> const, FibreValues>
     typedef typename View<typename Fibre<SparseString<TString, TSpec> const, FibreValues>::Type>::Type  Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction HistoryStack_                                [ParentLinks Iter]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TViewSpec, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<ContainerView<TText, TViewSpec>, TIndexSpec>,
+                     VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<TText, TIndexSpec>                                TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >   TIter_;
+    typedef typename HistoryStack_<TIter_>::Type                    THistory_;
+    typedef ContainerView<THistory_, Resizable<TViewSpec> >         Type;
+};
+
+template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>,
+                          VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>          TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >   TIter_;
+    typedef typename HistoryStack_<TIter_>::Type                    THistory_;
+    typedef ContainerView<THistory_, Resizable<TViewSpec> >         Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================

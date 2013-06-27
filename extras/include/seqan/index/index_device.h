@@ -274,6 +274,28 @@ struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreIn
 //    typedef thrust::device_vector<TValue, TAlloc>       Type;
 //};
 
+// ----------------------------------------------------------------------------
+// Metafunction HistoryStack_                                [ParentLinks Iter]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>,
+                     VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>            TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >               TIter_;
+    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>    Type;
+};
+
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TSpec>
+struct HistoryStack_<Iter<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>,
+                          VSTree<TopDown<ParentLinks<TSpec> > > > >
+{
+    typedef Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>  TIndex_;
+    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >                           TIter_;
+    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>                Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================

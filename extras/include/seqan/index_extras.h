@@ -66,13 +66,6 @@
 #include <seqan/index/index_qgram_bucketrefinement.h>
 
 // ===========================================================================
-// Backtracking Finders.
-// ===========================================================================
-
-#include <seqan/index/find_backtracking.h>
-#include <seqan/index/find_backtracking_exp.h>
-
-// ===========================================================================
 // Index Views.
 // ===========================================================================
 
@@ -84,6 +77,23 @@
 
 #ifdef __CUDACC__
 #include <seqan/index/index_device.h>
+#endif
+
+// ===========================================================================
+// Backtracking Finders.
+// ===========================================================================
+
+#include <seqan/index/find_backtracking.h>
+#include <seqan/index/find_backtracking_exp.h>
+
+// ===========================================================================
+// Index Finders.
+// ===========================================================================
+
+#include <seqan/index/find_index.h>
+#include <seqan/index/find_index_multiple.h>
+#ifdef __CUDACC__
+#include <seqan/index/find_index_multiple_device.h>
 #endif
 
 #endif  // EXTRAS_INCLUDE_SEQAN_INDEX_H_
