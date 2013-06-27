@@ -173,8 +173,40 @@ public:
 };
 
 // ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Delegated
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec>
+struct Delegated<Finder2<TText, TPattern, Multiple<TSpec> > >
+{
+    typedef Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > Type;
+};
+
+// ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function textIterator()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec>
+SEQAN_FUNC typename TextIterator_<TText, Multiple<TSpec> >::Type &
+textIterator(Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > & finder)
+{
+    return finder._textIt;
+}
+
+template <typename TText, typename TPattern, typename TSpec>
+SEQAN_FUNC typename TextIterator_<TText, Multiple<TSpec> >::Type const &
+textIterator(Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > const & finder)
+{
+    return finder._textIt;
+}
 
 // ----------------------------------------------------------------------------
 // Function find()

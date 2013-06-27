@@ -150,6 +150,25 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<TDistance, TSpec> 
     if (goDown(finder._textIt, pattern)) delegate(finder);
 }
 
+// ----------------------------------------------------------------------------
+// Function textIterator()
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TText, typename TPattern, typename TSpec>
+SEQAN_FUNC typename TextIterator_<TText, TSpec>::Type &
+textIterator(Finder2<TText, TPattern, TSpec> & finder)
+{
+    return finder._textIt;
+}
+
+template <typename TText, typename TPattern, typename TSpec>
+SEQAN_FUNC typename TextIterator_<TText, TSpec>::Type const &
+textIterator(Finder2<TText, TPattern, TSpec> const & finder)
+{
+    return finder._textIt;
+}
+
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_INDEX_FIND_INDEX_H_
