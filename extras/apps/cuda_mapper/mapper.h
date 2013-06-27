@@ -50,55 +50,172 @@ using namespace seqan;
 struct CPU_;
 typedef Tag<CPU_>     CPU;
 
+
+// ============================================================================
+// Tags
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Tag Ranges_
+// ----------------------------------------------------------------------------
+
+struct Ranges_;
+
 // ============================================================================
 // Classes
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Class HitsCounter
+// Class Hits
 // ----------------------------------------------------------------------------
 
-template <typename TSpec = void>
-struct HitsCounter
+template <typename TIndex, typename TSpec = void>
+struct Hits
 {
-//    typedef typename Delegated<TFinder>::Type   TDelegated;
-
-    unsigned long hits;
-
-    HitsCounter() :
-        hits(0)
-    {}
+    typename Member<Hits, Ranges_>::Type    ranges;
 
     template <typename TFinder>
     SEQAN_FUNC void
-    operator() (TFinder const & /* finder */)
+    operator() (TFinder const & finder)
     {
-//        SEQAN_OMP_PRAGMA(atomic)
-//        hits += countOccurrences(finder._pool[omp_get_thread_num()]._textIt);
+        appendRange(*this, finder);
     }
 };
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Member Ranges_
+// ----------------------------------------------------------------------------
+
+struct Ranges_;
+
+namespace seqan {
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, TSpec>, Ranges_>
+{
+    typedef Pair<typename Size<TIndex>::Type>   TRange_;
+    typedef String<TRange_>                     Type;
+};
+
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, View<TSpec> >, Ranges_>
+{
+    typedef typename Member<Hits<TIndex, TSpec>, Ranges_>::Type TRanges_;
+    typedef ContainerView<TRanges_, Resizable<TSpec> >          Type;
+};
+
+#ifdef __CUDACC__
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, Device<TSpec> >, Ranges_>
+{
+    typedef Pair<typename Size<TIndex>::Type>   TRange_;
+    typedef thrust::device_vector<TRange_>      Type;
+};
+#endif
+}
+
+// ----------------------------------------------------------------------------
+// Metafunction View
+// ----------------------------------------------------------------------------
+
+namespace seqan {
+template <typename TIndex, typename TSpec>
+struct View<Hits<TIndex, TSpec> >
+{
+    typedef Hits<TIndex, View<TSpec> >  Type;
+};
+}
 
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function mapReads()                                                    [CPU]
+// Function reserve()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec, typename TSize>
+inline void
+reserve(Hits<TIndex, TSpec> & hits, TSize newCapacity)
+{
+    reserve(hits.ranges, newCapacity, Exact());
+}
+
+// ----------------------------------------------------------------------------
+// Function view()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+typename View<Hits<TIndex, TSpec> >::Type
+view(Hits<TIndex, TSpec> & hits)
+{
+    typename View<Hits<TIndex, TSpec> >::Type hitsView;
+
+    hitsView.ranges = view(hits.ranges);
+
+    return hitsView;
+}
+
+// ----------------------------------------------------------------------------
+// Function appendRange()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec, typename TFinder>
+inline void
+appendRange(Hits<TIndex, TSpec> & hits, TFinder const & finder)
+{
+    SEQAN_OMP_PRAGMA(critical(Hits_appendRange))
+    appendValue(hits.ranges, range(textIterator(finder)));
+}
+
+#ifdef __CUDACC__
+template <typename TIndex, typename TSpec, typename TFinder>
+SEQAN_FUNC void
+appendRange(Hits<TIndex, View<Device<TSpec> > > & hits, TFinder const & finder)
+{
+    // TODO(esiragusa): Global lock.
+    appendValue(hits.ranges, range(textIterator(finder)));
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Function _mapReads()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TReadSeqs, typename TSpace>
+inline void
+_mapReads(TIndex & index, TReadSeqs & readSeqs)
+{
+    typedef Finder2<TIndex, TReadSeqs, Multiple<FinderSTree> >  TFinder;
+
+    // Instantiate a multiple finder.
+    TFinder finder(index);
+
+    // Instantiate an object to save the hits.
+    Hits<TIndex, TSpace> hits;
+
+    // Reserve space for hits.
+    reserve(hits, length(readSeqs));
+
+    // Find hits.
+    find(finder, readSeqs, hits);
+
+    std::cout << "Ranges count:\t\t\t" << length(hits.ranges) << std::endl;
+}
+
+// ----------------------------------------------------------------------------
+// Function mapReads()
 // ----------------------------------------------------------------------------
 
 template <typename TIndex, typename TReadSeqs>
 inline void
 mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
 {
-//    typedef Finder2<TIndex, TReadSeqs, Multiple<FinderSTree> >  TFinder;
-//
-//    // Instantiate a multiple finder.
-//    TFinder finder(index);
-//
-//    // Count hits.
-//    HitsCounter<> counter;
-//    find(finder, readSeqs, counter);
-//    std::cout << "Hits count:\t\t\t" << counter.hits << std::endl;
+    // Map reads.
+    _mapReads<TIndex, TReadSeqs, void>(index, readSeqs);
 }
 
 

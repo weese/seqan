@@ -37,28 +37,11 @@
 // ============================================================================
 
 #include "kernels.h"
-#include <thrust/sort.h>
-#include <thrust/reduce.h>
+
+//#include <thrust/sort.h>
+//#include <thrust/reduce.h>
 
 using namespace seqan;
-
-
-// ============================================================================
-// Classes
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// Class HitsCounter
-// ----------------------------------------------------------------------------
-
-template <>
-struct HitsCounter<GPU> : HitsCounter<>
-{
-    template <typename TFinder>
-    SEQAN_FUNC void
-    operator() (TFinder const & /* finder */)
-    {}
-};
 
 // ============================================================================
 // Functions
@@ -87,11 +70,6 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
     // Wait for the copy to finish.
     cudaDeviceSynchronize();
 
-    // Instantiate a multiple finder.
-    TFinder finder(deviceIndex);
-
-    // Count hits.
-    HitsCounter<GPU> counter;
-    find(finder, deviceReadSeqs, counter);
-    std::cout << "Hits count:\t\t\t" << counter.hits << std::endl;
+    // Map reads.
+    _mapReads<TDeviceIndex, TDeviceReadSeqs, Device<void> >(deviceIndex, deviceReadSeqs);
 }
