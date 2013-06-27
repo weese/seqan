@@ -274,13 +274,14 @@ _find(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
     typedef Finder2<TIndex, TPattern, Multiple<TSpec> > TFinder;
     typedef typename View<TFinder>::Type                TFinderView;
     typedef typename View<TPattern>::Type               TPatternView;
+    typedef typename View<TDelegate>::Type              TDelegateView;
 
     // Preprocess patterns.
 //    _preprocess(finder, patterns);
 
     // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TIndex, TPattern, Multiple<TSpec> >::VALUE;
-    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternView, TDelegate>, ctaSize, 0);
+    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternView, TDelegateView>, ctaSize, 0);
 
     std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
     std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
@@ -290,7 +291,7 @@ _find(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
     _resizeHistory(finder, activeBlocks * ctaSize);
 
     // Launch the find kernel.
-    _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), delegate);
+    _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), view(delegate));
 }
 
 }
