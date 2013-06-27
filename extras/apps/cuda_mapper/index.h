@@ -113,6 +113,30 @@ typedef Index<TContigs, TGenomeIndexSpec>   TGenomeIndex;
 // ----------------------------------------------------------------------------
 
 namespace seqan {
+template <>
+struct Size<TGenomeIndex>
+{
+    typedef __uint32 Type;
+};
+
+#ifdef __CUDACC__
+template <>
+struct Size<typename Device<TGenomeIndex>::Type>
+{
+    typedef __uint32 Type;
+};
+
+template <>
+struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
+{
+    typedef __uint32 Type;
+};
+#endif
+
+// ----------------------------------------------------------------------------
+// Rank Dictionary Size
+// ----------------------------------------------------------------------------
+
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
 {
