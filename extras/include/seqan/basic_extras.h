@@ -47,10 +47,10 @@
 // Thrust algorithms.
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
-#include <thrust/sort.h>
-#include <thrust/reduce.h>
-#endif
+//#ifdef __CUDACC__
+//#include <thrust/sort.h>
+//#include <thrust/reduce.h>
+//#endif
 
 // ===========================================================================
 // SIMD Types.
