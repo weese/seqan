@@ -93,7 +93,7 @@ struct Member<Hits<TIndex, TSpec>, Ranges_>
     typedef String<TRange_>                     Type;
 };
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <typename TIndex, typename TSpec>
 struct Member<Hits<TIndex, Device<TSpec> >, Ranges_>
 {
@@ -164,7 +164,7 @@ appendRange(Hits<TIndex, TSpec> & hits, TFinder const & finder)
     appendValue(hits.ranges, range(textIterator(finder)));
 }
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <typename TIndex, typename TSpec, typename TFinder>
 SEQAN_FUNC void
 appendRange(Hits<TIndex, View<Device<TSpec> > > & hits, TFinder const & finder)

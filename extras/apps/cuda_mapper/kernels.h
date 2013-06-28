@@ -60,7 +60,7 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
 // ----------------------------------------------------------------------------
 // NOTE(esiragusa): We do not assign the text to the device index!
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 namespace seqan {
 template <typename TValue, typename TAlloc, typename TSSetSpec, typename TOccSpec, typename TSpec,
           typename TText2, typename TOccSpec2, typename TSpec2>

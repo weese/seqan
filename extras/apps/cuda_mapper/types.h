@@ -113,7 +113,7 @@ struct Size<TReadSeqs>
     typedef __uint32 Type;
 };
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <>
 struct Size<typename Device<TReadSeqs>::Type>
 {
@@ -134,7 +134,7 @@ struct Size<typename View<typename Device<TReadSeqs>::Type>::Type>
 // TODO(esiragusa): Check if register usage decreases.
 
 namespace seqan {
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <typename TValue, typename TAlloc, typename TViewSpec>
 struct Size<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec> >
 {
@@ -183,7 +183,7 @@ struct Size<TGenomeIndex>
     typedef __uint32 Type;
 };
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <>
 struct Size<typename Device<TGenomeIndex>::Type>
 {

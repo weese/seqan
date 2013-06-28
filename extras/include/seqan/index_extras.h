@@ -75,7 +75,7 @@
 // Device Indices.
 // ===========================================================================
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 #include <seqan/index/index_device.h>
 #endif
 
@@ -92,7 +92,7 @@
 
 #include <seqan/index/find_index.h>
 #include <seqan/index/find_index_multiple.h>
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 #include <seqan/index/find_index_multiple_device.h>
 #endif
 
