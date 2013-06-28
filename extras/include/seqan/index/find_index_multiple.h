@@ -198,12 +198,15 @@ textIterator(Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > const & finder)
 }
 
 // ----------------------------------------------------------------------------
-// Function find()
+// Function _find(); ExecHost
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
 inline void
-find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TPattern & pattern, TDelegate & delegate)
+_find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder,
+      TPattern & pattern,
+      TDelegate & delegate,
+      ExecHost const & /* tag */)
 {
     typedef Index<TText, TIndexSpec>                        TIndex;
     typedef Finder2<TIndex, TPattern,  Multiple<TSpec> >    TFinder;
@@ -230,6 +233,19 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TP
         clear(finderFlyweight);
         find(finderFlyweight, value(patternIt), delegator);
     }
+}
+
+// ----------------------------------------------------------------------------
+// Function find()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
+inline void
+find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TPattern & pattern, TDelegate & delegate)
+{
+    typedef Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> >  TFinder;
+
+    _find(finder, pattern, delegate, typename ExecSpace<TFinder>::Type());
 }
 
 // ----------------------------------------------------------------------------

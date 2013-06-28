@@ -54,6 +54,13 @@ struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
     static const unsigned VALUE = 256;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction IsDevice
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec>
+struct IsDevice<Finder2<TText, TPattern, TSpec> > : IsDevice<TText> {};
+
 // ============================================================================
 // Kernels
 // ============================================================================
@@ -227,32 +234,15 @@ _getFlyweightFinder(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<Backtra
 }
 
 // ----------------------------------------------------------------------------
-// Function find()
+// Function _find(); ExecDevice
 // ----------------------------------------------------------------------------
-
-template <typename TValue, typename TAlloc, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-inline void
-find(Finder2<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
-     TPattern /* const */ & pattern,
-     TDelegate & delegate)
-{
-    _find(finder, pattern, delegate);
-}
-
-template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-inline void
-find(Finder2<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
-     TPattern /* const */ & pattern,
-     TDelegate & delegate)
-{
-    _find(finder, pattern, delegate);
-}
 
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
 inline void
 _find(Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > & finder,
       TPattern /* const */ & pattern,
-      TDelegate & delegate)
+      TDelegate & delegate,
+      ExecDevice const & /* tag */)
 {
     typedef Index<TText, TIndexSpec>                    TIndex;
     typedef Finder2<TIndex, TPattern, Multiple<TSpec> > TFinder;

@@ -54,6 +54,13 @@ struct Device<Index<TText, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction IsDevice                                                [Index]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct IsDevice<Index<TText, TSpec> > : IsDevice<TText> {};
+
+// ----------------------------------------------------------------------------
 // Metafunction FibreSA                                          [Device Index]
 // ----------------------------------------------------------------------------
 
