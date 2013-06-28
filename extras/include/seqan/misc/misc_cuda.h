@@ -107,13 +107,10 @@ inline void cudaPrintFreeMemory()
 // Function cudaOccupancy()
 // --------------------------------------------------------------------------
 
-inline float cudaOccupancy()
+inline SEQAN_DEVICE
+float cudaOccupancy()
 {
-#if defined(__CUDA_ARCH__)
     return __popc(__ballot(true)) / 32.0f;
-#else
-    return 1;
-#endif
 }
 
 // --------------------------------------------------------------------------
