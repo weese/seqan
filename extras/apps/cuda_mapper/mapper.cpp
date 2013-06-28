@@ -42,7 +42,6 @@
 #include "genome.h"
 #include "genome_index.h"
 
-#include "index.h"
 #include "mapper.h"
 #include "kernels.h"
 

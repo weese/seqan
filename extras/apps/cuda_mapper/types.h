@@ -31,11 +31,11 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// This file contains index type definitions.
+// This file contains type definitions.
 // ==========================================================================
 
-#ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
-#define SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
+#ifndef SEQAN_EXTRAS_CUDAMAPPER_TYPES_H_
+#define SEQAN_EXTRAS_CUDAMAPPER_TYPES_H_
 
 // ============================================================================
 // Prerequisites
@@ -216,4 +216,4 @@ struct Value<Shape<TValue, UngappedShape<q> > >
 };
 }
 
-#endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_INDEX_H_
+#endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_TYPES_H_

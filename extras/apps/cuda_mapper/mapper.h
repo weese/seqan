@@ -39,7 +39,7 @@
 // Prerequisites
 // ============================================================================
 
-#include "index.h"
+#include "types.h"
 
 using namespace seqan;
 

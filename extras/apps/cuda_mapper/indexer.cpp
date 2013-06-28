@@ -42,7 +42,7 @@
 #include "genome.h"
 #include "genome_index.h"
 
-#include "index.h"
+#include "types.h"
 
 using namespace seqan;
 
