@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
+// Copyright (c) 2013 NVIDIA Corporation
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -12,14 +12,14 @@
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
-//     * Neither the name of Knut Reinert or the FU Berlin nor the names of
+//     * Neither the name of NVIDIA Corporation nor the names of
 //       its contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL KNUT REINERT OR THE FU BERLIN BE LIABLE
+// ARE DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE
 // FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 // DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 // SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
@@ -29,25 +29,26 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
+// ==========================================================================
 
-#ifndef SEQAN_PLATFORM_H
-#define SEQAN_PLATFORM_H
+#ifdef __CUDACC__
 
-#ifdef __MINGW32__
-	#include "platform/platform_mingw.h"
-#elif _MSC_VER
-	#include "platform/platform_windows.h"
-#elif __SUNPRO_C
-	#include "platform/platform_solaris.h"
-#elif __ICC
-	#include "platform/platform_icc.h"
-#elif __PGI
-	#include "platform/platform_pgi.h"
+#ifndef PLATFORM_CUDA
+  #define PLATFORM_CUDA
+#endif
+
+#define SEQAN_FUNC inline __host__ __device__
+#define SEQAN_HOST_DEVICE __host__ __device__
+#define SEQAN_HOST __host__
+#define SEQAN_DEVICE __device__
+
 #else
-	#include "platform/platform_gcc.h"
+
+#define SEQAN_FUNC inline
+#define SEQAN_HOST_DEVICE
+#define SEQAN_HOST
+#define SEQAN_DEVICE
+
 #endif
 
-// NOTE(esiragusa): nvcc header must be included even if __CUDACC__ is not defined.
-#include "platform/platform_nvcc.h"
-
-#endif
