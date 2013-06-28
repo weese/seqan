@@ -100,7 +100,9 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
 
     addSection(parser, "Global Options");
 
+#ifdef SEQAN_CUDA
     addOption(parser, ArgParseOption("nc", "no-cuda", "Do not use CUDA accelerated code."));
+#endif
 
     addOption(parser, ArgParseOption("t", "threads", "Specify the number of threads to use.", ArgParseOption::INTEGER));
     setMinValue(parser, "threads", "1");
@@ -142,7 +144,9 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
     getArgumentValue(options.readsFile, parser, 1);
 
     // Parse CUDA options.
+#ifdef SEQAN_CUDA
     getOptionValue(options.noCuda, parser, "no-cuda");
+#endif
 
     // Parse the number of threads.
     getOptionValue(options.threadsCount, parser, "threads");
@@ -163,7 +167,7 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 // Function runMapper()
 // ----------------------------------------------------------------------------
 
-template <typename TCPUGPU>
+template <typename TExecSpace>
 int runMapper(Options & options)
 {
     typedef Genome<void, CUDAStoreConfig>                           TGenome;
@@ -247,7 +251,7 @@ int runMapper(Options & options)
 
         // Map reads.
         start = sysTime();
-        mapReads(genomeIndex.index, getSeqs(reads), TCPUGPU());
+        mapReads(genomeIndex.index, getSeqs(reads), TExecSpace());
         finish = sysTime();
         std::cout << "Mapping time:\t\t\t" << std::flush;
         std::cout << finish - start << " sec" << std::endl;
@@ -269,10 +273,14 @@ int runMapper(Options & options)
 template <typename TOptions>
 int configureMapper(TOptions & options)
 {
+#ifdef SEQAN_CUDA
     if (options.noCuda)
         return runMapper<CPU>(options);
     else
         return runMapper<GPU>(options);
+#else
+    return runMapper<CPU>(options);
+#endif
 }
 
 // ----------------------------------------------------------------------------

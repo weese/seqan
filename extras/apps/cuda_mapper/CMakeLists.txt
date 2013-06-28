@@ -21,12 +21,11 @@ find_package (SeqAn REQUIRED)
 # Search for CUDA.
 find_package (CUDA QUIET)
 
-# Break out if CUDA was not found.
+# Disable CUDA acceleration if CUDA was not found.
 if (NOT CUDA_FOUND)
-  message (STATUS "  CUDA not found: Not building cuda_mapper.")
-  #add_definitions (-DCUDA_NOT_FOUND=1)
-  return ()
+  message (STATUS "  CUDA not found: building cuda_mapper without CUDA acceleration.")
 endif (NOT CUDA_FOUND)
+add_definitions (-DSEQAN_CUDA=1)
 
 # ----------------------------------------------------------------------------
 # CUDA Setup
