@@ -48,9 +48,7 @@ namespace seqan {
 template <typename TObject>
 struct Device
 {
-    typedef typename Value<TObject>::Type               TValue_;
-//    typedef typename DefaultDeviceAlloc<TObject>::Type  TAlloc_;
-    typedef thrust::device_vector<TValue_/*, TAlloc_*/>     Type;
+    typedef TObject Type;
 };
 
 template <typename TObject>
@@ -68,6 +66,36 @@ struct IsDevice : public False {};
 
 template <typename TObject>
 struct IsDevice<TObject const> : public IsDevice<TObject> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction Device                                                 [String]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc>
+struct Device<String<TValue, TAlloc> >
+{
+    typedef thrust::device_vector<TValue>   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Device                                            [std::vector]
+// ----------------------------------------------------------------------------
+
+template <typename TValue>
+struct Device<std::vector<TValue> >
+{
+    typedef thrust::device_vector<TValue>   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Device                                            [std::string]
+// ----------------------------------------------------------------------------
+
+template <>
+struct Device<std::string>
+{
+    typedef thrust::device_vector<char>     Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction IsDevice                                [thrust::device_vector]

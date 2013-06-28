@@ -187,7 +187,7 @@ public:
 template <typename TObject>
 struct View
 {
-    typedef ContainerView<TObject>  Type;
+    typedef TObject Type;
 };
 
 template <typename TObject>
@@ -195,6 +195,20 @@ struct View<TObject const>
 {
     typedef typename View<TObject>::Type const  Type;
 };
+
+template <typename TValue, typename TAlloc>
+struct View<String<TValue, TAlloc> >
+{
+    typedef ContainerView<String<TValue, TAlloc> >  Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <typename TValue, typename TAlloc>
+struct View<thrust::device_vector<TValue, TAlloc> >
+{
+    typedef ContainerView<thrust::device_vector<TValue, TAlloc> >   Type;
+};
+#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction RemoveView
