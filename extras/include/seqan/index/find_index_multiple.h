@@ -61,19 +61,9 @@ struct FinderText_;
 template <typename TText, typename TPattern, typename TSpec>
 struct Member<Finder2<TText, TPattern, TSpec>, FinderText_>
 {
-    typedef Holder<TText>   Type;
-};
+    typedef Finder2<TText, TPattern, TSpec>     TFinder_;
 
-template <typename TText, typename TViewSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-struct Member<Finder2<Index<ContainerView<TText, TViewSpec>, TIndexSpec>, TPattern, TSpec>, FinderText_>
-{
-    typedef typename View<Index<TText, TIndexSpec> >::Type  Type;
-};
-
-template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-struct Member<Finder2<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>, TPattern, TSpec>, FinderText_>
-{
-    typedef typename View<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec> >::Type  Type;
+    typedef typename IfView<TFinder_, TText, Holder<TText> >::Type  Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -85,26 +75,12 @@ struct FinderHistory_;
 template <typename TText, typename TPattern, typename TSpec>
 struct Member<Finder2<TText, TPattern, Multiple<TSpec> >, FinderHistory_>
 {
-    typedef typename TextIterator_<TText, TSpec>::Type      TTextIterator_;
-    typedef typename HistoryStack_<TTextIterator_>::Type    Type;
-};
+    typedef Finder2<TText, TPattern, Multiple<TSpec> >      TFinder_;
+    typedef typename RemoveView<TText>::Type                TText_;
+    typedef typename TextIterator_<TText_, TSpec>::Type     TTextIterator_;
+    typedef typename HistoryStack_<TTextIterator_>::Type    THistory_;
 
-template <typename TText, typename TViewSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-struct Member<Finder2<Index<ContainerView<TText, TViewSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >, FinderHistory_>
-{
-    typedef Index<TText, TIndexSpec>                        TIndex_;
-    typedef Finder2<TIndex_, TPattern, Multiple<TSpec> >    TFinder_;
-    typedef typename Member<TFinder_, FinderHistory_>::Type TFinderHistory_;
-    typedef typename View<TFinderHistory_>::Type            Type;
-};
-
-template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TPattern, typename TSpec>
-struct Member<Finder2<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>, TPattern, Multiple<TSpec> >, FinderHistory_>
-{
-    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>  TIndex_;
-    typedef Finder2<TIndex_, TPattern, Multiple<TSpec> >    TFinder_;
-    typedef typename Member<TFinder_, FinderHistory_>::Type TFinderHistory_;
-    typedef typename View<TFinderHistory_>::Type            Type;
+    typedef typename IfView<TFinder_, typename View<THistory_>::Type, THistory_>::Type  Type;
 };
 
 // ============================================================================
