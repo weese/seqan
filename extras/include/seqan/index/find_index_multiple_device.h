@@ -42,21 +42,6 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction FinderFlyweight_
-// ----------------------------------------------------------------------------
-
-template <typename TFinder>
-struct FinderFlyweight_;
-
-template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-struct FinderFlyweight_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
-{
-    typedef Finder2<Index<TText, TIndexSpec>, typename Value<TPattern>::Type, TSpec>    Type;
-};
-
-// TODO(esiragusa): FinderFlyweight_ for CPU ?
-
-// ----------------------------------------------------------------------------
 // Metafunction FinderCTASize_
 // ----------------------------------------------------------------------------
 
@@ -68,7 +53,6 @@ struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 {
     static const unsigned VALUE = 256;
 };
-
 
 // ============================================================================
 // Kernels

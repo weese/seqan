@@ -162,8 +162,8 @@ public:
     typedef typename TextIterator_<TIndex, TSpec>::Type TTextIterator;
     typedef typename Iterator<TPattern, Standard>::Type TPatternIterator;
 
-    TTextIterator const & _textIt;
-    unsigned _patternIt;
+    TTextIterator const &   _textIt;
+    unsigned                _patternIt;
 
     template <typename TFinder>
     SEQAN_FUNC
@@ -175,6 +175,19 @@ public:
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction FinderFlyweight_
+// ----------------------------------------------------------------------------
+
+template <typename TFinder>
+struct FinderFlyweight_;
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
+struct FinderFlyweight_<Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> > >
+{
+    typedef Finder2<Index<TText, TIndexSpec>, typename Value<TPattern>::Type, TSpec>    Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction Delegated
@@ -212,32 +225,36 @@ textIterator(Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > const & finder)
 // Function find()
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-//inline void
-//find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TPattern & pattern, TDelegate & delegate)
-//{
-//    typedef Index<TText, TIndexSpec>                                        TIndex;
-//    typedef Finder2<TIndex, TPattern,  Multiple<TSpec> >                    TFinder;
-//    typedef Delegator<TFinder, TDelegate>                                   TDelegator;
-//    typedef typename Iterator<TPattern, Standard>::Type                     TPatternIter;
-//
-//    // Use a delegator object to delegate this finder instead of the pooled finders.
-//    TDelegator delegator(finder, delegate);
-//
-//    // Initialize the pool.
-//    _initPool(finder, omp_get_max_threads());
-//
-//    // Find all patterns in parallel.
-//    TPatternIter patternBegin = begin(pattern, Standard());
-//    TPatternIter patternEnd = end(pattern, Standard());
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
+inline void
+find(Finder2<Index<TText, TIndexSpec>, TPattern,  Multiple<TSpec> > & finder, TPattern & pattern, TDelegate & delegate)
+{
+    typedef Index<TText, TIndexSpec>                        TIndex;
+    typedef Finder2<TIndex, TPattern,  Multiple<TSpec> >    TFinder;
+    typedef Proxy<TFinder>                                  TFinderProxy;
+    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
+    typedef typename FinderFlyweight_<TFinder>::Type        TFlyweightFinder;
+    typedef typename Iterator<TPattern, Standard>::Type     TPatternIter;
+
+    // Instantiate a flyweight finder.
+    TFlyweightFinder finderFlyweight(value(finder._index));
+
+    // Instantiate a finder proxy to be delegated.
+    TFinderProxy finderProxy(finderFlyweight);
+
+    // Instantiate a delegator object to delegate the finder proxy instead of the flyweight finder.
+    TDelegator delegator(finderProxy, delegate);
+
+    // Find all patterns in parallel.
+    TPatternIter patternBegin = begin(pattern, Standard());
+    TPatternIter patternEnd = end(pattern, Standard());
 //    SEQAN_OMP_PRAGMA(parallel for schedule(dynamic))
-//    for (TPatternIter patternIt = patternBegin; patternIt != patternEnd; ++patternIt)
-//    {
-////        finder._patternIt[omp_get_thread_num()] = patternIt;
-//        clear(finder._pool[omp_get_thread_num()]);
-//        find(finder._pool[omp_get_thread_num()], value(patternIt), delegator);
-//    }
-//}
+    for (TPatternIter patternIt = patternBegin; patternIt != patternEnd; ++patternIt)
+    {
+        clear(finderFlyweight);
+        find(finderFlyweight, value(patternIt), delegator);
+    }
+}
 
 // ----------------------------------------------------------------------------
 // Function view()
