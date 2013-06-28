@@ -85,6 +85,54 @@ struct CUDAStoreConfig
 typedef StringSet<CUDAStoreConfig::TContigSeq, CUDAStoreConfig::TContigSpec>        TContigs;
 typedef StringSet<CUDAStoreConfig::TReadSeq, CUDAStoreConfig::TReadSeqStoreSpec>    TReadSeqs;
 
+// ----------------------------------------------------------------------------
+// ReadSeqs Size
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): Check if register usage decreases.
+
+namespace seqan {
+template <>
+struct Size<TReadSeqs>
+{
+    typedef __uint32 Type;
+};
+
+#ifdef __CUDACC__
+template <>
+struct Size<typename Device<TReadSeqs>::Type>
+{
+    typedef __uint32 Type;
+};
+
+template <>
+struct Size<typename View<typename Device<TReadSeqs>::Type>::Type>
+{
+    typedef __uint32 Type;
+};
+#endif
+}
+
+// ----------------------------------------------------------------------------
+// ContainerView Size
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): Check if register usage decreases.
+
+namespace seqan {
+#ifdef __CUDACC__
+template <typename TValue, typename TAlloc, typename TViewSpec>
+struct Size<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec> >
+{
+    typedef __uint32 Type;
+};
+
+template <typename TValue, typename TAlloc, typename TViewSpec, typename TSSetSpec>
+struct Size<StringSet<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec>, TSSetSpec> >
+{
+    typedef __uint32 Type;
+};
+#endif
+}
+
 // ============================================================================
 // Index Types
 // ============================================================================
