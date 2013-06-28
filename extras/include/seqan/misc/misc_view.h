@@ -196,11 +196,19 @@ struct View<TObject const>
     typedef typename View<TObject>::Type const  Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction View                                                   [String]
+// ----------------------------------------------------------------------------
+
 template <typename TValue, typename TAlloc>
 struct View<String<TValue, TAlloc> >
 {
     typedef ContainerView<String<TValue, TAlloc> >  Type;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction View                                    [thrust::device_vector]
+// ----------------------------------------------------------------------------
 
 #ifdef PLATFORM_CUDA
 template <typename TValue, typename TAlloc>
@@ -249,16 +257,6 @@ struct IfView
 // ============================================================================
 // Metafunctions
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Metafunction View
-// ----------------------------------------------------------------------------
-
-template <typename TContainer, typename TSpec>
-struct View<ContainerView<TContainer, TSpec> >
-{
-    typedef ContainerView<TContainer, TSpec>    Type;
-};
 
 // ----------------------------------------------------------------------------
 // Metafunction RemoveView
