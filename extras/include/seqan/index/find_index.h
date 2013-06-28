@@ -68,9 +68,27 @@ struct View<Finder2<TText, TPattern, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction RemoveView
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec>
+struct RemoveView<Finder2<TText, TPattern, TSpec> >
+{
+    typedef Finder2<typename RemoveView<TText>::Type, typename RemoveView<TPattern>::Type, TSpec>   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsView
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec>
+struct IsView<Finder2<TText, TPattern, TSpec> > : IsView<TText> {};
+
+// ----------------------------------------------------------------------------
 // Metafunction TextIterator_
 // ----------------------------------------------------------------------------
 
+// TODO(esiragusa): move this function in the base finder class.
 template <typename TText, typename TSpec>
 struct TextIterator_
 {

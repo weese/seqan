@@ -54,6 +54,23 @@ struct View<Index<TText, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction RemoveView                                              [Index]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct RemoveView<Index<TText, TSpec> >
+{
+    typedef Index<typename RemoveView<TText>::Type, TSpec>  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsView                                                  [Index]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec>
+struct IsView<Index<TText, TSpec> > : IsView<TText> {};
+
+// ----------------------------------------------------------------------------
 // Metafunction View                                                  [LfTable]
 // ----------------------------------------------------------------------------
 

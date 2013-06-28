@@ -197,13 +197,19 @@ struct View<TObject const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction View                                            [ContainerView]
+// Metafunction RemoveView
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TSpec>
-struct View<ContainerView<TContainer, TSpec> >
+template <typename TObject>
+struct RemoveView
 {
-    typedef ContainerView<TContainer, TSpec>    Type;
+    typedef TObject Type;
+};
+
+template <typename TObject>
+struct RemoveView<TObject const>
+{
+    typedef typename RemoveView<TObject>::Type const Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -217,11 +223,38 @@ template <typename TObject>
 struct IsView<TObject const> : public IsView<TObject> {};
 
 // ----------------------------------------------------------------------------
-// Metafunction IsView                                          [ContainerView]
+// Metafunction IfView
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename T1, typename T2>
+struct IfView
+{
+    typedef typename If<typename IsView<TObject>::Type, T1, T2>::Type  Type;
+};
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction View
 // ----------------------------------------------------------------------------
 
 template <typename TContainer, typename TSpec>
-struct IsView<ContainerView<TContainer, TSpec> > : public True {};
+struct View<ContainerView<TContainer, TSpec> >
+{
+    typedef ContainerView<TContainer, TSpec>    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction RemoveView
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct RemoveView<ContainerView<TContainer, TSpec> >
+{
+    typedef TContainer  Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction Value

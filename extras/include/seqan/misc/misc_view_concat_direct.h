@@ -52,6 +52,16 @@ struct View<StringSet<TString, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction RemoveView                                     [StringSet View]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TViewSpec, typename TSpec>
+struct RemoveView<StringSet<ContainerView<TString, TViewSpec>, TSpec> >
+{
+    typedef StringSet<TString, TSpec>   Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction IsView                                         [StringSet View]
 // ----------------------------------------------------------------------------
 
