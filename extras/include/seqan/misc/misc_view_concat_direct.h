@@ -55,15 +55,15 @@ struct View<StringSet<TString, TSpec> >
 // Metafunction IsView                                         [StringSet View]
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TSpec>
-struct IsView<StringSet<ContainerView<TString>, TSpec> > : public True {};
+template <typename TString, typename TViewSpec, typename TSpec>
+struct IsView<StringSet<ContainerView<TString, TViewSpec>, TSpec> > : public True {};
 
 // ----------------------------------------------------------------------------
 // Metafunction StringSetLimits                                [StringSet View]
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TSpec>
-struct StringSetLimits<StringSet<ContainerView<TString>, TSpec> >
+template <typename TString, typename TViewSpec, typename TSpec>
+struct StringSetLimits<StringSet<ContainerView<TString, TViewSpec>, TSpec> >
 {
     typedef typename View<typename StringSetLimits<StringSet<TString, TSpec> >::Type>::Type     Type;
 };
@@ -76,8 +76,8 @@ struct StringSetLimits<StringSet<ContainerView<TString>, TSpec> >
 // Function _initStringSetLimits                [ConcatDirect StringSet View]
 // --------------------------------------------------------------------------
 
-template <typename TString, typename TSpec>
-inline void _initStringSetLimits(StringSet<ContainerView<TString>, Owner<ConcatDirect<TSpec> > > & /* me */) {}
+template <typename TString, typename TViewSpec, typename TSpec>
+inline void _initStringSetLimits(StringSet<ContainerView<TString, TViewSpec>, Owner<ConcatDirect<TSpec> > > & /* me */) {}
 
 // ----------------------------------------------------------------------------
 // Function view()                                     [ConcatDirect StringSet]
