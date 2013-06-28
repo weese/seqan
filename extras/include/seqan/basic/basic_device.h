@@ -38,6 +38,20 @@
 namespace seqan {
 
 // ============================================================================
+// Tags
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Execution space tags
+// ----------------------------------------------------------------------------
+
+struct ExecHost_;
+struct ExecDevice_;
+
+typedef Tag<ExecHost_>   ExecHost;
+typedef Tag<ExecDevice_> ExecDevice;
+
+// ============================================================================
 // Metafunctions
 // ============================================================================
 
@@ -66,6 +80,16 @@ struct IsDevice : public False {};
 
 template <typename TObject>
 struct IsDevice<TObject const> : public IsDevice<TObject> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction ExecSpace
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+struct ExecSpace
+{
+    typedef typename If<typename IsDevice<TObject>::Type, ExecDevice, ExecHost>::Type   Type;
+};
 
 }  // namespace seqan
 
