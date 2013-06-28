@@ -275,11 +275,11 @@ int configureMapper(TOptions & options)
 {
 #ifdef SEQAN_CUDA
     if (options.noCuda)
-        return runMapper<CPU>(options);
+        return runMapper<ExecHost>(options);
     else
-        return runMapper<GPU>(options);
+        return runMapper<ExecDevice>(options);
 #else
-    return runMapper<CPU>(options);
+    return runMapper<ExecHost>(options);
 #endif
 }
 

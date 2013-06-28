@@ -45,10 +45,10 @@ using namespace seqan;
 // ============================================================================
 
 // --------------------------------------------------------------------------
-// Function mapReads()                                                  [GPU]
+// Function mapReads()
 // --------------------------------------------------------------------------
 
-void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, GPU const & /* tag */)
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & /* tag */)
 {
     typedef typename Device<TGenomeIndex>::Type                 TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type                    TDeviceReadSeqs;

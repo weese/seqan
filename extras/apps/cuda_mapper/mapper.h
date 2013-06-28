@@ -207,7 +207,7 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
 
 template <typename TIndex, typename TReadSeqs>
 inline void
-mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
+mapReads(TIndex & index, TReadSeqs & readSeqs, ExecHost const & /* tag */)
 {
     // Map reads.
     _mapReads<TIndex, TReadSeqs, void>(index, readSeqs);
