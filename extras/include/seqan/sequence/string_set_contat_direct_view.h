@@ -32,8 +32,8 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_MISC_DEVICE_H
-#define SEQAN_HEADER_MISC_DEVICE_H
+#ifndef SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_VIEW_H
+#define SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_VIEW_H
 
 namespace seqan {
 
@@ -42,88 +42,82 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction Device
+// Metafunction View                                                [StringSet]
 // ----------------------------------------------------------------------------
 
-template <typename TObject>
-struct Device
+template <typename TString, typename TSpec>
+struct View<StringSet<TString, TSpec> >
 {
-    typedef TObject Type;
-};
-
-template <typename TObject>
-struct Device<TObject const>
-{
-    typedef typename Device<TObject>::Type const    Type;
+    typedef StringSet<typename View<TString>::Type, TSpec>      Type;
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction IsDevice
+// Metafunction RemoveView                                     [StringSet View]
 // ----------------------------------------------------------------------------
 
-template <typename TObject>
-struct IsDevice : public False {};
-
-template <typename TObject>
-struct IsDevice<TObject const> : public IsDevice<TObject> {};
-
-// ----------------------------------------------------------------------------
-// Metafunction Device                                                 [String]
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TAlloc>
-struct Device<String<TValue, TAlloc> >
+template <typename TString, typename TViewSpec, typename TSpec>
+struct RemoveView<StringSet<ContainerView<TString, TViewSpec>, TSpec> >
 {
-    typedef thrust::device_vector<TValue>   Type;
+    typedef StringSet<TString, TSpec>   Type;
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Device                                            [std::vector]
+// Metafunction IsView                                         [StringSet View]
 // ----------------------------------------------------------------------------
 
-template <typename TValue>
-struct Device<std::vector<TValue> >
+template <typename TString, typename TViewSpec, typename TSpec>
+struct IsView<StringSet<ContainerView<TString, TViewSpec>, TSpec> > : public True {};
+
+// ----------------------------------------------------------------------------
+// Metafunction StringSetLimits                                [StringSet View]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TViewSpec, typename TSpec>
+struct StringSetLimits<StringSet<ContainerView<TString, TViewSpec>, TSpec> >
 {
-    typedef thrust::device_vector<TValue>   Type;
+    typedef typename View<typename StringSetLimits<StringSet<TString, TSpec> >::Type>::Type     Type;
 };
-
-// ----------------------------------------------------------------------------
-// Metafunction Device                                            [std::string]
-// ----------------------------------------------------------------------------
-
-template <>
-struct Device<std::string>
-{
-    typedef thrust::device_vector<char>     Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction IsDevice                                [thrust::device_vector]
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TAlloc>
-struct IsDevice<thrust::device_vector<TValue, TAlloc> > : public True {};
 
 // ============================================================================
 // Functions
 // ============================================================================
 
+// --------------------------------------------------------------------------
+// Function _initStringSetLimits                [ConcatDirect StringSet View]
+// --------------------------------------------------------------------------
+
+template <typename TString, typename TViewSpec, typename TSpec>
+inline void
+_initStringSetLimits(StringSet<ContainerView<TString, TViewSpec>, Owner<ConcatDirect<TSpec> > > & /* me */) {}
+
 // ----------------------------------------------------------------------------
-// Function view()                                      [thrust::device_vector]
+// Function view()                                     [ConcatDirect StringSet]
 // ----------------------------------------------------------------------------
 
-template <typename TContainer, typename TAlloc>
-inline typename View<thrust::device_vector<TContainer, TAlloc> >::Type
-view(thrust::device_vector<TContainer, TAlloc> & container)
+template <typename TString, typename TSpec>
+typename View<StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type
+view(StringSet<TString, Owner<ConcatDirect<TSpec> > > & stringSet)
 {
-    typedef typename View<thrust::device_vector<TContainer, TAlloc> >::Type TView;
+    typename View<StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type stringSetView;
 
-    if (empty(container)) return TView();
+    concat(stringSetView) = view(concat(stringSet));
+    stringSetLimits(stringSetView) = view(stringSetLimits(stringSet));
 
-    return TView(thrust::raw_pointer_cast(&container.front()),
-                 thrust::raw_pointer_cast(&container.front()) + container.size());
+    return stringSetView;
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                   [ConcatDirect StringSet]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TSpec, typename TString2, typename TSpec2>
+void assign(StringSet<TString, Owner<ConcatDirect<TSpec> > > & stringSet,
+            StringSet<TString2, Owner<ConcatDirect<TSpec2> > > & other)
+{
+    assign(concat(stringSet), concat(other));
+    assign(stringSetLimits(stringSet), stringSetLimits(other));
 }
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_MISC_DEVICE_H
+#endif  // #ifndef SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_VIEW_H

@@ -54,22 +54,8 @@
 // CUDA misc stuff.
 // ===========================================================================
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 #include <seqan/misc/misc_cuda.h>
-#endif
-
-// ===========================================================================
-// Views and Devices.
-// ===========================================================================
-
-#include <seqan/misc/misc_view.h>
-#ifdef __CUDACC__
-#include <seqan/misc/misc_device.h>
-#endif
-
-#include <seqan/misc/misc_view_concat_direct.h>
-#ifdef __CUDACC__
-#include <seqan/misc/misc_device_concat_direct.h>
 #endif
 
 // ===========================================================================

@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: David Weese <david.weese@fu-berlin.de>
+// Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 // Adaptions for Thrust device_vectors to SeqAn strings.
 // ==========================================================================
@@ -45,7 +46,7 @@ namespace seqan {
 
 /**
 .Adaption."thrust::device_vector"
-..summary:Adaption for STL vector class.
+..summary:Adaption for Thrust device_vector class.
  */
 
 // ===========================================================================
@@ -251,6 +252,45 @@ struct StdContainerIterator<thrust::device_vector<TChar, TAlloc> const>
 {
     typedef thrust::device_vector<TChar, TAlloc> TContainer_;
     typedef typename TContainer_::const_iterator Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction View
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc>
+struct View<thrust::device_vector<TValue, TAlloc> >
+{
+    typedef ContainerView<thrust::device_vector<TValue, TAlloc> >   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsDevice
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc>
+struct IsDevice<thrust::device_vector<TValue, TAlloc> > : public True {};
+
+// ----------------------------------------------------------------------------
+// Metafunction Device
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc>
+struct Device<String<TValue, TAlloc> >
+{
+    typedef thrust::device_vector<TValue>   Type;
+};
+
+template <typename TValue>
+struct Device<std::vector<TValue> >
+{
+    typedef thrust::device_vector<TValue>   Type;
+};
+
+template <>
+struct Device<std::string>
+{
+    typedef thrust::device_vector<char>     Type;
 };
 
 // ===========================================================================
@@ -836,6 +876,22 @@ fill(thrust::device_vector<TChar, TAlloc> & me, TSize new_length, TChar const & 
 {
     me.resize(new_length, val);
     return me.length();
+}
+
+// ----------------------------------------------------------------------------
+// Function view()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TAlloc>
+inline typename View<thrust::device_vector<TContainer, TAlloc> >::Type
+view(thrust::device_vector<TContainer, TAlloc> & container)
+{
+    typedef typename View<thrust::device_vector<TContainer, TAlloc> >::Type TView;
+
+    if (empty(container)) return TView();
+
+    return TView(thrust::raw_pointer_cast(&container.front()),
+                 thrust::raw_pointer_cast(&container.front()) + container.size());
 }
 
 }  // namespace seqan

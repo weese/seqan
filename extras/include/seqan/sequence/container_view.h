@@ -33,14 +33,10 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_MISC_VIEW_H
-#define SEQAN_HEADER_MISC_VIEW_H
+#ifndef SEQAN_EXTRAS_SEQUENCE_CONTAINER_VIEW_H
+#define SEQAN_EXTRAS_SEQUENCE_CONTAINER_VIEW_H
 
 namespace seqan {
-
-// ============================================================================
-// Forwards
-// ============================================================================
 
 // ============================================================================
 // Tags, Classes, Enums
@@ -184,79 +180,11 @@ public:
 // Metafunction View
 // ----------------------------------------------------------------------------
 
-template <typename TObject>
-struct View
-{
-    typedef TObject Type;
-};
-
-template <typename TObject>
-struct View<TObject const>
-{
-    typedef typename View<TObject>::Type const  Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction View                                                   [String]
-// ----------------------------------------------------------------------------
-
 template <typename TValue, typename TAlloc>
 struct View<String<TValue, TAlloc> >
 {
     typedef ContainerView<String<TValue, TAlloc> >  Type;
 };
-
-// ----------------------------------------------------------------------------
-// Metafunction View                                    [thrust::device_vector]
-// ----------------------------------------------------------------------------
-
-#ifdef PLATFORM_CUDA
-template <typename TValue, typename TAlloc>
-struct View<thrust::device_vector<TValue, TAlloc> >
-{
-    typedef ContainerView<thrust::device_vector<TValue, TAlloc> >   Type;
-};
-#endif
-
-// ----------------------------------------------------------------------------
-// Metafunction RemoveView
-// ----------------------------------------------------------------------------
-
-template <typename TObject>
-struct RemoveView
-{
-    typedef TObject Type;
-};
-
-template <typename TObject>
-struct RemoveView<TObject const>
-{
-    typedef typename RemoveView<TObject>::Type const Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction IsView
-// ----------------------------------------------------------------------------
-
-template <typename TObject>
-struct IsView : public False {};
-
-template <typename TObject>
-struct IsView<TObject const> : public IsView<TObject> {};
-
-// ----------------------------------------------------------------------------
-// Metafunction IfView
-// ----------------------------------------------------------------------------
-
-template <typename TObject, typename T1, typename T2>
-struct IfView
-{
-    typedef typename If<typename IsView<TObject>::Type, T1, T2>::Type  Type;
-};
-
-// ============================================================================
-// Metafunctions
-// ============================================================================
 
 // ----------------------------------------------------------------------------
 // Metafunction RemoveView
@@ -314,7 +242,7 @@ template <typename TContainer, typename TSpec>
 struct Iterator<ContainerView<TContainer, TSpec> const, Standard>:
     public Iterator<TContainer const, Standard> {};
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <typename TContainer, typename TAlloc, typename TSpec>
 struct Iterator<ContainerView<thrust::device_vector<TContainer, TAlloc>, TSpec>, Standard>
 {
@@ -572,17 +500,6 @@ inline void assign(ContainerView<TContainer, Resizable<TSpec> > & view, TOtherCo
 }
 
 // ----------------------------------------------------------------------------
-// Function view()
-// ----------------------------------------------------------------------------
-
-template <typename TContainer>
-inline ContainerView<TContainer>
-view(TContainer & container)
-{
-    return ContainerView<TContainer>(container);
-}
-
-// ----------------------------------------------------------------------------
 // Function appendValue()
 // ----------------------------------------------------------------------------
 
@@ -645,4 +562,4 @@ operator<<(TStream & target, ContainerView<TContainer, TSpec> const & source)
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_MISC_VIEW_H
+#endif  // #ifndef SEQAN_EXTRAS_SEQUENCE_CONTAINER_VIEW_H

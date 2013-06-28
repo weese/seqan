@@ -32,8 +32,8 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_MISC_DEVICE_CONCAT_DIRECT_H
-#define SEQAN_HEADER_MISC_DEVICE_CONCAT_DIRECT_H
+#ifndef SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_DEVICE_H
+#define SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_DEVICE_H
 
 namespace seqan {
 
@@ -72,4 +72,4 @@ struct StringSetLimits<StringSet<thrust::device_vector<TValue, TAlloc>, TSpec> >
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_MISC_DEVICE_CONCAT_DIRECT_H
+#endif  // #ifndef SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_DEVICE_H

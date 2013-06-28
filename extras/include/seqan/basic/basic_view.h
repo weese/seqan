@@ -32,8 +32,8 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_MISC_VIEW_CONCAT_DIRECT_H
-#define SEQAN_HEADER_MISC_VIEW_CONCAT_DIRECT_H
+#ifndef SEQAN_EXTRAS_BASIC_VIEW_H
+#define SEQAN_EXTRAS_BASIC_VIEW_H
 
 namespace seqan {
 
@@ -42,81 +42,72 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction View                                                [StringSet]
+// Metafunction View
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TSpec>
-struct View<StringSet<TString, TSpec> >
+template <typename TObject>
+struct View
 {
-    typedef StringSet<typename View<TString>::Type, TSpec>      Type;
+    typedef TObject Type;
+};
+
+template <typename TObject>
+struct View<TObject const>
+{
+    typedef typename View<TObject>::Type const  Type;
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction RemoveView                                     [StringSet View]
+// Metafunction RemoveView
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TViewSpec, typename TSpec>
-struct RemoveView<StringSet<ContainerView<TString, TViewSpec>, TSpec> >
+template <typename TObject>
+struct RemoveView
 {
-    typedef StringSet<TString, TSpec>   Type;
+    typedef TObject Type;
+};
+
+template <typename TObject>
+struct RemoveView<TObject const>
+{
+    typedef typename RemoveView<TObject>::Type const Type;
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction IsView                                         [StringSet View]
+// Metafunction IsView
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TViewSpec, typename TSpec>
-struct IsView<StringSet<ContainerView<TString, TViewSpec>, TSpec> > : public True {};
+template <typename TObject>
+struct IsView : public False {};
+
+template <typename TObject>
+struct IsView<TObject const> : public IsView<TObject> {};
 
 // ----------------------------------------------------------------------------
-// Metafunction StringSetLimits                                [StringSet View]
+// Metafunction IfView
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TViewSpec, typename TSpec>
-struct StringSetLimits<StringSet<ContainerView<TString, TViewSpec>, TSpec> >
+template <typename TObject, typename T1, typename T2>
+struct IfView
 {
-    typedef typename View<typename StringSetLimits<StringSet<TString, TSpec> >::Type>::Type     Type;
+    typedef typename If<typename IsView<TObject>::Type, T1, T2>::Type  Type;
 };
 
 // ============================================================================
 // Functions
 // ============================================================================
 
-// --------------------------------------------------------------------------
-// Function _initStringSetLimits                [ConcatDirect StringSet View]
-// --------------------------------------------------------------------------
-
-template <typename TString, typename TViewSpec, typename TSpec>
-inline void _initStringSetLimits(StringSet<ContainerView<TString, TViewSpec>, Owner<ConcatDirect<TSpec> > > & /* me */) {}
-
 // ----------------------------------------------------------------------------
-// Function view()                                     [ConcatDirect StringSet]
+// Function view()
 // ----------------------------------------------------------------------------
 
-template <typename TString, typename TSpec>
-typename View<StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type
-view(StringSet<TString, Owner<ConcatDirect<TSpec> > > & stringSet)
+template <typename TObject>
+inline typename View<TObject>::Type
+view(TObject & object)
 {
-    typename View<StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type stringSetView;
-
-    concat(stringSetView) = view(concat(stringSet));
-    stringSetLimits(stringSetView) = view(stringSetLimits(stringSet));
-
-    return stringSetView;
-}
-
-// ----------------------------------------------------------------------------
-// Function assign()                                   [ConcatDirect StringSet]
-// ----------------------------------------------------------------------------
-
-template <typename TString, typename TSpec, typename TString2, typename TSpec2>
-void assign(StringSet<TString, Owner<ConcatDirect<TSpec> > > & stringSet,
-            StringSet<TString2, Owner<ConcatDirect<TSpec2> > > & other)
-{
-    assign(concat(stringSet), concat(other));
-    assign(stringSetLimits(stringSet), stringSetLimits(other));
+    return typename View<TObject>::Type(object);
 }
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_MISC_VIEW_CONCAT_DIRECT_H
+#endif  // #ifndef SEQAN_EXTRAS_BASIC_VIEW_H

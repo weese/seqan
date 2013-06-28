@@ -31,46 +31,42 @@
 // ==========================================================================
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
-// Facade header for module sequence.
-// ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_SEQUENCE_H_
-#define EXTRAS_INCLUDE_SEQAN_SEQUENCE_H_
+#ifndef SEQAN_EXTRAS_BASIC_DEVICE_H
+#define SEQAN_EXTRAS_BASIC_DEVICE_H
 
-// ===========================================================================
-// Prerequisites.
-// ===========================================================================
+namespace seqan {
 
-#include <seqan/sequence.h>
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-// ===========================================================================
-// Prerequisites from extras.
-// ===========================================================================
+// ----------------------------------------------------------------------------
+// Metafunction Device
+// ----------------------------------------------------------------------------
 
-#include <seqan/basic_extras.h>
+template <typename TObject>
+struct Device
+{
+    typedef TObject Type;
+};
 
-// ===========================================================================
-// Container View.
-// ===========================================================================
+template <typename TObject>
+struct Device<TObject const>
+{
+    typedef typename Device<TObject>::Type const    Type;
+};
 
-#include <seqan/sequence/container_view.h>
+// ----------------------------------------------------------------------------
+// Metafunction IsDevice
+// ----------------------------------------------------------------------------
 
-// ===========================================================================
-// Adaption of thrust::device_vector.
-// ===========================================================================
+template <typename TObject>
+struct IsDevice : public False {};
 
-#ifdef PLATFORM_CUDA
-#include <seqan/sequence/adapt_thrust_vector.h>
-#endif
+template <typename TObject>
+struct IsDevice<TObject const> : public IsDevice<TObject> {};
 
-// ===========================================================================
-// StringSet View and Device.
-// ===========================================================================
+}  // namespace seqan
 
-#include <seqan/sequence/string_set_contat_direct_view.h>
-#ifdef PLATFORM_CUDA
-#include <seqan/sequence/string_set_contat_direct_device.h>
-#endif
-
-
-#endif  // EXTRAS_INCLUDE_SEQAN_SEQUENCE_H_
+#endif  // #ifndef SEQAN_EXTRAS_BASIC_DEVICE_H

@@ -47,10 +47,17 @@
 // Thrust algorithms.
 // ----------------------------------------------------------------------------
 
-//#ifdef __CUDACC__
+//#ifdef PLATFORM_CUDA
 //#include <thrust/sort.h>
 //#include <thrust/reduce.h>
 //#endif
+
+// ===========================================================================
+// Views and Devices.
+// ===========================================================================
+
+#include <seqan/basic/basic_view.h>
+#include <seqan/basic/basic_device.h>
 
 // ===========================================================================
 // SIMD Types.
