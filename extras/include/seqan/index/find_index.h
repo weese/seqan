@@ -53,6 +53,14 @@ struct Backtracking;
 template <typename TSpec>
 struct View;
 
+// TODO(esiragusa): Remove this.
+template <typename TSpec>
+struct RemoveView;
+
+// TODO(esiragusa): Remove this.
+template <typename TSpec>
+struct IsView;
+
 // ============================================================================
 // Metafunctions
 // ============================================================================
