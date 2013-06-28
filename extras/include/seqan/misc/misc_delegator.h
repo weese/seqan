@@ -65,6 +65,26 @@ struct Delegator
     }
 };
 
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Delegated
+// ----------------------------------------------------------------------------
+
+template <typename TObject>
+struct Delegated
+{
+    typedef TObject Type;
+};
+
+template <typename TObject>
+struct Delegated<TObject const>
+{
+    typedef TObject const Type;
+};
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_HEADER_MISC_DELEGATOR_H
