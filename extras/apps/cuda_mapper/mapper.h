@@ -93,13 +93,6 @@ struct Member<Hits<TIndex, TSpec>, Ranges_>
     typedef String<TRange_>                     Type;
 };
 
-template <typename TIndex, typename TSpec>
-struct Member<Hits<TIndex, View<TSpec> >, Ranges_>
-{
-    typedef typename Member<Hits<TIndex, TSpec>, Ranges_>::Type TRanges_;
-    typedef ContainerView<TRanges_, Resizable<TSpec> >          Type;
-};
-
 #ifdef __CUDACC__
 template <typename TIndex, typename TSpec>
 struct Member<Hits<TIndex, Device<TSpec> >, Ranges_>
@@ -108,6 +101,13 @@ struct Member<Hits<TIndex, Device<TSpec> >, Ranges_>
     typedef thrust::device_vector<TRange_>      Type;
 };
 #endif
+
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, View<TSpec> >, Ranges_>
+{
+    typedef typename Member<Hits<TIndex, TSpec>, Ranges_>::Type TRanges_;
+    typedef ContainerView<TRanges_, Resizable<TSpec> >          Type;
+};
 }
 
 // ----------------------------------------------------------------------------
@@ -182,7 +182,9 @@ template <typename TIndex, typename TReadSeqs, typename TSpace>
 inline void
 _mapReads(TIndex & index, TReadSeqs & readSeqs)
 {
-    typedef Finder2<TIndex, TReadSeqs, Multiple<FinderSTree> >  TFinder;
+    typedef Multiple<Backtracking<HammingDistance> >    TFinderSpec;
+//    typedef Multiple<FinderSTree>                       TFinderSpec;
+    typedef Finder2<TIndex, TReadSeqs, TFinderSpec>     TFinder;
 
     // Instantiate a multiple finder.
     TFinder finder(index);
@@ -210,6 +212,5 @@ mapReads(TIndex & index, TReadSeqs & readSeqs, CPU const & /* tag */)
     // Map reads.
     _mapReads<TIndex, TReadSeqs, void>(index, readSeqs);
 }
-
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
