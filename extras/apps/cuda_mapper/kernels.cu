@@ -38,9 +38,6 @@
 
 #include "kernels.h"
 
-//#include <thrust/sort.h>
-//#include <thrust/reduce.h>
-
 using namespace seqan;
 
 // ============================================================================
