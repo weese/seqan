@@ -56,16 +56,6 @@
 #include <seqan/misc_extras.h>
 
 // ===========================================================================
-// Extra VSTree Iterators.
-// ===========================================================================
-
-#include <seqan/index/index_sa_stree.h>
-#include <seqan/index/index_sa_truncated.h>
-
-#include <seqan/index/index_qgram_stree.h>
-#include <seqan/index/index_qgram_bucketrefinement.h>
-
-// ===========================================================================
 // Index Views.
 // ===========================================================================
 
@@ -78,6 +68,18 @@
 #ifdef PLATFORM_CUDA
 #include <seqan/index/index_device.h>
 #endif
+
+// ===========================================================================
+// Extra VSTree Iterators.
+// ===========================================================================
+
+#include <seqan/index/index_sa_stree.h>
+#include <seqan/index/index_sa_truncated.h>
+
+#include <seqan/index/index_qgram_stree.h>
+#include <seqan/index/index_qgram_bucketrefinement.h>
+
+#include <seqan/index/iter_vstree_factory.h>
 
 // ===========================================================================
 // Backtracking Finders.
