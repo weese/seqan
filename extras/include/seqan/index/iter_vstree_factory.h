@@ -53,6 +53,23 @@ struct Factory;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Metafunction View
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename TSpec>
+struct View<Factory<TObject, TSpec> >
+{
+    typedef Factory<typename View<TObject>::Type, TSpec>    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsView
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename TSpec>
+struct IsView<Factory<TObject, TSpec> > : IsView<TObject> {};
+
+// ----------------------------------------------------------------------------
 // Metafunction Host
 // ----------------------------------------------------------------------------
 
@@ -67,23 +84,6 @@ struct Host<Factory<Iter<TIndex, VSTree<TSpec> > > const>
 {
     typedef TIndex const    Type;
 };
-
-// ----------------------------------------------------------------------------
-// Metafunction View
-// ----------------------------------------------------------------------------
-
-template <typename TIndex, typename TSpec>
-struct View<Factory<Iter<TIndex, VSTree<TSpec> > > >
-{
-    typedef Factory<Iter<typename View<TIndex>::Type, VSTree<TSpec> > > Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction IsView
-// ----------------------------------------------------------------------------
-
-template <typename TIndex, typename TSpec>
-struct IsView<Factory<Iter<TIndex, VSTree<TSpec> > > > : IsView<TIndex> {};
 
 // ----------------------------------------------------------------------------
 // Member Index_
@@ -125,7 +125,6 @@ struct Factory<Iter<TIndex, VSTree<TSpec> > >
     SEQAN_HOST_DEVICE
     Factory() {}
 
-    SEQAN_HOST_DEVICE
     Factory(TIndex & index) :
         _index(index)
     {}
@@ -155,7 +154,6 @@ struct Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > :
         SEQAN_ASSERT(IsView<TIter_>::VALUE);
     }
 
-    SEQAN_HOST_DEVICE
     Factory(TIndex & index) :
         TBase(index)
     {
@@ -186,7 +184,7 @@ _host(Factory<Iter<TIndex, VSTree<TSpec> > > & factory, True const & /* isView *
 }
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type &
+inline typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type &
 _host(Factory<Iter<TIndex, VSTree<TSpec> > > & factory, False const & /* isView */)
 {
     return value(factory._index);
@@ -207,7 +205,7 @@ _host(Factory<Iter<TIndex, VSTree<TSpec> > > const & factory, True const & /* is
 }
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > const>::Type &
+inline typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > const>::Type &
 _host(Factory<Iter<TIndex, VSTree<TSpec> > > const & factory, False const & /* isView */)
 {
     return value(factory._index);
@@ -221,15 +219,20 @@ template <typename TIndex, typename TSpec>
 inline SEQAN_HOST_DEVICE typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type
 view(Factory<Iter<TIndex, VSTree<TSpec> > > & factory)
 {
-    return typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type(view(host(factory)));
+    typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type factoryView;
+
+    host(factoryView) = view(host(factory));
+
+    return factoryView;
 }
 
 template <typename TIndex, typename TSpec>
 inline SEQAN_HOST_DEVICE typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type
 view(Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > & factory)
 {
-    typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type factoryView(view(host(factory)));
+    typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type factoryView;
 
+    host(factoryView) = view(host(factory));
     factoryView._history = view(factory._history);
     factoryView._maxHistoryLength = factory._maxHistoryLength;
     factoryView._maxObjects = factory._maxObjects;
