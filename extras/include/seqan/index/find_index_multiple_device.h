@@ -95,7 +95,7 @@ _findKernel(Finder2<TText, TPatterns, Multiple<TSpec> > finder, TPatterns patter
     typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
 
     unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    unsigned gridThreads = gridDim.x * blockDim.x;
+//    unsigned gridThreads = gridDim.x * blockDim.x;
 
     // Instantiate a simple finder.
     TFinderSimple simpleFinder = getObject(finder._factory, threadId);
@@ -106,15 +106,15 @@ _findKernel(Finder2<TText, TPatterns, Multiple<TSpec> > finder, TPatterns patter
     // Instantiate a delegator object to delegate the finder proxy instead of the serial finder.
     TDelegator delegator(finderProxy, delegate);
 
-    unsigned patternsCount = length(patterns);
+//    unsigned patternsCount = length(patterns);
 
-	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
-    {
-        finderProxy._patternIt = patternId;
+//	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
+//    {
+        finderProxy._patternIt = threadId;// patternId;
 
         // Find a single pattern.
-        find(simpleFinder, patterns[patternId], delegator);
-    }
+        find(simpleFinder, patterns[finderProxy._patternIt], delegator);
+//    }
 }
 
 // ============================================================================
@@ -158,14 +158,16 @@ _find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
 
     // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
-    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
+//    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
+    unsigned activeBlocks = (length(patterns) * ctaSize - 1) / ctaSize;
 
     std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
     std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
 
     // Initialize the iterator factory.
     setMaxHistoryLength(finder._factory, length(back(patterns)));
-    setMaxObjects(finder._factory, activeBlocks * ctaSize);
+    setMaxObjects(finder._factory, length(patterns));
+//    setMaxObjects(finder._factory, activeBlocks * ctaSize);
     build(finder._factory);
 
     // Launch the find kernel.
