@@ -68,7 +68,7 @@ struct Hits
     typename Member<Hits, Ranges_>::Type    ranges;
 
     template <typename TFinder>
-    SEQAN_FUNC void
+    inline SEQAN_HOST_DEVICE void
     operator() (TFinder const & finder)
     {
         appendRange(*this, finder);
@@ -166,7 +166,7 @@ appendRange(Hits<TIndex, TSpec> & hits, TFinder const & finder)
 
 #ifdef PLATFORM_CUDA
 template <typename TIndex, typename TSpec, typename TFinder>
-SEQAN_FUNC void
+inline SEQAN_HOST_DEVICE void
 appendRange(Hits<TIndex, View<Device<TSpec> > > & hits, TFinder const & finder)
 {
     // TODO(esiragusa): Global lock.
