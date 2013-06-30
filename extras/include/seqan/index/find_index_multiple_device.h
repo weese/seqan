@@ -110,12 +110,10 @@ _findKernel(Finder2<TText, TPatterns, Multiple<TSpec> > finder, TPatterns patter
 
 	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
     {
-//        finderProxy._patternIt = begin(patterns, Standard()) + patternId;
         finderProxy._patternIt = patternId;
 
         // Find a single pattern.
         find(simpleFinder, patterns[patternId], delegator);
-//        find(simpleFinder, patterns[finder._idxs[patternId]], delegator);
     }
 }
 
@@ -151,6 +149,7 @@ _find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
 {
     typedef Finder2<TText, TPatterns, Multiple<TSpec> > TFinder;
     typedef typename View<TFinder>::Type                TFinderView;
+    typedef typename View<TText>::Type                  TTextView;
     typedef typename View<TPatterns>::Type              TPatternsView;
     typedef typename View<TDelegate>::Type              TDelegateView;
 
@@ -159,7 +158,7 @@ _find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
 
     // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
-    unsigned activeBlocks = 80;//cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternsView, TDelegateView>, ctaSize, 0);
+    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
 
     std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
     std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
