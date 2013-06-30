@@ -42,6 +42,7 @@
 #define SEQAN_HOST_DEVICE __host__ __device__
 #define SEQAN_HOST __host__
 #define SEQAN_DEVICE __device__
+#define SEQAN_GLOBAL __global__
 
 #else
 
@@ -49,6 +50,7 @@
 #define SEQAN_HOST_DEVICE
 #define SEQAN_HOST
 #define SEQAN_DEVICE
+#define SEQAN_GLOBAL
 
 #endif
 
