@@ -45,11 +45,8 @@ namespace seqan {
 // Metafunction FinderCTASize_
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TPattern, typename TSpec>
-struct FinderCTASize_;
-
-template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
+template <typename TFinder>
+struct FinderCTASize_
 {
     static const unsigned VALUE = 256;
 };
@@ -63,7 +60,7 @@ struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 // ----------------------------------------------------------------------------
 
 template <typename TFinderView, typename TPatternsView>
-__global__ void
+SEQAN_GLOBAL void
 _computeHashesKernel(TFinderView finder, TPatternsView patterns)
 {
     typedef typename Value<TPatternsView>::Type         TPatternView;
@@ -87,22 +84,24 @@ _computeHashesKernel(TFinderView finder, TPatternsView patterns)
 // Kernel _findKernel()
 // ----------------------------------------------------------------------------
 
-template <typename TFinderView, typename TPatternsView, typename TDelegateView>
-__global__ void
-_findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
+template <typename TText, typename TPatterns, typename TSpec, typename TDelegate>
+SEQAN_GLOBAL void
+_findKernel(Finder2<TText, TPatterns, Multiple<TSpec> > finder, TPatterns patterns, TDelegate delegate)
 {
+    typedef typename Value<TPatterns>::Type                 TPattern;
+    typedef Finder2<TText, TPattern, TSpec>                 TFinderSimple;
+    typedef Finder2<TText, TPatterns, Multiple<TSpec> >     TFinderView;
     typedef Proxy<TFinderView>                              TFinderProxy;
-    typedef Delegator<TFinderProxy, TDelegateView>          TDelegator;
-    typedef typename FinderSerial_<TFinderView>::Type       TSerialFinder;
+    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
 
     unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned gridThreads = gridDim.x * blockDim.x;
 
-    // Instantiate a serial finder.
-    TSerialFinder serialFinder = getObject(finder._factory, threadId);
+    // Instantiate a simple finder.
+    TFinderSimple simpleFinder = getObject(finder._factory, threadId);
 
     // Instantiate a finder proxy to be delegated.
-    TFinderProxy finderProxy(serialFinder);
+    TFinderProxy finderProxy(simpleFinder);
 
     // Instantiate a delegator object to delegate the finder proxy instead of the serial finder.
     TDelegator delegator(finderProxy, delegate);
@@ -115,8 +114,8 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
         finderProxy._patternIt = patternId;
 
         // Find a single pattern.
-        find(serialFinder, patterns[patternId], delegator);
-//        find(finderFlyweight, patterns[finder._idxs[patternId]], delegator);
+        find(simpleFinder, patterns[patternId], delegator);
+//        find(simpleFinder, patterns[finder._idxs[patternId]], delegator);
     }
 }
 
@@ -143,35 +142,35 @@ _findKernel(TFinderView finder, TPatternsView patterns, TDelegateView delegate)
 // Function _find(); ExecDevice
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TPattern, typename TSpec, typename TDelegate>
+template <typename TText, typename TPatterns, typename TSpec, typename TDelegate>
 inline void
-_find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
-      TPattern /* const */ & pattern,
+_find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
+      TPatterns /* const */ & patterns,
       TDelegate & delegate,
       ExecDevice const & /* tag */)
 {
-    typedef Finder2<TText, TPattern, Multiple<TSpec> >  TFinder;
+    typedef Finder2<TText, TPatterns, Multiple<TSpec> > TFinder;
     typedef typename View<TFinder>::Type                TFinderView;
-    typedef typename View<TPattern>::Type               TPatternView;
+    typedef typename View<TPatterns>::Type              TPatternsView;
     typedef typename View<TDelegate>::Type              TDelegateView;
 
     // Preprocess patterns.
 //    _preprocess(finder, patterns);
 
     // Compute grid size.
-    unsigned ctaSize = FinderCTASize_<TText, TPattern, Multiple<TSpec> >::VALUE;
-    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternView, TDelegateView>, ctaSize, 0);
+    unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
+    unsigned activeBlocks = 80;//cudaMaxActiveBlocks(_findKernel<TFinderView, TPatternsView, TDelegateView>, ctaSize, 0);
 
     std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
     std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
 
     // Initialize the iterator factory.
-    setMaxHistoryLength(finder._factory, length(back(pattern)));
+    setMaxHistoryLength(finder._factory, length(back(patterns)));
     setMaxObjects(finder._factory, activeBlocks * ctaSize);
     build(finder._factory);
 
     // Launch the find kernel.
-    _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), view(delegate));
+    _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(patterns), view(delegate));
 }
 
 }
