@@ -217,19 +217,13 @@ SEQAN_FUNC bool _isRoot(VertexFmi<TAlphabet, TSize> const & value)
 // ----------------------------------------------------------------------------
 // Function _isLeaf()                                                [Iterator]
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): Implement _isLeaf() with empty edges.
 
-template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
+template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec,
+          typename TDfsOrder, typename THideEmptyEdges, typename TView>
 SEQAN_FUNC bool
 _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
-        VSTreeIteratorTraits<TDfsOrder, False> const)
-{
-    return _isLeaf(it, VSTreeIteratorTraits<TDfsOrder, True>());
-}
-
-template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-SEQAN_FUNC bool
-_isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const & it,
-        VSTreeIteratorTraits<TDfsOrder, True> const)
+        VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges, TView> const)
 {
     return (value(it).range.i1 + 1 >= value(it).range.i2 &&
         sentinelAt(getFibre(container(it), FibreLF()), value(it).range.i1));
@@ -306,20 +300,13 @@ _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TS
 // ----------------------------------------------------------------------------
 // Function _goDown()                                                [Iterator]
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): Implement _goDown() with empty edges.
 
-// TODO(esiragusa): Implement this.
-template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-SEQAN_FUNC bool
-_goDown(Iter<Index<TText, FMIndex<TOccSpec,TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-        VSTreeIteratorTraits<TDfsOrder, False> const)
-{
-    return _goDown(it, VSTreeIteratorTraits<TDfsOrder, True>());
-}
-
-template <typename TText, typename TOccSpec, typename TSpec, typename TIndexSpec, typename TDfsOrder>
+template <typename TText, typename TOccSpec, typename TSpec, typename TIndexSpec,
+          typename TDfsOrder, typename THideEmptyEdges, typename TView>
 SEQAN_FUNC bool
 _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-        VSTreeIteratorTraits<TDfsOrder, True> const)
+        VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges, TView> const)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >    TIndex;
     typedef typename Value<TIndex>::Type                    TAlphabet;
@@ -387,20 +374,13 @@ _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<
 // ----------------------------------------------------------------------------
 // Function _goRight()                                               [Iterator]
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): Implement _goRight() with empty edges.
 
-// TODO(esiragusa): Implement this.
-template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
+template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec,
+          typename TDfsOrder, typename THideEmptyEdges, typename TView>
 SEQAN_FUNC bool
 _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-         VSTreeIteratorTraits<TDfsOrder, False> const)
-{
-    return _goRight(it, VSTreeIteratorTraits<TDfsOrder, True>());
-}
-
-template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-SEQAN_FUNC bool
-_goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-         VSTreeIteratorTraits<TDfsOrder, True> const)
+        VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges, TView> const)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
     typedef typename Value<TIndex>::Type                        TAlphabet;
