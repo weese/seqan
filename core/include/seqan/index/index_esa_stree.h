@@ -367,10 +367,12 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	struct HistoryStack_;
 
 	template <typename TIndex, typename TSpec>
-	struct HistoryStack_<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > >
+	struct HistoryStack_<Iter<TIndex, VSTree<TSpec> > >
 	{
-        typedef Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > >            TIter_;
-		typedef String<typename HistoryStackEntry_<TIter_>::Type, Block<> >     Type;
+        typedef Iter<TIndex, VSTree<TSpec> >                        TIter_;
+		typedef String<typename HistoryStackEntry_<TIter_>::Type>   Type;
+
+//		typedef String<typename HistoryStackEntry_<TIter_>::Type, Block<> > Type;
 	};
 
 	template < typename TIndex, class TSpec >
@@ -505,8 +507,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 		typedef typename VertexDescriptor<TIndex>::Type	TVertexDesc;
 		typedef typename Size<TIndex>::Type				TSize;
-		typedef	typename HistoryStackEntry_<Iter>::Type	TStackEntry;
-		typedef String<TStackEntry, Block<> >			TStack;
+        typedef	typename HistoryStack_<Iter>::Type      TStack;
 		typedef Iter									iterator;
 
 		TIndex	const	*index;			// container of all necessary tables
