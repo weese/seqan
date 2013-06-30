@@ -520,6 +520,16 @@ appendValue(ContainerView<TContainer, Resizable<TSpec> > & view, TValue const & 
 
     appendValue(view, _value, typename DefaultOverflowImplicit<TView>::Type());
 }
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+SEQAN_FUNC void
+clear(ContainerView<TContainer, Resizable<TSpec> > & view)
+{
+    resize(view, 0, Exact());
+}
 
 // ----------------------------------------------------------------------------
 // Operator<<
