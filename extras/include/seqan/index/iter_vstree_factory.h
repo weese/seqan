@@ -106,7 +106,7 @@ struct History_;
 template <typename TIndex, typename TSpec>
 struct Member<Factory<Iter<TIndex, TSpec> >, History_>
 {
-    typedef typename HistoryStack_<typename RemoveView<Iter<TIndex, TSpec> >::Type>::Type   Type;
+    typedef typename HistoryStack_<Iter<TIndex, TSpec> >::Type   Type;
 };
 
 // ============================================================================
@@ -122,7 +122,6 @@ struct Factory<Iter<TIndex, VSTree<TSpec> > >
 {
     typename Member<Factory, Index_>::Type  _index;
 
-    SEQAN_HOST_DEVICE
     Factory() {}
 
     Factory(TIndex & index) :
@@ -138,27 +137,22 @@ template <typename TIndex, typename TSpec>
 struct Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > :
     Factory<Iter<TIndex, VSTree<TSpec> > >
 {
-    typedef Factory<Iter<TIndex, VSTree<TSpec> > >                  TBase;
-    typedef Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > >    TIter_;
+    typedef Factory<Iter<TIndex, VSTree<TSpec> > >  TBase;
 
     typename Member<Factory, History_>::Type    _history;
     typename Size<TIndex>::Type                 _maxHistoryLength;
     typename Size<Factory>::Type                _maxObjects;
 
-    SEQAN_HOST_DEVICE
-    Factory() :
-        TBase(),
-        _maxHistoryLength(0),
-        _maxObjects(0)
-    {
-        SEQAN_ASSERT(IsView<TIter_>::VALUE);
-    }
+    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
+    Factory()
+//        TBase(),
+//        _maxHistoryLength(0),
+//        _maxObjects(0)
+    {}
 
     Factory(TIndex & index) :
         TBase(index)
-    {
-        SEQAN_ASSERT(IsView<TIter_>::VALUE);
-    }
+    {}
 };
 
 // ============================================================================
