@@ -123,8 +123,35 @@ struct View<RankDictionary<Naive<TValue, TSpec> > >
 template <typename TString, typename TSpec>
 struct View<SparseString<TString, TSpec> >
 {
-    typedef SparseString<ContainerView<TString>, TSpec>         Type;
+    typedef SparseString<typename View<TString>::Type, TSpec>       Type;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction View                                                     [Iter]
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+struct View<Iter<TIndex, VSTree<TSpec> > >
+{
+    typedef Iter<typename View<TIndex>::Type, VSTree<TSpec> >       Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction RemoveView                                               [Iter]
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+struct RemoveView<Iter<TIndex, VSTree<TSpec> > >
+{
+    typedef Iter<typename RemoveView<TIndex>::Type, VSTree<TSpec> > Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsView                                                   [Iter]
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+struct IsView<Iter<TIndex, VSTree<TSpec> > > : IsView<TIndex> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction FibreSA                                            [Index View]
@@ -494,27 +521,25 @@ struct Fibre<SparseString<ContainerView<TString>, TSpec> const, FibreValues>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction HistoryStack_                                [ParentLinks Iter]
+// Metafunction HistoryStack_                                [VSTree Iter View]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TViewSpec, typename TIndexSpec, typename TSpec>
-struct HistoryStack_<Iter<Index<ContainerView<TText, TViewSpec>, TIndexSpec>,
-                     VSTree<TopDown<ParentLinks<TSpec> > > > >
+struct HistoryStack_<Iter<Index<ContainerView<TText, TViewSpec>, TIndexSpec>, VSTree<TSpec> > >
 {
-    typedef Index<TText, TIndexSpec>                                TIndex_;
-    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >   TIter_;
-    typedef typename HistoryStack_<TIter_>::Type                    THistory_;
-    typedef ContainerView<THistory_, Resizable<TViewSpec> >         Type;
+    typedef Index<TText, TIndexSpec>                        TIndex_;
+    typedef Iter<TIndex_, VSTree<TSpec> >                   TIter_;
+    typedef typename HistoryStack_<TIter_>::Type            THistory_;
+    typedef ContainerView<THistory_, Resizable<TViewSpec> > Type;
 };
 
 template <typename TText, typename TViewSpec, typename TSSetSpec, typename TIndexSpec, typename TSpec>
-struct HistoryStack_<Iter<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>,
-                          VSTree<TopDown<ParentLinks<TSpec> > > > >
+struct HistoryStack_<Iter<Index<StringSet<ContainerView<TText, TViewSpec>, TSSetSpec>, TIndexSpec>, VSTree<TSpec> > >
 {
-    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>          TIndex_;
-    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >   TIter_;
-    typedef typename HistoryStack_<TIter_>::Type                    THistory_;
-    typedef ContainerView<THistory_, Resizable<TViewSpec> >         Type;
+    typedef Index<StringSet<TText, TSSetSpec>, TIndexSpec>  TIndex_;
+    typedef Iter<TIndex_, VSTree<TSpec> >                   TIter_;
+    typedef typename HistoryStack_<TIter_>::Type            THistory_;
+    typedef ContainerView<THistory_, Resizable<TViewSpec> > Type;
 };
 
 // ============================================================================

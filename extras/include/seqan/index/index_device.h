@@ -61,6 +61,13 @@ template <typename TText, typename TSpec>
 struct IsDevice<Index<TText, TSpec> > : IsDevice<TText> {};
 
 // ----------------------------------------------------------------------------
+// Metafunction IsDevice                                                 [Iter]
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+struct IsDevice<Iter<TIndex, VSTree<TSpec> > > : IsDevice<TIndex> {};
+
+// ----------------------------------------------------------------------------
 // Metafunction FibreSA                                          [Device Index]
 // ----------------------------------------------------------------------------
 
@@ -282,25 +289,27 @@ struct Fibre<SparseString<thrust::device_vector<TValue, TAlloc>, TSpec>, FibreIn
 //};
 
 // ----------------------------------------------------------------------------
-// Metafunction HistoryStack_                                [ParentLinks Iter]
+// Metafunction HistoryStack_                              [Device VSTree Iter]
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TAlloc, typename TIndexSpec, typename TSpec>
-struct HistoryStack_<Iter<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>,
-                     VSTree<TopDown<ParentLinks<TSpec> > > > >
+struct HistoryStack_<Iter<Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>, VSTree<TSpec> > >
 {
-    typedef Index<thrust::device_vector<TValue, TAlloc>, TIndexSpec>            TIndex_;
-    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >               TIter_;
-    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>    Type;
+    typedef thrust::device_vector<TValue, TAlloc>       TText_;
+    typedef Index<TText_, TIndexSpec>                   TIndex_;
+    typedef Iter<TIndex_, VSTree<TSpec> >               TIter_;
+    typedef typename HistoryStackEntry_<TIter_>::Type   TEntry_;
+    typedef thrust::device_vector<TEntry_>              Type;
 };
 
 template <typename TValue, typename TAlloc, typename TSSetSpec, typename TIndexSpec, typename TSpec>
-struct HistoryStack_<Iter<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>,
-                          VSTree<TopDown<ParentLinks<TSpec> > > > >
+struct HistoryStack_<Iter<Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>, VSTree<TSpec> > >
 {
-    typedef Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, TIndexSpec>  TIndex_;
-    typedef Iter<TIndex_, VSTree<TopDown<ParentLinks<TSpec> > > >                           TIter_;
-    typedef thrust::device_vector<typename HistoryStackEntry_<TIter_>::Type>                Type;
+    typedef StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>     TText_;
+    typedef Index<TText_, TIndexSpec>                                       TIndex_;
+    typedef Iter<TIndex_, VSTree<TSpec> >                                   TIter_;
+    typedef typename HistoryStackEntry_<TIter_>::Type                       TEntry_;
+    typedef thrust::device_vector<TEntry_>                                  Type;
 };
 
 // ============================================================================
