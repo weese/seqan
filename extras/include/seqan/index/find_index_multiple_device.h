@@ -54,13 +54,6 @@ struct FinderCTASize_<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
     static const unsigned VALUE = 256;
 };
 
-// ----------------------------------------------------------------------------
-// Metafunction IsDevice
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TPattern, typename TSpec>
-struct IsDevice<Finder2<TText, TPattern, TSpec> > : IsDevice<TText> {};
-
 // ============================================================================
 // Kernels
 // ============================================================================

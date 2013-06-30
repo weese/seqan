@@ -61,6 +61,14 @@ struct RemoveView;
 template <typename TSpec>
 struct IsView;
 
+// TODO(esiragusa): Remove this.
+template <typename TSpec>
+struct IsDevice;
+
+// TODO(esiragusa): Remove this.
+template <typename TObject, typename T1, typename T2>
+struct IfView;
+
 // ============================================================================
 // Metafunctions
 // ============================================================================
@@ -68,6 +76,7 @@ struct IsView;
 // ----------------------------------------------------------------------------
 // Metafunction View
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
 
 template <typename TText, typename TPattern, typename TSpec>
 struct View<Finder2<TText, TPattern, TSpec> >
@@ -78,6 +87,7 @@ struct View<Finder2<TText, TPattern, TSpec> >
 // ----------------------------------------------------------------------------
 // Metafunction RemoveView
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
 
 template <typename TText, typename TPattern, typename TSpec>
 struct RemoveView<Finder2<TText, TPattern, TSpec> >
@@ -88,9 +98,18 @@ struct RemoveView<Finder2<TText, TPattern, TSpec> >
 // ----------------------------------------------------------------------------
 // Metafunction IsView
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
 
 template <typename TText, typename TPattern, typename TSpec>
 struct IsView<Finder2<TText, TPattern, TSpec> > : IsView<TText> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsDevice
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TText, typename TPattern, typename TSpec>
+struct IsDevice<Finder2<TText, TPattern, TSpec> > : IsDevice<TText> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction TextIterator_
@@ -102,6 +121,10 @@ struct TextIterator_
 {
     typedef typename Iterator<TText>::Type  Type;
 };
+
+// ----------------------------------------------------------------------------
+// Metafunction TextIterator_
+// ----------------------------------------------------------------------------
 
 template <typename TText, typename TIndexSpec, typename TSpec>
 struct TextIterator_<Index<TText, TIndexSpec>, TSpec>
@@ -126,55 +149,28 @@ struct TextIterator_<Index<TText, TIndexSpec>, Backtracking<TDistance, TSpec> >
 template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
 struct Finder2<Index<TText, TIndexSpec>, TPattern, TSpec>
 {
-    typedef Index<TText, TIndexSpec>            TIndex;
+    typedef Index<TText, TIndexSpec>                    TIndex;
+    typedef typename TextIterator_<TIndex, TSpec>::Type TTextIterator;
 
-    typename TextIterator_<TIndex, TSpec>::Type _textIt;
+    TTextIterator _textIt;
 
     SEQAN_FUNC
     Finder2() {}
 
     SEQAN_FUNC
-    Finder2(TIndex & index) :
+    Finder2(TIndex const & index) :
         _textIt(index)
+    {}
+
+    SEQAN_FUNC
+    Finder2(TTextIterator const & textIt) :
+        _textIt(textIt)
     {}
 };
 
 // ============================================================================
 // Functions
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Function clear()
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-SEQAN_FUNC void
-clear(Finder2<Index<TText, TIndexSpec>, TPattern, TSpec> & finder)
-{
-    goRoot(finder._textIt);
-}
-
-// ----------------------------------------------------------------------------
-// Function find()
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TIndexSpec, typename TPattern, typename TDelegate>
-SEQAN_FUNC void
-find(Finder2<Index<TText, TIndexSpec>, TPattern, FinderSTree> & finder,
-     TPattern const & pattern,
-     TDelegate & delegate)
-{
-    if (goDown(finder._textIt, pattern)) delegate(finder);
-}
-
-template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TDelegate>
-SEQAN_FUNC void
-find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<TDistance, TSpec> > & finder,
-     TPattern const & pattern,
-     TDelegate & delegate)
-{
-    if (goDown(finder._textIt, pattern)) delegate(finder);
-}
 
 // ----------------------------------------------------------------------------
 // Function textIterator()
@@ -193,6 +189,49 @@ SEQAN_FUNC typename TextIterator_<TText, TSpec>::Type const &
 textIterator(Finder2<TText, TPattern, TSpec> const & finder)
 {
     return finder._textIt;
+}
+
+// ----------------------------------------------------------------------------
+// Function preprocess()
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TText, typename TPattern, typename TSpec>
+SEQAN_FUNC void
+preprocess(Finder2<TText, TPattern, TSpec> & /* finder */, TPattern const & /* pattern */)
+{}
+
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
+SEQAN_FUNC void
+clear(Finder2<Index<TText, TIndexSpec>, TPattern, TSpec> & finder)
+{
+    goRoot(textIterator(finder));
+}
+
+// ----------------------------------------------------------------------------
+// Function find()
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDelegate>
+SEQAN_FUNC void
+find(Finder2<Index<TText, TIndexSpec>, TPattern, FinderSTree> & finder,
+     TPattern const & pattern,
+     TDelegate & delegate)
+{
+    if (goDown(textIterator(finder), pattern)) delegate(finder);
+}
+
+template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TDelegate>
+SEQAN_FUNC void
+find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<TDistance, TSpec> > & finder,
+     TPattern const & pattern,
+     TDelegate & delegate)
+{
+    if (goDown(textIterator(finder), pattern)) delegate(finder);
 }
 
 }
