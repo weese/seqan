@@ -90,48 +90,48 @@ typedef StringSet<CUDAStoreConfig::TReadSeq, CUDAStoreConfig::TReadSeqStoreSpec>
 // ----------------------------------------------------------------------------
 // TODO(esiragusa): Check if register usage decreases.
 
-namespace seqan {
-template <>
-struct Size<TReadSeqs>
-{
-    typedef __uint32 Type;
-};
-
-#ifdef PLATFORM_CUDA
-template <>
-struct Size<typename Device<TReadSeqs>::Type>
-{
-    typedef __uint32 Type;
-};
-
-template <>
-struct Size<typename View<typename Device<TReadSeqs>::Type>::Type>
-{
-    typedef __uint32 Type;
-};
-#endif
-}
+//namespace seqan {
+//template <>
+//struct Size<TReadSeqs>
+//{
+//    typedef __uint32 Type;
+//};
+//
+//#ifdef PLATFORM_CUDA
+//template <>
+//struct Size<typename Device<TReadSeqs>::Type>
+//{
+//    typedef __uint32 Type;
+//};
+//
+//template <>
+//struct Size<typename View<typename Device<TReadSeqs>::Type>::Type>
+//{
+//    typedef __uint32 Type;
+//};
+//#endif
+//}
 
 // ----------------------------------------------------------------------------
 // ContainerView Size
 // ----------------------------------------------------------------------------
 // TODO(esiragusa): Check if register usage decreases.
 
-namespace seqan {
-#ifdef PLATFORM_CUDA
-template <typename TValue, typename TAlloc, typename TViewSpec>
-struct Size<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec> >
-{
-    typedef __uint32 Type;
-};
-
-template <typename TValue, typename TAlloc, typename TViewSpec, typename TSSetSpec>
-struct Size<StringSet<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec>, TSSetSpec> >
-{
-    typedef __uint32 Type;
-};
-#endif
-}
+//namespace seqan {
+//#ifdef PLATFORM_CUDA
+//template <typename TValue, typename TAlloc, typename TViewSpec>
+//struct Size<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec> >
+//{
+//    typedef __uint32 Type;
+//};
+//
+//template <typename TValue, typename TAlloc, typename TViewSpec, typename TSSetSpec>
+//struct Size<StringSet<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec>, TSSetSpec> >
+//{
+//    typedef __uint32 Type;
+//};
+//#endif
+//}
 
 // ============================================================================
 // Index Types
@@ -160,31 +160,32 @@ typedef Index<TContigs, TGenomeIndexSpec>   TGenomeIndex;
 // FM Index Size
 // ----------------------------------------------------------------------------
 
-namespace seqan {
-template <>
-struct Size<TGenomeIndex>
-{
-    typedef __uint32 Type;
-};
-
-#ifdef PLATFORM_CUDA
-template <>
-struct Size<typename Device<TGenomeIndex>::Type>
-{
-    typedef __uint32 Type;
-};
-
-template <>
-struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
-{
-    typedef __uint32 Type;
-};
-#endif
+//namespace seqan {
+//template <>
+//struct Size<TGenomeIndex>
+//{
+//    typedef __uint32 Type;
+//};
+//
+//#ifdef PLATFORM_CUDA
+//template <>
+//struct Size<typename Device<TGenomeIndex>::Type>
+//{
+//    typedef __uint32 Type;
+//};
+//
+//template <>
+//struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
+//{
+//    typedef __uint32 Type;
+//};
+//#endif
 
 // ----------------------------------------------------------------------------
 // Rank Dictionary Size
 // ----------------------------------------------------------------------------
 
+namespace seqan {
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
 {
