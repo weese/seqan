@@ -182,12 +182,16 @@ template <typename TIndex, typename TReadSeqs, typename TSpace>
 inline void
 _mapReads(TIndex & index, TReadSeqs & readSeqs)
 {
-    typedef Multiple<Backtracking<HammingDistance> >    TFinderSpec;
-//    typedef Multiple<FinderSTree>                       TFinderSpec;
-    typedef Finder2<TIndex, TReadSeqs, TFinderSpec>     TFinder;
+//    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
+    typedef Multiple<FinderSTree>                       TAlgoSpec;
+    typedef Pattern<TReadSeqs, TAlgoSpec>               TPattern;
+    typedef Finder2<TIndex, TPattern, TAlgoSpec>        TFinder;
 
     // Instantiate a multiple finder.
     TFinder finder(index);
+
+    // Instantiate a pattern object.
+    TPattern pattern(readSeqs);
 
     // Instantiate an object to save the hits.
     Hits<TIndex, TSpace> hits;
@@ -196,7 +200,7 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
     reserve(hits, length(readSeqs));
 
     // Find hits.
-    find(finder, readSeqs, hits);
+    find(finder, pattern, hits);
 
     std::cout << "Ranges count:\t\t\t" << length(hits.ranges) << std::endl;
 }
