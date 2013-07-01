@@ -35,6 +35,11 @@
 #ifndef SEQAN_EXTRAS_INDEX_FIND_INDEX_MULTIPLE_H
 #define SEQAN_EXTRAS_INDEX_FIND_INDEX_MULTIPLE_H
 
+#ifdef PLATFORM_CUDA
+#include <thrust/sort.h>
+#include <thrust/reduce.h>
+#endif
+
 namespace seqan {
 
 // ============================================================================
@@ -49,17 +54,25 @@ template <typename TSpec>
 struct Multiple;
 
 // ----------------------------------------------------------------------------
-// Tag Factory_
+// Finder Member Tags
 // ----------------------------------------------------------------------------
 
 struct Factory_;
+
+// ----------------------------------------------------------------------------
+// Pattern Member Tags
+// ----------------------------------------------------------------------------
+
+struct Needles_;
+struct Hashes_;
+struct Permutation_;
 
 // ============================================================================
 // Classes
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Class Finder
+// Class Finder; Multiple
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec>
@@ -95,6 +108,33 @@ struct Finder2<Index<TText, TIndexSpec>, TPatterns, Multiple<TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Class Pattern; Multiple
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+class Pattern<TNeedles, Multiple<TSpec> >
+{
+public:
+    typename Member<Pattern, Needles_>::Type        data_host;
+    typename Member<Pattern, Hashes_>::Type         _hashes;
+    typename Member<Pattern, Permutation_>::Type    _permutation;
+
+    SEQAN_HOST_DEVICE
+    Pattern() {}
+
+    Pattern(TNeedles const & needles) :
+        data_host(needles)
+    {
+        _preprocess(*this);
+    }
+
+//    Pattern(TNeedles const & needles)
+//    {
+//        setHost(*this, needles);
+//    }
+};
+
+// ----------------------------------------------------------------------------
 // Class Proxy                                                         [Finder]
 // ----------------------------------------------------------------------------
 
@@ -116,11 +156,112 @@ public:
 };
 
 // ============================================================================
-// Members
+// Metafunctions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Member Factory_
+// Metafunction Host                                                  [Pattern]
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+struct Host<Pattern<TNeedles, Multiple<TSpec> > >
+{
+    typedef TNeedles Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction PatternShape_                                         [Pattern]
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): Automatically select a good shape.
+
+template <typename TPattern>
+struct PatternShape_
+{
+    typedef typename Host<TPattern>::Type               TNeedles_;
+    typedef typename Value<TNeedles_>::Type             TNeedle_;
+    typedef typename Value<TNeedle_>::Type              TAlphabet_;
+
+    typedef Shape<TAlphabet_, UngappedShape<10> >       Type;
+};
+
+// ----------------------------------------------------------------------------
+// Member Needles_                                                    [Pattern]
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+struct Member<Pattern<TNeedles, Multiple<TSpec> >, Needles_>
+{
+    typedef typename IfView<TNeedles, TNeedles, Holder<TNeedles> >::Type    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Member Hashes_                                                     [Pattern]
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+struct Member<Pattern<TNeedles, Multiple<TSpec> >, Hashes_>
+{
+//    typedef Pattern<TNeedles, Multiple<TSpec> >     TPattern_;
+//    typedef typename PatternShape_<TPattern_>::Type TShape_;
+//    typedef typename Value<TShape_>::Type           THash_;
+//
+//    typedef String<THash_>                          Type;
+
+    typedef Nothing                                 Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Member<Pattern<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, Multiple<TSpec> >, Hashes_>
+{
+    typedef thrust::device_vector<TValue, TAlloc>   TNeedle_;
+    typedef StringSet<TNeedle_, TSSetSpec>          TNeedles_;
+    typedef Pattern<TNeedles_, Multiple<TSpec> >    TPattern_;
+    typedef typename PatternShape_<TPattern_>::Type TShape_;
+    typedef typename Value<TShape_>::Type           THash_;
+
+    typedef thrust::device_vector<THash_>           Type;
+};
+#endif
+
+template <typename TNeedle, typename TViewSpec, typename TSSetSpec, typename TSpec>
+struct Member<Pattern<StringSet<ContainerView<TNeedle, TViewSpec>, TSSetSpec>, Multiple<TSpec> >, Hashes_>
+{
+    typedef Pattern<StringSet<TNeedle, TSSetSpec>, Multiple<TSpec> >        TPattern_;
+    typedef typename View<typename Member<TPattern_, Hashes_>::Type>::Type  Type;
+};
+
+// ----------------------------------------------------------------------------
+// Member Permutation_                                                [Pattern]
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+struct Member<Pattern<TNeedles, Multiple<TSpec> >, Permutation_>
+{
+    typedef Nothing Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <typename TValue, typename TAlloc, typename TSSetSpec, typename TSpec>
+struct Member<Pattern<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, Multiple<TSpec> >, Permutation_>
+{
+    typedef thrust::device_vector<TValue, TAlloc>   TNeedle_;
+    typedef StringSet<TNeedle_, TSSetSpec>          TNeedles_;
+    typedef typename Size<TNeedles_>::Type          TSize_;
+
+    typedef thrust::device_vector<TSize_>           Type;
+};
+#endif
+
+template <typename TNeedle, typename TViewSpec, typename TSSetSpec, typename TSpec>
+struct Member<Pattern<StringSet<ContainerView<TNeedle, TViewSpec>, TSSetSpec>, Multiple<TSpec> >, Permutation_>
+{
+    typedef Pattern<StringSet<TNeedle, TSSetSpec>, Multiple<TSpec> >            TPattern_;
+    typedef typename View<typename Member<TPattern_, Permutation_>::Type>::Type Type;
+};
+
+// ----------------------------------------------------------------------------
+// Member Factory_                                                     [Finder]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec>
@@ -154,29 +295,28 @@ struct FinderCTASize_
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Kernel _computeHashesKernel()                                      [Pattern]
+// Kernel _preprocessKernel()                                         [Pattern]
 // ----------------------------------------------------------------------------
 
 #ifdef PLATFORM_CUDA
-template <typename TFinderView, typename TPatternsView>
+template <typename TNeedles, typename TSpec>
 SEQAN_GLOBAL void
-_computeHashesKernel(TFinderView finder, TPatternsView patterns)
+_preprocessKernel(Pattern<TNeedles, Multiple<TSpec> > pattern)
 {
-    typedef typename Value<TPatternsView>::Type         TPatternView;
-    typedef typename Value<TPatternView>::Type          TAlphabet;
-    typedef Shape<TAlphabet, UngappedShape<10> >        TShape;
+    typedef Pattern<TNeedles, Multiple<TSpec> >     TPattern;
+    typedef typename PatternShape_<TPattern>::Type  TShape;
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     // Return silently if there is no job left.
-    if (idx >= length(patterns)) return;
+    if (idx >= length(pattern.data_host)) return;
 
-    // Compute the hash of a read.
+    // Compute the hash of a needle.
     TShape shape;
-    finder._hashes[idx] = hash(shape, begin(patterns[idx], Standard()));
+    pattern._hashes[idx] = hash(shape, begin(pattern.data_host[idx], Standard()));
 
-    // Fill idxs with the identity permutation.
-    finder._idxs[idx] = idx;
+    // Fill with the identity permutation.
+    pattern._permutation[idx] = idx;
 }
 #endif
 
@@ -225,37 +365,65 @@ _findKernel(Finder2<TText, TPatterns, Multiple<TSpec> > finder, TPatterns patter
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function preprocess()
+// Function _preprocess()                                   [Pattern; ExecHost]
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TPatterns>
+template <typename TNeedles, typename TSpec>
+inline void
+_preprocess(Pattern<TNeedles, Multiple<TSpec> > & /* pattern */, ExecHost const & /* tag */) {}
+
+// ----------------------------------------------------------------------------
+// Function _preprocess()                                 [Pattern; ExecDevice]
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_CUDA
+template <typename TNeedles, typename TSpec>
+inline void
+_preprocess(Pattern<TNeedles, Multiple<TSpec> > & pattern, ExecDevice const & /* tag */)
+{
+    typedef typename Size<TNeedles>::Type   TSize;
+
+    TSize needlesCount = length(needle(pattern));
+
+    resize(pattern._hashes, needlesCount, Exact());
+    resize(pattern._permutation, needlesCount, Exact());
+
+    // Compute grid size.
+    unsigned ctaSize = 256;
+    unsigned activeBlocks = (needlesCount + ctaSize - 1) / ctaSize;
+
+    // Launch the preprocessing kernel.
+    _preprocessKernel<<<activeBlocks, ctaSize>>>(view(pattern));
+
+    // Sort the patterns.
+    thrust::sort_by_key(pattern._hashes.begin(), pattern._hashes.end(), pattern._permutation.begin());
+
+    cudaDeviceSynchronize();
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Function _preprocess()                                             [Pattern]
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+inline void
+_preprocess(Pattern<TNeedles, Multiple<TSpec> > & pattern)
+{
+    typedef Pattern<TNeedles, Multiple<TSpec> > TPattern;
+
+    _preprocess(pattern, typename ExecSpace<TPattern>::Type());
+}
+
+// ----------------------------------------------------------------------------
+// Function setHost()                                                 [Pattern]
+// ----------------------------------------------------------------------------
+
+//template <typename TNeedles, typename TSpec, typename TOtherNeedles>
 //SEQAN_FUNC void
-//preprocess(Finder2<Index<TText, TIndexSpec>, TPattern, TSpec> & finder, TPatterns const & patterns)
+//setHost(Pattern<TNeedles, Multiple<TSpec> > & pattern, TOtherNeedles const & needles)
 //{
-//    _resize(finder, length(patterns));
-//    _computeHashes(finder, patterns);
-//    _fillIdxsWithIdentity(finder);
-//    _sortIdxsByHashes(finder);
-//    cudaDeviceSynchronize();
 //}
-
-// ----------------------------------------------------------------------------
-// Function textIterator()                                       [Finder Proxy]
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TPatterns, typename TSpec>
-inline SEQAN_HOST_DEVICE typename TextIterator_<TText, Multiple<TSpec> >::Type &
-textIterator(Proxy<Finder2<TText, TPatterns, Multiple<TSpec> > > & finder)
-{
-    return finder._textIt;
-}
-
-template <typename TText, typename TPatterns, typename TSpec>
-inline SEQAN_HOST_DEVICE typename TextIterator_<TText, Multiple<TSpec> >::Type const &
-textIterator(Proxy<Finder2<TText, TPatterns, Multiple<TSpec> > > const & finder)
-{
-    return finder._textIt;
-}
 
 // ----------------------------------------------------------------------------
 // Function _find()                                          [Finder; ExecHost]
@@ -329,7 +497,7 @@ _find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
     // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
     unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
-//    unsigned activeBlocks = (length(patterns) * ctaSize + 1) / ctaSize;
+//    unsigned activeBlocks = (length(patterns) + ctaSize - 1) / ctaSize;
 
     std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
     std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
@@ -359,7 +527,24 @@ find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder, TPatterns & patterns,
 }
 
 // ----------------------------------------------------------------------------
-// Function view()
+// Function view()                                                    [Pattern]
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec>
+inline typename View<Pattern<TNeedles, Multiple<TSpec> > >::Type
+view(Pattern<TNeedles, Multiple<TSpec> > & pattern)
+{
+    typename View<Pattern<TNeedles, Multiple<TSpec> > >::Type   patternView;
+
+    patternView.data_host = view(needle(pattern));
+    patternView._hashes = view(pattern._hashes);
+    patternView._permutation = view(pattern._permutation);
+
+    return patternView;
+}
+
+// ----------------------------------------------------------------------------
+// Function view()                                                     [Finder]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec>
@@ -373,6 +558,24 @@ view(Finder2<TText, TPatterns, Multiple<TSpec> > & finder)
 //    finderView._hashes = view(finder._hashes);
 
     return finderView;
+}
+
+// ----------------------------------------------------------------------------
+// Function textIterator()                                       [Finder Proxy]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPatterns, typename TSpec>
+inline SEQAN_HOST_DEVICE typename TextIterator_<TText, Multiple<TSpec> >::Type &
+textIterator(Proxy<Finder2<TText, TPatterns, Multiple<TSpec> > > & finder)
+{
+    return finder._textIt;
+}
+
+template <typename TText, typename TPatterns, typename TSpec>
+inline SEQAN_HOST_DEVICE typename TextIterator_<TText, Multiple<TSpec> >::Type const &
+textIterator(Proxy<Finder2<TText, TPatterns, Multiple<TSpec> > > const & finder)
+{
+    return finder._textIt;
 }
 
 }
