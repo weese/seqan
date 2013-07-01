@@ -230,16 +230,6 @@ textIterator(Finder2<TText, TPattern, TSpec> const & finder)
 }
 
 // ----------------------------------------------------------------------------
-// Function preprocess()
-// ----------------------------------------------------------------------------
-// TODO(esiragusa): move this function in the base finder class.
-
-template <typename TText, typename TPattern, typename TSpec>
-SEQAN_FUNC void
-preprocess(Finder2<TText, TPattern, TSpec> & /* finder */, TPattern const & /* pattern */)
-{}
-
-// ----------------------------------------------------------------------------
 // Function clear()
 // ----------------------------------------------------------------------------
 
@@ -263,13 +253,53 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, FinderSTree> & finder,
     if (goDown(textIterator(finder), pattern)) delegate(finder);
 }
 
-template <typename TText, typename TIndexSpec, typename TPattern, typename TDistance, typename TSpec, typename TDelegate>
+template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
 SEQAN_FUNC void
-find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<TDistance, TSpec> > & finder,
+find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, TSpec> > & finder,
      TPattern const & pattern,
      TDelegate & delegate)
 {
-    if (goDown(textIterator(finder), pattern)) delegate(finder);
+    typedef Index<TText, TIndexSpec>                            TIndex;
+    typedef Backtracking<HammingDistance, TSpec>                TFinderSpec;
+    typedef typename TextIterator_<TIndex, TFinderSpec>::Type   TTextIterator;
+    typedef typename Iterator<TPattern, Standard>::Type         TPatternIterator;
+
+    unsigned maxScore = 1;
+    unsigned errors = 0;
+
+    TTextIterator & textIt = textIterator(finder);
+    TPatternIterator patternIt = begin(pattern, Standard());
+    TPatternIterator patternEnd = end(pattern, Standard());
+
+    do
+    {
+        if (goDown(textIt) && !atEnd(patternIt, pattern))
+        {
+            goNext(patternIt);
+
+            do
+            {
+                errors += parentEdgeLabel(textIt) != value(patternIt);
+
+                if (atEnd(patternIt, pattern) && errors <= maxScore)
+                {
+                    delegate(finder);
+                }
+                else if (errors == maxScore)
+                {
+                    if (goDown(textIt, suffix(pattern, patternIt)))
+                        delegate(finder);
+
+                    goUp(textIt);
+                }
+            }
+            while (goRight(textIt));
+
+            goUp(textIt);
+            goPrevious(patternIt);
+        }
+    }
+    while (!isRoot(textIt));
 }
 
 }
