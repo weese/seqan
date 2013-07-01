@@ -250,11 +250,11 @@ int runMapper(Options & options)
         std::cout << "Reads count:\t\t\t" << reads.readsCount << std::endl;
 
         // Map reads.
-        start = sysTime();
+//        start = sysTime();
         mapReads(genomeIndex.index, getSeqs(reads), TExecSpace());
-        finish = sysTime();
-        std::cout << "Mapping time:\t\t\t" << std::flush;
-        std::cout << finish - start << " sec" << std::endl;
+//        finish = sysTime();
+//        std::cout << "Mapping time:\t\t\t" << std::flush;
+//        std::cout << finish - start << " sec" << std::endl;
 
         // Clear mapped reads.
         clear(reads);
