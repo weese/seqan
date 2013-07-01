@@ -112,6 +112,44 @@ template <typename TText, typename TPattern, typename TSpec>
 struct IsDevice<Finder2<TText, TPattern, TSpec> > : IsDevice<TText> {};
 
 // ----------------------------------------------------------------------------
+// Metafunction View
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TNeedle, typename TSpec>
+struct View<Pattern<TNeedle, TSpec> >
+{
+    typedef Pattern<typename View<TNeedle>::Type, TSpec>    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction RemoveView
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TNeedle, typename TSpec>
+struct RemoveView<Pattern<TNeedle, TSpec> >
+{
+    typedef Pattern<typename RemoveView<TNeedle>::Type, TSpec>    Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsView
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TNeedle, typename TSpec>
+struct IsView<Pattern<TNeedle, TSpec> > : IsView<TNeedle> {};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsDevice
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TNeedle, typename TSpec>
+struct IsDevice<Pattern<TNeedle, TSpec> > : IsDevice<TNeedle> {};
+
+// ----------------------------------------------------------------------------
 // Metafunction TextIterator_
 // ----------------------------------------------------------------------------
 
