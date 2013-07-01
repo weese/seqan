@@ -54,6 +54,9 @@ using namespace seqan;
 
 struct Ranges_;
 
+template <typename TSpec = void>
+struct Count;
+
 // ============================================================================
 // Classes
 // ============================================================================
@@ -78,6 +81,16 @@ struct Hits
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction HitsSpec
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+struct HitsSpec
+{
+    typedef typename IfDevice<TIndex, Device<TSpec>, TSpec>::Type   Type;
+};
 
 // ----------------------------------------------------------------------------
 // Member Ranges_
@@ -111,6 +124,34 @@ struct Member<Hits<TIndex, View<TSpec> >, Ranges_>
 }
 
 // ----------------------------------------------------------------------------
+// Member Ranges_; Count
+// ----------------------------------------------------------------------------
+
+namespace seqan {
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, Count<TSpec> >, Ranges_>
+{
+    typedef typename Size<TIndex>::Type         TCount_;
+    typedef String<TCount_>                     Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, Device<Count<TSpec> > >, Ranges_>
+{
+    typedef typename Size<TIndex>::Type         TCount_;
+    typedef thrust::device_vector<TCount_>      Type;
+};
+#endif
+
+template <typename TIndex, typename TSpec>
+struct Member<Hits<TIndex, View<Device<Count<TSpec> > > >, Ranges_>
+{
+    typedef typename View<typename Member<Hits<TIndex, Device<Count<TSpec> > >, Ranges_>::Type>::Type    Type;
+};
+}
+
+// ----------------------------------------------------------------------------
 // Metafunction View
 // ----------------------------------------------------------------------------
 
@@ -122,19 +163,49 @@ struct View<Hits<TIndex, TSpec> >
 };
 }
 
+// ----------------------------------------------------------------------------
+// Metafunction Device
+// ----------------------------------------------------------------------------
+
+namespace seqan {
+template <typename TIndex, typename TSpec>
+struct Device<Hits<TIndex, TSpec> >
+{
+    typedef Hits<TIndex, Device<TSpec> >  Type;
+};
+}
+
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function reserve()
+// Function init()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex, typename TSpec, typename TSize>
+template <typename TIndex, typename TSpec, typename TPattern>
 inline void
-reserve(Hits<TIndex, TSpec> & hits, TSize newCapacity)
+init(Hits<TIndex, TSpec> & hits, TPattern const & pattern)
 {
-    reserve(hits.ranges, newCapacity, Exact());
+    reserve(hits.ranges, length(needle(pattern)), Exact());
+}
+
+// ----------------------------------------------------------------------------
+// Function init()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec, typename TPattern>
+inline void
+init(Hits<TIndex, Count<TSpec> > & hits, TPattern const & /* pattern */)
+{
+    resize(hits.ranges, omp_get_max_threads(), 0, Exact());
+}
+
+template <typename TIndex, typename TSpec, typename TPattern>
+inline void
+init(Hits<TIndex, Device<Count<TSpec> > > & hits, TPattern const & pattern)
+{
+    resize(hits.ranges, length(needle(pattern)), Exact());
 }
 
 // ----------------------------------------------------------------------------
@@ -167,10 +238,55 @@ appendRange(Hits<TIndex, TSpec> & hits, TFinder const & finder)
 #ifdef PLATFORM_CUDA
 template <typename TIndex, typename TSpec, typename TFinder>
 inline SEQAN_HOST_DEVICE void
-appendRange(Hits<TIndex, View<Device<TSpec> > > & hits, TFinder const & finder)
+appendRange(Hits<TIndex, View<Device<TSpec> > > & /* hits */, TFinder const & /* finder */)
 {
     // TODO(esiragusa): Global lock.
-    appendValue(hits.ranges, range(textIterator(finder)));
+//    appendValue(hits.ranges, range(textIterator(finder)));
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Function appendRange()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec, typename TFinder>
+inline SEQAN_HOST_DEVICE void
+appendRange(Hits<TIndex, Count<TSpec> > & hits, TFinder const & finder)
+{
+    hits.ranges[getThreadId()] += countOccurrences(textIterator(finder));
+}
+
+template <typename TIndex, typename TSpec, typename TFinder>
+inline SEQAN_HOST_DEVICE void
+appendRange(Hits<TIndex, View<Device<Count<TSpec> > > > & hits, TFinder const & finder)
+{
+    hits.ranges[getThreadId()] += countOccurrences(textIterator(finder));
+}
+
+// ----------------------------------------------------------------------------
+// Function getCount()
+// ----------------------------------------------------------------------------
+
+template <typename TIndex, typename TSpec>
+inline typename Size<TIndex>::Type
+getCount(Hits<TIndex, Count<TSpec> > & hits)
+{
+    typedef typename Size<TIndex>::Type TSize;
+
+    // TODO(esiragusa): Add function reduce().
+    TSize count = 0;
+    for (TSize i = 0; i < length(hits.ranges); ++i)
+        count += hits.ranges[i];
+
+    return count;
+}
+
+#ifdef PLATFORM_CUDA
+template <typename TIndex, typename TSpec>
+inline typename Size<TIndex>::Type
+getCount(Hits<TIndex, Device<Count<TSpec> > > & hits)
+{
+    return thrust::reduce(hits.ranges.begin(), hits.ranges.end());
 }
 #endif
 
@@ -178,7 +294,7 @@ appendRange(Hits<TIndex, View<Device<TSpec> > > & hits, TFinder const & finder)
 // Function _mapReads()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex, typename TReadSeqs, typename TSpace>
+template <typename TIndex, typename TReadSeqs>
 inline void
 _mapReads(TIndex & index, TReadSeqs & readSeqs)
 {
@@ -186,6 +302,8 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
     typedef Multiple<FinderSTree>                       TAlgoSpec;
     typedef Pattern<TReadSeqs, TAlgoSpec>               TPattern;
     typedef Finder2<TIndex, TPattern, TAlgoSpec>        TFinder;
+    typedef typename HitsSpec<TIndex, Count<> >::Type   THitsSpec;
+    typedef Hits<TIndex, THitsSpec>                     THits;
 
     // Instantiate a multiple finder.
     TFinder finder(index);
@@ -194,15 +312,23 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
     TPattern pattern(readSeqs);
 
     // Instantiate an object to save the hits.
-    Hits<TIndex, TSpace> hits;
+    THits hits;
 
-    // Reserve space for hits.
-    reserve(hits, length(readSeqs));
+    // Resize space for hits.
+    init(hits, pattern);
+
+    double start, finish;
+
+    start = sysTime();
 
     // Find hits.
     find(finder, pattern, hits);
 
-    std::cout << "Ranges count:\t\t\t" << length(hits.ranges) << std::endl;
+    finish = sysTime();
+    std::cout << "Mapping time:\t\t\t" << std::flush;
+    std::cout << finish - start << " sec" << std::endl;
+
+    std::cout << "Hits count:\t\t\t" << getCount(hits) << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -214,7 +340,7 @@ inline void
 mapReads(TIndex & index, TReadSeqs & readSeqs, ExecHost const & /* tag */)
 {
     // Map reads.
-    _mapReads<TIndex, TReadSeqs, void>(index, readSeqs);
+    _mapReads(index, readSeqs);
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_

@@ -65,5 +65,5 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & /* 
     cudaDeviceSynchronize();
 
     // Map reads.
-    _mapReads<TDeviceIndex, TDeviceReadSeqs, Device<void> >(deviceIndex, deviceReadSeqs);
+    _mapReads(deviceIndex, deviceReadSeqs);
 }
