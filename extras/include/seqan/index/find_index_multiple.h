@@ -337,7 +337,10 @@ _findKernel(Finder2<TText, TPattern, Multiple<TSpec> > finder, TPattern pattern,
     typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
 
     unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    unsigned gridThreads = gridDim.x * blockDim.x;
+//    unsigned gridThreads = gridDim.x * blockDim.x;
+
+    // Return silently if there is no job left.
+    if (threadId >= length(pattern.data_host)) return;
 
     // Instantiate a simple finder.
     TFinderSimple simpleFinder = getObject(finder._factory, threadId);
@@ -348,16 +351,15 @@ _findKernel(Finder2<TText, TPattern, Multiple<TSpec> > finder, TPattern pattern,
     // Instantiate a delegator object to delegate the finder proxy instead of the serial finder.
     TDelegator delegator(finderProxy, delegate);
 
-    unsigned patternsCount = length(pattern.data_host);
-
-	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
-    {
-        finderProxy._patternIt = pattern._permutation[patternId];
-//        finderProxy._patternIt = pattern._permutation[threadId];
+//    unsigned patternsCount = length(pattern.data_host);
+//    for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
+//    {
+//        finderProxy._patternIt = pattern._permutation[patternId];
+        finderProxy._patternIt = pattern._permutation[threadId];
 
         // Find a single needle.
         find(simpleFinder, pattern.data_host[finderProxy._patternIt], delegator);
-    }
+//    }
 }
 #endif
 
@@ -493,21 +495,17 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     typedef typename View<TPattern>::Type               TPatternsView;
     typedef typename View<TDelegate>::Type              TDelegateView;
 
-    // Preprocess pattern.
-//    _preprocess(finder, pattern);
-
     // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
-    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
-//    unsigned activeBlocks = (length(pattern) + ctaSize - 1) / ctaSize;
-
-    std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
-    std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
+    unsigned activeBlocks = (length(needle(pattern)) + ctaSize - 1) / ctaSize;
+//    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
+//    std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
+//    std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
 
     // Initialize the iterator factory.
     setMaxHistoryLength(finder._factory, length(back(needle(pattern))));
-//    setMaxObjects(finder._factory, length(pattern));
-    setMaxObjects(finder._factory, activeBlocks * ctaSize);
+    setMaxObjects(finder._factory, length(needle(pattern)));
+//    setMaxObjects(finder._factory, activeBlocks * ctaSize);
     build(finder._factory);
 
     // Launch the find kernel.
