@@ -75,6 +75,10 @@ struct Finder2<TText, TPatterns, Multiple<TSpec> >
     {}
 };
 
+// ----------------------------------------------------------------------------
+// Class Finder; Index, Multiple
+// ----------------------------------------------------------------------------
+
 template <typename TText, typename TIndexSpec, typename TPatterns, typename TSpec>
 struct Finder2<Index<TText, TIndexSpec>, TPatterns, Multiple<TSpec> >
 {
@@ -125,12 +129,8 @@ struct Member<Finder2<TText, TPatterns, Multiple<TSpec> >, Factory_>
     typedef Factory<typename TextIterator_<TText, TSpec>::Type>  Type;
 };
 
-// ============================================================================
-// Metafunctions
-// ============================================================================
-
 // ----------------------------------------------------------------------------
-// Metafunction Delegated
+// Metafunction Delegated                                              [Finder]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec>
@@ -139,12 +139,108 @@ struct Delegated<Finder2<TText, TPatterns, Multiple<TSpec> > >
     typedef Proxy<Finder2<TText, TPatterns, Multiple<TSpec> > > Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction FinderCTASize_                                         [Finder]
+// ----------------------------------------------------------------------------
+
+template <typename TFinder>
+struct FinderCTASize_
+{
+    static const unsigned VALUE = 256;
+};
+
+// ============================================================================
+// Kernels
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Kernel _computeHashesKernel()                                      [Pattern]
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_CUDA
+template <typename TFinderView, typename TPatternsView>
+SEQAN_GLOBAL void
+_computeHashesKernel(TFinderView finder, TPatternsView patterns)
+{
+    typedef typename Value<TPatternsView>::Type         TPatternView;
+    typedef typename Value<TPatternView>::Type          TAlphabet;
+    typedef Shape<TAlphabet, UngappedShape<10> >        TShape;
+
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Return silently if there is no job left.
+    if (idx >= length(patterns)) return;
+
+    // Compute the hash of a read.
+    TShape shape;
+    finder._hashes[idx] = hash(shape, begin(patterns[idx], Standard()));
+
+    // Fill idxs with the identity permutation.
+    finder._idxs[idx] = idx;
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Kernel _findKernel()                                                [Finder]
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_CUDA
+template <typename TText, typename TPatterns, typename TSpec, typename TDelegate>
+SEQAN_GLOBAL void
+_findKernel(Finder2<TText, TPatterns, Multiple<TSpec> > finder, TPatterns patterns, TDelegate delegate)
+{
+    typedef typename Value<TPatterns>::Type                 TPattern;
+    typedef Finder2<TText, TPattern, TSpec>                 TFinderSimple;
+    typedef Finder2<TText, TPatterns, Multiple<TSpec> >     TFinderView;
+    typedef Proxy<TFinderView>                              TFinderProxy;
+    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
+
+    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned gridThreads = gridDim.x * blockDim.x;
+
+    // Instantiate a simple finder.
+    TFinderSimple simpleFinder = getObject(finder._factory, threadId);
+
+    // Instantiate a finder proxy to be delegated.
+    TFinderProxy finderProxy(simpleFinder);
+
+    // Instantiate a delegator object to delegate the finder proxy instead of the serial finder.
+    TDelegator delegator(finderProxy, delegate);
+
+    unsigned patternsCount = length(patterns);
+
+	for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
+    {
+        finderProxy._patternIt = patternId;
+//        finderProxy._patternIt = threadId;
+
+        // Find a single pattern.
+        find(simpleFinder, patterns[finderProxy._patternIt], delegator);
+    }
+}
+#endif
+
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function textIterator()
+// Function preprocess()
+// ----------------------------------------------------------------------------
+
+//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TPatterns>
+//SEQAN_FUNC void
+//preprocess(Finder2<Index<TText, TIndexSpec>, TPattern, TSpec> & finder, TPatterns const & patterns)
+//{
+//    _resize(finder, length(patterns));
+//    _computeHashes(finder, patterns);
+//    _fillIdxsWithIdentity(finder);
+//    _sortIdxsByHashes(finder);
+//    cudaDeviceSynchronize();
+//}
+
+// ----------------------------------------------------------------------------
+// Function textIterator()                                       [Finder Proxy]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec>
@@ -162,7 +258,7 @@ textIterator(Proxy<Finder2<TText, TPatterns, Multiple<TSpec> > > const & finder)
 }
 
 // ----------------------------------------------------------------------------
-// Function _find(); ExecHost
+// Function _find()                                          [Finder; ExecHost]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec, typename TDelegate>
@@ -210,7 +306,47 @@ _find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
 }
 
 // ----------------------------------------------------------------------------
-// Function find()
+// Function _find();                                       [Finder; ExecDevice]
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_CUDA
+template <typename TText, typename TPatterns, typename TSpec, typename TDelegate>
+inline void
+_find(Finder2<TText, TPatterns, Multiple<TSpec> > & finder,
+      TPatterns /* const */ & patterns,
+      TDelegate & delegate,
+      ExecDevice const & /* tag */)
+{
+    typedef Finder2<TText, TPatterns, Multiple<TSpec> > TFinder;
+    typedef typename View<TFinder>::Type                TFinderView;
+    typedef typename View<TText>::Type                  TTextView;
+    typedef typename View<TPatterns>::Type              TPatternsView;
+    typedef typename View<TDelegate>::Type              TDelegateView;
+
+    // Preprocess patterns.
+//    _preprocess(finder, patterns);
+
+    // Compute grid size.
+    unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
+    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
+//    unsigned activeBlocks = (length(patterns) * ctaSize + 1) / ctaSize;
+
+    std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
+    std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
+
+    // Initialize the iterator factory.
+    setMaxHistoryLength(finder._factory, length(back(patterns)));
+//    setMaxObjects(finder._factory, length(patterns));
+    setMaxObjects(finder._factory, activeBlocks * ctaSize);
+    build(finder._factory);
+
+    // Launch the find kernel.
+    _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(patterns), view(delegate));
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Function find()                                                     [Finder]
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TPatterns, typename TSpec, typename TDelegate>

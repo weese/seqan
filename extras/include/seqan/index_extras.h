@@ -94,8 +94,5 @@
 
 #include <seqan/index/find_index.h>
 #include <seqan/index/find_index_multiple.h>
-#ifdef PLATFORM_CUDA
-#include <seqan/index/find_index_multiple_device.h>
-#endif
 
 #endif  // EXTRAS_INCLUDE_SEQAN_INDEX_H_
