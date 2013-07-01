@@ -298,12 +298,16 @@ template <typename TIndex, typename TReadSeqs>
 inline void
 _mapReads(TIndex & index, TReadSeqs & readSeqs)
 {
-//    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
-    typedef Multiple<FinderSTree>                       TAlgoSpec;
+    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
+//    typedef Multiple<FinderSTree>                       TAlgoSpec;
     typedef Pattern<TReadSeqs, TAlgoSpec>               TPattern;
     typedef Finder2<TIndex, TPattern, TAlgoSpec>        TFinder;
     typedef typename HitsSpec<TIndex, Count<> >::Type   THitsSpec;
     typedef Hits<TIndex, THitsSpec>                     THits;
+
+    double start, finish;
+
+    start = sysTime();
 
     // Instantiate a multiple finder.
     TFinder finder(index);
@@ -316,10 +320,6 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
 
     // Resize space for hits.
     init(hits, pattern);
-
-    double start, finish;
-
-    start = sysTime();
 
     // Find hits.
     find(finder, pattern, hits);
