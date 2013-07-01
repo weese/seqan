@@ -82,6 +82,16 @@ template <typename TObject>
 struct IsDevice<TObject const> : public IsDevice<TObject> {};
 
 // ----------------------------------------------------------------------------
+// Metafunction IfDevice
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename T1, typename T2>
+struct IfDevice
+{
+    typedef typename If<typename IsDevice<TObject>::Type, T1, T2>::Type  Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction ExecSpace
 // ----------------------------------------------------------------------------
 
