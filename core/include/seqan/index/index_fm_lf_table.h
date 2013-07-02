@@ -515,11 +515,10 @@ _createBwt(LfTable<StringSet<TText, TSSetSpec>, TSpec > & lfTable, TBwt & bwt, T
     typedef typename Iterator<TBwt, Standard>::Type         TBwtIter;
 
     TSize seqNum = countSequences(text);
-//    TSize totalLen = lengthSum(text);
+    TSize totalLen = lengthSum(text);
 
-//    resize(lfTable.sentinels, seqNum + totalLen, Exact());
-    resize(lfTable.sentinels, seqNum, Exact());
-    
+    resize(lfTable.sentinels, seqNum + totalLen, Exact());
+
     TSAIter saIt = begin(sa, Standard());
     TSAIter saItEnd = end(sa, Standard());
     TBwtIter bwtItBeg = begin(bwt, Standard());

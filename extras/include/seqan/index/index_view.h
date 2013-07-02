@@ -877,7 +877,6 @@ view(RankDictionary<Naive<TValue, TSpec> > & dict)
     typename View<RankDictionary<Naive<TValue, TSpec> > >::Type dictView;
 
     getFibre(dictView, FibreRanks()) = view(getFibre(dict, FibreRanks()));
-    dictView._length = dict._length;
 
     return dictView;
 }

@@ -360,7 +360,6 @@ inline void
 assign(RankDictionary<Naive<TValue, TSpec> > & dict, RankDictionary<Naive<TValue2, TSpec2> > & source)
 {
     assign(getFibre(dict, FibreRanks()), getFibre(source, FibreRanks()));
-    assign(dict._length, source._length);
 }
 
 template <typename TText, typename TSpec, typename TText2, typename TSpec2>

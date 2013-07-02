@@ -110,16 +110,12 @@ struct RankDictionary<Naive<TValue, TSpec> >
     // ------------------------------------------------------------------------
 
     typename Fibre<RankDictionary, FibreRanks>::Type    ranks;
-    typename Size<RankDictionary>::Type                 _length;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    // NOTE(esiragusa): NVCC cyclic SEQAN_FUNC problem.
     RankDictionary() {};
-
-//    RankDictionary() : _length(0) {};
 
     template <typename TText>
     RankDictionary(TText const & text)
@@ -247,7 +243,9 @@ inline void appendValue(RankDictionary<Naive<bool, TSpec> > & dict, TChar c, Tag
 {
     if (c == false) return;
 
-    resize(dict, length(dict) + 1, tag);
+// NOTE(esiragusa): RankDictionary's resize() is desabled.
+//    resize(dict, length(dict) + 1, tag);
+    resize(dict.ranks, length(dict) + 1, tag);
     setValue(dict, length(dict) - 1, c);
 }
 
@@ -319,13 +317,14 @@ reserve(RankDictionary<Naive<TValue, TSpec> > & dict, TSize newCapacity, Tag<TEx
 // ----------------------------------------------------------------------------
 // Function resize()                                           [RankDictionary]
 // ----------------------------------------------------------------------------
+// NOTE(esiragusa): disabled because LfTable::_createBwt() resizes the rank dict to the bwt length.
 
 template <typename TValue, typename TSpec, typename TSize, typename TExpand>
 inline typename Size<RankDictionary<Naive<TValue, TSpec> > >::Type
-resize(RankDictionary<Naive<TValue, TSpec> > & dict, TSize newLength, Tag<TExpand> const tag)
+resize(RankDictionary<Naive<TValue, TSpec> > & dict, TSize /* newLength */, Tag<TExpand> const /* tag */)
 {
-    dict._length = newLength;
-    return resize(dict.ranks, newLength, tag);
+    return length(dict);
+//    return resize(dict.ranks, newLength, tag);
 }
 
 // ----------------------------------------------------------------------------
@@ -335,7 +334,6 @@ resize(RankDictionary<Naive<TValue, TSpec> > & dict, TSize newLength, Tag<TExpan
 template <typename TValue, typename TSpec>
 inline bool open(RankDictionary<Naive<TValue, TSpec> > & dict, const char * fileName, int openMode)
 {
-    // TODO(esiragusa): Open _length or remove it.
     return open(dict.ranks, fileName, openMode);
 }
 
@@ -358,7 +356,6 @@ inline bool save(RankDictionary<Naive<TValue, TSpec> > const & dict, const char 
 template <typename TValue, typename TSpec>
 inline bool save(RankDictionary<Naive<TValue, TSpec> > const & dict, const char * fileName)
 {
-    // TODO(esiragusa): Save _length or remove it.
     return save(dict, fileName, DefaultOpenMode<RankDictionary<Naive<TValue, TSpec> > >::VALUE);
 }
 
