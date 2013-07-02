@@ -83,11 +83,11 @@ struct Hits
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Metafunction HitsSpec
+// Metafunction ExecSpec
 // ----------------------------------------------------------------------------
 
 template <typename TIndex, typename TSpec>
-struct HitsSpec
+struct ExecSpec
 {
     typedef typename IfDevice<TIndex, Device<TSpec>, TSpec>::Type   Type;
 };
@@ -174,6 +174,37 @@ struct Device<Hits<TIndex, TSpec> >
     typedef Hits<TIndex, Device<TSpec> >  Type;
 };
 }
+
+// ----------------------------------------------------------------------------
+// Metafunction Seed
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec = void>
+struct Seed
+{
+    typedef typename Value<TNeedles>::Type  TNeedle_;
+    typedef typename View<TNeedle_>::Type   Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Seeds
+// ----------------------------------------------------------------------------
+
+template <typename TNeedles, typename TSpec = void>
+struct Seeds
+{
+    typedef typename Seed<TNeedles>::Type   TSeed_;
+    typedef String<TSeed_>                  Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <typename TNeedles, typename TSpec>
+struct Seeds<TNeedles, Device<TSpec> >
+{
+    typedef typename Seed<TNeedles>::Type   TSeed_;
+    typedef thrust::device_vector<TSeed_>   Type;
+};
+#endif
 
 // ============================================================================
 // Functions
@@ -291,6 +322,40 @@ getCount(Hits<TIndex, Device<Count<TSpec> > > & hits)
 #endif
 
 // ----------------------------------------------------------------------------
+// Function fillSeeds()
+// ----------------------------------------------------------------------------
+
+template <typename TSeeds, typename TReadSeqs, typename TSize>
+inline void
+fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs, TSize seedLength)
+{
+    typedef typename Value<TReadSeqs>::Type                 TReadSeq;
+    typedef typename Infix<TReadSeqs>::Type                 TReadSeqInfix;
+    typedef typename Iterator<TReadSeqs, Standard>::Type    TReadSeqsIterator;
+    typedef typename Iterator<TReadSeq, Standard>::Type     TReadSeqIterator;
+
+    TSize readSeqsCount = length(readSeqs);
+    TSize readSeqLength = length(back(readSeqs));
+    TSize seedsPerReadSeq = readSeqLength / seedLength;
+
+    reserve(seeds, readSeqsCount * seedsPerReadSeq, Exact());
+
+    TReadSeqsIterator readSeqsIt = begin(readSeqs, Standard());
+    TReadSeqsIterator readSeqsEnd = end(readSeqs, Standard());
+
+    for (; readSeqsIt != readSeqsEnd; ++readSeqsIt)
+    {
+        TReadSeq const & readSeq = value(readSeqsIt);
+
+        for (TSize seedId = 0; seedId < seedsPerReadSeq; ++seedId)
+        {
+            TReadSeqInfix seedInfix = infix(readSeq, seedId * seedLength, (seedId + 1) * seedLength);
+            appendValue(seeds, view(seedInfix));
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 // Function _mapReads()
 // ----------------------------------------------------------------------------
 
@@ -298,11 +363,13 @@ template <typename TIndex, typename TReadSeqs>
 inline void
 _mapReads(TIndex & index, TReadSeqs & readSeqs)
 {
-    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
-//    typedef Multiple<FinderSTree>                       TAlgoSpec;
-    typedef Pattern<TReadSeqs, TAlgoSpec>               TPattern;
+    typedef typename ExecSpec<TReadSeqs, void>::Type    TSeedsSpec;
+    typedef typename Seeds<TReadSeqs, TSeedsSpec>::Type TSeeds;
+//    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
+    typedef Multiple<FinderSTree>                       TAlgoSpec;
+    typedef Pattern<TSeeds, TAlgoSpec>                  TPattern;
     typedef Finder2<TIndex, TPattern, TAlgoSpec>        TFinder;
-    typedef typename HitsSpec<TIndex, Count<> >::Type   THitsSpec;
+    typedef typename ExecSpec<TIndex, Count<> >::Type   THitsSpec;
     typedef Hits<TIndex, THitsSpec>                     THits;
 
     double start, finish;
@@ -312,8 +379,13 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
     // Instantiate a multiple finder.
     TFinder finder(index);
 
+    // Collect seeds from read seqs.
+    TSeeds seeds;
+    fillSeeds(seeds, readSeqs, 20u);
+    std::cout << "Seeds count:\t\t\t" << length(seeds) << std::endl;
+
     // Instantiate a pattern object.
-    TPattern pattern(readSeqs);
+    TPattern pattern(seeds);
 
     // Instantiate an object to save the hits.
     THits hits;
