@@ -201,13 +201,7 @@ struct Member<Pattern<TNeedles, Multiple<TSpec> >, Needles_>
 template <typename TNeedles, typename TSpec>
 struct Member<Pattern<TNeedles, Multiple<TSpec> >, Hashes_>
 {
-//    typedef Pattern<TNeedles, Multiple<TSpec> >     TPattern_;
-//    typedef typename PatternShape_<TPattern_>::Type TShape_;
-//    typedef typename Value<TShape_>::Type           THash_;
-//
-//    typedef String<THash_>                          Type;
-
-    typedef Nothing                                 Type;
+    typedef Nothing Type;
 };
 
 #ifdef PLATFORM_CUDA
@@ -306,17 +300,17 @@ _preprocessKernel(Pattern<TNeedles, Multiple<TSpec> > pattern)
     typedef Pattern<TNeedles, Multiple<TSpec> >     TPattern;
     typedef typename PatternShape_<TPattern>::Type  TShape;
 
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned threadId = getThreadId();
 
     // Return silently if there is no job left.
-    if (idx >= length(pattern.data_host)) return;
+    if (threadId >= length(pattern.data_host)) return;
 
     // Compute the hash of a needle.
     TShape shape;
-    pattern._hashes[idx] = hash(shape, begin(pattern.data_host[idx], Standard()));
+    pattern._hashes[threadId] = hash(shape, begin(pattern.data_host[threadId], Standard()));
 
     // Fill with the identity permutation.
-    pattern._permutation[idx] = idx;
+    pattern._permutation[threadId] = threadId;
 }
 #endif
 
@@ -336,8 +330,7 @@ _findKernel(Finder2<TText, TPattern, Multiple<TSpec> > finder, TPattern pattern,
     typedef Proxy<TFinderView>                              TFinderProxy;
     typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
 
-    unsigned threadId = blockIdx.x * blockDim.x + threadIdx.x;
-//    unsigned gridThreads = gridDim.x * blockDim.x;
+    unsigned threadId = getThreadId();
 
     // Return silently if there is no job left.
     if (threadId >= length(pattern.data_host)) return;
@@ -351,15 +344,10 @@ _findKernel(Finder2<TText, TPattern, Multiple<TSpec> > finder, TPattern pattern,
     // Instantiate a delegator object to delegate the finder proxy instead of the serial finder.
     TDelegator delegator(finderProxy, delegate);
 
-//    unsigned patternsCount = length(pattern.data_host);
-//    for (unsigned patternId = threadId; patternId < patternsCount; patternId += gridThreads)
-//    {
-//        finderProxy._patternIt = pattern._permutation[patternId];
-        finderProxy._patternIt = pattern._permutation[threadId];
+    finderProxy._patternIt = pattern._permutation[threadId];
 
-        // Find a single needle.
-        find(simpleFinder, pattern.data_host[finderProxy._patternIt], delegator);
-//    }
+    // Find a single needle.
+    find(simpleFinder, pattern.data_host[finderProxy._patternIt], delegator);
 }
 #endif
 
@@ -458,7 +446,7 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     TFinderView finderView = view(finder);
 
     // Instantiate a finder.
-    TFinderSimpleView simpleFinder = getObject(finderView._factory, omp_get_thread_num());
+    TFinderSimpleView simpleFinder = getObject(finderView._factory, getThreadId());
 
     // Instantiate a finder proxy to be delegated.
     TFinderProxy finderProxy(simpleFinder);
