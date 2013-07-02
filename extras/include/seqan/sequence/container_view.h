@@ -290,6 +290,7 @@ struct IsSequence<ContainerView<TContainer, TSpec> >:
 // ----------------------------------------------------------------------------
 // Metafunction Infix
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): add Prefix/Suffix metafunctions.
 
 template <typename TContainer, typename TSpec>
 struct Infix<ContainerView<TContainer, TSpec> >
@@ -300,6 +301,16 @@ struct Infix<ContainerView<TContainer, TSpec> >
 template <typename TContainer, typename TSpec>
 struct Infix<ContainerView<TContainer, TSpec> const> :
     Infix<ContainerView<TContainer, TSpec> > {};
+
+// ----------------------------------------------------------------------------
+// Metafunction View
+// ----------------------------------------------------------------------------
+
+template <typename THost, typename TSpec>
+struct View<Segment<THost, TSpec> >
+{
+    typedef typename View<THost>::Type  Type;
+};
 
 // ============================================================================
 // Functions
@@ -457,6 +468,7 @@ resize(ContainerView<TContainer, Resizable<TSpec> > & me, TSize new_length)
 // ----------------------------------------------------------------------------
 // Function infix()
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): add prefix()/suffix() functions.
 
 template <typename TContainer, typename TSpec, typename TPosBegin, typename TPosEnd>
 SEQAN_FUNC typename Infix<ContainerView<TContainer, TSpec> >::Type
