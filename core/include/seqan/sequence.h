@@ -67,7 +67,7 @@
 // Thrust prerequisites.
 // ----------------------------------------------------------------------------
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #endif

@@ -349,7 +349,7 @@ template <typename TValue, typename TPos> inline TValue const & value(TValue con
 // Forwards For thrust::device_vector
 // --------------------------------------------------------------------------
 
-#ifdef __CUDACC__
+#ifdef PLATFORM_CUDA
 template <typename TChar,  typename TAlloc> inline void const * getObjectId(thrust::device_vector<TChar, TAlloc> const & me);
 template <typename TChar,  typename TAlloc> inline typename Iterator<thrust::device_vector<TChar, TAlloc>, Standard>::Type begin(thrust::device_vector<TChar, TAlloc> & me, Standard);
 template <typename TChar,  typename TAlloc> inline typename Iterator<thrust::device_vector<TChar, TAlloc> const, Standard>::Type begin(thrust::device_vector<TChar, TAlloc> const & me, Standard);
