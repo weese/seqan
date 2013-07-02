@@ -197,6 +197,13 @@ struct RemoveView<ContainerView<TContainer, TSpec> >
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction IsView
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct IsView<ContainerView<TContainer, TSpec> > : True {};
+
+// ----------------------------------------------------------------------------
 // Metafunction Value
 // ----------------------------------------------------------------------------
 
