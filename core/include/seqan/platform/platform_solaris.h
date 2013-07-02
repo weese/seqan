@@ -46,10 +46,3 @@
 // default 64bit type
 typedef int64_t __int64;
 typedef uint64_t __uint64;
-
-#ifdef __CUDACC__
-#define SEQAN_FUNC inline __device__ __host__
-#else
-#define SEQAN_FUNC inline
-#endif
-
