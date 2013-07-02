@@ -322,46 +322,94 @@ getCount(Hits<TIndex, Device<Count<TSpec> > > & hits)
 #endif
 
 // ----------------------------------------------------------------------------
-// Function fillSeeds()
+// Kernel _fillSeedsKernel()
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_CUDA
+template <typename TSeeds, typename TReadSeqs, typename TSize>
+SEQAN_GLOBAL void
+_fillSeedsKernel(TSeeds seeds, TReadSeqs readSeqs, TSize seedLength, TSize seedsPerReadSeq)
+{
+    typedef typename Value<TReadSeqs>::Type                 TReadSeq;
+
+    TSize readSeqId = getThreadId();
+    TReadSeq const & readSeq = readSeqs[readSeqId];
+
+    for (TSize seedId = 0; seedId < seedsPerReadSeq; ++seedId)
+        seeds[readSeqId * seedsPerReadSeq + seedId] = infix(readSeq, seedId * seedLength, (seedId + 1) * seedLength);
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Function _fillSeeds(); ExecDevice
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_CUDA
+template <typename TSeeds, typename TReadSeqs, typename TSize>
+inline void
+_fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs,
+           TSize seedLength, TSize readSeqsCount, TSize seedsPerReadSeq,
+           ExecDevice const & /* tag */)
+{
+    // Compute grid size.
+    unsigned ctaSize = 256;
+    unsigned activeBlocks = (readSeqsCount + ctaSize - 1) / ctaSize;
+
+    _fillSeedsKernel<<<activeBlocks, ctaSize>>>(view(seeds), view(readSeqs), seedLength, seedsPerReadSeq);
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// Function _fillSeeds(); ExecHost
 // ----------------------------------------------------------------------------
 
 template <typename TSeeds, typename TReadSeqs, typename TSize>
 inline void
-fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs, TSize seedLength)
+_fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs,
+           TSize seedLength, TSize readSeqsCount, TSize seedsPerReadSeq,
+           ExecHost const & /* tag */)
 {
     typedef typename Value<TReadSeqs>::Type                 TReadSeq;
     typedef typename Infix<TReadSeqs>::Type                 TReadSeqInfix;
-    typedef typename Iterator<TReadSeqs, Standard>::Type    TReadSeqsIterator;
-    typedef typename Iterator<TReadSeq, Standard>::Type     TReadSeqIterator;
+
+    for (TSize readSeqId = 0; readSeqId != readSeqsCount; ++readSeqId)
+    {
+        TReadSeq const & readSeq = readSeqs[readSeqId];
+
+        for (TSize seedId = 0; seedId < seedsPerReadSeq; ++seedId)
+        {
+            TReadSeqInfix seedInfix = infix(readSeq, seedId * seedLength, (seedId + 1) * seedLength);
+            seeds[readSeqId * seedsPerReadSeq + seedId] = view(seedInfix);
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function fillSeeds()
+// ----------------------------------------------------------------------------
+
+template <typename TSeeds, typename TReadSeqs, typename TSeedLength, typename TExecSpace>
+inline void
+fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs, TSeedLength seedLength, TExecSpace const & tag)
+{
+    typedef typename Size<TReadSeqs>::Type  TSize;
 
     TSize readSeqsCount = length(readSeqs);
     TSize readSeqLength = length(back(readSeqs));
     TSize seedsPerReadSeq = readSeqLength / seedLength;
 
-    reserve(seeds, readSeqsCount * seedsPerReadSeq, Exact());
+    resize(seeds, readSeqsCount * seedsPerReadSeq, Exact());
 
-    TReadSeqsIterator readSeqsIt = begin(readSeqs, Standard());
-    TReadSeqsIterator readSeqsEnd = end(readSeqs, Standard());
-
-    for (; readSeqsIt != readSeqsEnd; ++readSeqsIt)
-    {
-        TReadSeq const & readSeq = value(readSeqsIt);
-
-        for (TSize seedId = 0; seedId < seedsPerReadSeq; ++seedId)
-        {
-            TReadSeqInfix seedInfix = infix(readSeq, seedId * seedLength, (seedId + 1) * seedLength);
-            appendValue(seeds, view(seedInfix));
-        }
-    }
+    _fillSeeds(seeds, readSeqs, static_cast<TSize>(seedLength), readSeqsCount, seedsPerReadSeq, tag);
 }
 
 // ----------------------------------------------------------------------------
 // Function _mapReads()
 // ----------------------------------------------------------------------------
 
-template <typename TIndex, typename TReadSeqs>
+template <typename TIndex, typename TReadSeqs, typename TExecSpace>
 inline void
-_mapReads(TIndex & index, TReadSeqs & readSeqs)
+_mapReads(TIndex & index, TReadSeqs & readSeqs, TExecSpace const & tag)
 {
     typedef typename ExecSpec<TReadSeqs, void>::Type    TSeedsSpec;
     typedef typename Seeds<TReadSeqs, TSeedsSpec>::Type TSeeds;
@@ -381,7 +429,7 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
 
     // Collect seeds from read seqs.
     TSeeds seeds;
-    fillSeeds(seeds, readSeqs, 20u);
+    fillSeeds(seeds, readSeqs, 20u, tag);
     std::cout << "Seeds count:\t\t\t" << length(seeds) << std::endl;
 
     // Instantiate a pattern object.
@@ -409,10 +457,10 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs)
 
 template <typename TIndex, typename TReadSeqs>
 inline void
-mapReads(TIndex & index, TReadSeqs & readSeqs, ExecHost const & /* tag */)
+mapReads(TIndex & index, TReadSeqs & readSeqs, ExecHost const & tag)
 {
     // Map reads.
-    _mapReads(index, readSeqs);
+    _mapReads(index, readSeqs, tag);
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
