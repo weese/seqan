@@ -155,6 +155,46 @@ public:
     {}
 };
 
+// ----------------------------------------------------------------------------
+// Class FinderContext_
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec, typename TDelegate>
+struct FinderContext_;
+
+template <typename TText, typename TPattern, typename TSpec, typename TDelegate>
+struct FinderContext_<TText, TPattern, Multiple<TSpec>, TDelegate>
+{
+    typedef typename Needle<TPattern>::Type                 TNeedles;
+    typedef typename Value<TPattern>::Type                  TNeedle;
+    typedef Finder2<TText, TNeedle, TSpec>                  TSingleFinder;
+    typedef Finder2<TText, TPattern, Multiple<TSpec> >      TFinder;
+    typedef Proxy<TFinder>                                  TFinderProxy;
+    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
+    typedef typename Member<TFinder, Factory_>::Type        TFactory;
+
+    TFactory &      factory;
+    TSingleFinder   finder;
+    TFinderProxy    proxy;
+    TDelegator      delegator;
+
+    explicit
+    FinderContext_(TFactory & factory, TDelegate & delegate) :
+        factory(factory),
+        finder(getObject(factory, getThreadId())),
+        proxy(finder),
+        delegator(proxy, delegate)
+    {}
+
+    // NOTE(esiragusa): This is called on firstprivate.
+    FinderContext_(FinderContext_ & ctx) :
+        factory(ctx.factory),
+        finder(getObject(factory, getThreadId())),
+        proxy(finder),
+        delegator(proxy, ctx.delegator.delegate)
+    {}
+};
+
 // ============================================================================
 // Metafunctions
 // ============================================================================
@@ -365,31 +405,21 @@ template <typename TText, typename TPattern, typename TSpec, typename TDelegate>
 SEQAN_GLOBAL void
 _findKernel(Finder2<TText, TPattern, Multiple<TSpec> > finder, TPattern pattern, TDelegate delegate)
 {
-    typedef typename Needle<TPattern>::Type                 TNeedles;
-    typedef typename Value<TPattern>::Type                  TNeedle;
-    typedef Finder2<TText, TNeedle, TSpec>                  TFinderSimple;
-    typedef Finder2<TText, TPattern, Multiple<TSpec> >      TFinderView;
-    typedef Proxy<TFinderView>                              TFinderProxy;
-    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
+    typedef FinderContext_<TText, TPattern, Multiple<TSpec>, TDelegate> TFinderContext;
 
     unsigned threadId = getThreadId();
 
-    // Return silently if there is no job left.
+    // Return if there is no job left.
     if (threadId >= length(pattern.data_host)) return;
 
-    // Instantiate a simple finder.
-    TFinderSimple simpleFinder = getObject(finder._factory, threadId);
+    // Instantiate a thread context.
+    TFinderContext ctx(finder._factory, delegate);
 
-    // Instantiate a finder proxy to be delegated.
-    TFinderProxy finderProxy(simpleFinder);
-
-    // Instantiate a delegator object to delegate the finder proxy instead of the serial finder.
-    TDelegator delegator(finderProxy, delegate);
-
-    finderProxy._patternIt = pattern._permutation[threadId];
+    // Get the sorted needle id.
+    ctx.proxy._patternIt = pattern._permutation[threadId];
 
     // Find a single needle.
-    find(simpleFinder, pattern.data_host[finderProxy._patternIt], delegator);
+    find(ctx.finder, pattern.data_host[ctx.proxy._patternIt], ctx.delegator);
 }
 #endif
 
@@ -469,15 +499,13 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
       TDelegate & delegate,
       ExecHost const & /* tag */)
 {
-    typedef typename Needle<TPattern>::Type                 TNeedles;
-    typedef typename Value<TPattern>::Type                  TNeedle;
-    typedef Finder2<TText, TNeedle, TSpec>                  TFinderSimple;
-    typedef typename View<TFinderSimple>::Type              TFinderSimpleView;
-    typedef Finder2<TText, TPattern,  Multiple<TSpec> >     TFinder;
-    typedef typename View<TFinder>::Type                    TFinderView;
-    typedef Proxy<TFinderView>                              TFinderProxy;
-    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
-    typedef typename Iterator<TNeedles, Standard>::Type     TNeedlesIter;
+    typedef Finder2<TText, TPattern,  Multiple<TSpec> >                         TFinder;
+    typedef typename View<TText>::Type                                          TTextView;
+    typedef typename View<TPattern>::Type                                       TPatternView;
+    typedef typename View<TFinder>::Type                                        TFinderView;
+    typedef FinderContext_<TTextView, TPatternView, Multiple<TSpec>, TDelegate> TFinderContext;
+    typedef typename Needle<TPattern>::Type                                     TNeedles;
+    typedef typename Size<TNeedles>::Type                                       TSize;
 
     // Initialize the iterator factory.
     setMaxHistoryLength(finder._factory, length(back(needle(pattern))));
@@ -487,23 +515,19 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     // Use a finder view.
     TFinderView finderView = view(finder);
 
-    // Instantiate a finder.
-    TFinderSimpleView simpleFinder = getObject(finderView._factory, getThreadId());
+    // Instantiate a thread context.
+    // NOTE(esiragusa): Each thread initializes its private context on firstprivate.
+    TFinderContext ctx(finderView._factory, delegate);
 
-    // Instantiate a finder proxy to be delegated.
-    TFinderProxy finderProxy(simpleFinder);
-
-    // Instantiate a delegator object to delegate the finder proxy instead of the simple finder.
-    TDelegator delegator(finderProxy, delegate);
+    TNeedles & needles = needle(pattern);
+    TSize needlesCount = length(needles);
 
     // Find all needles in parallel.
-    TNeedlesIter needlesBegin = begin(needle(pattern), Standard());
-    TNeedlesIter needlesEnd = end(needle(pattern), Standard());
-//    SEQAN_OMP_PRAGMA(parallel for schedule(dynamic))
-    for (TNeedlesIter needlesIt = needlesBegin; needlesIt != needlesEnd; ++needlesIt)
+    SEQAN_OMP_PRAGMA(parallel for schedule(dynamic) firstprivate(ctx))
+    for (TSize needleId = 0; needleId < needlesCount; ++needleId)
     {
-        clear(simpleFinder);
-        find(simpleFinder, value(needlesIt), delegator);
+        clear(ctx.finder);
+        find(ctx.finder, needles[needleId], ctx.delegator);
     }
 }
 
@@ -525,17 +549,17 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     typedef typename View<TPattern>::Type               TPatternsView;
     typedef typename View<TDelegate>::Type              TDelegateView;
 
+    // NOTE(esiragusa): Use this to switch to persistent threads.
+//    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
+//    setMaxObjects(finder._factory, activeBlocks * ctaSize);
+
     // Compute grid size.
     unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
     unsigned activeBlocks = (length(needle(pattern)) + ctaSize - 1) / ctaSize;
-//    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
-//    std::cout << "CTA Size:\t\t\t" << ctaSize << std::endl;
-//    std::cout << "Active Blocks:\t\t\t" << activeBlocks << std::endl;
 
     // Initialize the iterator factory.
     setMaxHistoryLength(finder._factory, length(back(needle(pattern))));
     setMaxObjects(finder._factory, length(needle(pattern)));
-//    setMaxObjects(finder._factory, activeBlocks * ctaSize);
     build(finder._factory);
 
     // Launch the find kernel.
