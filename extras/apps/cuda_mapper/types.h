@@ -88,7 +88,7 @@ typedef StringSet<CUDAStoreConfig::TReadSeq, CUDAStoreConfig::TReadSeqStoreSpec>
 // ----------------------------------------------------------------------------
 // ReadSeqs Size
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Check if register usage decreases.
+// NOTE(esiragusa): Register usage does not decrease.
 
 //namespace seqan {
 //template <>
@@ -115,10 +115,22 @@ typedef StringSet<CUDAStoreConfig::TReadSeq, CUDAStoreConfig::TReadSeqStoreSpec>
 // ----------------------------------------------------------------------------
 // ContainerView Size
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): Check if register usage decreases.
+// NOTE(esiragusa): Register usage does not decrease.
 
-//namespace seqan {
 //#ifdef PLATFORM_CUDA
+//namespace seqan {
+//template <typename TAlloc>
+//struct Size<thrust::device_vector<Dna, TAlloc> >
+//{
+//    typedef __uint32 Type;
+//};
+//
+//template <typename TAlloc>
+//struct Size<thrust::device_vector<bool, TAlloc> >
+//{
+//    typedef __uint32 Type;
+//};
+//
 //template <typename TValue, typename TAlloc, typename TViewSpec>
 //struct Size<ContainerView<thrust::device_vector<TValue, TAlloc>, TViewSpec> >
 //{
@@ -130,8 +142,8 @@ typedef StringSet<CUDAStoreConfig::TReadSeq, CUDAStoreConfig::TReadSeqStoreSpec>
 //{
 //    typedef __uint32 Type;
 //};
-//#endif
 //}
+//#endif
 
 // ============================================================================
 // Index Types
@@ -160,26 +172,27 @@ typedef Index<TContigs, TGenomeIndexSpec>   TGenomeIndex;
 // FM Index Size
 // ----------------------------------------------------------------------------
 
-//namespace seqan {
-//template <>
-//struct Size<TGenomeIndex>
-//{
-//    typedef __uint32 Type;
-//};
-//
-//#ifdef PLATFORM_CUDA
-//template <>
-//struct Size<typename Device<TGenomeIndex>::Type>
-//{
-//    typedef __uint32 Type;
-//};
-//
-//template <>
-//struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
-//{
-//    typedef __uint32 Type;
-//};
-//#endif
+namespace seqan {
+template <>
+struct Size<TGenomeIndex>
+{
+    typedef __uint32 Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <>
+struct Size<typename Device<TGenomeIndex>::Type>
+{
+    typedef __uint32 Type;
+};
+
+template <>
+struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
+{
+    typedef __uint32 Type;
+};
+#endif
+}
 
 // ----------------------------------------------------------------------------
 // Rank Dictionary Size
