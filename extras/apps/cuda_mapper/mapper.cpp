@@ -100,7 +100,7 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
 
     addSection(parser, "Global Options");
 
-#ifdef SEQAN_CUDA
+#ifndef CUDA_DISABLED
     addOption(parser, ArgParseOption("nc", "no-cuda", "Do not use CUDA accelerated code."));
 #endif
 
@@ -144,7 +144,7 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
     getArgumentValue(options.readsFile, parser, 1);
 
     // Parse CUDA options.
-#ifdef SEQAN_CUDA
+#ifndef CUDA_DISABLED
     getOptionValue(options.noCuda, parser, "no-cuda");
 #endif
 
@@ -273,7 +273,7 @@ int runMapper(Options & options)
 template <typename TOptions>
 int configureMapper(TOptions & options)
 {
-#ifdef SEQAN_CUDA
+#ifndef CUDA_DISABLED
     if (options.noCuda)
         return runMapper<ExecHost>(options);
     else

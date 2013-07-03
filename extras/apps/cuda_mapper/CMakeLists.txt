@@ -23,19 +23,16 @@ find_package (CUDA QUIET)
 
 # Disable CUDA acceleration if CUDA was not found.
 if (NOT CUDA_FOUND)
+  add_definitions (-DCUDA_DISABLED=1)
   message (STATUS "  CUDA not found: building cuda_mapper without CUDA acceleration.")
 endif (NOT CUDA_FOUND)
-add_definitions (-DSEQAN_CUDA=1)
 
-# ----------------------------------------------------------------------------
-# App-Level Configuration
-# ----------------------------------------------------------------------------
+option (CUDA_DISABLED "Set to ON to disable CUDA acceleration." OFF)
 
-option (FM_INDEX_32_BITS "Set to ON to use a 32 bits FM-index." OFF)
-
-if (FM_INDEX_32_BITS)
-    add_definitions (-DFM_INDEX_32_BITS=1)
-endif (FM_INDEX_32_BITS)
+if (CUDA_DISABLED)
+  add_definitions (-DCUDA_DISABLED=1)
+  message (STATUS "  CUDA disabled: building cuda_mapper without CUDA acceleration.")
+endif (CUDA_DISABLED)
 
 # ----------------------------------------------------------------------------
 # CUDA Setup
@@ -71,7 +68,7 @@ add_executable(cuda_indexer indexer.cpp
                             genome.h
                             genome_index.h)
 
-if (CUDA_FOUND)
+if (CUDA_FOUND AND NOT CUDA_DISABLED)
   cuda_add_executable(cuda_mapper mapper.cpp
                                   mapper.h
                                   kernels.cu
@@ -81,7 +78,7 @@ if (CUDA_FOUND)
                                   ../masai/store/reads.h
                                   genome.h
                                   genome_index.h)
-else (CUDA_FOUND)
+else (CUDA_FOUND AND NOT CUDA_DISABLED)
   add_executable(cuda_mapper mapper.cpp
                              mapper.h
                              types.h
@@ -89,7 +86,7 @@ else (CUDA_FOUND)
                              ../masai/store/reads.h
                              genome.h
                              genome_index.h)
-endif (CUDA_FOUND)
+endif (CUDA_FOUND AND NOT CUDA_DISABLED)
 
 # Add dependencies found by find_package (SeqAn).
 target_link_libraries (cuda_indexer ${SEQAN_LIBRARIES})
