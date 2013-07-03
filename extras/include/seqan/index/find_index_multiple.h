@@ -178,7 +178,7 @@ struct FinderContext_<TText, TPattern, Multiple<TSpec>, TDelegate>
     TFinderProxy    proxy;
     TDelegator      delegator;
 
-    explicit
+    explicit SEQAN_HOST_DEVICE
     FinderContext_(TFactory & factory, TDelegate & delegate) :
         factory(factory),
         finder(getObject(factory, getThreadId())),
