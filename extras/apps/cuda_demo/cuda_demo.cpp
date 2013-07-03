@@ -32,108 +32,145 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#include "cuda_demo.h"
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
+#include <seqan/index_extras.h>
 
 using namespace seqan;
 
 // ==========================================================================
-// Forwards
+// Metafunctions
 // ==========================================================================
 
-extern void findKernel(Index<StringSet<DnaString, Owner<ConcatDirect<> > >, FMIndex<> > & index, DnaString & pattern);
+// --------------------------------------------------------------------------
+// Metafunction Size
+// --------------------------------------------------------------------------
+// Select the size types for the FM-index.
+
+namespace seqan {
+template <>
+struct SAValue<DnaString>
+{
+    typedef __uint32    Type;
+};
+
+template <typename TSpec>
+struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
+{
+    typedef __uint32    Type;
+};
+
+template <typename TSpec>
+struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
+{
+    typedef __uint32    Type;
+};
+
+template <typename TSpec>
+struct Size<RankDictionary<Naive<bool, TSpec> > >
+{
+    typedef __uint32    Type;
+};
+}
 
 // ==========================================================================
 // Functions
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// Function testInfix()
+// Function count()
 // --------------------------------------------------------------------------
+// Count the occurrences of a set of needles in a indexed haystack.
 
-//template <typename TAlphabet>
-//void testInfix()
-//{
-//    typedef String<TAlphabet>                           TString;
-//    typedef typename View<TString>::Type                TStringView;
-//    typedef typename Infix<TString>::Type               TStringInfix;
-//    typedef typename Infix<TStringView>::Type           TStringViewInfix;
-//
-//    TString s = "AAACCCGGGTTT";
-//    TStringInfix sInfix = infix(s, 3, 6);
-//
-//    TStringView sView = view(s);
-//    TStringViewInfix sViewInfix = infix(sView, 3, 6);
-//
-//    SEQAN_ASSERT(isEqual(sInfix, sViewInfix));
-//}
-
-// --------------------------------------------------------------------------
-// Function testStringSet()
-// --------------------------------------------------------------------------
-
-//template <typename TAlphabet>
-//void testStringSet()
-//{
-//    typedef String<TAlphabet>                           TString;
-//    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-//    typedef typename Device<TStringSet>::Type           TDeviceStringSet;
-//    typedef typename View<TString>::Type                TStringView;
-//    typedef typename View<TStringSet>::Type             TStringSetView;
-//    typedef typename View<TDeviceStringSet>::Type       TDeviceStringSetView;
-//
-//    TStringSet ss;
-//    appendValue(ss, "AAAAAAAA");
-//    appendValue(ss, "CCCCCCC");
-//    appendValue(ss, "GGGGGGGGGGGGGG");
-//    appendValue(ss, "T");
-//
-//    TStringSetView ssView = view(ss);
-//
-//    SEQAN_ASSERT_EQ(length(ss), length(ssView));
-//    for (unsigned i = 0; i < length(ss); ++i)
-//        SEQAN_ASSERT(isEqual(ss[i], ssView[i]));
-//
-//    TDeviceStringSet deviceSs;
-//    assign(deviceSs, ss);
-//    TDeviceStringSetView deviceSsView = view(deviceSs);
-//}
-
-// --------------------------------------------------------------------------
-// Function testIndex()
-// --------------------------------------------------------------------------
-
-template <typename TAlphabet, typename TIndexSpec>
-void testIndex()
+template <typename TIndex, typename TNeedles>
+void count(TIndex & index, TNeedles & needles)
 {
-    typedef String<TAlphabet>                           TString;
-    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-    typedef Index<TStringSet, TIndexSpec>               TIndex;
+    // Select the algorithm type.
+    typedef Multiple<FinderSTree>                       TAlgorithmSpec;
+    typedef Pattern<TNeedles, TAlgorithmSpec>           TPattern;
+    typedef Finder2<TIndex, TPattern, TAlgorithmSpec>   TFinder;
+    typedef Counter<TIndex>                             TCounter;
 
-    // Create a text.
-    TStringSet text;
-    appendValue(text, "ATAAAAAAAAA");
-    appendValue(text, "CCCCTACCC");
+    // Instantiate a finder object holding the context of the search algorithm.
+    TFinder finder(index);
 
-    // Create an index on the reversed text.
-    TIndex index(text);
-    reverse(text);
-    indexCreate(index);
-    reverse(text);
+    // Instantiate a pattern object holding the needles.
+    TPattern pattern(needles);
 
-    // Create a pattern.
-    TString pattern("TA");
+    // Instantiate a functor object counting the number of found occurrences.
+    TCounter counter(needles);
 
-    // Launch find kernel.
-    findKernel(index, pattern);
+    // Find all needles in haystack and call counter() on each match.
+    find(finder, pattern, counter);
+
+    // Output the number of hits.
+    std::cout << "Hits: " << getCount(counter) << std::endl;
 }
 
 // --------------------------------------------------------------------------
 // Function main()
 // --------------------------------------------------------------------------
 
-int main(int /* argc */, char const ** /* argv */)
+int main()
 {
-//    testInfix<Dna>();
-//    testStringSet<Dna>();
-    testIndex<Dna, FMIndex<> >();
-};
+    // ----------------------------------------------------------------------
+    // Create input data on the CPU.
+    // ----------------------------------------------------------------------
+
+    // Select the input types.
+    typedef DnaString                                       THaystack;
+    typedef StringSet<DnaString, Owner<ConcatDirect<> > >   TNeedles;
+
+    // Create a haystack.
+    THaystack haystack = "ACGTTGCAACGTTGCAACGTTGCAACGTTGCAACGTTGCAACGTTGCA";
+
+    // Create a set of needles.
+    TNeedles needles;
+    appendValue(needles, "GTTG");
+    appendValue(needles, "TAC");
+    appendValue(needles, "CAAC");
+
+    // ----------------------------------------------------------------------
+    // Build the FM-index on the CPU.
+    // ----------------------------------------------------------------------
+
+    // Select the index type.
+    typedef Index<THaystack, FMIndex<> >    TIndex;
+
+    // Build the index over the reversed haystack.
+    TIndex index(haystack);
+    reverse(haystack);
+    indexCreate(index);
+    reverse(haystack);
+
+    // ----------------------------------------------------------------------
+    // Count on the CPU.
+    // ----------------------------------------------------------------------
+
+    omp_set_num_threads(8);
+    count(index, needles);
+
+    // ----------------------------------------------------------------------
+    // Copy data to the GPU.
+    // ----------------------------------------------------------------------
+
+    // Select the GPU types.
+    typedef typename Device<TNeedles>::Type     TDeviceNeedles;
+    typedef typename Device<TIndex>::Type       TDeviceIndex;
+
+    // Copy the needles to the GPU.
+    TDeviceNeedles deviceNeedles;
+    assign(deviceNeedles, needles);
+
+    // Copy the index to the GPU.
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
+
+    // ----------------------------------------------------------------------
+    // Count on the GPU.
+    // ----------------------------------------------------------------------
+
+    count(deviceIndex, deviceNeedles);
+
+    return 0;
+}

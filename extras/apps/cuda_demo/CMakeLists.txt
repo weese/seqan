@@ -32,13 +32,13 @@ endif (NOT CUDA_FOUND)
 # ----------------------------------------------------------------------------
 
 # Activate debug symbols for device code and remove optimizations.
-list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
+#list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
 
-# Build from Tesla architecture upwards.
-list (APPEND CUDA_NVCC_FLAGS -arch sm_20)
+# Build from Kepler architecture upwards.
+list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
 
 # Produce an error on illegal calls, e.g. __host__ __device__ --> __host__.
-list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
+#list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
 
 # ----------------------------------------------------------------------------
 # Build Setup
@@ -52,7 +52,7 @@ add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
 if (CUDA_FOUND)
-  cuda_add_executable(cuda_demo cuda_demo.cpp cuda_demo.cu cuda_demo.h)
+  cuda_add_executable(cuda_demo cuda_demo.cpp)
 endif (CUDA_FOUND)
 
 # Add dependencies found by find_package (SeqAn).
