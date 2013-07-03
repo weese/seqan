@@ -35,6 +35,7 @@
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
 #include <seqan/store.h>
+#include <seqan/parallel.h>
 
 #include "../masai/tags.h"
 #include "../masai/options.h"
@@ -104,10 +105,12 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
     addOption(parser, ArgParseOption("nc", "no-cuda", "Do not use CUDA accelerated code."));
 #endif
 
+#ifdef _OPENMP
     addOption(parser, ArgParseOption("t", "threads", "Specify the number of threads to use.", ArgParseOption::INTEGER));
     setMinValue(parser, "threads", "1");
     setMaxValue(parser, "threads", "2048");
     setDefaultValue(parser, "threads", options.threadsCount);
+#endif
 
     addSection(parser, "Mapping Options");
 
@@ -148,8 +151,10 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
     getOptionValue(options.noCuda, parser, "no-cuda");
 #endif
 
+#ifdef _OPENMP
     // Parse the number of threads.
     getOptionValue(options.threadsCount, parser, "threads");
+#endif
 
     // Parse mapping block.
     getOptionValue(options.mappingBlock, parser, "mapping-block");
@@ -189,9 +194,11 @@ int runMapper(Options & options)
 
     double start, finish;
 
+#ifdef _OPENMP
     // Set the number of threads that OpenMP can spawn.
     omp_set_num_threads(options.threadsCount);
-    std::cout << "Max threads:\t\t\t" << omp_get_max_threads() << std::endl;
+    std::cout << "Threads count:\t\t\t" << omp_get_max_threads() << std::endl;
+#endif
 
 //    // Load genome.
 //    if (!open(genomeLoader, options.genomeFile))
