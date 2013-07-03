@@ -15,7 +15,7 @@ message (STATUS "Configuring extras/apps/cuda_mapper")
 # ----------------------------------------------------------------------------
 
 # Search SeqAn and select dependencies.
-set (SEQAN_FIND_DEPENDENCIES NONE)
+set (SEQAN_FIND_DEPENDENCIES OpenMP)
 find_package (SeqAn REQUIRED)
 
 # Search for CUDA.
@@ -33,6 +33,14 @@ if (CUDA_DISABLED)
   add_definitions (-DCUDA_DISABLED=1)
   message (STATUS "  CUDA disabled: building cuda_mapper without CUDA acceleration.")
 endif (CUDA_DISABLED)
+
+# Search for OpenMP.
+find_package (OPENMP QUIET)
+
+# Warn if OpenMP was not found.
+if (NOT OPENMP_FOUND)
+  message (STATUS "  OpenMP not found: building cuda_mapper without multi-threading.")
+endif (NOT OPENMP_FOUND)
 
 # ----------------------------------------------------------------------------
 # CUDA Setup
