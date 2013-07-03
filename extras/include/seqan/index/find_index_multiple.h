@@ -521,7 +521,7 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     TSize needlesCount = length(needles);
 
     // Find all needles in parallel.
-    SEQAN_OMP_PRAGMA(parallel for schedule(dynamic) firstprivate(ctx))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1) firstprivate(ctx))
     for (TSize needleId = 0; needleId < needlesCount; ++needleId)
     {
         clear(ctx.finder);
