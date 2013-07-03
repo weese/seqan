@@ -141,14 +141,14 @@ struct RankDictionaryBitMask_<__uint64>
 // Metafunction RankDictionaryWordSize_                             [TwoLevels]
 // ----------------------------------------------------------------------------
 
-#ifdef FM_INDEX_32_BITS
-template <typename TValue, typename TSpec>
-struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
-    BitsPerValue<__uint32> {};
-#else
+#ifdef CUDA_DISABLED
 template <typename TValue, typename TSpec>
 struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
     BitsPerValue<unsigned long> {};
+#else
+template <typename TValue, typename TSpec>
+struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
+    BitsPerValue<__uint32> {};
 #endif
 
 // ----------------------------------------------------------------------------
