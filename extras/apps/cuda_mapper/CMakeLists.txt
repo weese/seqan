@@ -49,11 +49,17 @@ list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
 # Activate verbose flag in ptxas to show register usage.
 #list (APPEND CUDA_NVCC_FLAGS -Xptxas --verbose)
 
+# Enforce nvcc to use at most 32 registers per thread.
+list (APPEND CUDA_NVCC_FLAGS --maxrregcount 32)
+
 # Build from Kepler architecture upwards.
 list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
 
 # Produce an error on illegal calls, e.g. __host__ __device__ --> __host__.
 list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
+
+# Disable all warnings.
+#list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 
 # ----------------------------------------------------------------------------
 # Build Setup
