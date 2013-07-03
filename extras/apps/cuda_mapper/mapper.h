@@ -444,6 +444,10 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs, TExecSpace const & tag)
     // Find hits.
     find(finder, pattern, hits);
 
+#ifdef CUDA_PLATFORM
+    cudaDeviceSynchronize();
+#endif
+
     finish = sysTime();
     std::cout << "Mapping time:\t\t\t" << std::flush;
     std::cout << finish - start << " sec" << std::endl;
