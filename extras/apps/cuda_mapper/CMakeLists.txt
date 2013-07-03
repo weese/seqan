@@ -28,6 +28,16 @@ endif (NOT CUDA_FOUND)
 add_definitions (-DSEQAN_CUDA=1)
 
 # ----------------------------------------------------------------------------
+# App-Level Configuration
+# ----------------------------------------------------------------------------
+
+option (FM_INDEX_32_BITS "Set to ON to use a 32 bits FM-index." OFF)
+
+if (FM_INDEX_32_BITS)
+    add_definitions (-DFM_INDEX_32_BITS=1)
+endif (FM_INDEX_32_BITS)
+
+# ----------------------------------------------------------------------------
 # CUDA Setup
 # ----------------------------------------------------------------------------
 
