@@ -34,9 +34,6 @@ if (CUDA_DISABLED)
   message (STATUS "  CUDA disabled: building cuda_mapper without CUDA acceleration.")
 endif (CUDA_DISABLED)
 
-# Search for OpenMP.
-find_package (OPENMP QUIET)
-
 # Warn if OpenMP was not found.
 if (NOT OPENMP_FOUND)
   message (STATUS "  OpenMP not found: building cuda_mapper without multi-threading.")
