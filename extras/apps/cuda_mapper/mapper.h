@@ -328,11 +328,14 @@ getCount(Hits<TIndex, Device<Count<TSpec> > > & hits)
 #ifdef PLATFORM_CUDA
 template <typename TSeeds, typename TReadSeqs, typename TSize>
 SEQAN_GLOBAL void
-_fillSeedsKernel(TSeeds seeds, TReadSeqs readSeqs, TSize seedLength, TSize seedsPerReadSeq)
+_fillSeedsKernel(TSeeds seeds, TReadSeqs readSeqs, TSize seedLength, TSize readSeqsCount, TSize seedsPerReadSeq)
 {
     typedef typename Value<TReadSeqs>::Type                 TReadSeq;
 
     TSize readSeqId = getThreadId();
+
+    if (readSeqId >= readSeqsCount) return;
+
     TReadSeq const & readSeq = readSeqs[readSeqId];
 
     for (TSize seedId = 0; seedId < seedsPerReadSeq; ++seedId)
@@ -355,7 +358,7 @@ _fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs,
     unsigned ctaSize = 256;
     unsigned activeBlocks = (readSeqsCount + ctaSize - 1) / ctaSize;
 
-    _fillSeedsKernel<<<activeBlocks, ctaSize>>>(view(seeds), view(readSeqs), seedLength, seedsPerReadSeq);
+    _fillSeedsKernel<<<activeBlocks, ctaSize>>>(view(seeds), view(readSeqs), seedLength, readSeqsCount, seedsPerReadSeq);
 }
 #endif
 
@@ -444,7 +447,7 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs, TExecSpace const & tag)
     // Find hits.
     find(finder, pattern, hits);
 
-#ifdef CUDA_PLATFORM
+#ifdef PLATFORM_CUDA
     cudaDeviceSynchronize();
 #endif
 

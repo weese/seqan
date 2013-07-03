@@ -460,8 +460,6 @@ _preprocess(Pattern<TNeedles, Multiple<TSpec> > & pattern, ExecDevice const & /*
 
     // Sort the pattern.
     thrust::sort_by_key(pattern._hashes.begin(), pattern._hashes.end(), pattern._permutation.begin());
-
-    cudaDeviceSynchronize();
 }
 #endif
 
