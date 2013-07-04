@@ -437,39 +437,45 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, T
             // Update the score forwards.
             finder._score += _getVertexScore(finder);
 
-//            printState(finder);
+            // Exact case.
+//            if (finder._score == finder._scoreThreshold)
+//            {
+//                if (goDown(textIt, suffix(patternIt)))
+//                {
+//                    delegate(finder);
+//                    goUp(textIt);
+//                }
+//            }
 
-            // Recursive case.
-            if (finder._score <= finder._scoreThreshold && !atEnd(patternIt + 1) && !isLeaf(textIt))
-            {
-//                std::cout << std::endl << "Recurse" << std::endl;
-
-                goDown(textIt);
-                goNext(patternIt);
-            }
-            else
+            // Approximate case.
+//            else if (finder._score <= finder._scoreThreshold)
+            if (finder._score <= finder._scoreThreshold)
             {
                 // Base case.
-                if (finder._score <= finder._scoreThreshold && atEnd(patternIt + 1))
+                if (atEnd(patternIt + 1))
                 {
-//                    std::cout << std::endl << "Report" << std::endl;
                     delegate(finder);
                 }
 
-                // Backtrack.
-                finder._score -= _getVertexScore(finder);
-
-//                std::cout << std::endl << "Backtrack" << std::endl;
-
-                // Iterate to the next text node.
-                while (!goRight(textIt) && goUp(textIt))
+                // Recursive case.
+                else if (goDown(textIt))
                 {
-                    // Iterate backwards in the pattern when going up.
-                    goPrevious(patternIt);
-
-                    // Update the score backwards.
-                    finder._score -= _getVertexScore(finder);
+                    goNext(patternIt);
+                    continue;
                 }
+            }
+
+            // Backtrack.
+            finder._score -= _getVertexScore(finder);
+
+            // Iterate to the next text node.
+            while (!goRight(textIt) && goUp(textIt))
+            {
+                // Iterate backwards in the pattern when going up.
+                goPrevious(patternIt);
+
+                // Update the score backwards.
+                finder._score -= _getVertexScore(finder);
             }
         }
         while (!isRoot(textIt));
