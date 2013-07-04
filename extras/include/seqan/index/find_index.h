@@ -429,102 +429,55 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, T
     TTextIterator & textIt = textIterator(finder);
     TPatternIterator & patternIt = patternIterator(finder);
 
-    // Check for non-empty problem.
-    if (goDown(textIt) && !atEnd(patternIt))
+    do
     {
-        do
+        // Exact case.
+        if (finder._score == finder._scoreThreshold)
         {
-            // Update the score forwards.
-            finder._score += _getVertexScore(finder);
-
-            // Exact case.
-//            if (finder._score == finder._scoreThreshold)
-//            {
-//                if (goDown(textIt, suffix(patternIt)))
-//                {
-//                    delegate(finder);
-//                    goUp(textIt);
-//                }
-//            }
-
-            // Approximate case.
-//            else if (finder._score <= finder._scoreThreshold)
-            if (finder._score <= finder._scoreThreshold)
+            if (goDown(textIt, suffix(pattern, patternIt)))
             {
-                // Base case.
-                if (atEnd(patternIt + 1))
-                {
-                    delegate(finder);
-                }
+                delegate(finder);
+                goUp(textIt);
 
-                // Recursive case.
-                else if (goDown(textIt))
-                {
-                    goNext(patternIt);
-                    continue;
-                }
-            }
-
-            // Backtrack.
-            finder._score -= _getVertexScore(finder);
-
-            // Iterate to the next text node.
-            while (!goRight(textIt) && goUp(textIt))
-            {
-                // Iterate backwards in the pattern when going up.
-                goPrevious(patternIt);
-
-                // Update the score backwards.
-                finder._score -= _getVertexScore(finder);
+                // Termination.
+                if (isRoot(textIt)) break;
             }
         }
-        while (!isRoot(textIt));
-    }
-}
 
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
-//SEQAN_FUNC void
-//find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, TSpec> > & finder,
-//     TPattern const & pattern,
-//     TDelegate & delegate)
-//{
-//    typedef Index<TText, TIndexSpec>                            TIndex;
-//    typedef Backtracking<HammingDistance, TSpec>                TFinderSpec;
-//    typedef typename TextIterator_<TIndex, TFinderSpec>::Type   TTextIterator;
-//    typedef typename Iterator<TPattern, Standard>::Type         TPatternIterator;
-//
-//    unsigned maxErrors = 1;
-//    unsigned errors = 0;
-//
-//    TTextIterator & textIt = textIterator(finder);
-//    TPatternIterator patternIt = begin(pattern, Standard());
-//    TPatternIterator patternEnd = end(pattern, Standard());
-//
-//    do
-//    {
-//        // Compare text edge label with pattern.
-//        errors += (parentEdgeLabel(textIt) != value(patternIt));
-//
-//        // Check error threshold.
-//        if (errors <= maxErrors)
-//        {
-//            // Base case.
-//            if (atEnd(patternIt, pattern))
-//                delegate(finder);
-//
-//            // Recurse.
-//            else if (goDown(textIt))
-//                goNext(patternIt);
-//        }
-//        // Backtrack.
-//        else
-//        {
-//            while (!goRight(textIt) && goUp(textIt))
-//                goPrevious(patternIt);
-//        }
-//    }
-//    while (!isRoot(textIt));
-//}
+        // Approximate case.
+        else if (finder._score < finder._scoreThreshold)
+        {
+            // Base case.
+            if (atEnd(patternIt))
+            {
+                delegate(finder);
+            }
+
+            // Recursive case.
+            else if (goDown(textIt))
+            {
+                finder._score += _getVertexScore(finder);
+                goNext(patternIt);
+                continue;
+            }
+        }
+
+        // Backtrack.
+        do
+        {
+            goPrevious(patternIt);
+            finder._score -= _getVertexScore(finder);
+        }
+        while (!goRight(textIt) && goUp(textIt));
+
+        // Termination.
+        if (isRoot(textIt)) break;
+
+        finder._score += _getVertexScore(finder);
+        goNext(patternIt);
+    }
+    while (true);
+}
 
 }
 
