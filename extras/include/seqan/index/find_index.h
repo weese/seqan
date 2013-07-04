@@ -248,37 +248,6 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, TSpec>
     {}
 };
 
-// ----------------------------------------------------------------------------
-// Class Finder
-// ----------------------------------------------------------------------------
-
-//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec>
-//struct Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, TSpec> >
-//{
-//    typedef Backtracking<HammingDistance, TSpec>                    TAlgorithm;
-//    typedef Index<TText, TIndexSpec>                                TIndex;
-//    typedef typename TextIterator_<TIndex, TSpec>::Type             TTextIterator;
-//    typedef typename PatternIterator_<TPattern const, TSpec>::Type  TPatternIterator;
-//    typedef typename VertexScoreStack_<TAlgorithm>::Type            TVertexScoreStack;
-//
-//    TTextIterator       _textIt;
-//    TPatternIterator    _patternIt;
-//    TVertexScoreStack   _scoreStack;
-//
-//    SEQAN_FUNC
-//    Finder2() {}
-//
-//    SEQAN_FUNC
-//    Finder2(TIndex /* const */ & index) :
-//        _textIt(index)
-//    {}
-//
-//    SEQAN_FUNC
-//    Finder2(TTextIterator const & textIt) :
-//        _textIt(textIt)
-//    {}
-//};
-
 // ============================================================================
 // Functions
 // ============================================================================
