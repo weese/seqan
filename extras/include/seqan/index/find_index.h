@@ -191,6 +191,7 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, TSpec>
     typedef typename TextIterator_<TIndex, TSpec>::Type TTextIterator;
 
     TTextIterator _textIt;
+//    TPatternIterator _patternIt;
 
     SEQAN_FUNC
     Finder2() {}
@@ -264,43 +265,91 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, T
     typedef typename TextIterator_<TIndex, TFinderSpec>::Type   TTextIterator;
     typedef typename Iterator<TPattern, Standard>::Type         TPatternIterator;
 
-    unsigned maxScore = 1;
+    unsigned maxErrors = 1;
     unsigned errors = 0;
 
     TTextIterator & textIt = textIterator(finder);
     TPatternIterator patternIt = begin(pattern, Standard());
-    TPatternIterator patternEnd = end(pattern, Standard());
+//    TPatternIterator patternEnd = end(pattern, Standard());
 
     do
     {
-        if (goDown(textIt) && !atEnd(patternIt, pattern))
+        // Recurse in the text.
+        if (goDown(textIt))
         {
-            goNext(patternIt);
+            std::cout << "Text:\t\t\t" << parentEdgeLabel(textIt) << std::endl;
+            std::cout << "Pattern:\t\t" << value(patternIt) << std::endl;
 
-            do
+            // Compare text edge label with pattern.
+            errors += (parentEdgeLabel(textIt) != value(patternIt));
+
+            // Check the error threshold.
+            if (errors <= maxErrors)
             {
-                errors += parentEdgeLabel(textIt) != value(patternIt);
-
-                if (atEnd(patternIt, pattern) && errors <= maxScore)
+                // Base case.
+                if (atEnd(patternIt, pattern))
                 {
                     delegate(finder);
                 }
-                else if (errors == maxScore)
+                // Recursive case.
+                else
                 {
-                    if (goDown(textIt, suffix(pattern, patternIt)))
-                        delegate(finder);
-
-                    goUp(textIt);
+                    // Recurse in the pattern.
+                    goNext(patternIt);
+                    continue;
                 }
             }
-            while (goRight(textIt));
-
-            goUp(textIt);
-            goPrevious(patternIt);
         }
+        // Backtrack.
+        while (!goRight(textIt) && goUp(textIt))
+                goPrevious(patternIt);
     }
     while (!isRoot(textIt));
 }
+
+//template <typename TText, typename TIndexSpec, typename TPattern, typename TSpec, typename TDelegate>
+//SEQAN_FUNC void
+//find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, TSpec> > & finder,
+//     TPattern const & pattern,
+//     TDelegate & delegate)
+//{
+//    typedef Index<TText, TIndexSpec>                            TIndex;
+//    typedef Backtracking<HammingDistance, TSpec>                TFinderSpec;
+//    typedef typename TextIterator_<TIndex, TFinderSpec>::Type   TTextIterator;
+//    typedef typename Iterator<TPattern, Standard>::Type         TPatternIterator;
+//
+//    unsigned maxErrors = 1;
+//    unsigned errors = 0;
+//
+//    TTextIterator & textIt = textIterator(finder);
+//    TPatternIterator patternIt = begin(pattern, Standard());
+//    TPatternIterator patternEnd = end(pattern, Standard());
+//
+//    do
+//    {
+//        // Compare text edge label with pattern.
+//        errors += (parentEdgeLabel(textIt) != value(patternIt));
+//
+//        // Check error threshold.
+//        if (errors <= maxErrors)
+//        {
+//            // Base case.
+//            if (atEnd(patternIt, pattern))
+//                delegate(finder);
+//
+//            // Recurse.
+//            else if (goDown(textIt))
+//                goNext(patternIt);
+//        }
+//        // Backtrack.
+//        else
+//        {
+//            while (!goRight(textIt) && goUp(textIt))
+//                goPrevious(patternIt);
+//        }
+//    }
+//    while (!isRoot(textIt));
+//}
 
 }
 
