@@ -48,7 +48,7 @@ list (APPEND CUDA_NVCC_FLAGS -arch sm_20)
 #list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
 
 # Disable all warnings.
-#list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
+list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 
 # ----------------------------------------------------------------------------
 # Build Setup
@@ -62,7 +62,7 @@ add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
 if (CUDA_FOUND AND NOT CUDA_DISABLED)
-  cuda_add_executable(cuda_demo cuda_demo.cpp cuda_demo.cu cuda_demo.h)
+  cuda_add_executable(cuda_demo cuda_demo.cu cuda_demo.h)
 else (CUDA_FOUND AND NOT CUDA_DISABLED)
   add_executable(cuda_demo cuda_demo.cpp cuda_demo.h)
 endif (CUDA_FOUND AND NOT CUDA_DISABLED)

@@ -125,27 +125,73 @@ count(TIndex & index, TNeedles & needles)
 }
 
 // --------------------------------------------------------------------------
-// Function count(); ExecHost
+// Function main()
 // --------------------------------------------------------------------------
-// Dispatches compilation to the host compiler.
 
-template <typename TIndex, typename TNeedles>
-typename Size<TIndex>::Type
-count(TIndex & index, TNeedles & needles, ExecHost const & /* tag */)
+int main()
 {
-    return count(index, needles);
-}
+    // ----------------------------------------------------------------------
+    // Create input data on the CPU.
+    // ----------------------------------------------------------------------
 
-// --------------------------------------------------------------------------
-// Function count(); ExecDevice
-// --------------------------------------------------------------------------
-// Dispatches compilation to nvcc.
+    // Select the input types.
+    typedef DnaString                                       THaystack;
+    typedef StringSet<DnaString, Owner<ConcatDirect<> > >   TNeedles;
 
-#ifdef CUDA_PLATFORM
-Size<Device<Index<DnaString, FMIndex<> > >::Type>::Type
-count(Device<Index<DnaString, FMIndex<> > >::Type & index,
-      Device<StringSet<DnaString, Owner<ConcatDirect<> > > >::Type & needles,
-      ExecDevice const & /* tag */);
+    // Create a haystack.
+    THaystack haystack = "ACGTTGCAACGTTGCAACGTTGCAACGTTGCAACGTTGCAACGTTGCA";
+
+    // Create a set of needles.
+    TNeedles needles;
+    appendValue(needles, "GTTG");
+    appendValue(needles, "TAC");
+    appendValue(needles, "CAAC");
+
+    // ----------------------------------------------------------------------
+    // Build the FM-index on the CPU.
+    // ----------------------------------------------------------------------
+
+    // Select the index type.
+    typedef Index<THaystack, FMIndex<> >    TIndex;
+
+    // Build the index over the reversed haystack.
+    TIndex index(haystack);
+    reverse(haystack);
+    indexCreate(index);
+    reverse(haystack);
+
+    // ----------------------------------------------------------------------
+    // Count on the CPU.
+    // ----------------------------------------------------------------------
+
+    omp_set_num_threads(8);
+    std::cout << "CPU Occurrences: " << count(index, needles) << std::endl;
+
+#ifndef CUDA_DISABLED
+    // ----------------------------------------------------------------------
+    // Copy data to the GPU.
+    // ----------------------------------------------------------------------
+
+    // Select the GPU types.
+    typedef Device<TNeedles>::Type     TDeviceNeedles;
+    typedef Device<TIndex>::Type       TDeviceIndex;
+
+    // Copy the needles to the GPU.
+    TDeviceNeedles deviceNeedles;
+    assign(deviceNeedles, needles);
+
+    // Copy the index to the GPU.
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
+
+    // ----------------------------------------------------------------------
+    // Count on the GPU.
+    // ----------------------------------------------------------------------
+
+    std::cout << "GPU Occurrences: " << count(deviceIndex, deviceNeedles) << std::endl;
 #endif
+
+    return 0;
+}
 
 #endif  // SEQAN_EXTRAS_APPS_CUDA_DEMO_H

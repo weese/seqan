@@ -33,22 +33,3 @@
 // ==========================================================================
 
 #include "cuda_demo.h"
-
-using namespace seqan;
-
-// ==========================================================================
-// Functions
-// ==========================================================================
-
-// --------------------------------------------------------------------------
-// Function count(); ExecDevice
-// --------------------------------------------------------------------------
-// Dispatches compilation to nvcc.
-
-Size<Device<Index<DnaString, FMIndex<> > >::Type>::Type
-count(Device<Index<DnaString, FMIndex<> > >::Type & index,
-      Device<StringSet<DnaString, Owner<ConcatDirect<> > > >::Type & needles,
-      ExecDevice const & /* tag */)
-{
-    return count(index, needles);
-}
