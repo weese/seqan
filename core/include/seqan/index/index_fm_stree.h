@@ -337,49 +337,38 @@ _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec>
 // Function _goDownString()                                          [Iterator]
 // ----------------------------------------------------------------------------
 
-//template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TString, typename TSize>
-//inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it,
-//                          TString const & string,
-//                          TSize & lcp)
-//{
-//    typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
-//    typedef Pair<typename Size<TIndex>::Type>                   TRange;
-//
-//    typedef typename Iterator<TString const, Standard>::Type    TIterator;
-//
-//    _historyPush(it);
-//
-//    lcp = 0;
-//
-//    for (TIterator stringIt = begin(string, Standard()); stringIt != end(string, Standard()); ++stringIt)
-//    {
-//        TRange _range;
-//
-//        if (isLeaf(it) || !_getNodeByChar(it, value(it), _range, value(stringIt)))
-//            return false;
-//
-//        value(it).range = _range;
-//        value(it).lastChar = value(stringIt);
-//        value(it).repLen++;
-//        lcp++;
-//    }
-//
-//    return true;
-//}
-
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TString, typename TSize>
 SEQAN_FUNC bool
 _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > &it,
               TString const & string,
               TSize & lcp)
 {
+    typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >        TIndex;
+    typedef Pair<typename Size<TIndex>::Type>                   TRange;
     typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
     lcp = 0;
+    _historyPush(it);
 
-    for (TStringIter stringIt = begin(string, Standard()); stringIt != end(string, Standard()); ++stringIt, ++lcp)
-        if (isLeaf(it) || !_goDownChar(it, value(stringIt)))
-            return false;
+    TStringIter stringEnd = end(string, Standard());
+    for (TStringIter stringIt = begin(string, Standard()); stringIt != stringEnd; ++stringIt, ++lcp)
+    {
+        TRange _range;
+
+//        if (!_getNodeByChar(it, value(it), _range, value(stringIt))) break;
+        if (isLeaf(it) || !_getNodeByChar(it, value(it), _range, value(stringIt))) break;
+
+        value(it).range = _range;
+    }
+
+    if (lcp < length(string))
+    {
+        _historyPop(it);
+        return false;
+    }
+
+    value(it).lastChar = back(string);
+    value(it).repLen += lcp;
 
     return true;
 }
@@ -415,6 +404,7 @@ _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec
     TRange _range;
 
     for (TAlphabetSize c = ordValue(value(it).lastChar) + 1; c < ValueSize<TAlphabet>::VALUE; ++c)
+    {
         if (_getNodeByChar(it, parentDesc, _range, c))
         {
             value(it).range = _range;
@@ -422,6 +412,7 @@ _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec
 
             return true;
         }
+    }
 
     return false;
 }
@@ -434,31 +425,22 @@ template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec
 SEQAN_FUNC bool
 _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > & it)
 {
-    if (!isRoot(it))
-    {
-        value(it).range = it._parentDesc.range;
-        value(it).lastChar = it._parentDesc.lastChar;
-        --value(it).repLen;
-        return true;
-    }
+    if (isRoot(it)) return false;
 
-    return false;
+    _historyPop(it);
+    --value(it).repLen;
+    return true;
 }
 
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
 SEQAN_FUNC bool
 _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
 {
-    if (!isRoot(it))
-    {
-        value(it).range = back(it.history).range;
-        value(it).lastChar = back(it.history).lastChar;
-        --value(it).repLen;
-        pop(it.history);
-        return true;
-    }
+    if (isRoot(it)) return false;
 
-    return false;
+    _historyPop(it);
+    --value(it).repLen;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -501,6 +483,27 @@ _historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<
     h.lastChar = value(it).lastChar;
 
     appendValue(it.history, h);
+}
+
+// ----------------------------------------------------------------------------
+// Function _historyPop()                                            [Iterator]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
+SEQAN_FUNC void
+_historyPop(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > & it)
+{
+    value(it).range = back(it.history).range;
+    value(it).lastChar = back(it.history).lastChar;
+}
+
+template < typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
+SEQAN_FUNC void
+_historyPop(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
+{
+    value(it).range = back(it.history).range;
+    value(it).lastChar = back(it.history).lastChar;
+    pop(it.history);
 }
 
 // ----------------------------------------------------------------------------
