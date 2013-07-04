@@ -101,6 +101,16 @@ struct ExecSpace
     typedef typename If<typename IsDevice<TObject>::Type, ExecDevice, ExecHost>::Type   Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction CtaSize                                                [Finder]
+// ----------------------------------------------------------------------------
+
+template <typename TObject, typename TSpec = void>
+struct CtaSize
+{
+    static const unsigned VALUE = 256;
+};
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_EXTRAS_BASIC_DEVICE_H

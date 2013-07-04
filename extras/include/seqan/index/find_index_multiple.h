@@ -356,16 +356,6 @@ struct Delegated<Finder2<TText, TPattern, Multiple<TSpec> > >
     typedef Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > Type;
 };
 
-// ----------------------------------------------------------------------------
-// Metafunction FinderCTASize_                                         [Finder]
-// ----------------------------------------------------------------------------
-
-template <typename TFinder>
-struct FinderCTASize_
-{
-    static const unsigned VALUE = 256;
-};
-
 // ============================================================================
 // Kernels
 // ============================================================================
@@ -452,7 +442,7 @@ _preprocess(Pattern<TNeedles, Multiple<TSpec> > & pattern, ExecDevice const & /*
     resize(pattern._permutation, needlesCount, Exact());
 
     // Compute grid size.
-    unsigned ctaSize = 256;
+    unsigned ctaSize = CtaSize<TPattern>::VALUE;
     unsigned activeBlocks = (needlesCount + ctaSize - 1) / ctaSize;
 
     // Launch the preprocessing kernel.
@@ -543,16 +533,13 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
 {
     typedef Finder2<TText, TPattern, Multiple<TSpec> >  TFinder;
     typedef typename View<TFinder>::Type                TFinderView;
-    typedef typename View<TText>::Type                  TTextView;
-    typedef typename View<TPattern>::Type               TPatternsView;
-    typedef typename View<TDelegate>::Type              TDelegateView;
 
     // NOTE(esiragusa): Use this to switch to persistent threads.
 //    unsigned activeBlocks = cudaMaxActiveBlocks(_findKernel<TTextView, TPatternsView, TSpec, TDelegateView>, ctaSize, 0);
 //    setMaxObjects(finder._factory, activeBlocks * ctaSize);
 
     // Compute grid size.
-    unsigned ctaSize = FinderCTASize_<TFinderView>::VALUE;
+    unsigned ctaSize = CtaSize<TFinderView>::VALUE;
     unsigned activeBlocks = (length(needle(pattern)) + ctaSize - 1) / ctaSize;
 
     // Initialize the iterator factory.
