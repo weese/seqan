@@ -37,95 +37,18 @@
 using namespace seqan;
 
 // ==========================================================================
-// Kernels
-// ==========================================================================
-
-// --------------------------------------------------------------------------
-// Kernel _findKernel()
-// --------------------------------------------------------------------------
-
-template <typename TIndex, typename TString>
-__global__ void
-_findKernel(TIndex index, TString pattern)
-{
-    typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
-    typedef typename EdgeLabel<TIterator>::Type         TEdgeLabel;
-    typedef typename Fibre<TIndex, FibreText>::Type     TTextFibre;
-    typedef typename Infix<TTextFibre const>::Type      TRepresentative;
-
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("index=%i\n", idx);
-
-    // Print the Compressed SA values.
-    printf("lengthSA=%ld\n", length(indexSA(index)));
-    for (unsigned i = 0; i < length(indexSA(index)); ++i)
-        printf("<%ld,%ld>\n", indexSA(index)[i].i1, indexSA(index)[i].i2);
-//        printf("%ld\n", indexSA(index)[i]);
-
-    // Instantiate a virtual suffix tree iterator.
-    TIterator it(index);
-
-    // At root.
-    printf("isRoot()=%d\n", isRoot(it));
-    printf("repLength()=%ld\n", repLength(it));
-    printf("countOccurrences()=%ld\n", countOccurrences(it));
-
-    // Visit the leftmost children of the root.
-    if (goDown(it))
-    {
-        // Visit all the siblings at depth one.
-        do
-        {
-            printf("repLength()=%ld\n", repLength(it));
-            printf("parentEdgeLabel()=%c\n", static_cast<char>(parentEdgeLabel(it)));
-            printf("countOccurrences()=%ld\n", countOccurrences(it));
-            printf("isLeaf()=%d\n", isLeaf(it));
-        }
-        while (goRight(it));
-    }
-
-    // Restart from root.
-    goRoot(it);
-    printf("goRoot()\n");
-
-    // Search the pattern.
-    printf("goDown(pattern)=%d\n", goDown(it, pattern));
-    printf("repLength()=%ld\n", repLength(it));
-    printf("countOccurrences()=%ld\n", countOccurrences(it));
-    printf("isLeaf()=%d\n", isLeaf(it));
-}
-
-// ==========================================================================
 // Functions
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// Function findKernel()
+// Function count(); ExecDevice
 // --------------------------------------------------------------------------
+// Dispatches compilation to nvcc.
 
-void findKernel(Index<StringSet<DnaString, Owner<ConcatDirect<> > >, FMIndex<> > & index, DnaString & pattern)
+Size<Device<Index<DnaString, FMIndex<> > >::Type>::Type
+count(Device<Index<DnaString, FMIndex<> > >::Type & index,
+      Device<StringSet<DnaString, Owner<ConcatDirect<> > > >::Type & needles,
+      ExecDevice const & /* tag */)
 {
-    typedef DnaString                                   TString;
-    typedef StringSet<TString, Owner<ConcatDirect<> > > TStringSet;
-    typedef Index<TStringSet, FMIndex<> >               TIndex;
-
-//template <typename TIndex, typename TString>
-//void findKernel(TIndex & index, TString & pattern)
-//{
-
-    typedef typename Device<TIndex>::Type               TDeviceIndex;
-    typedef typename Device<TString>::Type              TDeviceString;
-
-    // Copy index to device.
-    TDeviceIndex deviceIndex;
-    assign(deviceIndex, index);
-
-    // Copy pattern to device.
-    TDeviceString devicePattern;
-    assign(devicePattern, pattern);
-
-    _findKernel<<< 1,1 >>>(view(deviceIndex), view(devicePattern));
-    cudaDeviceSynchronize();
+    return count(index, needles);
 }
-
-//void findKernel(Index<StringSet<DnaString, Owner<ConcatDirect<> > >, FMIndex<> > & index, DnaString & pattern);

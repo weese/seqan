@@ -48,20 +48,104 @@ using namespace seqan;
 // --------------------------------------------------------------------------
 // Metafunction Size
 // --------------------------------------------------------------------------
+// Select the size types for the FM-index.
 
 namespace seqan {
+template <>
+struct SAValue<DnaString>
+{
+    typedef __uint32    Type;
+};
+
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
 {
-    typedef unsigned Type;
+    typedef __uint32    Type;
 };
 
 template <typename TSpec>
 struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
 {
-    typedef unsigned Type;
+    typedef __uint32    Type;
+};
+
+template <typename TSpec>
+struct Size<RankDictionary<Naive<bool, TSpec> > >
+{
+    typedef __uint32    Type;
 };
 }
 
+struct DummyDelegate
+{
+    unsigned count;
+
+    DummyDelegate() : count(0) {};
+
+    template <typename TFinder>
+    inline SEQAN_HOST_DEVICE
+    void operator()(TFinder const & finder) { count += countOccurrences(textIterator(finder)); }
+};
+
+// ==========================================================================
+// Functions
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// Function count()
+// --------------------------------------------------------------------------
+// Count the occurrences of a set of needles in a indexed haystack.
+
+template <typename TIndex, typename TNeedles>
+typename Size<TIndex>::Type
+count(TIndex & index, TNeedles & needles)
+{
+    // Select the algorithm type.
+    typedef Multiple<FinderSTree>                       TAlgorithmSpec;
+    typedef Pattern<TNeedles, TAlgorithmSpec>           TPattern;
+    typedef Finder2<TIndex, TPattern, TAlgorithmSpec>   TFinder;
+//    typedef Counter<TIndex>                             TCounter;
+
+    // Instantiate a finder object holding the context of the search algorithm.
+    TFinder finder(index);
+
+    // Instantiate a pattern object holding the needles.
+    TPattern pattern(needles);
+
+    // Instantiate a functor object counting the number of found occurrences.
+//    TCounter counter(needles);
+    DummyDelegate counter;
+
+    // Find all needles in haystack and call counter() on each match.
+    find(finder, pattern, counter);
+
+    // Return the number of hits.
+//    return getCount(counter);
+    return counter.count;
+}
+
+// --------------------------------------------------------------------------
+// Function count(); ExecHost
+// --------------------------------------------------------------------------
+// Dispatches compilation to the host compiler.
+
+template <typename TIndex, typename TNeedles>
+typename Size<TIndex>::Type
+count(TIndex & index, TNeedles & needles, ExecHost const & /* tag */)
+{
+    return count(index, needles);
+}
+
+// --------------------------------------------------------------------------
+// Function count(); ExecDevice
+// --------------------------------------------------------------------------
+// Dispatches compilation to nvcc.
+
+#ifdef CUDA_PLATFORM
+Size<Device<Index<DnaString, FMIndex<> > >::Type>::Type
+count(Device<Index<DnaString, FMIndex<> > >::Type & index,
+      Device<StringSet<DnaString, Owner<ConcatDirect<> > > >::Type & needles,
+      ExecDevice const & /* tag */);
+#endif
 
 #endif  // SEQAN_EXTRAS_APPS_CUDA_DEMO_H

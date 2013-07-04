@@ -32,84 +32,9 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#include <seqan/basic_extras.h>
-#include <seqan/sequence_extras.h>
-#include <seqan/index_extras.h>
+#include "cuda_demo.h"
 
 using namespace seqan;
-
-// ==========================================================================
-// Metafunctions
-// ==========================================================================
-
-// --------------------------------------------------------------------------
-// Metafunction Size
-// --------------------------------------------------------------------------
-// Select the size types for the FM-index.
-
-namespace seqan {
-template <>
-struct SAValue<DnaString>
-{
-    typedef __uint32    Type;
-};
-
-template <typename TSpec>
-struct Size<RankDictionary<TwoLevels<Dna, TSpec> > >
-{
-    typedef __uint32    Type;
-};
-
-template <typename TSpec>
-struct Size<RankDictionary<TwoLevels<bool, TSpec> > >
-{
-    typedef __uint32    Type;
-};
-
-template <typename TSpec>
-struct Size<RankDictionary<Naive<bool, TSpec> > >
-{
-    typedef __uint32    Type;
-};
-}
-
-// ==========================================================================
-// Functions
-// ==========================================================================
-
-// --------------------------------------------------------------------------
-// Function count()
-// --------------------------------------------------------------------------
-// Count the occurrences of a set of needles in a indexed haystack.
-
-template <typename TIndex, typename TNeedles>
-void count(TIndex & index, TNeedles & needles)
-{
-    // Select the algorithm type.
-    typedef Multiple<FinderSTree>                       TAlgorithmSpec;
-    typedef Pattern<TNeedles, TAlgorithmSpec>           TPattern;
-    typedef Finder2<TIndex, TPattern, TAlgorithmSpec>   TFinder;
-    typedef Counter<TIndex>                             TCounter;
-
-    // Instantiate a finder object holding the context of the search algorithm.
-    TFinder finder(index);
-
-    // Instantiate a pattern object holding the needles.
-    TPattern pattern(needles);
-
-    // Instantiate a functor object counting the number of found occurrences.
-    TCounter counter(needles);
-
-    // Find all needles in haystack and call counter() on each match.
-    find(finder, pattern, counter);
-
-    // Output the number of hits.
-    std::cout << "Hits: " << getCount(counter) << std::endl;
-}
-
-// --------------------------------------------------------------------------
-// Function main()
-// --------------------------------------------------------------------------
 
 int main()
 {
@@ -148,15 +73,16 @@ int main()
     // ----------------------------------------------------------------------
 
     omp_set_num_threads(8);
-    count(index, needles);
+    std::cout << "CPU Occurrences: " << count(index, needles, ExecSpace<TIndex>::Type()) << std::endl;
 
+#ifndef CUDA_DISABLED
     // ----------------------------------------------------------------------
     // Copy data to the GPU.
     // ----------------------------------------------------------------------
 
     // Select the GPU types.
-    typedef typename Device<TNeedles>::Type     TDeviceNeedles;
-    typedef typename Device<TIndex>::Type       TDeviceIndex;
+    typedef Device<TNeedles>::Type     TDeviceNeedles;
+    typedef Device<TIndex>::Type       TDeviceIndex;
 
     // Copy the needles to the GPU.
     TDeviceNeedles deviceNeedles;
@@ -170,7 +96,8 @@ int main()
     // Count on the GPU.
     // ----------------------------------------------------------------------
 
-    count(deviceIndex, deviceNeedles);
+    std::cout << "GPU Occurrences: " << count(deviceIndex, deviceNeedles, ExecSpace<TDeviceIndex>::Type()) << std::endl;
+#endif
 
     return 0;
 }

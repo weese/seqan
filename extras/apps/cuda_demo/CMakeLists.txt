@@ -21,11 +21,18 @@ find_package (SeqAn REQUIRED)
 # Search for CUDA.
 find_package (CUDA QUIET)
 
-# Break out if CUDA was not found.
+# Disable CUDA acceleration if CUDA was not found.
 if (NOT CUDA_FOUND)
-  message (STATUS "  CUDA not found: Not building cuda_demo.")
-  return ()
+  add_definitions (-DCUDA_DISABLED=1)
+  message (STATUS "  CUDA not found: building cuda_demo without CUDA acceleration.")
 endif (NOT CUDA_FOUND)
+
+option (CUDA_DISABLED "Set to ON to disable CUDA acceleration." OFF)
+
+if (CUDA_DISABLED)
+  add_definitions (-DCUDA_DISABLED=1)
+  message (STATUS "  CUDA disabled: building cuda_demo without CUDA acceleration.")
+endif (CUDA_DISABLED)
 
 # ----------------------------------------------------------------------------
 # CUDA Setup
@@ -34,11 +41,14 @@ endif (NOT CUDA_FOUND)
 # Activate debug symbols for device code and remove optimizations.
 #list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
 
-# Build from Kepler architecture upwards.
-list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
+# Build from Tesla architecture upwards.
+list (APPEND CUDA_NVCC_FLAGS -arch sm_20)
 
 # Produce an error on illegal calls, e.g. __host__ __device__ --> __host__.
 #list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
+
+# Disable all warnings.
+#list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 
 # ----------------------------------------------------------------------------
 # Build Setup
@@ -51,9 +61,11 @@ include_directories (${SEQAN_INCLUDE_DIRS})
 add_definitions (${SEQAN_DEFINITIONS})
 
 # Update the list of file names below if you add source files to your application.
-if (CUDA_FOUND)
-  cuda_add_executable(cuda_demo cuda_demo.cpp)
-endif (CUDA_FOUND)
+if (CUDA_FOUND AND NOT CUDA_DISABLED)
+  cuda_add_executable(cuda_demo cuda_demo.cpp cuda_demo.cu cuda_demo.h)
+else (CUDA_FOUND AND NOT CUDA_DISABLED)
+  add_executable(cuda_demo cuda_demo.cpp cuda_demo.h)
+endif (CUDA_FOUND AND NOT CUDA_DISABLED)
 
 # Add dependencies found by find_package (SeqAn).
 target_link_libraries (cuda_demo ${SEQAN_LIBRARIES})
