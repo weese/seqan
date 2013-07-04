@@ -434,7 +434,8 @@ template <typename TNeedles, typename TSpec>
 inline void
 _preprocess(Pattern<TNeedles, Multiple<TSpec> > & pattern, ExecDevice const & /* tag */)
 {
-    typedef typename Size<TNeedles>::Type   TSize;
+    typedef Pattern<TNeedles, Multiple<TSpec> > TPattern;
+    typedef typename Size<TNeedles>::Type       TSize;
 
     TSize needlesCount = length(needle(pattern));
 
@@ -491,31 +492,33 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     typedef typename View<TText>::Type                                          TTextView;
     typedef typename View<TPattern>::Type                                       TPatternView;
     typedef typename View<TFinder>::Type                                        TFinderView;
-    typedef FinderContext_<TTextView, TPatternView, Multiple<TSpec>, TDelegate> TFinderContext;
     typedef typename Needle<TPattern>::Type                                     TNeedles;
+    typedef typename View<TNeedles>::Type                                       TNeedlesView;
     typedef typename Size<TNeedles>::Type                                       TSize;
+    typedef FinderContext_<TTextView, TPatternView, Multiple<TSpec>, TDelegate> TFinderContext;
 
     // Initialize the iterator factory.
     setMaxHistoryLength(finder._factory, length(back(needle(pattern))));
     setMaxObjects(finder._factory, omp_get_max_threads());
     build(finder._factory);
 
+    TNeedles & needles = needle(pattern);
+    TSize needlesCount = length(needles);
+
     // Use a finder view.
     TFinderView finderView = view(finder);
+    TNeedlesView needlesView = view(needles);
 
     // Instantiate a thread context.
     // NOTE(esiragusa): Each thread initializes its private context on firstprivate.
     TFinderContext ctx(finderView._factory, delegate);
-
-    TNeedles & needles = needle(pattern);
-    TSize needlesCount = length(needles);
 
     // Find all needles in parallel.
     SEQAN_OMP_PRAGMA(parallel for schedule(dynamic) firstprivate(ctx))
     for (TSize needleId = 0; needleId < needlesCount; ++needleId)
     {
         clear(ctx.finder);
-        find(ctx.finder, needles[needleId], ctx.delegator);
+        find(ctx.finder, needlesView[needleId], ctx.delegator);
     }
 }
 
