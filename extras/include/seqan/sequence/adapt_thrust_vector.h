@@ -484,23 +484,16 @@ back(thrust::device_vector<TChar, TAlloc> const & list)
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source)
 {
     assign(target, source, Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source)
 {
-    assign(target, source, Generous());
-}
-
-template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
-inline void
-assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, TSize limit)
-{
-    assign(target, source, limit, Generous());
+    assign(target, reinterpret_cast<TSource const &>(source), Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
@@ -510,29 +503,37 @@ assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, TS
     assign(target, source, limit, Generous());
 }
 
+template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
+inline void
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, TSize limit)
+{
+    assign(target, reinterpret_cast<TSource const &>(source), limit, Generous());
+}
+
 // ----------------------------------------------------------------------------
 // Function assign(); Generous
 // ----------------------------------------------------------------------------
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, Generous)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Generous)
 {
     target.assign(begin(source, Standard()), end(source, Standard()));
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Generous)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, Generous)
 {
-    target.assign(begin(source, Standard()), end(source, Standard()));
+    assign(target, reinterpret_cast<TSource const &>(source), Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
 inline void
-assign_std_vector_Generous_impl(thrust::device_vector<TChar, TAlloc> & target,
-                                TSource & source,
-                                typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit)
+assign(thrust::device_vector<TChar, TAlloc> & target,
+       TSource const & source,
+       typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
+       Generous)
 {
     typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
     typename Size<TSource const>::Type source_length = length(source);
@@ -550,29 +551,12 @@ assign(thrust::device_vector<TChar, TAlloc> & target,
        typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
        Generous)
 {
-    assign_std_vector_Generous_impl(target, source, limit);
-}
-
-template <typename TChar,  typename TAlloc, typename TSource>
-inline void
-assign(thrust::device_vector<TChar, TAlloc> & target,
-       TSource const & source,
-       typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
-       Generous)
-{
-    assign_std_vector_Generous_impl(target, source, limit);
+    assign(target, reinterpret_cast<TSource const &>(source), limit Generous());
 }
 
 // ----------------------------------------------------------------------------
 // Function assign(); Limit
 // ----------------------------------------------------------------------------
-
-template <typename TChar, typename TAlloc, typename TSource>
-inline void
-assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, Limit)
-{
-    assign(target, source, target.capacity(), Generous());
-}
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
@@ -583,17 +567,9 @@ assign(thrust::device_vector<TChar, TAlloc> & target, TSource const & source, Li
 
 template <typename TChar, typename TAlloc, typename TSource>
 inline void
-assign(thrust::device_vector<TChar, TAlloc> & target,
-       TSource & source,
-       typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
-       Limit)
+assign(thrust::device_vector<TChar, TAlloc> & target, TSource & source, Limit)
 {
-    if (limit > target.capacity())
-    {
-        limit = target.capacity();
-    }
-
-    assign(target, source, limit, Generous());
+    assign(target, reinterpret_cast<TSource const &>(source), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
@@ -609,6 +585,16 @@ assign(thrust::device_vector<TChar, TAlloc> & target,
     }
 
     assign(target, source, limit, Generous());
+}
+
+template <typename TChar, typename TAlloc, typename TSource>
+inline void
+assign(thrust::device_vector<TChar, TAlloc> & target,
+       TSource & source,
+       typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
+       Limit)
+{
+    assign(target, reinterpret_cast<TSource const &>(source), limit, Generous());
 }
 
 // ----------------------------------------------------------------------------

@@ -315,24 +315,35 @@ struct HistoryStack_<Iter<Index<StringSet<thrust::device_vector<TValue, TAlloc>,
 // ============================================================================
 // Functions
 // ============================================================================
+// NOTE(esiragusa): Functions assign() are not specific to Device Index.
 
 // ----------------------------------------------------------------------------
 // Function assign()                                                  [FMIndex]
 // ----------------------------------------------------------------------------
-// NOTE(esiragusa): assign() is not specific to thrust::device_vector.
 
 template <typename TText, typename TOccSpec, typename TSpec, typename TText2, typename TOccSpec2, typename TSpec2>
 inline void
-assign(Index<TText, FMIndex<TOccSpec, TSpec> > & index, Index<TText2, FMIndex<TOccSpec2, TSpec2> > & source)
+assign(Index<TText, FMIndex<TOccSpec, TSpec> > & index, Index<TText2, FMIndex<TOccSpec2, TSpec2> > const & source)
 {
     assign(indexText(index), indexText(source));
     assign(indexSA(index), indexSA(source));
     assign(indexLF(index), indexLF(source));
 }
 
+template <typename TText, typename TOccSpec, typename TSpec, typename TText2, typename TOccSpec2, typename TSpec2>
+inline void
+assign(Index<TText, FMIndex<TOccSpec, TSpec> > & index, Index<TText2, FMIndex<TOccSpec2, TSpec2> > & source)
+{
+    assign(index, reinterpret_cast<Index<TText2, FMIndex<TOccSpec2, TSpec2> > const &>(source));
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                                  [LfTable]
+// ----------------------------------------------------------------------------
+
 template <typename TText, typename TSpec, typename TText2, typename TSpec2>
 inline void
-assign(LfTable<TText, TSpec> & lfTable, LfTable<TText2, TSpec2> & source)
+assign(LfTable<TText, TSpec> & lfTable, LfTable<TText2, TSpec2> const & source)
 {
     assign(getFibre(lfTable, FibrePrefixSum()), getFibre(source, FibrePrefixSum()));
     assign(getFibre(lfTable, FibreValues()), getFibre(source, FibreValues()));
@@ -340,16 +351,38 @@ assign(LfTable<TText, TSpec> & lfTable, LfTable<TText2, TSpec2> & source)
     assign(lfTable.sentinelSubstitute, source.sentinelSubstitute);
 }
 
+template <typename TText, typename TSpec, typename TText2, typename TSpec2>
+inline void
+assign(LfTable<TText, TSpec> & lfTable, LfTable<TText2, TSpec2> & source)
+{
+    assign(lfTable, reinterpret_cast<LfTable<TText2, TSpec2> const &>(source));
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                           [PrefixSumTable]
+// ----------------------------------------------------------------------------
+
 template <typename TChar, typename TSpec, typename TChar2, typename TSpec2>
 inline void
-assign(PrefixSumTable<TChar, TSpec> & pst, PrefixSumTable<TChar2, TSpec2> & source)
+assign(PrefixSumTable<TChar, TSpec> & pst, PrefixSumTable<TChar2, TSpec2> const & source)
 {
     assign(getFibre(pst, FibreEntries()), getFibre(source, FibreEntries()));
 }
 
+template <typename TChar, typename TSpec, typename TChar2, typename TSpec2>
+inline void
+assign(PrefixSumTable<TChar, TSpec> & pst, PrefixSumTable<TChar2, TSpec2> & source)
+{
+    assign(pst, reinterpret_cast<PrefixSumTable<TChar2, TSpec2> const &>(source));
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                           [RankDictionary]
+// ----------------------------------------------------------------------------
+
 template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
 inline void
-assign(RankDictionary<TwoLevels<TValue, TSpec> > & dict, RankDictionary<TwoLevels<TValue2, TSpec2> > & source)
+assign(RankDictionary<TwoLevels<TValue, TSpec> > & dict, RankDictionary<TwoLevels<TValue2, TSpec2> > const & source)
 {
     assign(getFibre(dict, FibreRanks()), getFibre(source, FibreRanks()));
     assign(dict._length, source._length);
@@ -357,26 +390,66 @@ assign(RankDictionary<TwoLevels<TValue, TSpec> > & dict, RankDictionary<TwoLevel
 
 template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
 inline void
-assign(RankDictionary<Naive<TValue, TSpec> > & dict, RankDictionary<Naive<TValue2, TSpec2> > & source)
+assign(RankDictionary<TwoLevels<TValue, TSpec> > & dict, RankDictionary<TwoLevels<TValue2, TSpec2> > & source)
+{
+    assign(dict, reinterpret_cast<RankDictionary<TwoLevels<TValue2, TSpec2> > const &>(source));
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                           [RankDictionary]
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
+inline void
+assign(RankDictionary<Naive<TValue, TSpec> > & dict, RankDictionary<Naive<TValue2, TSpec2> > const & source)
 {
     assign(getFibre(dict, FibreRanks()), getFibre(source, FibreRanks()));
+}
+
+template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
+inline void
+assign(RankDictionary<Naive<TValue, TSpec> > & dict, RankDictionary<Naive<TValue2, TSpec2> > & source)
+{
+    assign(dict, reinterpret_cast<RankDictionary<Naive<TValue2, TSpec2> > const &>(source));
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                             [CompressedSA]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TText2, typename TSpec2>
+inline void
+assign(CompressedSA<TText, TSpec> & sa, CompressedSA<TText2, TSpec2> const & source)
+{
+    assign(getFibre(sa, FibreSparseString()), getFibre(source, FibreSparseString()));
+    assign(getFibre(sa, FibreLF()), getFibre(source, FibreLF()));
 }
 
 template <typename TText, typename TSpec, typename TText2, typename TSpec2>
 inline void
 assign(CompressedSA<TText, TSpec> & sa, CompressedSA<TText2, TSpec2> & source)
 {
-    assign(getFibre(sa, FibreSparseString()), getFibre(source, FibreSparseString()));
-    assign(getFibre(sa, FibreLF()), getFibre(source, FibreLF()));
+    assign(sa, reinterpret_cast<CompressedSA<TText2, TSpec2> const &>(source));
+}
+
+// ----------------------------------------------------------------------------
+// Function assign()                                             [SparseString]
+// ----------------------------------------------------------------------------
+
+template <typename TString, typename TSpec, typename TString2, typename TSpec2>
+inline void
+assign(SparseString<TString, TSpec> & sparseString, SparseString<TString2, TSpec2> const & source)
+{
+    assign(getFibre(sparseString, FibreValues()), getFibre(source, FibreValues()));
+    assign(getFibre(sparseString, FibreIndicators()), getFibre(source, FibreIndicators()));
+    assign(sparseString._length, source._length);
 }
 
 template <typename TString, typename TSpec, typename TString2, typename TSpec2>
 inline void
 assign(SparseString<TString, TSpec> & sparseString, SparseString<TString2, TSpec2> & source)
 {
-    assign(getFibre(sparseString, FibreValues()), getFibre(source, FibreValues()));
-    assign(getFibre(sparseString, FibreIndicators()), getFibre(source, FibreIndicators()));
-    assign(sparseString._length, source._length);
+    assign(sparseString, reinterpret_cast<SparseString<TString2, TSpec2> const &>(source));
 }
 
 }
