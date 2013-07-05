@@ -551,7 +551,7 @@ assign(thrust::device_vector<TChar, TAlloc> & target,
        typename Size<thrust::device_vector<TChar, TAlloc> >::Type limit,
        Generous)
 {
-    assign(target, reinterpret_cast<TSource const &>(source), limit Generous());
+    assign(target, reinterpret_cast<TSource const &>(source), limit, Generous());
 }
 
 // ----------------------------------------------------------------------------
