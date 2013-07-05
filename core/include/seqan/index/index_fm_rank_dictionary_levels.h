@@ -141,15 +141,16 @@ struct RankDictionaryBitMask_<__uint64>
 // Metafunction RankDictionaryWordSize_                             [TwoLevels]
 // ----------------------------------------------------------------------------
 
-#ifdef CUDA_DISABLED
-template <typename TValue, typename TSpec>
-struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
-    BitsPerValue<unsigned long> {};
-#else
+// NOTE(esiragusa): Always faster using 32bits words. Why?
+//#ifdef CUDA_DISABLED
+//template <typename TValue, typename TSpec>
+//struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
+//    BitsPerValue<unsigned long> {};
+//#else
 template <typename TValue, typename TSpec>
 struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
     BitsPerValue<__uint32> {};
-#endif
+//#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBitsPerBlock_                         [TwoLevels]
@@ -159,6 +160,12 @@ struct RankDictionaryWordSize_<TwoLevels<TValue, TSpec> > :
 template <typename TValue, typename TSpec>
 struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, TSpec> > :
     BitsPerValue<typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type> {};
+
+//#ifdef CUDA_DISABLED
+//template <typename TValue, typename TSpec>
+//struct RankDictionaryBitsPerBlock_<TwoLevels<TValue, TSpec> > :
+//    BitsPerValue<typename RankDictionaryBlock_<TwoLevels<TValue, TSpec> >::Type> {};
+//#endif
 
 // ----------------------------------------------------------------------------
 // Metafunction RankDictionaryBlock_                                [TwoLevels]
