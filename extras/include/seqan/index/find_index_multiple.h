@@ -478,6 +478,22 @@ _preprocess(Pattern<TNeedles, Multiple<TSpec> > & pattern)
 //}
 
 // ----------------------------------------------------------------------------
+// Function _initFactory()                                             [Finder]
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TPattern, typename TSpec, typename THistorySize, typename TObjectsSize>
+inline void
+_initFactory(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
+             THistorySize maxHistoryLength,
+             TObjectsSize maxObjects)
+{
+    // Initialize the iterator factory.
+    setMaxHistoryLength(finder._factory, maxHistoryLength);
+    setMaxObjects(finder._factory, maxObjects);
+    build(finder._factory);
+}
+
+// ----------------------------------------------------------------------------
 // Function _find()                                          [Finder; ExecHost]
 // ----------------------------------------------------------------------------
 
@@ -498,9 +514,7 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     typedef FinderContext_<TTextView, TPatternView, Multiple<TSpec>, TDelegate> TFinderContext;
 
     // Initialize the iterator factory.
-    setMaxHistoryLength(finder._factory, length(back(needle(pattern))));
-    setMaxObjects(finder._factory, omp_get_max_threads());
-    build(finder._factory);
+    _initFactory(finder, length(back(needle(pattern))) + 1, omp_get_max_threads());
 
     TNeedles & needles = needle(pattern);
     TSize needlesCount = length(needles);
@@ -546,9 +560,7 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     unsigned activeBlocks = (length(needle(pattern)) + ctaSize - 1) / ctaSize;
 
     // Initialize the iterator factory.
-    setMaxHistoryLength(finder._factory, length(back(needle(pattern))));
-    setMaxObjects(finder._factory, length(needle(pattern)));
-    build(finder._factory);
+    _initFactory(finder, length(back(needle(pattern))) + 1, length(needle(pattern)));
 
     // Launch the find kernel.
     _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), view(delegate));
