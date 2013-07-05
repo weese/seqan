@@ -406,11 +406,12 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, T
             if (goDown(textIt, suffix(pattern, patternIt)))
             {
                 delegate(finder);
-                goUp(textIt);
-
-                // Termination.
-                if (isRoot(textIt)) break;
             }
+
+            goUp(textIt);
+
+            // Termination.
+            if (isRoot(textIt)) break;
         }
 
         // Approximate case.
