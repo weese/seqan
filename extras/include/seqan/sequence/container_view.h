@@ -519,6 +519,17 @@ inline void assign(ContainerView<TContainer, Resizable<TSpec> > & view, TOtherCo
 }
 
 // ----------------------------------------------------------------------------
+// Function capacity()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+inline typename Size<ContainerView<TContainer, Resizable<TSpec> > >::Type
+capacity(ContainerView<TContainer, Resizable<TSpec> > const & view)
+{
+    return view._capacity;
+}
+
+// ----------------------------------------------------------------------------
 // Function appendValue()
 // ----------------------------------------------------------------------------
 
@@ -539,6 +550,7 @@ appendValue(ContainerView<TContainer, Resizable<TSpec> > & view, TValue const & 
 
     appendValue(view, _value, typename DefaultOverflowImplicit<TView>::Type());
 }
+
 // ----------------------------------------------------------------------------
 // Function clear()
 // ----------------------------------------------------------------------------
