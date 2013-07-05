@@ -226,7 +226,7 @@ getValue(RankDictionary<Naive<bool, TSpec> > const & dict, TPos pos)
 template <typename TValue, typename TSpec, typename TPos, typename TChar>
 inline void setValue(RankDictionary<Naive<TValue, TSpec> > & dict, TPos pos, TChar c)
 {
-    SEQAN_ASSERT_GT(pos, back(dict.ranks));
+    SEQAN_ASSERT_GT(pos, (TPos)back(dict.ranks));
 
     if (c == false) return;
 

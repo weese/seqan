@@ -575,28 +575,32 @@ _getBlockRank(RankDictionary<TwoLevels<bool, TSpec> > const & dict, TBlock const
 }
 
 // ----------------------------------------------------------------------------
-// Function _getValueRank()                                    [RankDictionary]
+// Function _getWordRank()                                     [RankDictionary]
 // ----------------------------------------------------------------------------
-// NOTE(esiragusa): This version is generic but absymally slow.
+// NOTE(esiragusa): This version is generic but absymally slow - only for testing purposes.
 
-//template <typename TValue, typename TSpec, typename TValues, typename TPosInWord>
-//inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
-//_getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
-//              TValues values,
-//              TPosInWord posInWord,
-//              TValue c)
-//{
-//    typedef TwoLevels<TValue, TSpec>                                    TRankDictionarySpec;
-//    typedef RankDictionary<TRankDictionarySpec>                         TRankDictionary;
-//    typedef typename Size<TRankDictionary>::Type                        TSize;
-//
-//    TSize valueRank = 0;
-//
-//    for (TSize i = 0; i <= posInWord; ++i)
-//        valueRank += isEqual(_valuesAt(dict, blockPos, wordPos)[i], c);
-//
-//    return valueRank;
-//}
+template <typename TValue, typename TSpec, typename TWord, typename TPosInWord>
+inline typename Size<RankDictionary<TwoLevels<TValue, TSpec> > const>::Type
+_getWordRank(RankDictionary<TwoLevels<TValue, TSpec> > const & /* dict */,
+             TWord const & word,
+             TPosInWord posInWord,
+             TValue c)
+{
+    typedef TwoLevels<TValue, TSpec>                                        TRankDictionarySpec;
+    typedef RankDictionary<TRankDictionarySpec>                             TRankDictionary;
+    typedef typename RankDictionaryValues_<TRankDictionarySpec>::TValues    TRankDictionaryValues;
+    typedef typename Size<TRankDictionary>::Type                            TSize;
+
+    TRankDictionaryValues values;
+    values.i = word;
+
+    TSize valueRank = 0;
+
+    for (TSize i = 0; i <= posInWord; ++i)
+        valueRank += isEqual(values[i], c);
+
+    return valueRank;
+}
 
 // ----------------------------------------------------------------------------
 // Function _getWordRank(Dna)                                  [RankDictionary]
