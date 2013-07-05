@@ -44,47 +44,80 @@ namespace seqan {
 // ==========================================================================
 
 // ----------------------------------------------------------------------------
-// Class VertexFmi
+// Class HistoryStackFM_
 // ----------------------------------------------------------------------------
 
-template <typename TAlphabet, typename TSize>
-struct VertexFmi
+template <typename TSize, typename TAlphabet>
+struct HistoryStackFM_
 {
     Pair<TSize> range;
     TSize       repLen;
     TAlphabet   lastChar;
 
     SEQAN_FUNC
-    VertexFmi() :
+    HistoryStackFM_() {}
+
+    template <typename TSize_, typename TAlphabet_>
+    SEQAN_FUNC
+    HistoryStackFM_(Pair<TSize_> const &_range, TSize_ _repLen, TAlphabet_ _lastChar):
+        range(_range),
+        repLen(_repLen),
+        lastChar(_lastChar)
+    {}
+
+    SEQAN_FUNC
+    HistoryStackFM_ const &
+    operator=(HistoryStackFM_ const & _origin)
+    {
+        range = _origin.range;
+        repLen = _origin.repLen;
+        lastChar = _origin.lastChar;
+        return _origin;
+    }
+};
+
+// ----------------------------------------------------------------------------
+// Class VertexFM
+// ----------------------------------------------------------------------------
+
+template <typename TSize, typename TAlphabet>
+struct VertexFM
+{
+    Pair<TSize> range;
+    TSize       repLen;
+    TAlphabet   lastChar;
+
+    SEQAN_FUNC
+    VertexFM() :
         range(0, 0),
         repLen(0),
         lastChar(0)
     {}
 
     SEQAN_FUNC
-    VertexFmi(MinimalCtor) :
+    VertexFM(MinimalCtor) :
         range(0, 0),
         repLen(0),
         lastChar(0)
     {}
 
     SEQAN_FUNC
-    VertexFmi(Pair<TSize> newCurrentRange, TSize newRepLen, TAlphabet newChar) :
+    VertexFM(Pair<TSize> newCurrentRange, TSize newRepLen, TAlphabet newChar) :
         range(newCurrentRange),
         repLen(newRepLen),
         lastChar(newChar)
     {}
 
     SEQAN_FUNC
-    VertexFmi(VertexFmi const & other) :
+    VertexFM(VertexFM const & other) :
         range(other.range),
         repLen(other.repLen),
         lastChar(other.lastChar)
     {}
 
     SEQAN_FUNC
-    VertexFmi &
-    operator = (VertexFmi const & _origin)
+    VertexFM &
+    operator = (VertexFM const & _origin)
     {
         range = _origin.range;
         repLen = _origin.repLen;
@@ -92,37 +125,6 @@ struct VertexFmi
         return *this;
     }
 };
-
-// ----------------------------------------------------------------------------
-// Class HistoryStackFmi_
-// ----------------------------------------------------------------------------
-
-template <typename TAlphabet, typename TSize>
-struct HistoryStackFmi_
-{
-    Pair<TSize> range;
-    TAlphabet   lastChar;
-
-    SEQAN_FUNC
-    HistoryStackFmi_() {}
-
-    template <typename TAlphabet_, typename TSize_>
-    SEQAN_FUNC
-    HistoryStackFmi_(TAlphabet_ const _lastChar, Pair<TSize_> const &_range):
-        range(_range),
-        lastChar(_lastChar)
-    {}
-
-    SEQAN_FUNC
-    HistoryStackFmi_ const &
-    operator=(HistoryStackFmi_ const & _origin)
-    {
-        range = _origin.range;
-        lastChar = _origin.lastChar;
-        return _origin;
-    }
-};
-
 
 // ============================================================================
 // Metafunctions
@@ -135,11 +137,11 @@ struct HistoryStackFmi_
 template < typename TText, typename TOccSpec, typename TIndexSpec>
 struct VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >
 {
-    typedef Index<TText,FMIndex<TOccSpec, TIndexSpec> >     TIndex;
-    typedef typename Value<TIndex>::Type                    TAlphabet;
-    typedef typename Size<TIndex>::Type                     TSize;
+    typedef Index<TText,FMIndex<TOccSpec, TIndexSpec> >     TIndex_;
+    typedef typename Size<TIndex_>::Type                    TSize_;
+    typedef typename Value<TIndex_>::Type                   TAlphabet_;
 
-    typedef VertexFmi<TAlphabet, TSize> Type;
+    typedef VertexFM<TSize_, TAlphabet_>                    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -150,8 +152,8 @@ template <typename TText, typename TOccSpec, typename TSpec, typename TIterSpec>
 struct HistoryStackEntry_<Iter<Index<TText, FMIndex<TOccSpec, TSpec> >,
                                VSTree< TopDown< ParentLinks<TIterSpec> > > > >
 {
-    typedef HistoryStackFmi_<typename Value<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type,
-                             typename Size<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type>     Type;
+    typedef HistoryStackFM_<typename Size<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type,
+                             typename Value<Index<TText, FMIndex<TOccSpec, TSpec> > >::Type>    Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -209,7 +211,7 @@ begin(Index<TText, FMIndex<TOccSpec, TIndexSpec> > const & index, TSpec const /*
 // ----------------------------------------------------------------------------
 
 template <typename TAlphabet, typename TSize>
-SEQAN_FUNC bool _isRoot(VertexFmi<TAlphabet, TSize> const & value)
+SEQAN_FUNC bool _isRoot(VertexFM<TAlphabet, TSize> const & value)
 {
     return _isSizeInval(value.range.i2);
 }
@@ -347,11 +349,12 @@ _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<
     typedef Pair<typename Size<TIndex>::Type>                   TRange;
     typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
-    lcp = 0;
     _historyPush(it);
 
+    TStringIter stringIt = begin(string, Standard());
     TStringIter stringEnd = end(string, Standard());
-    for (TStringIter stringIt = begin(string, Standard()); stringIt != stringEnd; ++stringIt, ++lcp)
+
+    for (lcp = 0; stringIt != stringEnd; ++stringIt, ++lcp)
     {
         TRange _range;
 
@@ -361,16 +364,11 @@ _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<
         value(it).range = _range;
     }
 
-    if (lcp < length(string))
-    {
-        _historyPop(it);
-        return false;
-    }
-
-    value(it).lastChar = back(string);
     value(it).repLen += lcp;
 
-    return true;
+    if (lcp) value(it).lastChar = value(stringIt - 1);
+
+    return stringIt == stringEnd;
 }
 
 // ----------------------------------------------------------------------------
@@ -428,7 +426,6 @@ _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> >
     if (isRoot(it)) return false;
 
     _historyPop(it);
-    --value(it).repLen;
     return true;
 }
 
@@ -439,7 +436,6 @@ _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<ParentLi
     if (isRoot(it)) return false;
 
     _historyPop(it);
-    --value(it).repLen;
     return true;
 }
 
@@ -455,7 +451,7 @@ nodeUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree< TopDown< Paren
     typedef typename VertexDescriptor<TIndex>::Type         TVertexDescriptor;
 
     if (!empty(it.history))
-        return TVertexDescriptor(back(it.history).range, value(it).repLen - 1, back(it.history).lastChar);
+        return TVertexDescriptor(back(it.history).range, back(it.history).repLen, back(it.history).lastChar);
     else
         return value(it);
 }
@@ -480,6 +476,7 @@ _historyPush(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<
     typename HistoryStackEntry_<TIter>::Type h;
 
     h.range = value(it).range;
+    h.repLen = value(it).repLen;
     h.lastChar = value(it).lastChar;
 
     appendValue(it.history, h);
@@ -494,6 +491,7 @@ SEQAN_FUNC void
 _historyPop(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<TSpec> > > & it)
 {
     value(it).range = back(it.history).range;
+    value(it).repLen = back(it.history).repLen;
     value(it).lastChar = back(it.history).lastChar;
 }
 
@@ -502,6 +500,7 @@ SEQAN_FUNC void
 _historyPop(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<ParentLinks<TSpec> > > > & it)
 {
     value(it).range = back(it.history).range;
+    value(it).repLen = back(it.history).repLen;
     value(it).lastChar = back(it.history).lastChar;
     pop(it.history);
 }
@@ -512,7 +511,7 @@ _historyPop(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec > >, VSTree<TopDown<P
 
 template <typename TIndex, typename TAlphabet, typename TSize>
 SEQAN_FUNC typename Size<TIndex>::Type
-repLength(TIndex const &, VertexFmi<TAlphabet, TSize> const & vDesc)
+repLength(TIndex const &, VertexFM<TAlphabet, TSize> const & vDesc)
 {
     return vDesc.repLen;
 }
