@@ -345,7 +345,8 @@ clear(Finder2<Index<TText, TIndexSpec>, TPattern, TSpec> & finder)
 {
     // NOTE(esiragusa): should clear() be called on text/patternIt?
     goRoot(textIterator(finder));
-    goBegin(patternIterator(finder));
+    // NOTE(esiragusa): if find wasn't called yet, patternIterator is uninitialized.
+//    goBegin(patternIterator(finder));
     finder._score = typename Score_<TSpec>::Type();
 }
 
