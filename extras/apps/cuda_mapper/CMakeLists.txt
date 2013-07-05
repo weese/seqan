@@ -59,7 +59,7 @@ list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
 list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
 
 # Disable all warnings.
-#list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
+list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 
 # ----------------------------------------------------------------------------
 # Build Setup
