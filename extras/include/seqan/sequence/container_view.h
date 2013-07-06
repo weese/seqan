@@ -424,7 +424,7 @@ length(ContainerView<TContainer, TSpec> const & view)
 // and need to make sure that it has a certain length
 
 template <typename TContainer, typename TSpec, typename TSize, typename TValue, typename TExpand>
-inline typename Size< ContainerView<TContainer, TSpec> >::Type
+SEQAN_FUNC typename Size< ContainerView<TContainer, TSpec> >::Type
 resize(ContainerView<TContainer, TSpec> & me, TSize new_length, TValue /* val */, Tag<TExpand>)
 {
     ignoreUnusedVariableWarning(new_length);
@@ -434,7 +434,7 @@ resize(ContainerView<TContainer, TSpec> & me, TSize new_length, TValue /* val */
 }
 
 template <typename TContainer, typename TSpec, typename TSize, typename TExpand>
-inline typename Size< ContainerView<TContainer, TSpec> >::Type
+SEQAN_FUNC typename Size< ContainerView<TContainer, TSpec> >::Type
 resize(ContainerView<TContainer, TSpec> & me, TSize new_length, Tag<TExpand> tag)
 {
     return resize(me, new_length, Nothing(), tag);
@@ -523,7 +523,7 @@ inline void assign(ContainerView<TContainer, Resizable<TSpec> > & view, TOtherCo
 // ----------------------------------------------------------------------------
 
 template <typename TContainer, typename TSpec>
-inline typename Size<ContainerView<TContainer, Resizable<TSpec> > >::Type
+SEQAN_FUNC typename Size<ContainerView<TContainer, Resizable<TSpec> > >::Type
 capacity(ContainerView<TContainer, Resizable<TSpec> > const & view)
 {
     return view._capacity;
