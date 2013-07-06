@@ -80,7 +80,6 @@ struct Finder2<TText, TPattern, Multiple<TSpec> >
 {
     typename Member<Finder2, Factory_>::Type    _factory;
 
-    SEQAN_HOST_DEVICE
     Finder2() {}
 
     Finder2(TText & text) :
@@ -99,7 +98,6 @@ struct Finder2<Index<TText, TIndexSpec>, TPattern, Multiple<TSpec> >
 
     typename Member<Finder2, Factory_>::Type    _factory;
 
-    SEQAN_HOST_DEVICE
     Finder2() {}
 
     Finder2(TIndex & index) :
@@ -119,7 +117,6 @@ public:
     typename Member<Pattern, Hashes_>::Type         _hashes;
     typename Member<Pattern, Permutation_>::Type    _permutation;
 
-    SEQAN_HOST_DEVICE
     Pattern() {}
 
     Pattern(TNeedles const & needles) :
