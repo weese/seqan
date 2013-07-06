@@ -147,7 +147,7 @@ template <typename T, typename TSpec> SEQAN_FUNC typename Iterator<T, Tag<TSpec>
 template <typename T, typename TSpec> SEQAN_FUNC typename Iterator<T const, Tag<TSpec> const>::Type begin(T const & me, Tag<TSpec> const tag_);
 template <typename T> inline typename Position<T>::Type beginPosition(T &);
 template <typename T> inline typename Position<T>::Type beginPosition(T const &);
-template <typename T> inline typename Size<T const>::Type capacity(T const & me);
+template <typename T> SEQAN_FUNC typename Size<T const>::Type capacity(T const & me);
 template <typename T, typename TSize> inline TSize computeGenerousCapacity(T const & , TSize capacity);
 template <typename T> SEQAN_FUNC bool empty(T const & me);
 template <typename T> SEQAN_FUNC typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type end(T & me);
