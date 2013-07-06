@@ -955,7 +955,7 @@ The function @Function.reserve@ can be used to change the capacity explicitely.
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Size<T const>::Type
+inline SEQAN_HOST_DEVICE typename Size<T const>::Type
 capacity(T const & me)
 {
     SEQAN_CHECKPOINT;
