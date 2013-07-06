@@ -70,6 +70,58 @@ struct StringSetLimits<StringSet<thrust::device_vector<TValue, TAlloc>, TSpec> >
     typedef thrust::device_vector<TSize_>           Type;
 };
 
+// ============================================================================
+// Functions
+// ============================================================================
+// NOTE(esiragusa): All functions are equivalent to the originals - overloaded to remove SEQAN_HOST_DEVICE :(
+
+// --------------------------------------------------------------------------
+// Function value()
+// --------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TSpec, typename TPos >
+inline typename Infix<thrust::device_vector<TValue, TAlloc> >::Type
+value(StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TSpec> > > & me, TPos pos)
+{
+    return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
+}
+
+template <typename TValue, typename TAlloc, typename TSpec, typename TPos >
+inline typename Infix<thrust::device_vector<TValue, TAlloc> const>::Type
+value(StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TSpec> > > const & me, TPos pos)
+{
+    return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
+}
+
+// --------------------------------------------------------------------------
+// Function length()
+// --------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TDelimiter>
+inline typename Size<StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TDelimiter> > > >::Type
+length(StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TDelimiter> > > const & me)
+{
+    return length(me.limits) - 1;
+}
+
+// --------------------------------------------------------------------------
+// Function back()
+// --------------------------------------------------------------------------
+
+template <typename TValue, typename TAlloc, typename TDelimiter>
+inline typename Reference<StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TDelimiter> > > const>::Type
+back(StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TDelimiter> > > const & me)
+{
+    return value(me, length(me) - 1);
+}
+
+template <typename TValue, typename TAlloc, typename TDelimiter>
+inline typename Reference<StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TDelimiter> > > >::Type
+back(StringSet<thrust::device_vector<TValue, TAlloc>, Owner<ConcatDirect<TDelimiter> > > & me)
+{
+    return value(me, length(me) - 1);
+}
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_EXTRAS_SEQUENCE_STRING_SET_CONCAT_DIRECT_DEVICE_H
