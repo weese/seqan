@@ -164,7 +164,7 @@ struct Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > :
 // ----------------------------------------------------------------------------
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type &
+inline typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type &
 host(Factory<Iter<TIndex, VSTree<TSpec> > > & factory)
 {
     return _host(factory, typename IsView<TIndex>::Type());
@@ -185,7 +185,7 @@ _host(Factory<Iter<TIndex, VSTree<TSpec> > > & factory, False const & /* isView 
 }
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > const>::Type &
+inline typename Host<Factory<Iter<TIndex, VSTree<TSpec> > > const>::Type &
 host(Factory<Iter<TIndex, VSTree<TSpec> > > const & factory)
 {
     return _host(factory, typename IsView<TIndex>::Type());
@@ -215,7 +215,7 @@ view(Factory<Iter<TIndex, VSTree<TSpec> > > & factory)
 {
     typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type factoryView;
 
-    host(factoryView) = view(host(factory));
+    host(factoryView) = view(_host(factory, typename IsView<TIndex>::Type()));
 
     return factoryView;
 }
@@ -226,7 +226,7 @@ view(Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > & factory)
 {
     typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type factoryView;
 
-    host(factoryView) = view(host(factory));
+    host(factoryView) = view(_host(factory, typename IsView<TIndex>::Type()));
     factoryView._history = view(factory._history);
     factoryView._maxHistoryLength = factory._maxHistoryLength;
     factoryView._maxObjects = factory._maxObjects;
@@ -303,7 +303,7 @@ getObject(Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > & facto
 {
     SEQAN_ASSERT_LEQ(objectId, factory._maxObjects);
 
-    Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > it(host(factory));
+    Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > it(_host(factory, typename IsView<TIndex>::Type()));
 
     it.history._begin = begin(factory._history, Standard()) + objectId * factory._maxHistoryLength;
     it.history._end = it.history._begin;
