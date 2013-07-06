@@ -210,7 +210,7 @@ _host(Factory<Iter<TIndex, VSTree<TSpec> > > const & factory, False const & /* i
 // ----------------------------------------------------------------------------
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type
+inline typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type
 view(Factory<Iter<TIndex, VSTree<TSpec> > > & factory)
 {
     typename View<Factory<Iter<TIndex, VSTree<TSpec> > > >::Type factoryView;
@@ -221,7 +221,7 @@ view(Factory<Iter<TIndex, VSTree<TSpec> > > & factory)
 }
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type
+inline typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type
 view(Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > & factory)
 {
     typename View<Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > >::Type factoryView;
@@ -271,12 +271,12 @@ setMaxObjects(Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > & f
 // ----------------------------------------------------------------------------
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE void
+inline void
 build(Factory<Iter<TIndex, VSTree<TSpec> > > & /* factory */)
 {}
 
 template <typename TIndex, typename TSpec>
-inline SEQAN_HOST_DEVICE void
+inline void
 build(Factory<Iter<TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > > & factory)
 {
     resize(factory._history, factory._maxObjects * factory._maxHistoryLength, Exact());
