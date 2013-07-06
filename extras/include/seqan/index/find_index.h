@@ -404,7 +404,7 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, T
         // Exact case.
         if (finder._score == finder._scoreThreshold)
         {
-            if (goDown(textIt, suffix(pattern, patternIt)))
+            if (goDown(textIt, suffix(pattern, position(patternIt))))
             {
                 delegate(finder);
             }

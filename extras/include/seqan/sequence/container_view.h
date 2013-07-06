@@ -295,9 +295,36 @@ struct IsSequence<ContainerView<TContainer, TSpec> >:
     public IsSequence<TContainer> {};
 
 // ----------------------------------------------------------------------------
+// Metafunction Prefix
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct Prefix<ContainerView<TContainer, TSpec> >
+{
+    typedef ContainerView<TContainer, TSpec>    Type;
+};
+
+template <typename TContainer, typename TSpec>
+struct Prefix<ContainerView<TContainer, TSpec> const> :
+    Prefix<ContainerView<TContainer, TSpec> > {};
+
+// ----------------------------------------------------------------------------
+// Metafunction Suffix
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec>
+struct Suffix<ContainerView<TContainer, TSpec> >
+{
+    typedef ContainerView<TContainer, TSpec>    Type;
+};
+
+template <typename TContainer, typename TSpec>
+struct Suffix<ContainerView<TContainer, TSpec> const> :
+    Suffix<ContainerView<TContainer, TSpec> > {};
+    
+// ----------------------------------------------------------------------------
 // Metafunction Infix
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): add Prefix/Suffix metafunctions.
 
 template <typename TContainer, typename TSpec>
 struct Infix<ContainerView<TContainer, TSpec> >
@@ -473,22 +500,57 @@ resize(ContainerView<TContainer, Resizable<TSpec> > & me, TSize new_length)
 }
 
 // ----------------------------------------------------------------------------
+// Function prefix()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec, typename TPosEnd>
+SEQAN_FUNC typename Prefix<ContainerView<TContainer, TSpec> const>::Type
+prefix(ContainerView<TContainer, TSpec> const & view, TPosEnd pos_end)
+{
+    return typename Prefix<ContainerView<TContainer, TSpec> const>::Type(view._begin, view._begin + pos_end);
+}
+
+template <typename TContainer, typename TSpec, typename TPosEnd>
+SEQAN_FUNC typename Prefix<ContainerView<TContainer, TSpec> >::Type
+prefix(ContainerView<TContainer, TSpec> & view, TPosEnd pos_end)
+{
+    return prefix(reinterpret_cast<ContainerView<TContainer, TSpec> const &>(view), pos_end);
+}
+
+// ----------------------------------------------------------------------------
+// Function suffix()
+// ----------------------------------------------------------------------------
+
+template <typename TContainer, typename TSpec, typename TPosBegin>
+SEQAN_FUNC typename Suffix<ContainerView<TContainer, TSpec> const>::Type
+suffix(ContainerView<TContainer, TSpec> const & view, TPosBegin pos_begin)
+{
+    return typename Suffix<ContainerView<TContainer, TSpec> const>::Type(view._begin + pos_begin, view._end);
+}
+
+template <typename TContainer, typename TSpec, typename TPosBegin>
+SEQAN_FUNC typename Suffix<ContainerView<TContainer, TSpec> >::Type
+suffix(ContainerView<TContainer, TSpec> & view, TPosBegin pos_begin)
+{
+    return suffix(reinterpret_cast<ContainerView<TContainer, TSpec> const &>(view), pos_begin);
+}
+
+// ----------------------------------------------------------------------------
 // Function infix()
 // ----------------------------------------------------------------------------
-// TODO(esiragusa): add prefix()/suffix() functions.
-
-template <typename TContainer, typename TSpec, typename TPosBegin, typename TPosEnd>
-SEQAN_FUNC typename Infix<ContainerView<TContainer, TSpec> >::Type
-infix(ContainerView<TContainer, TSpec> & view, TPosBegin pos_begin, TPosEnd pos_end)
-{
-    return typename Infix<ContainerView<TContainer, TSpec> >::Type(view._begin + pos_begin, view._begin + pos_end);
-}
 
 template <typename TContainer, typename TSpec, typename TPosBegin, typename TPosEnd>
 SEQAN_FUNC typename Infix<ContainerView<TContainer, TSpec> const>::Type
 infix(ContainerView<TContainer, TSpec> const & view, TPosBegin pos_begin, TPosEnd pos_end)
 {
-    return typename Infix<ContainerView<TContainer, TSpec> const>::Type(view._begin + pos_begin, view._begin + pos_end);
+    return typename Infix<ContainerView<TContainer, TSpec> >::Type(view._begin + pos_begin, view._begin + pos_end);
+}
+
+template <typename TContainer, typename TSpec, typename TPosBegin, typename TPosEnd>
+SEQAN_FUNC typename Infix<ContainerView<TContainer, TSpec> >::Type
+infix(ContainerView<TContainer, TSpec> & view, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return infix(reinterpret_cast<ContainerView<TContainer, TSpec> const &>(view), pos_begin, pos_end);
 }
 
 // TODO(esiragusa): infix of view pointer?
