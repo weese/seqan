@@ -62,7 +62,7 @@ using namespace seqan;
 // Function mapReads()
 // --------------------------------------------------------------------------
 
-void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & tag)
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, unsigned seedLength, unsigned errorsPerSeed, ExecDevice const & tag)
 {
     typedef typename Device<TGenomeIndex>::Type                 TDeviceIndex;
     typedef typename Device<TReadSeqs>::Type                    TDeviceReadSeqs;
@@ -79,5 +79,5 @@ void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & tag
     cudaDeviceSynchronize();
 
     // Map reads.
-    _mapReads(deviceIndex, deviceReadSeqs, tag);
+    _mapReads(deviceIndex, deviceReadSeqs, seedLength, errorsPerSeed, tag);
 }

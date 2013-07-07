@@ -43,7 +43,7 @@
 // Function mapReads()                                                  [GPU]
 // --------------------------------------------------------------------------
 
-void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & /* tag */);
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, unsigned seedLength, unsigned errorsPerSeed, ExecDevice const & /* tag */);
 
 // ============================================================================
 // Functions

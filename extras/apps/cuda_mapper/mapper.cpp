@@ -290,7 +290,7 @@ int runMapper(Options & options)
 
         // Map reads.
 //        start = sysTime();
-        mapReads(genomeIndex.index, getSeqs(reads), TExecSpace());
+        mapReads(genomeIndex.index, getSeqs(reads), options.seedLength, options.errorsPerSeed, TExecSpace());
 //        finish = sysTime();
 //        std::cout << "Mapping time:\t\t\t" << std::flush;
 //        std::cout << finish - start << " sec" << std::endl;

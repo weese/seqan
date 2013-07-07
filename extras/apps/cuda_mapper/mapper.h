@@ -406,12 +406,12 @@ fillSeeds(TSeeds & seeds, TReadSeqs /* const */ & readSeqs, TSeedLength seedLeng
 
 template <typename TIndex, typename TReadSeqs, typename TExecSpace>
 inline void
-_mapReads(TIndex & index, TReadSeqs & readSeqs, TExecSpace const & tag)
+_mapReads(TIndex & index, TReadSeqs & readSeqs, unsigned seedLength, unsigned errorsPerSeed, TExecSpace const & tag)
 {
     typedef typename ExecSpec<TReadSeqs, void>::Type    TSeedsSpec;
     typedef typename Seeds<TReadSeqs, TSeedsSpec>::Type TSeeds;
-//    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
-    typedef Multiple<FinderSTree>                       TAlgoSpec;
+    typedef Multiple<Backtracking<HammingDistance> >    TAlgoSpec;
+//    typedef Multiple<FinderSTree>                       TAlgoSpec;
     typedef Pattern<TSeeds, TAlgoSpec>                  TPattern;
     typedef Finder2<TIndex, TPattern, TAlgoSpec>        TFinder;
     typedef typename ExecSpec<TIndex, Count<> >::Type   THitsSpec;
@@ -423,10 +423,11 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs, TExecSpace const & tag)
 
     // Instantiate a multiple finder.
     TFinder finder(index);
+//    setScoreThreshold(finder, errorsPerSeed);
 
     // Collect seeds from read seqs.
     TSeeds seeds;
-    fillSeeds(seeds, readSeqs, 20u, tag);
+    fillSeeds(seeds, readSeqs, seedLength, tag);
     std::cout << "Seeds count:\t\t\t" << length(seeds) << std::endl;
 
     // Instantiate a pattern object.
@@ -458,10 +459,10 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs, TExecSpace const & tag)
 
 template <typename TIndex, typename TReadSeqs>
 inline void
-mapReads(TIndex & index, TReadSeqs & readSeqs, ExecHost const & tag)
+mapReads(TIndex & index, TReadSeqs & readSeqs, unsigned seedLength, unsigned errorsPerSeed, ExecHost const & tag)
 {
     // Map reads.
-    _mapReads(index, readSeqs, tag);
+    _mapReads(index, readSeqs, seedLength, errorsPerSeed, tag);
 }
 
 #endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_MAPPER_H_
