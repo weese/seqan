@@ -66,12 +66,14 @@ struct Options
     unsigned    threadsCount;
     int         mappingBlock;
     unsigned    seedLength;
+    unsigned    errorsPerSeed;
 
     Options() :
         noCuda(false),
         threadsCount(8),
         mappingBlock(MaxValue<int>::VALUE),
-        seedLength(33)
+        seedLength(33),
+        errorsPerSeed(0)
     {}
 };
 
@@ -123,6 +125,11 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
     setMaxValue(parser, "seed-length", "100");
     setDefaultValue(parser, "seed-length", options.seedLength);
 
+    addOption(parser, ArgParseOption("se", "seed-errors", "Maximum number of errors per seed.", ArgParseOption::INTEGER));
+    setMinValue(parser, "seed-errors", "0");
+    setMaxValue(parser, "seed-errors", "2");
+    setDefaultValue(parser, "seed-errors", options.errorsPerSeed);
+
     addSection(parser, "Genome Index Options");
 
     setIndexPrefix(parser);
@@ -161,6 +168,7 @@ parseCommandLine(Options & options, ArgumentParser & parser, int argc, char cons
 
     // Parse mapping options.
     getOptionValue(options.seedLength, parser, "seed-length");
+    getOptionValue(options.errorsPerSeed, parser, "seed-errors");
 
     // Parse genome index prefix.
     getIndexPrefix(options, parser);
@@ -176,7 +184,7 @@ template <typename TExecSpace>
 int runMapper(Options & options)
 {
     typedef Genome<void, CUDAStoreConfig>                           TGenome;
-//    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
+    typedef GenomeLoader<void, CUDAStoreConfig>                     TGenomeLoader;
     typedef GenomeIndex<TGenome, TGenomeIndexSpec, void>            TGenomeIndex;
 
     typedef FragmentStore<void, CUDAStoreConfig>                    TStore;
@@ -185,7 +193,9 @@ int runMapper(Options & options)
     typedef ReadsLoader<void, TReadsConfig>                         TReadsLoader;
 
     TGenome             genome;
-//    TGenomeLoader       genomeLoader(genome);
+#ifdef ENABLE_GENOME_LOADING
+    TGenomeLoader       genomeLoader(genome);
+#endif
     TGenomeIndex        genomeIndex(genome);
 
     TStore              store;
@@ -200,22 +210,24 @@ int runMapper(Options & options)
     std::cout << "Threads count:\t\t\t" << omp_get_max_threads() << std::endl;
 #endif
 
-//    // Load genome.
-//    if (!open(genomeLoader, options.genomeFile))
-//    {
-//        std::cerr << "Error while loading genome" << std::endl;
-//        return 1;
-//    }
-//
-//    std::cout << "Loading genome:\t\t\t" << std::flush;
-//    start = sysTime();
-//    if (!load(genomeLoader))
-//    {
-//        std::cerr << "Error while loading genome" << std::endl;
-//        return 1;
-//    }
-//    finish = sysTime();
-//    std::cout << finish - start << " sec" << std::endl;
+#ifdef ENABLE_GENOME_LOADING
+    // Load genome.
+    if (!open(genomeLoader, options.genomeFile))
+    {
+        std::cerr << "Error while loading genome" << std::endl;
+        return 1;
+    }
+
+    std::cout << "Loading genome:\t\t\t" << std::flush;
+    start = sysTime();
+    if (!load(genomeLoader))
+    {
+        std::cerr << "Error while loading genome" << std::endl;
+        return 1;
+    }
+    finish = sysTime();
+    std::cout << finish - start << " sec" << std::endl;
+#endif
 
     // Load genome index.
     std::cout << "Loading genome index:\t\t" << std::flush;
