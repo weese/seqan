@@ -82,8 +82,8 @@ add_executable(cuda_indexer indexer.cpp
 if (CUDA_FOUND AND NOT CUDA_DISABLED)
   cuda_add_executable(cuda_mapper mapper.cpp
                                   mapper.h
-                                  kernels.cu
-                                  kernels.h
+                                  mapper.cu
+                                  mapper.cuh
                                   types.h
                                   ../masai/options.h
                                   ../masai/store/reads.h

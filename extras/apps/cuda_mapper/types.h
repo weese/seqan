@@ -37,14 +37,6 @@
 #ifndef SEQAN_EXTRAS_CUDAMAPPER_TYPES_H_
 #define SEQAN_EXTRAS_CUDAMAPPER_TYPES_H_
 
-// ============================================================================
-// Prerequisites
-// ============================================================================
-
-#include <seqan/basic_extras.h>
-#include <seqan/sequence_extras.h>
-#include <seqan/index_extras.h>
-
 using namespace seqan;
 
 // ============================================================================

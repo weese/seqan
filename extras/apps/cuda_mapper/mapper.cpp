@@ -32,10 +32,23 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+// ============================================================================
+// Prerequisites
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// SeqAn headers
+// ----------------------------------------------------------------------------
+
 #include <seqan/basic_extras.h>
 #include <seqan/sequence_extras.h>
+#include <seqan/index_extras.h>
 #include <seqan/store.h>
 #include <seqan/parallel.h>
+
+// ----------------------------------------------------------------------------
+// Masai headers; I/O and options
+// ----------------------------------------------------------------------------
 
 #include "../masai/tags.h"
 #include "../masai/options.h"
@@ -43,8 +56,15 @@
 #include "genome.h"
 #include "genome_index.h"
 
+// ----------------------------------------------------------------------------
+// App headers
+// ----------------------------------------------------------------------------
+
+#include "types.h"
 #include "mapper.h"
-#include "kernels.h"
+#ifndef CUDA_DISABLED
+#include "mapper.cuh"
+#endif
 
 using namespace seqan;
 

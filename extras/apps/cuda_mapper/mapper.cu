@@ -32,50 +32,52 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_EXTRAS_CUDAMAPPER_KERNELS_H_
-#define SEQAN_EXTRAS_CUDAMAPPER_KERNELS_H_
-
 // ============================================================================
 // Prerequisites
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// SeqAn headers
+// ----------------------------------------------------------------------------
+
+#include <seqan/basic_extras.h>
+#include <seqan/sequence_extras.h>
+#include <seqan/index_extras.h>
+
+// ----------------------------------------------------------------------------
+// App headers
+// ----------------------------------------------------------------------------
+
+#include "types.h"
 #include "mapper.h"
+#include "mapper.cuh"
 
-// ============================================================================
-// Forwards
-// ============================================================================
-
-// --------------------------------------------------------------------------
-// Function mapReads()                                                  [GPU]
-// --------------------------------------------------------------------------
-
-void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & /* tag */);
+using namespace seqan;
 
 // ============================================================================
 // Functions
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// Function assign()                                                  [FMIndex]
-// ----------------------------------------------------------------------------
-// NOTE(esiragusa): We do not assign the text to the device index!
+// --------------------------------------------------------------------------
+// Function mapReads()
+// --------------------------------------------------------------------------
 
-#ifdef PLATFORM_CUDA
-namespace seqan {
-template <typename TValue, typename TAlloc, typename TSSetSpec, typename TOccSpec, typename TSpec,
-          typename TText2, typename TOccSpec2, typename TSpec2>
-inline void
-assign(Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, FMIndex<TOccSpec, TSpec> > & index,
-       Index<TText2, FMIndex<TOccSpec2, TSpec2> > & source)
+void mapReads(TGenomeIndex & index, TReadSeqs & readSeqs, ExecDevice const & tag)
 {
-    cudaPrintFreeMemory();
+    typedef typename Device<TGenomeIndex>::Type                 TDeviceIndex;
+    typedef typename Device<TReadSeqs>::Type                    TDeviceReadSeqs;
 
-//    assign(indexSA(index), indexSA(source));
-    assign(indexLF(index), indexLF(source));
+    // Copy index to device.
+    TDeviceIndex deviceIndex;
+    assign(deviceIndex, index);
 
-    cudaPrintFreeMemory();
+    // Copy read seqs to device.
+    TDeviceReadSeqs deviceReadSeqs;
+    assign(deviceReadSeqs, readSeqs);
+
+    // Wait for the copy to finish.
+    cudaDeviceSynchronize();
+
+    // Map reads.
+    _mapReads(deviceIndex, deviceReadSeqs, tag);
 }
-}
-#endif
-
-#endif  // #ifndef SEQAN_EXTRAS_CUDAMAPPER_KERNELS_H_
