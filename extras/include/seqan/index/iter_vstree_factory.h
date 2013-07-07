@@ -290,7 +290,7 @@ template <typename TIndex, typename TSpec, typename TId>
 inline SEQAN_HOST_DEVICE Iter<TIndex, VSTree<TSpec> >
 getObject(Factory<Iter<TIndex, VSTree<TSpec> > > & factory, TId /* objectId */)
 {
-    return Iter<TIndex, VSTree<TSpec> >(host(factory));
+    return Iter<TIndex, VSTree<TSpec> >(_host(factory, typename IsView<TIndex>::Type()));
 }
 
 // ----------------------------------------------------------------------------
