@@ -305,12 +305,25 @@ setPatternIterator(Finder2<TText, TPattern, TSpec> & finder, TPatternIterator co
 // ----------------------------------------------------------------------------
 // Function getScore()
 // ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
 
 template <typename TText, typename TPattern, typename TSpec>
 SEQAN_FUNC typename Score_<TSpec>::Type
 getScore(Finder2<TText, TPattern, TSpec> const & finder)
 {
     return finder._score;
+}
+
+// ----------------------------------------------------------------------------
+// Function setScoreThreshold()
+// ----------------------------------------------------------------------------
+// TODO(esiragusa): move this function in the base finder class.
+
+template <typename TText, typename TPattern, typename TSpec, typename TScore>
+SEQAN_FUNC void
+setScoreThreshold(Finder2<TText, TPattern, TSpec> & finder, TScore score)
+{
+    finder._scoreThreshold = score;
 }
 
 // ----------------------------------------------------------------------------
@@ -322,17 +335,6 @@ SEQAN_FUNC typename Score_<Backtracking<HammingDistance, TSpec> >::Type
 _getVertexScore(Finder2<TText, TPattern, Backtracking<HammingDistance, TSpec> > const & finder)
 {
     return parentEdgeLabel(textIterator(finder)) != value(patternIterator(finder));
-}
-
-// ----------------------------------------------------------------------------
-// Function setScoreThreshold()
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TPattern, typename TSpec, typename TScore>
-SEQAN_FUNC typename Score_<TSpec>::Type
-setScoreThreshold(Finder2<TText, TPattern, TSpec> & finder, TScore score)
-{
-    return finder._scoreThreshold = score;
 }
 
 // ----------------------------------------------------------------------------
