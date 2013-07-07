@@ -90,7 +90,7 @@ struct Options
 
     Options() :
         noCuda(false),
-        threadsCount(8),
+        threadsCount(1),
         mappingBlock(MaxValue<int>::VALUE),
         seedLength(33),
         errorsPerSeed(0)
