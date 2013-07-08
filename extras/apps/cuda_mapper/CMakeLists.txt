@@ -66,8 +66,14 @@ list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 # ----------------------------------------------------------------------------
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} -mpopcnt")
+  set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} -mpopcnt")
 endif (CMAKE_COMPILER_IS_GNUCXX)
+
+set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} -march=native")
+
+if (CMAKE_COMPILER_IS_GNUCXX AND APPLE)
+  set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} -mno-avx")
+endif (CMAKE_COMPILER_IS_GNUCXX AND APPLE)
 
 # Add include directories.
 include_directories (${SEQAN_INCLUDE_DIRS})
