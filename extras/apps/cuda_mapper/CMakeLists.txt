@@ -44,13 +44,13 @@ endif (NOT OPENMP_FOUND)
 # ----------------------------------------------------------------------------
 
 # Activate debug symbols for device code and remove optimizations.
-list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0)
+list (APPEND CUDA_NVCC_FLAGS_DEBUG -G -O0 -lineinfo)
 
 # Activate verbose flag in ptxas to show register usage.
-#list (APPEND CUDA_NVCC_FLAGS -Xptxas --verbose)
+list (APPEND CUDA_NVCC_FLAGS -Xptxas --verbose)
 
 # Enforce nvcc to use at most 32 registers per thread.
-list (APPEND CUDA_NVCC_FLAGS --maxrregcount 32)
+#list (APPEND CUDA_NVCC_FLAGS --maxrregcount 32)
 
 # Build from Kepler architecture upwards.
 list (APPEND CUDA_NVCC_FLAGS -arch sm_35)
