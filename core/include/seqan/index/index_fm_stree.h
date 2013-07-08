@@ -403,12 +403,11 @@ _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec
     TRange _range;
 
 //    for (TAlphabetSize c = ordValue(value(it).lastChar) + 1; c < ValueSize<TAlphabet>::VALUE; ++c)
-    for (TAlphabet c = value(it).lastChar; ordValue(c) < ValueSize<TAlphabet>::VALUE; ++c)
+    for (value(it).lastChar++; ordValue(value(it).lastChar) < ValueSize<TAlphabet>::VALUE; value(it).lastChar++)
     {
-        if (_getNodeByChar(it, parentDesc, _range, c))
+        if (_getNodeByChar(it, parentDesc, _range, value(it).lastChar))
         {
             value(it).range = _range;
-            value(it).lastChar = c;
 
             return true;
         }
