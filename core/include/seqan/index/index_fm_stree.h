@@ -329,7 +329,8 @@ _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec>
 
     if (isLeaf(it)) return false;
 
-    for (TAlphabetSize c = 0; c < ValueSize<TAlphabet>::VALUE; ++c)
+//    for (TAlphabetSize c = 0; c < ValueSize<TAlphabet>::VALUE; ++c)
+    for (TAlphabet c = 0; ordValue(c) < ValueSize<TAlphabet>::VALUE; ++c)
         if (_goDownChar(it, c)) return true;
 
     return false;
@@ -401,7 +402,8 @@ _goRight(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec
     TVertexDescriptor parentDesc = nodeUp(it);
     TRange _range;
 
-    for (TAlphabetSize c = ordValue(value(it).lastChar) + 1; c < ValueSize<TAlphabet>::VALUE; ++c)
+//    for (TAlphabetSize c = ordValue(value(it).lastChar) + 1; c < ValueSize<TAlphabet>::VALUE; ++c)
+    for (TAlphabet c = value(it).lastChar; ordValue(c) < ValueSize<TAlphabet>::VALUE; ++c)
     {
         if (_getNodeByChar(it, parentDesc, _range, c))
         {
