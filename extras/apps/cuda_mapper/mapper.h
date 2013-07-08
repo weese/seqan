@@ -419,6 +419,10 @@ _mapReads(TIndex & index, TReadSeqs & readSeqs, unsigned seedLength, unsigned er
 
     double start, finish;
 
+#ifdef PLATFORM_CUDA
+    cudaDeviceSynchronize();
+#endif
+
     start = sysTime();
 
     // Instantiate a multiple finder.

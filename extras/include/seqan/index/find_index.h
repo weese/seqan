@@ -401,6 +401,9 @@ find(Finder2<Index<TText, TIndexSpec>, TPattern, Backtracking<HammingDistance, T
     TTextIterator & textIt = textIterator(finder);
     TPatternIterator & patternIt = patternIterator(finder);
 
+    finder._score = 0;
+    finder._scoreThreshold = 1;
+
     do
     {
         // Exact case.
