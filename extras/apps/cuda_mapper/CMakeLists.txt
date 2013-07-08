@@ -65,6 +65,10 @@ list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 # Build Setup
 # ----------------------------------------------------------------------------
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+set (SEQAN_CXX_FLAGS "${SEQAN_CXX_FLAGS} -mpopcnt")
+endif (CMAKE_COMPILER_IS_GNUCXX)
+
 # Add include directories.
 include_directories (${SEQAN_INCLUDE_DIRS})
 
