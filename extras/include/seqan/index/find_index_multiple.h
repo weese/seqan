@@ -534,7 +534,7 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
 }
 
 // ----------------------------------------------------------------------------
-// Function _find();                                       [Finder; ExecDevice]
+// Function _find()                                        [Finder; ExecDevice]
 // ----------------------------------------------------------------------------
 
 #ifdef PLATFORM_CUDA
