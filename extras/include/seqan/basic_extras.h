@@ -63,7 +63,8 @@
 // SIMD Types.
 // ===========================================================================
 
+#ifndef __clang__
 #include <seqan/basic/basic_simd_vector.h>
-
+#endif
 
 #endif  // EXTRAS_INCLUDE_SEQAN_BASIC_H_
