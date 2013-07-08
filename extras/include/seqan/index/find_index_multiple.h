@@ -132,27 +132,6 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// Class Proxy                                                         [Finder]
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TPattern, typename TSpec>
-class Proxy<Finder2<TText, TPattern, Multiple<TSpec> > >
-{
-public:
-    typedef typename TextIterator_<TText, TSpec>::Type     TTextIterator;
-    typedef typename Iterator<TPattern, Standard>::Type    TPatternIterator;
-
-    TTextIterator const &   _textIt;
-    unsigned                _patternIt;
-
-    template <typename TFinder>
-    SEQAN_HOST_DEVICE
-    Proxy(TFinder const & finder) :
-        _textIt(textIterator(finder))
-    {}
-};
-
-// ----------------------------------------------------------------------------
 // Class FinderContext_
 // ----------------------------------------------------------------------------
 
@@ -164,32 +143,36 @@ struct FinderContext_<TText, TPattern, Multiple<TSpec>, TDelegate>
 {
     typedef typename Needle<TPattern>::Type                 TNeedles;
     typedef typename Value<TPattern>::Type                  TNeedle;
-    typedef Finder2<TText, TNeedle, TSpec>                  TSingleFinder;
+    typedef Finder2<TText, TNeedle, TSpec>                  TBaseFinder;
     typedef Finder2<TText, TPattern, Multiple<TSpec> >      TFinder;
-    typedef Proxy<TFinder>                                  TFinderProxy;
-    typedef Delegator<TFinderProxy, TDelegate>              TDelegator;
-    typedef typename Member<TFinder, Factory_>::Type        TFactory;
+    typedef typename Iterator<TNeedles, Standard>::Type     TPatternIterator;
 
-    TFactory &      factory;
-    TSingleFinder   finder;
-    TFinderProxy    proxy;
-    TDelegator      delegator;
+    TFinder &      finder;
+    TDelegate &    delegate;
+    TBaseFinder    baseFinder;
+//    TPatternIterator _patternIt;
+    unsigned        _patternIt;
 
     explicit SEQAN_HOST_DEVICE
-    FinderContext_(TFactory & factory, TDelegate & delegate) :
-        factory(factory),
-        finder(getObject(factory, getThreadId())),
-        proxy(finder),
-        delegator(proxy, delegate)
+    FinderContext_(TFinder & finder, TDelegate & delegate) :
+        finder(finder),
+        delegate(delegate),
+        baseFinder(getObject(finder._factory, getThreadId()))
     {}
 
     // NOTE(esiragusa): This is called on firstprivate.
     FinderContext_(FinderContext_ & ctx) :
-        factory(ctx.factory),
-        finder(getObject(factory, getThreadId())),
-        proxy(finder),
-        delegator(proxy, ctx.delegator.delegate)
+        finder(ctx.finder),
+        delegate(ctx.delegate),
+        baseFinder(getObject(finder._factory, getThreadId()))
     {}
+
+    template <typename TOther>
+    SEQAN_FUNC void
+    operator()(TOther & /* other */)
+    {
+        delegate(*this);
+    }
 };
 
 // ============================================================================
@@ -347,11 +330,11 @@ struct Member<Finder2<TText, TPattern, Multiple<TSpec> >, Factory_>
 // Metafunction Delegated                                              [Finder]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TPattern, typename TSpec>
-struct Delegated<Finder2<TText, TPattern, Multiple<TSpec> > >
-{
-    typedef Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > Type;
-};
+//template <typename TText, typename TPattern, typename TSpec>
+//struct Delegated<Finder2<TText, TPattern, Multiple<TSpec> > >
+//{
+//    typedef Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > Type;
+//};
 
 // ============================================================================
 // Kernels
@@ -400,13 +383,13 @@ _findKernel(Finder2<TText, TPattern, Multiple<TSpec> > finder, TPattern pattern,
     if (threadId >= length(pattern.data_host)) return;
 
     // Instantiate a thread context.
-    TFinderContext ctx(finder._factory, delegate);
+    TFinderContext ctx(finder, delegate);
 
     // Get the sorted needle id.
-    ctx.proxy._patternIt = pattern._permutation[threadId];
+    ctx._patternIt = pattern._permutation[threadId];
 
     // Find a single needle.
-    find(ctx.finder, pattern.data_host[ctx.proxy._patternIt], ctx.delegator);
+    find(ctx.baseFinder, pattern.data_host[pattern._permutation[threadId]], ctx);
 }
 #endif
 
@@ -522,14 +505,14 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
 
     // Instantiate a thread context.
     // NOTE(esiragusa): Each thread initializes its private context on firstprivate.
-    TFinderContext ctx(finderView._factory, delegate);
+    TFinderContext ctx(finderView, delegate);
 
     // Find all needles in parallel.
     SEQAN_OMP_PRAGMA(parallel for schedule(dynamic) firstprivate(ctx))
     for (TSize needleId = 0; needleId < needlesCount; ++needleId)
     {
-        clear(ctx.finder);
-        find(ctx.finder, needlesView[needleId], ctx.delegator);
+        clear(ctx.baseFinder);
+        find(ctx.baseFinder, needlesView[needleId], ctx);
     }
 }
 
@@ -610,21 +593,21 @@ view(Finder2<TText, TPattern, Multiple<TSpec> > & finder)
 }
 
 // ----------------------------------------------------------------------------
-// Function textIterator()                                       [Finder Proxy]
+// Function textIterator()                                     [Finder Context]
 // ----------------------------------------------------------------------------
 
-template <typename TText, typename TPattern, typename TSpec>
+template <typename TText, typename TPattern, typename TSpec, typename TDelegate>
 inline SEQAN_HOST_DEVICE typename TextIterator_<TText, Multiple<TSpec> >::Type &
-textIterator(Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > & finder)
+textIterator(FinderContext_<TText, TPattern, Multiple<TSpec>, TDelegate> & ctx)
 {
-    return finder._textIt;
+    return textIterator(ctx.baseFinder);
 }
 
-template <typename TText, typename TPattern, typename TSpec>
+template <typename TText, typename TPattern, typename TSpec, typename TDelegate>
 inline SEQAN_HOST_DEVICE typename TextIterator_<TText, Multiple<TSpec> >::Type const &
-textIterator(Proxy<Finder2<TText, TPattern, Multiple<TSpec> > > const & finder)
+textIterator(FinderContext_<TText, TPattern, Multiple<TSpec>, TDelegate> const & ctx)
 {
-    return finder._textIt;
+    return textIterator(ctx.baseFinder);
 }
 
 }
