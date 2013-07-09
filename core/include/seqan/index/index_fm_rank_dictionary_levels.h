@@ -703,7 +703,6 @@ _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
 //    for (TSize wordPrevPos = 0; wordPrevPos < wordPos; ++wordPrevPos)
 //      valueRank += _getWordRank(dict, values[wordPrevPos].i, c);
 
-    #pragma unroll
     for (TSize wordPrevPos = 0; wordPrevPos < TRankDictionary::_WORDS_PER_BLOCK; ++wordPrevPos)
       if (wordPrevPos < wordPos) valueRank += _getWordRank(dict, values[wordPrevPos].i, c);
 
