@@ -163,30 +163,34 @@ typedef Index<TContigs, TGenomeIndexSpec>   TGenomeIndex;
 // ----------------------------------------------------------------------------
 // FM Index Size
 // ----------------------------------------------------------------------------
-// NOTE(esiragusa): Register usage decreases.
-// TODO(esiragusa): Check type mismatch with stack history.
 
-//namespace seqan {
-//template <>
-//struct Size<TGenomeIndex>
-//{
-//    typedef __uint32 Type;
-//};
-//
-//#ifdef PLATFORM_CUDA
-//template <>
-//struct Size<typename Device<TGenomeIndex>::Type>
-//{
-//    typedef __uint32 Type;
-//};
-//
-//template <>
-//struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
-//{
-//    typedef __uint32 Type;
-//};
-//#endif
-//}
+namespace seqan {
+template <>
+struct Size<TGenomeIndex>
+{
+    typedef __uint32 Type;
+};
+
+template <>
+struct Size<typename View<TGenomeIndex>::Type>
+{
+    typedef __uint32 Type;
+};
+
+#ifdef PLATFORM_CUDA
+template <>
+struct Size<typename Device<TGenomeIndex>::Type>
+{
+    typedef __uint32 Type;
+};
+
+template <>
+struct Size<typename View<typename Device<TGenomeIndex>::Type>::Type>
+{
+    typedef __uint32 Type;
+};
+#endif
+}
 
 // ----------------------------------------------------------------------------
 // Rank Dictionary Size
