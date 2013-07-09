@@ -61,6 +61,9 @@ list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_error -Xcudafe h_hd_illegal_call)
 # Disable all warnings.
 list (APPEND CUDA_NVCC_FLAGS --disable-warnings)
 
+# Output PTX.
+#list (APPEND CUDA_NVCC_FLAGS --keep --source-in-ptx)
+
 # ----------------------------------------------------------------------------
 # Build Setup
 # ----------------------------------------------------------------------------
