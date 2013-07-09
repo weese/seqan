@@ -700,8 +700,13 @@ _getValueRank(RankDictionary<TwoLevels<TValue, TSpec> > const & dict,
 
     TSize valueRank = 0;
 
-    for (TSize wordPrevPos = 0; wordPrevPos < wordPos; ++wordPrevPos)
-      valueRank += _getWordRank(dict, values[wordPrevPos].i, c);
+    // NOTE(esiragusa): writing the loop in this form prevents the compiler from unrolling it.
+//    for (TSize wordPrevPos = 0; wordPrevPos < wordPos; ++wordPrevPos)
+//      valueRank += _getWordRank(dict, values[wordPrevPos].i, c);
+
+    #pragma unroll
+    for (TSize wordPrevPos = 0; wordPrevPos < TRankDictionary::_WORDS_PER_BLOCK; ++wordPrevPos)
+      if (wordPrevPos < wordPos) valueRank += _getWordRank(dict, values[wordPrevPos].i, c);
 
     valueRank += _getWordRank(dict, values[wordPos].i, posInWord, c);
 
