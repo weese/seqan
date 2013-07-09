@@ -48,11 +48,11 @@ namespace seqan {
 template <typename TObject, typename TDelegate, typename TSpec = void>
 struct Delegator
 {
-    TObject & object;
+    TObject const & object;
     TDelegate & delegate;
 
     SEQAN_FUNC
-    Delegator(TObject & object, TDelegate & delegate) :
+    Delegator(TObject const & object, TDelegate & delegate) :
         object(object),
         delegate(delegate)
     {}
