@@ -540,7 +540,10 @@ _find(Finder2<TText, TPattern, Multiple<TSpec> > & finder,
     unsigned activeBlocks = (length(needle(pattern)) + ctaSize - 1) / ctaSize;
 
     // Initialize the iterator factory.
-    _initFactory(finder, length(back(needle(pattern))) + 1, length(needle(pattern)));
+    _initFactory(finder, 33 + 1, length(needle(pattern)));
+    // TODO(esiragusa): Compute the longest pattern.
+    // NOTE(esiragusa): back/value do not work on thrust::device_vector.
+//    _initFactory(finder, length(back(needle(pattern))) + 1, length(needle(pattern)));
 
     // Launch the find kernel.
     _findKernel<<<activeBlocks, ctaSize>>>(view(finder), view(pattern), view(delegate));
