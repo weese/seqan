@@ -64,7 +64,7 @@ assign(Index<StringSet<thrust::device_vector<TValue, TAlloc>, TSSetSpec>, FMInde
 {
     cudaPrintFreeMemory();
 
-//    assign(indexSA(index), indexSA(source));
+    assign(indexSA(index), indexSA(source));
     assign(indexLF(index), indexLF(source));
 
     cudaPrintFreeMemory();
