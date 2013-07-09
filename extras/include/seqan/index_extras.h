@@ -92,7 +92,7 @@
 // Index Finders.
 // ===========================================================================
 
-#include <seqan/index/find_index.h>
+#include <seqan/index/find_index_new.h>
 #include <seqan/index/find_index_multiple.h>
 
 #endif  // EXTRAS_INCLUDE_SEQAN_INDEX_H_

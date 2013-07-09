@@ -45,30 +45,6 @@ namespace seqan {
 template <typename TText, typename TPattern, typename TSpec = void>
 struct Finder2;
 
-// TODO(esiragusa): Remove this.
-template <typename TDistance, typename TSpec>
-struct Backtracking;
-
-// TODO(esiragusa): Remove this.
-template <typename TSpec>
-struct View;
-
-// TODO(esiragusa): Remove this.
-template <typename TSpec>
-struct RemoveView;
-
-// TODO(esiragusa): Remove this.
-template <typename TSpec>
-struct IsView;
-
-// TODO(esiragusa): Remove this.
-template <typename TSpec>
-struct IsDevice;
-
-// TODO(esiragusa): Remove this.
-template <typename TObject, typename T1, typename T2>
-struct IfView;
-
 // ============================================================================
 // Metafunctions
 // ============================================================================
