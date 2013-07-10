@@ -2,7 +2,6 @@
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
-// Copyright (c) 2013 NVIDIA Corporation
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -274,6 +273,8 @@ specialization tag class.
 
 struct Dna5Q_ {};
 typedef SimpleType <unsigned char, Dna5Q_> Dna5Q;
+
+static const unsigned char Dna5QValueN_ = 252;                              // value representing N
 
 template <> struct ValueSize<Dna5Q>
 {
@@ -591,36 +592,36 @@ struct BitsPerValue<SimpleType<TValue, Finite<SIZE> > >
 // char
 // ----------------------------------------------------------------------------
 
-void SEQAN_FUNC assign(char & c_target, 
+inline void assign(char & c_target, 
                    Dna const & source)
 {
-    c_target = translateDna5ToAscii_<void>(source.value);
+    c_target = TranslateTableDna5ToAscii_<>::VALUE[source.value];
 }
 
-void SEQAN_FUNC assign(char & c_target, 
+inline void assign(char & c_target, 
                    Dna5 const & source)
 {
-    c_target = translateDna5ToAscii_<void>(source.value);
+    c_target = TranslateTableDna5ToAscii_<>::VALUE[source.value];
 }
 
-void SEQAN_FUNC assign(char& target,
+inline void assign(char& target,
                    Rna const & source)
 {
         target = TranslateTableRna5ToAscii_<>::VALUE[source.value];
 }
 
-void SEQAN_FUNC assign(char& target,
+inline void assign(char& target,
                    Rna5 const & source)
 {
         target = TranslateTableRna5ToAscii_<>::VALUE[source.value];
 }
 
-void SEQAN_FUNC assign(char & c_target, Iupac const & source)
+inline void assign(char & c_target, Iupac const & source)
 {
     c_target = TranslateTableIupacToAscii_<>::VALUE[source.value];
 }
 
-void SEQAN_FUNC assign(char & c_target, AminoAcid const & source)
+inline void assign(char & c_target, AminoAcid const & source)
 {
     c_target = TranslateTableAAToAscii_<>::VALUE[source.value];
 }
@@ -635,9 +636,9 @@ struct CompareType<Dna, __uint8>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, __uint8 c_source)
+inline void assign(Dna & target, __uint8 c_source)
 {
-    target.value = translateByteToDna_<void>(c_source);
+    target.value = TranslateTableByteToDna_<>::VALUE[c_source];
 }
 
 template <>
@@ -646,9 +647,13 @@ struct CompareType<Dna, char>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, char c_source)
+inline void assign(Dna & target, char c_source)
 {
+#ifdef __CUDA_ARCH__
     target.value = translateAsciiToDna_<void>((unsigned char)c_source);
+#else
+    target.value = TranslateTableAsciiToDna_<>::VALUE[(unsigned char) c_source];
+#endif
 }
 
 template <>
@@ -657,9 +662,13 @@ struct CompareType<Dna, Unicode>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, Unicode c_source)
+inline void assign(Dna & target, Unicode c_source)
 {
+#ifdef __CUDA_ARCH__
     target.value = translateAsciiToDna_<void>((unsigned char)c_source);
+#else
+    target.value = TranslateTableAsciiToDna_<>::VALUE[(unsigned char) c_source];
+#endif
 }
 
 template <>
@@ -668,7 +677,7 @@ struct CompareType<Dna, Dna5>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, Dna5 const & c_source)
+inline void assign(Dna & target, Dna5 const & c_source)
 {
     target.value = c_source.value & 0x03;
 }
@@ -679,7 +688,7 @@ struct CompareType<Dna, Iupac>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, Iupac const & source)
+inline void assign(Dna & target, Iupac const & source)
 {
     target.value = TranslateTableIupacToDna_<>::VALUE[source.value];
 }
@@ -694,8 +703,7 @@ struct CompareType<Dna5, __uint8>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC
-assign(Dna5 & target, __uint8 c_source)
+inline void assign(Dna5 & target, __uint8 c_source)
 {
     target.value = TranslateTableByteToDna5_<>::VALUE[c_source];
 }
@@ -706,8 +714,7 @@ struct CompareType<Dna5, char>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC
-assign(Dna5 & target, char c_source)
+inline void assign(Dna5 & target, char c_source)
 {
     target.value = TranslateTableAsciiToDna5_<>::VALUE[(unsigned char) c_source];
 }
@@ -718,7 +725,7 @@ struct CompareType<Dna5, Unicode>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5 & target, Unicode c_source)
+inline void assign(Dna5 & target, Unicode c_source)
 {
     target.value = TranslateTableAsciiToDna5_<>::VALUE[(unsigned char) c_source];
 }
@@ -729,7 +736,7 @@ struct CompareType<Dna5, Iupac>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5 & target, Iupac const & source)
+inline void assign(Dna5 & target, Iupac const & source)
 {
     target.value = TranslateTableIupacToDna5_<>::VALUE[source.value];
 }
@@ -740,7 +747,7 @@ struct CompareType<Dna5, Dna>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna5 & target, Dna const & c_source)
+inline void assign(Dna5 & target, Dna const & c_source)
 {
     target.value = c_source.value;
 }
@@ -755,7 +762,7 @@ struct CompareType<Rna, __uint8>
     typedef Rna Type;
 };
 
-void SEQAN_FUNC assign(Rna & target, __uint8 c_source)
+inline void assign(Rna & target, __uint8 c_source)
 {
         target.value = TranslateTableByteToRna_<>::VALUE[c_source];
 }
@@ -766,7 +773,7 @@ struct CompareType<Rna, char>
     typedef Rna Type;
 };
 
-void SEQAN_FUNC assign(Rna & target, char c_source)
+inline void assign(Rna & target, char c_source)
 {
         target.value = TranslateTableAsciiToRna_<>::VALUE[(unsigned char)c_source];
 }
@@ -777,7 +784,7 @@ struct CompareType<Rna, Unicode>
     typedef Rna Type;
 };
 
-void SEQAN_FUNC assign(Rna & target, Unicode c_source)
+inline void assign(Rna & target, Unicode c_source)
 {
         target.value = TranslateTableAsciiToRna_<>::VALUE[(unsigned char) c_source];
 }
@@ -788,7 +795,7 @@ struct CompareType<Rna, Rna5>
     typedef Rna Type;
 };
 
-void SEQAN_FUNC assign(Rna & target, Rna5 const & c_source)
+inline void assign(Rna & target, Rna5 const & c_source)
 {
     target.value = c_source.value & 0x03;
 }
@@ -803,7 +810,7 @@ struct CompareType<Rna5, __uint8>
     typedef Rna5 Type;
 };
 
-void SEQAN_FUNC assign(Rna5 & target, __uint8 c_source)
+inline void assign(Rna5 & target, __uint8 c_source)
 {
         target.value = TranslateTableByteToRna5_<>::VALUE[c_source];
 }
@@ -814,7 +821,7 @@ struct CompareType<Rna5, char>
     typedef Rna5 Type;
 };
 
-void SEQAN_FUNC assign(Rna5 & target, char c_source)
+inline void assign(Rna5 & target, char c_source)
 {
         target.value = TranslateTableAsciiToRna5_<>::VALUE[(unsigned char)c_source];
 }
@@ -825,7 +832,7 @@ struct CompareType<Rna5, Unicode>
     typedef Rna5 Type;
 };
 
-void SEQAN_FUNC assign(Rna5 & target, Unicode c_source)
+inline void assign(Rna5 & target, Unicode c_source)
 {
         target.value = TranslateTableAsciiToRna5_<>::VALUE[(unsigned char) c_source];
 }
@@ -836,7 +843,7 @@ struct CompareType<Rna5, Rna>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Rna5 & target, Rna const & c_source)
+inline void assign(Rna5 & target, Rna const & c_source)
 {
     target.value = c_source.value;
 }
@@ -851,7 +858,7 @@ struct CompareType<Iupac, __uint8>
     typedef Iupac Type;
 };
 
-void SEQAN_FUNC assign(Iupac & target, __uint8 c_source)
+inline void assign(Iupac & target, __uint8 c_source)
 {
     target.value = TranslateTableByteToIupac_<>::VALUE[c_source];
 }
@@ -862,7 +869,7 @@ struct CompareType<Iupac, char>
     typedef Iupac Type;
 };
 
-void SEQAN_FUNC assign(Iupac & target, char c_source)
+inline void assign(Iupac & target, char c_source)
 {
     target.value = TranslateTableAsciiToIupac_<>::VALUE[(unsigned char) c_source];
 }
@@ -873,17 +880,17 @@ struct CompareType<Iupac, Unicode>
     typedef Iupac Type;
 };
 
-void SEQAN_FUNC assign(Iupac & target, Unicode c_source)
+inline void assign(Iupac & target, Unicode c_source)
 {
     target.value = TranslateTableAsciiToIupac_<>::VALUE[(unsigned char) c_source];
 }
 
-void SEQAN_FUNC assign(Iupac & target, Dna const & source)
+inline void assign(Iupac & target, Dna const & source)
 {
     target.value = TranslateTableDna5ToIupac_<>::VALUE[source.value];
 }
 
-void SEQAN_FUNC assign(Iupac & target, Dna5 const & source)
+inline void assign(Iupac & target, Dna5 const & source)
 {
     target.value = TranslateTableDna5ToIupac_<>::VALUE[source.value];
 }
@@ -898,7 +905,7 @@ struct CompareType<AminoAcid, __uint8>
     typedef AminoAcid Type;
 };
 
-void SEQAN_FUNC assign(AminoAcid & target, __uint8 c_source)
+inline void assign(AminoAcid & target, __uint8 c_source)
 {
     target.value = TranslateTableByteToAA_<>::VALUE[c_source];
 }
@@ -909,7 +916,7 @@ struct CompareType<AminoAcid, char>
     typedef AminoAcid Type;
 };
 
-void SEQAN_FUNC assign(AminoAcid & target, char c_source)
+inline void assign(AminoAcid & target, char c_source)
 {
     target.value = TranslateTableAsciiToAA_<>::VALUE[(unsigned char) c_source];
 }
@@ -920,7 +927,7 @@ struct CompareType<AminoAcid, Unicode>
     typedef AminoAcid Type;
 };
 
-void SEQAN_FUNC assign(AminoAcid & target, Unicode c_source)
+inline void assign(AminoAcid & target, Unicode c_source)
 {
     target.value = TranslateTableAsciiToAA_<>::VALUE[(unsigned char) c_source];
 }
@@ -953,7 +960,7 @@ struct CompareType<DnaQ, Dna>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(DnaQ & target, Dna const & source)
+inline void assign(DnaQ & target, Dna const & source)
 {
     target.value = source.value | (60 << 2);
 }
@@ -964,7 +971,7 @@ struct CompareType<Dna, DnaQ>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, DnaQ const & source)
+inline void assign(Dna & target, DnaQ const & source)
 {
     target.value = source.value & 3;
 }
@@ -975,7 +982,7 @@ struct CompareType<DnaQ, Iupac>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(DnaQ & target, Iupac const & source)
+inline void assign(DnaQ & target, Iupac const & source)
 {
     assign(target, (Dna) source);
 }
@@ -986,7 +993,7 @@ struct CompareType<DnaQ, Dna5>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(DnaQ & target, Dna5 const & source)
+inline void assign(DnaQ & target, Dna5 const & source)
 {
     assign(target, (Dna) source);
 }
@@ -997,7 +1004,7 @@ struct CompareType<DnaQ, __uint8>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(DnaQ & target, __uint8 c_source)
+inline void assign(DnaQ & target, __uint8 c_source)
 {
     assign(target, (Dna) c_source);
 }
@@ -1008,7 +1015,7 @@ struct CompareType<DnaQ, char>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(DnaQ & target, char c_source)
+inline void assign(DnaQ & target, char c_source)
 {
     assign(target, (Dna) c_source);
 }
@@ -1019,32 +1026,32 @@ struct CompareType<DnaQ, Unicode>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(DnaQ & target, Unicode c_source)
+inline void assign(DnaQ & target, Unicode c_source)
 {
     assign(target, (Dna) c_source);
 }
 
-void SEQAN_FUNC
+inline void 
 assign(DnaQ & target, DnaQ const & source)
 {
     target.value = source.value;
 }
 
 template <typename TSource>
-void SEQAN_FUNC 
+inline void 
 assign(DnaQ & target, TSource const & source)
 {
     target.value = (Dna)source;
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(__int64 & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(__int64 & c_target, 
        DnaQ const & source)
 {
@@ -1053,14 +1060,14 @@ assign(__int64 & c_target,
 
 // __uint64
 
-void SEQAN_FUNC 
+inline void 
 assign(__uint64 & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(__uint64 & c_target, 
        DnaQ const & source)
 {
@@ -1069,14 +1076,14 @@ assign(__uint64 & c_target,
 
 // int
 
-void SEQAN_FUNC 
+inline void 
 assign(int & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(int & c_target, 
        DnaQ const & source)
 {
@@ -1085,14 +1092,14 @@ assign(int & c_target,
 
 // unsigned int
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned int & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned int & c_target, 
        DnaQ const & source)
 {
@@ -1101,14 +1108,14 @@ assign(unsigned int & c_target,
 
 // short
 
-void SEQAN_FUNC 
+inline void 
 assign(short & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(short & c_target, 
        DnaQ const & source)
 {
@@ -1117,14 +1124,14 @@ assign(short & c_target,
 
 // unsigned short
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned short & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned short & c_target, 
        DnaQ const & source)
 {
@@ -1133,14 +1140,14 @@ assign(unsigned short & c_target,
 
 // char
 
-void SEQAN_FUNC 
+inline void 
 assign(char & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(char & c_target, 
        DnaQ const & source)
 {
@@ -1149,14 +1156,14 @@ assign(char & c_target,
 
 // signed char
 
-void SEQAN_FUNC 
+inline void 
 assign(signed char & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(signed char & c_target, 
        DnaQ const & source)
 {
@@ -1165,14 +1172,14 @@ assign(signed char & c_target,
 
 // unsigned char
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned char & c_target, 
        DnaQ & source)
 {
     c_target = Dna(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned char & c_target, 
        DnaQ const & source)
 {
@@ -1208,15 +1215,13 @@ struct CompareType<DnaQ, Dna5Q>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC
-assign(DnaQ & target, Dna5Q const & source)
+inline void assign(DnaQ & target, Dna5Q const & source)
 {
-    // We perform the converstion from DNA5Q to DNAQ with qualities by a simple
+    // We perform the converstion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
     // target.value = (source.value == Dna5QValueN_)? 0: source.value;
 
-	/* this is not allowed in CUDA
     static const unsigned table[] = {
           0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
          16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
@@ -1234,8 +1239,8 @@ assign(DnaQ & target, Dna5Q const & source)
         208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
         224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
         240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 0,   0,   0,   0
-    };*/
-    target.value = TranslateTableDna5QToDnaQ_<>::VALUE[source.value];
+    };
+    target.value = table[source.value];
 }
 
 template <>
@@ -1244,7 +1249,7 @@ struct CompareType<Dna5Q, DnaQ>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, DnaQ const & source)
+inline void assign(Dna5Q & target, DnaQ const & source)
 {
     target.value = source.value;
 }
@@ -1256,7 +1261,7 @@ struct CompareType<Dna5, Dna5Q>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5 & target, Dna5Q const & source)
+inline void assign(Dna5 & target, Dna5Q const & source)
 {
         SEQAN_CHECKPOINT;;
 
@@ -1265,7 +1270,6 @@ void SEQAN_FUNC assign(Dna5 & target, Dna5Q const & source)
     //
     // target.value = (source.value == Dna5QValueN_)? 4: source.value & 3;
 
-/* static variables are not allowed in CUDA
     static const unsigned table[] = {
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
@@ -1280,8 +1284,8 @@ void SEQAN_FUNC assign(Dna5 & target, Dna5Q const & source)
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 4, 4, 4, 4 // <-- note the 4
-    }; */
-    target.value = TranslateTableDna5QToDna5_<>::VALUE[source.value];
+    };
+    target.value = table[source.value];
 }
 
 template <>
@@ -1290,7 +1294,7 @@ struct CompareType<Dna5Q, Dna5>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, Dna5 const & source)
+inline void assign(Dna5Q & target, Dna5 const & source)
 {
 
     // We perform the conversion from DNA5 with qualities to DNA5 by a simple
@@ -1298,12 +1302,10 @@ void SEQAN_FUNC assign(Dna5Q & target, Dna5 const & source)
     //
     // target.value = (source.value == 4)? Dna5QValueN_ : source.value | (60 << 2);
 
-/* static variables are not allowed in CUDA
     static const unsigned table[] = {
         (60 << 2) + 0, (60 << 2) + 1, (60 << 2) + 2, (60 << 2) + 3, Dna5QValueN_
-    }; 
-*/
-    target.value = TranslateTableDna5ToDna5Q_<>::VALUE[source.value];
+    };
+    target.value = table[source.value];
 }
 
 template <>
@@ -1312,7 +1314,7 @@ struct CompareType<Dna5Q, Dna>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, Dna const & source)
+inline void assign(Dna5Q & target, Dna const & source)
 {
     assign(target, (DnaQ) source);
 }
@@ -1323,7 +1325,7 @@ struct CompareType<Dna, Dna5Q>
     typedef Dna Type;
 };
 
-void SEQAN_FUNC assign(Dna & target, Dna5Q const & source)
+inline void assign(Dna & target, Dna5Q const & source)
 {
     assign(target, (Dna5)source);
 }
@@ -1334,7 +1336,7 @@ struct CompareType<Dna5, DnaQ>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5 & target, DnaQ const & source)
+inline void assign(Dna5 & target, DnaQ const & source)
 {
     assign(target, (Dna5Q)source);
 }
@@ -1345,7 +1347,7 @@ struct CompareType<Dna5Q, __uint8>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, __uint8 c_source)
+inline void assign(Dna5Q & target, __uint8 c_source)
 {
     assign(target, (Dna5)c_source);
 }
@@ -1356,7 +1358,7 @@ struct CompareType<Dna5Q, char>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, char c_source)
+inline void assign(Dna5Q & target, char c_source)
 {
     assign(target, (Dna5)c_source);
 }
@@ -1367,7 +1369,7 @@ struct CompareType<Dna5Q, Unicode>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, Unicode c_source)
+inline void assign(Dna5Q & target, Unicode c_source)
 {
     assign(target, (Dna5)c_source);
 }
@@ -1378,19 +1380,19 @@ struct CompareType<Dna5Q, Iupac>
     typedef Dna5 Type;
 };
 
-void SEQAN_FUNC assign(Dna5Q & target, Iupac const & source)
+inline void assign(Dna5Q & target, Iupac const & source)
 {
     assign(target, (Dna5)source);
 }
 
-void SEQAN_FUNC
+inline void 
 assign(Dna5Q & target, Dna5Q const & source)
 {
     target.value = source.value;
 }
 
 template <typename TSource>
-void SEQAN_FUNC 
+inline void 
 assign(Dna5Q & target, TSource const & source)
 {
     assign(target, (Dna5)source);
@@ -1398,14 +1400,14 @@ assign(Dna5Q & target, TSource const & source)
 
 // __int64
 
-void SEQAN_FUNC 
+inline void 
 assign(__int64 & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(__int64 & c_target, 
        Dna5Q const & source)
 {
@@ -1414,14 +1416,14 @@ assign(__int64 & c_target,
 
 // __uint64
 
-void SEQAN_FUNC 
+inline void 
 assign(__uint64 & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(__uint64 & c_target, 
        Dna5Q const & source)
 {
@@ -1430,14 +1432,14 @@ assign(__uint64 & c_target,
 
 // int
 
-void SEQAN_FUNC 
+inline void 
 assign(int & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(int & c_target, 
        Dna5Q const & source)
 {
@@ -1446,14 +1448,14 @@ assign(int & c_target,
 
 // unsigned int
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned int & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned int & c_target, 
        Dna5Q const & source)
 {
@@ -1463,14 +1465,14 @@ assign(unsigned int & c_target,
 
 //short
 
-void SEQAN_FUNC 
+inline void 
 assign(short & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(short & c_target, 
        Dna5Q const & source)
 {
@@ -1479,14 +1481,14 @@ assign(short & c_target,
 
 //unsigned short
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned short & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned short & c_target, 
        Dna5Q const & source)
 {
@@ -1495,14 +1497,14 @@ assign(unsigned short & c_target,
 
 // char
 
-void SEQAN_FUNC 
+inline void 
 assign(char & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(char & c_target, 
        Dna5Q const & source)
 {
@@ -1511,14 +1513,14 @@ assign(char & c_target,
 
 // signed char
 
-void SEQAN_FUNC 
+inline void 
 assign(signed char & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(signed char & c_target, 
        Dna5Q const & source)
 {
@@ -1527,14 +1529,14 @@ assign(signed char & c_target,
 
 // unsigned char
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned char & c_target, 
        Dna5Q & source)
 {
     c_target = Dna5(source);
 }
 
-void SEQAN_FUNC 
+inline void 
 assign(unsigned char & c_target, 
        Dna5Q const & source)
 {
