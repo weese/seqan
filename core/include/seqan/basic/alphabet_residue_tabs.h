@@ -66,10 +66,28 @@ struct TranslateTableDna5ToIupac_
 template <typename T>
 char const TranslateTableDna5ToIupac_<T>::VALUE[5] = {0x02, 0x04, 0x08, 0x01, 0x0f};
 
+SEQAN_FUNC unsigned char __toUpper(unsigned char c)
+{
+    return c >= 'A' ? c : c + 'A' - 'a';
+}
+
 template <typename T>
 SEQAN_FUNC unsigned char
 translateAsciiToDna_(unsigned char c)
 {
+#ifdef __CUDA_ARCH__
+    switch (__toUpper(c))
+    {
+        case 'C':
+            return 1;
+        case 'G':
+            return 2;
+        case 'T':
+            return 3;
+        default:
+            return 0;
+    };
+#else
     unsigned char const VALUE[256] =
     {
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //0
@@ -100,6 +118,7 @@ translateAsciiToDna_(unsigned char c)
     };
 
     return VALUE[c];
+#endif
 }
 
 template <typename T = void>
