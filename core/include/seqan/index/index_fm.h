@@ -222,22 +222,6 @@ public:
     {}
 };
 
-// This function computes the length of the bwt string.
-template <typename TText>
-inline typename Size<TText>::Type
-_computeBwtLength(TText const & text)
-{
-    return length(text) + 1;
-}
-
-// This function computes the length of the bwt string.
-template <typename TText, typename TSetSpec>
-inline typename Size<typename StringSetLimits<TText>::Type>::Type
-_computeBwtLength(StringSet<TText, TSetSpec> const & text)
-{
-    return lengthSum(text) + countSequences(text);
-}
-
 // ----------------------------------------------------------------------------
 // Class FmIndexInfo_ 
 // ----------------------------------------------------------------------------
