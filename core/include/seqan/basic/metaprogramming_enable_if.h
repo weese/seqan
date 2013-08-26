@@ -64,7 +64,7 @@ namespace seqan {
  * LogicMetaprogramming logical metaprogramming metafunctions @endlink.
  *
  * <b>Enable-if is an advanced technique and mostly interesting if you want to extend the SeqAn library with generic
- * algorithms.  The average developer does not have to know about this technique.</tt>.
+ * algorithms.  The average developer does not have to know about this technique.</b>.
  *
  * @see LogicalValuesTags
  * @see LogicMetaprogramming
@@ -265,7 +265,7 @@ struct DisableIf2<true, T> {};
  * The following shows an example on how to properly use <tt>SEQAN_CTOR_ENABLE_IF</tt> as the last argument to the
  * constructor and suppressing the unused variable warning for the dummy parameter.
  *
- * @snippet core/demos/basic/enable_if.cpp enable if example constructor
+ * @snippet demos/basic/enable_if.cpp enable if example constructor
  */
 
 /**
@@ -276,15 +276,11 @@ struct DisableIf2<true, T> {};
 ..param.cond:Boolean type. If @Tag.Logical Values.tag.True@ or a metafunction that returns @Tag.Logical Values.tag.True@, the following function is visible, otherwise not.
 ...remarks:The boolean value must be available at compile-time, e.g. $sizeof(T)>4$.
 ..remarks:This macro allows to bind the visibility of a constructor to a boolean expression
-by using the @hr|SFINAE@ principle for an optional argument with default value.
+by using the SFINAE principle for an optional argument with default value.
 It can be used as the last dummy-argument of a constructor.
 To avoid an unused argument warning, call $ignoreUnusedVariableWarning(dummy)$ in the constructor's body.
-..example.code:
-Rational(T const & n, SEQAN_CTOR_ENABLE_IF(Is<IntegerConcept<T> >)) :  // macro must be extra c'tor argument
-    num(n), den(1)
-{ 
-    ignoreUnusedVariableWarning(dummy);		// necessary to avoid unused warning
-}
+..example.text:Here is an example on how to use the macro:
+..example.snippet:demos/basic/enable_if.cpp|enable if example constructor
 ..include:seqan/basic.h
  */
 
@@ -313,7 +309,7 @@ Rational(T const & n, SEQAN_CTOR_ENABLE_IF(Is<IntegerConcept<T> >)) :  // macro 
  * The following shows an example on how to properly use <tt>SEQAN_CTOR_DISABLE_IF</tt> as the last argument to the
  * constructor and suppressing the unused variable warning for the dummy parameter.
  *
- * @snippet core/demos/basic/enable_if.cpp disable if example constructor
+ * @snippet demos/basic/enable_if.cpp disable if example constructor
  */
 
 /**
@@ -362,7 +358,7 @@ String(T const & s, SEQAN_CTOR_DISABLE_IF(IsProxy<T> >)) :  // macro must be ext
  * The following shows an example on how to properly use <tt>SEQAN_FUNC_ENABLE_IF</tt> as the last argument to the
  * constructor and suppressing the unused variable warning for the dummy parameter.
  *
- * @snippet core/demos/basic/enable_if.cpp enable if example function
+ * @snippet demos/basic/enable_if.cpp enable if example function
  */
 
 /**
@@ -416,7 +412,7 @@ length(TContainer & cont)
  * The following shows an example on how to properly use <tt>SEQAN_FUNC_DISABLE_IF</tt> as the last argument to the
  * constructor and suppressing the unused variable warning for the dummy parameter.
  *
- * @snippet core/demos/basic/enable_if.cpp disable if example function
+ * @snippet demos/basic/enable_if.cpp disable if example function
  */
 
 /**

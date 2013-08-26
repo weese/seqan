@@ -46,6 +46,22 @@
 #ifndef SEQAN_STREAM_H_
 #define SEQAN_STREAM_H_
 
+/*!
+ * @macro SEQAN_HAS_ZLIB
+ * @headerfile <seqan/stream.h>
+ * @brief Defined as 0 or 1, depending on zlib being available.
+ *
+ * @signature #define SEQAN_HAS_ZLIB 0  // or 1
+ */
+
+/*!
+ * @macro SEQAN_HAS_BZIP2
+ * @headerfile <seqan/stream.h>
+ * @brief Defined as 0 or 1, depending on bzlib being available.
+ *
+ * @signature #define SEQAN_HAS_BZIP 0  // or 1
+ */
+
 /**
 .Macro.SEQAN_HAS_ZLIB
 ..cat:Input/Output
@@ -78,12 +94,15 @@
 
 #include <seqan/stream/adapt_cstdio.h>
 #include <seqan/stream/adapt_fstream.h>
-#include <seqan/stream/adapt_mmap.h> // TODO(h4nn3s): only streamPut() right now
 #include <seqan/stream/adapt_iostream.h>
 #include <seqan/stream/adapt_sstream.h>
 
 #include <seqan/stream/stream_base.h>
+#include <seqan/stream/stream_put.h>
 #include <seqan/stream/stream_char_array.h>
+
+#include <seqan/stream/adapt_mmap.h> // TODO(h4nn3s): only streamPut() right now
+
 #if SEQAN_HAS_ZLIB
 // Enable Stream<GZFile> and Stream<Bgzf> if available.
 #include <seqan/stream/stream_gz_file.h>
@@ -92,6 +111,8 @@
 #if SEQAN_HAS_BZIP2  // Enable Stream<BZ2File> if available.
 #include <seqan/stream/stream_bz2_file.h>
 #endif  // #if SEQAN_HAS_BZIP2
+
+#include <seqan/stream/file_stream.h>
 
 // ===========================================================================
 // Record Reader Class and Specializations.

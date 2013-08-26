@@ -50,6 +50,14 @@ namespace SEQAN_NAMESPACE_MAIN {
 template <typename TSpec>
 struct Ucsc_;
 
+/*!
+ * @tag Ucsc
+ * @headerfile <seqan/store.h>
+ * @brief UCSC Genome browser annotation file (aka knownGene format).
+ *
+ * @signature typedef Tag<Ucsc<UcscKnownGene_> > const Ucsc;
+ */
+
 /**
 .Tag.File Format.tag.Ucsc:
     Ucsc Genome Browser annotation file (a.k.a. knownGene format).
@@ -58,6 +66,14 @@ struct Ucsc_;
 
 struct UcscKnownGene_;
 typedef Tag<Ucsc_<UcscKnownGene_> > const Ucsc;
+
+/*!
+ * @tag UcscIsoforms
+ * @headerfile <seqan/store.h>
+ * @brief UCSC Genome browser annotation file (aka knownIsoforms format).
+ *
+ * @signature typedef Tag<Ucsc<UcscKnownIsoforms_> > const UcscIsoforms;
+ */
 
 /**
 .Tag.File Format.tag.UcscIsoforms:
@@ -334,23 +350,14 @@ _storeOneAnnotationKnownGene(
 
     SEQAN_ASSERT_EQ(length(fragStore.annotationStore), length(fragStore.annotationNameStore));
 
-    TId annoStoreLen = length(fragStore.annotationStore);
-    TId transId = TAnnotation::INVALID_ID;
-    TId cdsId = TAnnotation::INVALID_ID;
-
     // add transcript and CDS
+    TId transId = TAnnotation::INVALID_ID;
     _storeAppendAnnotationName(fragStore, transId, ctx.transName, (TId) TFragmentStore::ANNO_MRNA);
-    cdsId = length(fragStore.annotationNameStore);
+    TId cdsId = length(fragStore.annotationStore);
     appendName(fragStore.annotationNameStore, ctx.proteinName, fragStore.annotationNameStoreCache);
 
-    if (annoStoreLen <= transId)
-        annoStoreLen = transId + 1;
-
-    if (annoStoreLen <= cdsId)
-        annoStoreLen = cdsId + 1;
-
-    resize(fragStore.annotationStore, annoStoreLen + length(ctx.exonBegin), Generous());
-    resize(fragStore.annotationNameStore, annoStoreLen + length(ctx.exonBegin), Generous());
+    resize(fragStore.annotationStore, cdsId + 1 + length(ctx.exonBegin), Generous());
+    resize(fragStore.annotationNameStore, cdsId + 1 + length(ctx.exonBegin), Generous());
 
     // add contig name
     _storeAppendContig(fragStore, ctx.annotation.contigId, ctx.contigName);
@@ -378,7 +385,7 @@ _storeOneAnnotationKnownGene(
     {
         ctx.annotation.beginPos = ctx.exonBegin[i];
         ctx.annotation.endPos = ctx.exonEnd[i];
-        fragStore.annotationStore[annoStoreLen + i] = ctx.annotation;
+        fragStore.annotationStore[cdsId + 1 + i] = ctx.annotation;
         _adjustParent(transcript, ctx.annotation);
     }
     if (geneId != 0)
@@ -397,22 +404,12 @@ _storeOneAnnotationKnownIsoforms(
 
     SEQAN_ASSERT_EQ(length(fragStore.annotationStore), length(fragStore.annotationNameStore));
 
-    TId annoStoreLen = length(fragStore.annotationStore);
     TId geneId = TAnnotation::INVALID_ID;
     TId transId = TAnnotation::INVALID_ID;
 
     // add transcript and CDS
     _storeAppendAnnotationName(fragStore, geneId, ctx.transName, (TId) TFragmentStore::ANNO_GENE);
     _storeAppendAnnotationName(fragStore, transId, ctx.contigName, (TId) TFragmentStore::ANNO_MRNA);
-
-    if (annoStoreLen <= geneId)
-        annoStoreLen = geneId + 1;
-
-    if (annoStoreLen <= transId)
-        annoStoreLen = transId + 1;
-
-    resize(fragStore.annotationStore, annoStoreLen, Generous());
-    resize(fragStore.annotationNameStore, annoStoreLen, Generous());
 
     // set parent link locus->root
     TAnnotation & locus = fragStore.annotationStore[geneId];

@@ -46,6 +46,113 @@
 
 namespace seqan {
 
+/*!
+ * @class MarkovModel
+ * @headerfile <seqan/statistics.h>
+ * @brief Gives a suitable representation of a Marcov Chain.
+ *
+ * @signature template <typename TAlphabet[, typename TFloat[, typename TSpec]]>
+ *            class MarkovModel;
+ *
+ *
+ * @tparam TAlphabet The type of the underlying alphabet.
+ * @tparam TFloat    The type for storing counts, default is <tt>double</tt>.
+ * @tparam TSpec     Tag for specialization.
+ *
+ * @section Examples
+ *
+ * @subsection Build a MarkovModel from Background
+ *
+ * @include demos/statistics/build_markov_model.cpp
+ *
+ * The following example shows how to build a MarkovModel over a Dna alphabet from a set of background sequence.  After
+ * build the model, we compute the zscore.
+ *
+ * @code{.console}
+ * zscore: 11.8323
+ * @endcode
+ *
+ * @subsection Load a MarkovModel from File
+ *
+ * We can also load the MarkovModel from a file (previously saved using @link MarkovModel::write @endlink).  Since we do
+ * not have the background word set here but only the model, we compute the variance of a word using the function
+ * calculateVariance from the alignment_free module.
+ *
+ * @include demos/statistics/load_markov_model.cpp
+ *
+ * @code{.console}
+ * variance: 0.267919
+ * @endcode
+ *
+ * @var unsigned MarkovModel::order
+ * @brief The order of the MarkovModel.
+ *
+ * @var TMatrix MarkovModel::transition
+ * @brief The transition matirx.
+ *
+ * @var TVector MarkovModel::stationaryDistribution
+ * @brief The vector of characgter distribution (String of TFloat).
+ *
+ *
+ * @fn MarkovModel::MarkovModel
+ * @brief Constructor
+ *
+ * @signature MarkovModel::MarkovModel(order);
+ *
+ * @param order The order of the model (<tt>unsigned</tt>).
+ *
+ *
+ * @fn MarkovModel::build
+ * @brief Compute the transition matrix from a training set.
+ *
+ * The character statitionary distribution and the auxiliary information that give raise to an instance of a
+ * Markov Model are also computed.
+ *
+ * @signature void MarkovModel::build(ss);
+ *
+ * @param[ss] ss The StringSet to build the model for.
+ *
+ *
+ * @fn MarkovModel::set
+ * @brief Set transition matrix.
+ *
+ * Given e transition matrix, sets it as transition matrix of the MarkovModel and computes (if it is not available) the
+ * vector of character distributions and the auxiliary information.
+ *
+ * @signature void MarkovModel(iTransition[, iStationaryDistribution]);
+ *
+ * @param iTransition             The transition matrix.
+ * @param iStationaryDistribution The vector of character distributions.
+ *
+ *
+ * @fn MarkovModel::emittedProbability
+ * @brief Computes the probability that a string or a set of strings is emitted by the MarkovModel.
+ *
+ * @signature TFloat MarkovModel::emittedProbability(s);
+ * @signature TFloat MarkovModel::emittedProbability(ss);
+ *
+ * @param[in] s  The String to compute the emission probability for.
+ * @param[in] ss The StringSet to compute the emission probability for.
+ *
+ * @return TFloat The emission probability, TFloat is the TFloat from the MarkovModel.
+ *
+ *
+ * @fn MarkovModel::write
+ * @brief Stores an instance of a markovModel in a file.
+ *
+ * @signature void MarkovModel::write(file);
+ *
+ * @param file The file to write the model to (type <tt>FILE *</tt>).
+ *
+ *
+ * @fn MarkovModel::read
+ * @brief Load an instance of MarkovModel from a file.
+ *
+ * @signature void MarkovModel::read(file);
+ *
+ * @param file The file to read the model from (type <tt>FILE *</tt>).
+ */
+
 /*
 with matrix calss matrices
 */
@@ -537,6 +644,17 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 // _computeInverseMatrix
 //////////////////////////////////////////////////////////////////////////////
+
+/*
+ * @fn _computeInverseMatrix
+ * @brief Computes the inverse matrix of a given matrix.
+ *
+ * @signature TMatrix _computeInverseMatrix(matrix);
+ *
+ * @param matrix The matrix in the input (2-dimensional Matrix).
+ *
+ * @return TMatrix The inverse matrix, the same type as matrix.
+ */
 
 /*
 .Function._computeInverseMatrix:

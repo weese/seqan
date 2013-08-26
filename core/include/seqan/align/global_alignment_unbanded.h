@@ -98,7 +98,7 @@ class Fragment;
  * @param upperDiag    Optional upper diagonal (<tt>int</tt>).
  * @param algorithmTag Tag to select the alignment algorithm (see @link AlignmentAlgorithmTags @endlink).
  *
- * @return TScoreVal Score value of the resulting alignment.  Of type <tt>Value<TScore>::Type</tt> where
+ * @return TScoreVal Score value of the resulting alignment.  Of type <tt>Value&lt;TScore&gt;::Type</tt> where
  *                   <tt>TScore</tt> is the type of <tt>scoringScheme</tt>.
  * 
  * There exist multiple overloads for this function with four configuration dimensions.
@@ -106,20 +106,20 @@ class Fragment;
  * First, you can select whether begin and end gaps are free in either sequence using <tt>alignConfig</tt>.
  * 
  * Second, you can select the type of the target storing the alignment. This can be either an @link Align @endlink
- * object, two @link Gaps @endlink objects, a @link Alignment Graph @endlink, or a string of @link Fragment @endlink
+ * object, two @link Gaps @endlink objects, a @link AlignmentGraph @endlink, or a string of @link Fragment @endlink
  * objects. @link Align @endlink objects provide an interface to tabular alignments with the restriction of all rows
  * having the same type. Using two @link Gaps @endlink objects has the advantage that you an align sequences with
- * different types, for example @link DnaString @endlink and @link Dna5String @endlink. @link Alignment Graph Alignment
+ * different types, for example @link DnaString @endlink and @link Dna5String @endlink. @link AlignmentGraph Alignment
  * Graphs @endlink provide a graph-based representation of segment-based colinear alignments. Using @link Fragment
  * @endlink strings is useful for collecting many pairwise alignments, for example in the construction of @link
- * Alignment Graph Alignment Graphs @endlink for multiple-sequence alignments (MSA).
+ * AlignmentGraph Alignment Graphs @endlink for multiple-sequence alignments (MSA).
  * 
  * Third, you can optionally give a band for the alignment using <tt>lowerDiag</tt> and <tt>upperDiag</tt>. The center
  * diagonal has index <tt>0</tt>, the <tt>i</tt>th diagonal below has index <tt>-i</tt>, the <tt>i</tt>th above has
  * index <tt>i</tt>.
  * 
- * Fourth, you can select the algorithm to use with <tt>algorithmTag</tt>. This can be one of @link
- * AlignmentAlgorithmTags @endlink and @link Pairwise Global Alignment Algorithms.value.Gotoh @endlink.  The
+ * Fourth, you can select the algorithm to use with <tt>algorithmTag</tt>.  This can be one of @link
+ * AlignmentAlgorithmTags#NeedlemanWunsch @endlink and @link AlignmentAlgorithmTags#Gotoh @endlink.  The
  * Needleman-Wunsch algorithm supports scoring schemes with linear gap costs only while Gotoh's algorithm also allows
  * affine gap costs.
  * 
@@ -135,35 +135,20 @@ class Fragment;
  * 
  * Global alignment of two sequences using an @link Align @endlink object and
  * the Needleman-Wunsch algorithm.
- * 
- * @code{.cpp}
- * Dna5String seqH = "CGATT";
- * Dna5String seqV = "CGAAATT";
- *  
- * Align<Dna5String> align;
- * resize(rows(align), 2);
- * assignSource(row(align, 0), seqH);
- * assignSource(row(align, 0), seqV);
- * Score<int, Simple> scoringScheme(2, -1, -2);
- * AlignConfig<> alignConfig;
- *  
- * int result = globalAlignment(align, scoringScheme, alignConfig,
- *                              NeedlemanWunsch());
- * @endcode
+ *
+ * @include demos/align/global_alignment_unbanded.cpp
+ *
+ * The output is as follows:
+ *
+ * @include demos/align/global_alignment_unbanded.cpp.stdout
  *
  * Global banded alignment of two sequences using two @link Gaps @endlink objects and the Gotoh algorithm.
- * 
- * @code{.cpp}
- * Dna5String seqH = "CGATT";
- * Gaps<Dna5String, ArrayGaps> gapsH(seqH);
- * DnaString seqV = "CGAAATT";
- * Gaps<Dna5String, AnchorGaps<> > gapsV(seqV);
- *  
- * Score<int, Simple> scoringScheme(5, -3, -1, -5);
- * AlignConfig<> alignConfig;
- *  
- * int result = globalAlignment(gapsH, gapsV, scoringScheme, alignConfig, -2, 2);
- * @endcode
+ *
+ * @include demos/align/global_alignment_banded.cpp
+ *
+ * The output is as follows:
+ *
+ * @include demos/align/global_alignment_banded.cpp.stdout
  * 
  * http://trac.seqan.de/wiki/Tutorial/PairwiseSequenceAlignment
  * 
@@ -248,31 +233,10 @@ The implementation of Hirschberg's algorithm is further limited that it does not
 The implementation of the Myers-Hirschberg algorithm further limits this to only support edit distance (as scores, matches are scored with 0, mismatches are scored with -1).
 ..remarks:
 The examples below show some common use cases.
-..example.text:Global alignment of two sequences using an @Class.Align@ object and the Needleman-Wunsch algorithm.
-..example.code:
-Dna5String seqH = "CGATT";
-Dna5String seqV = "CGAAATT";
-
-Align<Dna5String> align;
-resize(rows(align), 2);
-assignSource(row(align, 0), seqH);
-assignSource(row(align, 0), seqV);
-Score<int, Simple> scoringScheme(2, -1, -2);
-AlignConfig<> alignConfig;
-
-int result = globalAlignment(align, scoringScheme, alignConfig,
-                             NeedlemanWunsch());
-..example.text:Global banded alignment of two sequences using two @Class.Gaps@ objects and the Gotoh algorithm.
-..example.code:
-Dna5String seqH = "CGATT";
-Gaps<Dna5String, ArrayGaps> gapsH(seqH);
-DnaString seqV = "CGAAATT";
-Gaps<Dna5String, AnchorGaps<> > gapsV(seqV);
-
-Score<int, Simple> scoringScheme(5, -3, -1, -5);
-AlignConfig<> alignConfig;
-
-int result = globalAlignment(gapsH, gapsV, scoringScheme, alignConfig, -2, 2);
+..example.text:Global alignment of two sequences using an @Class.Align@ object and the Needleman-Wunsch algorithm. The Needleman-Wunsch algorithm is automatically selected since the scoring scheme uses linear gap costs.
+..example.file:demos/align/global_alignment_unbanded.cpp
+..example.text:Global banded alignment of two sequences using two @Class.Gaps@ objects and the Gotoh algorithm. The Gotoh algorithm is automatically selected since the scoring scheme uses affine gap costs.
+..example.file:demos/align/global_alignment_banded.cpp
 ..see:Function.localAlignment
 ..see:Function.globalAlignmentScore
 ..include:seqan/align.h
@@ -569,6 +533,42 @@ TScoreValue globalAlignment(String<Fragment<TSize, TFragmentSpec>, TStringSpec> 
 // Function globalAlignmentScore()
 // ----------------------------------------------------------------------------
 
+/*!
+ * @fn globalAlignmentScore
+ * @brief Computes the best global pairwise alignment score.
+ * 
+ * @signature TScoreVal globalAlignmentScore(seqH, seqV, scoringScheme[, alignConfig][, lowerDiag, upperDiag][, algorithmTag]);
+ * @signature TScoreVal globalAlignmentScore(strings,    scoringScheme[, alignConfig][, lowerDiag, upperDiag][, algorithmTag]);
+ * @signature TScoreVal globalAlignmentScore(seqH, seqV, {MyersBitVector | MyersHirschberg});
+ * @signature TScoreVal globalAlignmentScore(strings,    {MyersBitVector | MyersHirschberg});
+ * 
+ * @param[in] seqH          Horizontal gapped sequence in alignment matrix.  Types: String
+ * @param[in] seqV          Vertical gapped sequence in alignment matrix.  Types: String
+ * @param[in] strings       A @link StringSet @endlink containing two sequences.  Type: StringSet.
+ * @param[in] alignConfig   The @link AlignConfig @endlink to use for the alignment.  Type: AlignConfig
+ * @param[in] scoringScheme The scoring scheme to use for the alignment.  Note that the user is responsible for ensuring
+ *                          that the scoring scheme is compatible with <tt>algorithmTag</tt>.  Type: @link Score @endlink.
+ * @param[in] lowerDiag     Optional lower diagonal.  Types: <tt>int</tt>
+ * @param[in] upperDiag     Optional upper diagonal.  Types: <tt>int</tt>
+ * @param[in] algorithmTag  The Tag for picking the alignment algorithm. Types: @link PairwiseLocalAlignmentAlgorithms
+ *                          @endlink.
+ * 
+ * @return TScoreValue The score value with the alignment score, as given by the @link Score#Value @endlink metafunction
+ *                     of the <tt>scoringScheme</tt> type.
+ * 
+ * @section Remarks
+ * 
+ * This function does not perform the (linear time) traceback step after the (mostly quadratic time) dynamic programming
+ * step.  Note that Myers' bit-vector algorithm does not compute an alignment (only in the Myers-Hirschberg variant) but
+ * scores can be computed using <tt>globalAlignmentScore</tt>.
+ * 
+ * The same limitations to algorithms as in @link globalAlignment @endlink apply.  Furthermore, the
+ * <tt>MyersBitVector</tt> and <tt>MyersHirschberg</tt> variants can only be used without any other parameter.
+ * 
+ * @see http://trac.seqan.de/wiki/Tutorial/PairwiseSequenceAlignment
+ * @see globalAlignment
+ */
+
 /**
 .Function.globalAlignmentScore
 ..summary:Computes the best global pairwise alignment score.
@@ -614,13 +614,13 @@ Furthermore, the $MyersBitVector$ and $MyersHirschberg$ variants can only be use
 // Function globalAlignmentScore()                        [unbanded, 2 Strings]
 // ----------------------------------------------------------------------------
 
-template <typename TAlphabetH, typename TSpecH,
-          typename TAlphabetV, typename TSpecV,
+template <typename TSequenceH,
+          typename TSequenceV,
           typename TScoreValue, typename TScoreSpec,
           bool TOP, bool LEFT, bool RIGHT, bool BOTTOM, typename TACSpec,
           typename TAlgoTag>
-TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
-                                 String<TAlphabetV, TSpecV> const & seqV,
+TScoreValue globalAlignmentScore(TSequenceH const & seqH,
+                                 TSequenceV const & seqV,
                                  Score<TScoreValue, TScoreSpec> const & scoringScheme,
                                  AlignConfig<TOP, LEFT, RIGHT, BOTTOM, TACSpec> const & alignConfig,
                                  TAlgoTag const & algoTag)
@@ -630,12 +630,12 @@ TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
 
 // Interface without AlignConfig<>.
 
-template <typename TAlphabetH, typename TSpecH,
-          typename TAlphabetV, typename TSpecV,
+template <typename TSequenceH,
+          typename TSequenceV,
           typename TScoreValue, typename TScoreSpec,
           typename TAlgoTag>
-TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
-                                 String<TAlphabetV, TSpecV> const & seqV,
+TScoreValue globalAlignmentScore(TSequenceH const & seqH,
+                                 TSequenceV const & seqV,
                                  Score<TScoreValue, TScoreSpec> const & scoringScheme,
                                  TAlgoTag const & algoTag)
 {
@@ -645,12 +645,12 @@ TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
 
 // Interface without algorithm tag.
 
-template <typename TAlphabetH, typename TSpecH,
-          typename TAlphabetV, typename TSpecV,
+template <typename TSequenceH,
+          typename TSequenceV,
           typename TScoreValue, typename TScoreSpec,
           bool TOP, bool LEFT, bool RIGHT, bool BOTTOM, typename TACSpec>
-TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
-                                 String<TAlphabetV, TSpecV> const & seqV,
+TScoreValue globalAlignmentScore(TSequenceH const & seqH,
+                                 TSequenceV const & seqV,
                                  Score<TScoreValue, TScoreSpec> const & scoringScheme,
                                  AlignConfig<TOP, LEFT, RIGHT, BOTTOM, TACSpec> const & alignConfig)
 {
@@ -662,11 +662,11 @@ TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
 
 // Interface without AlignConfig<> and algorithm tag.
 
-template <typename TAlphabetH, typename TSpecH,
-          typename TAlphabetV, typename TSpecV,
+template <typename TSequenceH,
+          typename TSequenceV,
           typename TScoreValue, typename TScoreSpec>
-TScoreValue globalAlignmentScore(String<TAlphabetH, TSpecH> const & seqH,
-                                 String<TAlphabetV, TSpecV> const & seqV,
+TScoreValue globalAlignmentScore(TSequenceH const & seqH,
+                                 TSequenceV const & seqV,
                                  Score<TScoreValue, TScoreSpec> const & scoringScheme)
 {
     AlignConfig<> alignConfig;

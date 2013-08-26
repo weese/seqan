@@ -41,6 +41,17 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef CharString
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with char alphabet.
+ *
+ * You can efficiently cast a CharString to <tt>char *</tt> using <tt>toCString</tt>.
+ *
+ * @signature typedef String<char> CharString;
+ */
+
 /**
 .Shortcut.CharString:
 ..cat:Strings
@@ -57,6 +68,14 @@ typedef String<char, Alloc<void> > CharString;
 
 //____________________________________________________________________________
 
+/*!
+ * @typedef CharIterator
+ * @headerfile <seqan/sequence.h>
+ * @brief An iterator intoa @link CharString @endlink.
+ *
+ * @signature typedef Iterator<CharString, Rooted>::Type CharIterator;
+ */
+
 /**
 .Shortcut.CharIterator:
 ..cat:Iterators
@@ -70,6 +89,15 @@ typedef String<char, Alloc<void> > CharString;
 typedef Iterator<CharString, Rooted>::Type CharIterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef UnicodeString
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with wchar_t alphabet.
+ *
+ * @signature typedef String<wchar_t> CharString;
+ */
+
 /**
 .Shortcut.UnicodeString:
 ..cat:Strings
@@ -96,6 +124,15 @@ typedef String<wchar_t, Alloc<void> > UnicodeString;
 typedef Iterator<UnicodeString, Rooted>::Type UnicodeIterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef DnaString
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with Dna alphabet.
+ *
+ * @signature typedef String<Dna> CharString;
+ */
+
 /**
 .Shortcut.DnaString:
 ..cat:Strings
@@ -109,6 +146,14 @@ typedef Iterator<UnicodeString, Rooted>::Type UnicodeIterator;
 typedef String<Dna, Alloc<void> > DnaString;
 
 //____________________________________________________________________________
+
+/*!
+ * @typedef DnaIterator
+ * @headerfile <seqan/sequence.h>
+ * @brief A rooted iterator over a Dna.
+ *
+ * @signature typedef Iterator<DnaString, Rooted>::Type DnaIterator;
+ */
 
 /**
 .Shortcut.DnaIterator:
@@ -124,6 +169,15 @@ typedef String<Dna, Alloc<void> > DnaString;
 typedef Iterator<DnaString, Rooted>::Type DnaIterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef Dna5String
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with Dna5 alphabet.
+ *
+ * @signature typedef String<Dna5> CharString;
+ */
+
 /**
 .Shortcut.Dna5String:
 ..cat:Strings
@@ -138,6 +192,14 @@ typedef Iterator<DnaString, Rooted>::Type DnaIterator;
 typedef String<Dna5, Alloc<void> > Dna5String;
 
 //____________________________________________________________________________
+
+/*!
+ * @typedef Dna5Iterator
+ * @headerfile <seqan/sequence.h>
+ * @brief A rooted iterator over a Dna5.
+ *
+ * @signature typedef Iterator<Dna5String, Rooted>::Type Dna5Iterator;
+ */
 
 /**
 .Shortcut.Dna5Iterator:
@@ -154,6 +216,15 @@ typedef String<Dna5, Alloc<void> > Dna5String;
 typedef Iterator<Dna5String, Rooted>::Type Dna5Iterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef RnaString
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with Rna alphabet.
+ *
+ * @signature typedef String<Rna> CharString;
+ */
+
 /**
 .Shortcut.RnaString:
 ..cat:Strings
@@ -167,6 +238,14 @@ typedef Iterator<Dna5String, Rooted>::Type Dna5Iterator;
 typedef String<Rna, Alloc<void> > RnaString;
 
 //____________________________________________________________________________
+
+/*!
+ * @typedef RnaIterator
+ * @headerfile <seqan/sequence.h>
+ * @brief A rooted iterator over a Rna.
+ *
+ * @signature typedef Iterator<RnaString, Rooted>::Type RnaIterator;
+ */
 
 /**
 .Shortcut.RnaIterator:
@@ -182,6 +261,15 @@ typedef String<Rna, Alloc<void> > RnaString;
 typedef Iterator<RnaString, Rooted>::Type RnaIterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef Rna5String
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with Rna5 alphabet.
+ *
+ * @signature typedef String<Rna5> CharString;
+ */
+
 /**
 .Shortcut.Rna5String:
 ..cat:Strings
@@ -196,6 +284,14 @@ typedef Iterator<RnaString, Rooted>::Type RnaIterator;
 typedef String<Rna5, Alloc<void> > Rna5String;
 
 //____________________________________________________________________________
+
+/*!
+ * @typedef Rna5Iterator
+ * @headerfile <seqan/sequence.h>
+ * @brief A rooted iterator over a Rna5.
+ *
+ * @signature typedef Iterator<Rna5String, Rooted>::Type Rna5Iterator;
+ */
 
 /**
 .Shortcut.Rna5Iterator:
@@ -212,6 +308,15 @@ typedef String<Rna5, Alloc<void> > Rna5String;
 typedef Iterator<Rna5String, Rooted>::Type Rna5Iterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef IupacString
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with Iupac alphabet.
+ *
+ * @signature typedef String<Iupac> CharString;
+ */
+
 /**
 .Shortcut.IupacString:
 ..cat:Strings
@@ -225,6 +330,14 @@ typedef Iterator<Rna5String, Rooted>::Type Rna5Iterator;
 typedef String<Iupac, Alloc<void> > IupacString;
 
 //____________________________________________________________________________
+
+/*!
+ * @typedef IupacIterator
+ * @headerfile <seqan/sequence.h>
+ * @brief A rooted iterator over a Iupac.
+ *
+ * @signature typedef Iterator<IupacString, Rooted>::Type IupacIterator;
+ */
 
 /**
 .Shortcut.IupacIterator:
@@ -240,6 +353,15 @@ typedef String<Iupac, Alloc<void> > IupacString;
 typedef Iterator<IupacString, Rooted>::Type IupacIterator;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @typedef Peptide
+ * @headerfile <seqan/sequence.h>
+ * @brief An AllocString with AminoAcid alphabet.
+ *
+ * @signature typedef String<AminoAcid> Peptide;
+ */
+
 /**
 .Shortcut.Peptide:
 ..cat:Strings
@@ -253,6 +375,14 @@ typedef Iterator<IupacString, Rooted>::Type IupacIterator;
 typedef String<AminoAcid, Alloc<void> > Peptide;
 
 //____________________________________________________________________________
+
+/*!
+ * @typedef PeptideIterator
+ * @headerfile <seqan/sequence.h>
+ * @brief A rooted iterator over a Peptide.
+ *
+ * @signature typedef Iterator<Peptide, Rooted>::Type PeptideIterator;
+ */
 
 /**
 .Shortcut.PeptideIterator:

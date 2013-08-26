@@ -47,20 +47,47 @@ namespace seqan {
 // Class Simple Seed
 // ---------------------------------------------------------------------------
 
+/*!
+ * @class SimpleSeed
+ * @headerfile <seqan/seeds.h>
+ * @brief Describes a seed with start and end position and diagonal upper and lower bounds.
+ *
+ * @signature template <[typename TConfig]>
+ *            class Seed<Simple, TConfig>;
+ *
+ * @tparam TConfig The configuration to use.  Defaults to DefaultSeedConfig.
+ */
+
+/*!
+ * @fn SimpleSeed::Seed
+ * @brief Constructor
+ *
+ * @signature Seed::Seed();
+ * @signature Seed::Seed(beginPosH, beginPosV, length);
+ * @signature Seed::Seed(beginPosH, beginPosV, endPosH, endPosV);
+ *
+ * @param beginPosH[in] The begin position in the horizontal position.
+ * @param beginPosV[in] The begin position in the vertical position.
+ * @param length[in]    The length of the seed (in both directions).
+ * @param endPosH[in]   The end position in the horizontal position.
+ * @param endPosV[in]   The end position in the vertical position.
+ */
+
 /**
 .Spec.Simple Seed
 ..summary:Describes a seed with start and end position and diagonal upper and lower bounds.
 ..cat:Seed Handling
 ..general:Class.Seed
-..signature:Seed<TPosition, SimpleSeed>
-..param.TPosition:The type number that should be used. Must have negative numbers (e.g. int/long).
+..signature:Seed<Simple, TConfig>
+..param.TConfig:The configuration object used for the seed.
+...default:DefaultSeedConfig.
 
 .Memfunc.Simple Seed#Seed
 ..class:Spec.Simple Seed
 ..summary:Constructor
-..signature: Seed<TPosition, SimpleSeed> ()
-..signature: Seed<TPosition, SimpleSeed> (beginPosH, beginPosV, length)
-..signature: Seed<TPosition, SimpleSeed> (beginPosH, beginPosV, endPosH, endPosV)
+..signature: Seed<Simple, TConfig> ()
+..signature: Seed<Simple, TConfig> (beginPosH, beginPosV, length)
+..signature: Seed<Simple, TConfig> (beginPosH, beginPosV, endPosH, endPosV)
 ..param.beginPosH: Begin position in database (horizontal).
 ..param.beginPosV: Begin position in query (vertical).
 ..param.endPosH: End position in database (horizontal).

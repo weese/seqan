@@ -140,7 +140,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.IndexWotd:
-..summary:An index based on a lazy suffix tree (see Giegerich et al., "Efficient implementation of lazy suffix trees").
+..summary:This index represents a lazy suffix tree, meaning that a path from the tree of the index in only computed,
+if it is traversed. For details see Giegerich et al., "Efficient implementation of lazy suffix trees".
 ..cat:Index
 ..general:Class.Index
 ..signature:Index<TText, IndexWotd<> >
@@ -165,7 +166,7 @@ namespace SEQAN_NAMESPACE_MAIN
  * 
  * @section Remarks
  * 
- * The fibres (see @link Index @endlink and @link Fibre @endlink) of this index
+ * The fibres (see @link Index @endlink and @link Index#Fibre @endlink) of this index
  * are a partially sorted suffix array (see @link WOTDIndexFibres#WotdSA
  * @endlink) and the wotd tree (see @link WOTDIndexFibres#WotdDir @endlink).
  * 

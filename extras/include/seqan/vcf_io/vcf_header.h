@@ -49,6 +49,31 @@ namespace seqan {
 // Class VcfHeader
 // ----------------------------------------------------------------------------
 
+/*!
+ * @class VcfHeader
+ * @headerfile <seqan/vcf_io.h>
+ * @brief Store VCF Header information.
+ * 
+ * @signature class VcfHeader;
+ * 
+ *
+ * @fn VcfHeader::VcfHeader
+ * @brief Constructor.
+ * 
+ * @signature VcfHeader::VcfHeader()
+ *
+ * 
+ * @var TRecords VcfHeader::headerRecords
+ * 
+ * @brief The meta information records (String of VcfHeaderRecord).
+ * 
+ * @var TNames VcfHeader::sequenceNames
+ * @brief Names of the sequences (StringSet of CharString).
+ * 
+ * @var TNames VcfHeader::sampleNames
+ * @brief Names of the samples (StringSet of CharString).
+ */
+
 /**
 .Class.VcfHeader
 ..cat:VCF I/O
@@ -63,11 +88,15 @@ namespace seqan {
 
 .Memvar.VcfHeader#sequenceNames
 ..class:Class.VcfHeader
-..summary:Names of the sequences (@Class.StringSet@<@Shortcut.CharString>).
+..summary:Names of the sequences (@Class.StringSet@<@Shortcut.CharString@>).
 
 .Memvar.VcfHeader#sampleNames
 ..class:Class.VcfHeader
-..summary:Names of the samples (@Class.StringSet@<@Shortcut.CharString>).
+..summary:Names of the samples (@Class.StringSet@<@Shortcut.CharString@>).
+
+.Memvar.VcfHeader#headerRecords
+..class:Class.VcfHeader
+..summary:The meta information records (@Class.String@ of @Class.VcfHeaderRecord@).
 */
 
 class VcfHeader
@@ -79,7 +108,7 @@ public:
     TNameStore_ sequenceNames;
     // The names of the samples.
     TNameStore_ sampleNames;
-
+    // Records for the meta information lines.
     String<VcfHeaderRecord> headerRecords;
 
     VcfHeader()
@@ -97,6 +126,15 @@ public:
 // ----------------------------------------------------------------------------
 // Function clear()
 // ----------------------------------------------------------------------------
+
+/*!
+ * @fn VcfHeader#clear
+ * @brief Clear a VcfHeader.
+ * 
+ * @signature void clear(header);
+ *
+ * @param[in,out] header VcfHeader to clear.
+ */
 
 /**
 .Function.VcfHeader#clear

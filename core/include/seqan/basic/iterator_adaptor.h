@@ -55,6 +55,33 @@ struct AdaptorIterator;
 // Adaptor Iterator
 //////////////////////////////////////////////////////////////////////////////
 
+/*!
+ * @class AdaptorIterator
+ * @extends Iter
+ * @headerfile <seqan/basic.h>
+ * @brief Adapts iterators to RootedIteratorConcept.
+ *
+ * @signature template <typename TContainer, typename TIterator[, typename TSpec]>
+ *            class Iter;
+ *
+ * @tparam TContainer The container to iterate over.
+ * @tparam TIterator  The iterator type to wrap.
+ * @tparam TSpec      Specialization tag for AdaptorIterator.  Defaults to <tt>Default</tt>.
+ */
+
+/*!
+ * @fn AdaptorIterator::Iter
+ * @brief Constructor
+ *
+ * @signature Iter::Iter();
+ * @signature Iter::Iter(iter);
+ * @signature Iter::Iter(container[, iterator]);
+ *
+ * @param[in] iter      Other AdaptorIterator to copy from.
+ * @param[in] container The container to create an container of.
+ * @param[in] iterator  The <tt>Standard</tt> iterator to wrap, defaults to beginning of <tt>container</tt>.
+ */
+
 /**
 .Spec.Adaptor Iterator:
 ..cat:Iterators
@@ -231,6 +258,16 @@ container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
 // Function setContainer()
 // ----------------------------------------------------------------------------
 
+/*!
+ * @fn AdaptorIterator#setContainer
+ * @brief Set container of an AdaptorIterator.
+ *
+ * @signature void setContainer(iter, container);
+ *
+ * @param[in,out] iter      The AdaptorIterator to set the container to.
+ * @param[in]     container The container to set for the AdaptorIterator.
+ */
+
 // TODO(holtgrew): Also defined in index module, change documentation?
 /**
 .Function.setContainer
@@ -256,6 +293,17 @@ setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,
 // ----------------------------------------------------------------------------
 // Function hostIterator()
 // ----------------------------------------------------------------------------
+
+/*!
+ * @fn AdaptorIterator#hostIterator
+ * @brief Return the host iterator of an AdaptorIterator.
+ *
+ * @signature TIter hostIterator(iter);
+ *
+ * @param[in] iter The AdaptorIterator to get the iterator for.
+ *
+ * @return TIter The wrapped iterator.
+ */
 
 /**
 .Function.hostIterator
@@ -310,6 +358,16 @@ position(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me,
 // ----------------------------------------------------------------------------
 // Function setPosition()
 // ----------------------------------------------------------------------------
+
+/*!
+ * @fn AdaptorIterator#setPosition
+ * @brief Set position of AdaptorIterator.
+ *
+ * @signature void setPosition(iter, pos);
+ *
+ * @param[in,out] iter The AdaptorIterator to set the position for.
+ * @param[in]     pos  The position to set.
+ */
 
 /**
 .Function.setPosition

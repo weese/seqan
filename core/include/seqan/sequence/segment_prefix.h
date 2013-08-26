@@ -54,7 +54,7 @@ namespace SEQAN_NAMESPACE_MAIN
  * @signature template <typename THost>
  *            class Segment<THost, PrefixSegment>;
  *
- * @tparam THost The underlying @link SequenceConcept sequence@ type.
+ * @tparam THost The underlying @link SequenceConcept sequence @endlink type.
  */
 
 /**
@@ -72,6 +72,10 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.InfixSegment
 ..see:Spec.SuffixSegment
 ..see:Metafunction.Prefix
+..example.file:demos/sequence/prefix.cpp
+..example.text:The output is as follows:
+..example.output:
+Prefix: TATA
 ..include:seqan/sequence.h
 */
 

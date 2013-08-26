@@ -69,6 +69,18 @@ namespace seqan {
 // Function setBitTo()
 // ----------------------------------------------------------------------------
 
+/*!
+ * @fn setBitTo
+ * @headerfile <seqan/misc/misc_bit_twiddling.h>
+ * @brief Set the bit with the given index to the given value.
+ *
+ * @signature void setBitTo(word, index, value);
+ *
+ * @param[in,out] word  The machine word (number) to set bits of.
+ * @param[in]     index The index of the bit in the word to set, integer.
+ * @param[in]     value The value to set to, <tt>bool</tt>.
+ */
+
 /**
 .Function.setBitTo
 ..cat:Bit Twiddling
@@ -99,6 +111,17 @@ setBitTo(TWord & word, TPos index, bool value)
 // Function setBit()
 // ----------------------------------------------------------------------------
 
+/*!
+ * @fn setBit
+ * @headerfile <seqan/misc/misc_bit_twiddling.h>
+ * @brief Set the bit with the given index to 1.
+ *
+ * @signature void setBit(word, index);
+ *
+ * @param[in,out] word  The word to set the bit of.
+ * @param[in]     index The index of the bit to set.
+ */
+
 /**
 .Function.setBit
 ..cat:Bit Twiddling
@@ -125,6 +148,17 @@ setBit(TWord & word, TPos index)
 // ----------------------------------------------------------------------------
 // Function clearBit()
 // ----------------------------------------------------------------------------
+
+/*!
+ * @fn clearBit
+ * @headerfile <seqan/misc/misc_bit_twiddling.h>
+ * @brief Set the bit with the given index to 0.
+ *
+ * @signature void clearBit(word, index);
+ *
+ * @param[in,out] word  The machine word to set the bit of.
+ * @param[in]     index The index of the bit to set to 0.
+ */
 
 /**
 .Function.clearBit
@@ -153,6 +187,16 @@ clearBit(TWord & word, TPos index)
 // Function clearAllBits()
 // ----------------------------------------------------------------------------
 
+/*!
+ * @fn clearAllBits
+ * @headerfile <seqan/misc/misc_bit_twiddling.h>
+ * @brief Set all bits to 0.
+ *
+ * @signature void clearAllBits(word);
+ *
+ * @param[in,out] word The word to clear all bits of.
+ */
+
 /**
 .Function.clearAllBits
 ..cat:Bit Twiddling
@@ -177,6 +221,17 @@ clearBits(TWord & word)
 // ----------------------------------------------------------------------------
 // Function isBitSet()
 // ----------------------------------------------------------------------------
+
+/*!
+ * @fn isBitSet
+ * @headerfile <seqan/misc/misc_bit_twiddling.h>
+ * @brief Returns whether the bit with the given index is set to 1.
+ *
+ * @signature bool isBitSet(word, index);
+ *
+ * @param[in] word  The word to check.
+ * @param[in] index The index of the bit to check.
+ */
 
 /**
 .Function.isBitSet
@@ -217,6 +272,18 @@ hiBits(TWord word, TPos index)
 // ----------------------------------------------------------------------------
 // Function popCount()
 // ----------------------------------------------------------------------------
+
+/*!
+ * @fn popCount
+ * @headerfile <seqan/misc/misc_bit_twiddling.h>
+ * @brief Returns number of set bits in an integer.
+ *
+ * @signature unsigned popCount(words);
+ *
+ * @param[in] word The word to count the number of set bits of.
+ *
+ * @return unsigned The number of set bits in <tt>word</tt>.
+ */
 
 /**
 .Function.popCount

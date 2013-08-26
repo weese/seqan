@@ -139,11 +139,33 @@ typedef Tag<GapsLeft_> GapsLeft;
 struct GapsRight_;
 typedef Tag<GapsRight_> GapsRight;
 
+
 // ----------------------------------------------------------------------------
-// Tag TracebackOn<TSpec>
+// Tag SingleTrace
 // ----------------------------------------------------------------------------
 
-template <typename TSpec = GapsLeft>
+struct SingleTrace_;
+typedef Tag<SingleTrace_> SingleTrace;
+
+// ----------------------------------------------------------------------------
+// Tag CompleteTrace
+// ----------------------------------------------------------------------------
+
+struct CompleteTrace_;
+typedef Tag<CompleteTrace_> CompleteTrace;
+
+// ----------------------------------------------------------------------------
+// Tag TracebackConfig_
+// ----------------------------------------------------------------------------
+
+template <typename TTracesSpec, typename TGapsPlacement>
+struct TracebackConfig_ {};
+
+// ----------------------------------------------------------------------------
+// Tag TracebackOn
+// ----------------------------------------------------------------------------
+
+template <typename TSpec = TracebackConfig_<CompleteTrace, GapsLeft> >
 struct TracebackOn {};
 
 // ----------------------------------------------------------------------------
@@ -240,6 +262,35 @@ struct IsGlobalAlignment_<DPProfile_<TAlgoSpec, TGapCosts, TTraceFlag> const>:
     IsGlobalAlignment_<TAlgoSpec>{};
 
 // ----------------------------------------------------------------------------
+// Metafunction TraceTail_
+// ----------------------------------------------------------------------------
+
+// define whether to include the 'tail' of an alignment in the trace
+template <typename TSpec>
+struct TraceTail_ :
+    IsGlobalAlignment_<TSpec>{};
+
+// ----------------------------------------------------------------------------
+// Metafunction TraceHead_
+// ----------------------------------------------------------------------------
+
+// define whether to include the 'head' of an alignment in the trace
+template <typename TSpec>
+struct TraceHead_ :
+    IsGlobalAlignment_<TSpec>{};
+
+// ----------------------------------------------------------------------------
+// Metafunction HasTerminationCriterium_
+// ----------------------------------------------------------------------------
+
+// check whether an algorithm has an early termination criterium
+// if an algorithm has this, it will get a DPscout that can be terminated
+// see dp_scout.h for more info
+template <typename TSpec>
+struct HasTerminationCriterium_ :
+    False {};
+
+// ----------------------------------------------------------------------------
 // Metafunction IsLocalAlignment_
 // ----------------------------------------------------------------------------
 
@@ -273,12 +324,12 @@ template <typename T>
 struct IsTracebackEnabled_ :
     False {};
 
-template <typename TGapsPlacement>
-struct IsTracebackEnabled_<TracebackOn<TGapsPlacement> >:
+template <typename TTracebackConfig>
+struct IsTracebackEnabled_<TracebackOn<TTracebackConfig> >:
     True {};
 
-template <typename TGapsPlacement>
-struct IsTracebackEnabled_<TracebackOn<TGapsPlacement> const>:
+template <typename TTracebackConfig>
+struct IsTracebackEnabled_<TracebackOn<TTracebackConfig> const>:
     True {};
 
 template <typename TAlgoSpec, typename TGapCosts, typename TTraceFlag>
@@ -288,6 +339,36 @@ struct IsTracebackEnabled_<DPProfile_<TAlgoSpec, TGapCosts, TTraceFlag> >:
 template <typename TAlgoSpec, typename TGapCosts, typename TTraceFlag>
 struct IsTracebackEnabled_<DPProfile_<TAlgoSpec, TGapCosts, TTraceFlag> const>:
     IsTracebackEnabled_<TTraceFlag>{};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsGapsLeft_
+// ----------------------------------------------------------------------------
+
+template <typename TTraceConfig>
+struct IsGapsLeft_ : False{};
+
+template <typename TTraceSpec>
+struct IsGapsLeft_<TracebackOn<TracebackConfig_<TTraceSpec, GapsLeft > > >
+        : True{};
+
+template <typename TAlgorithm, typename TGapSpec, typename TTraceConfig>
+struct IsGapsLeft_<DPProfile_<TAlgorithm, TGapSpec, TTraceConfig> >
+        : IsGapsLeft_<TTraceConfig>{};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsSingleTrace_
+// ----------------------------------------------------------------------------
+
+template <typename TTraceConfig>
+struct IsSingleTrace_ : False{};
+
+template <typename TGapsPlacement>
+struct IsSingleTrace_<TracebackOn<TracebackConfig_<SingleTrace, TGapsPlacement> > >
+: True{};
+
+template <typename TAlgorithm, typename TGapSpec, typename TTraceConfig>
+struct IsSingleTrace_<DPProfile_<TAlgorithm, TGapSpec, TTraceConfig> >
+: IsSingleTrace_<TTraceConfig>{};
 
 // ----------------------------------------------------------------------------
 // Metafunction IsFreeEndGap_

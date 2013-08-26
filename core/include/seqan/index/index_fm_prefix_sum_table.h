@@ -33,6 +33,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
+//SEQAN_NO_DDDOC:do not generate documentation for this file
+
 #ifndef INDEX_FM_PREFIX_SUM_TABLE_H_
 #define INDEX_FM_PREFIX_SUM_TABLE_H_
 
@@ -94,12 +96,13 @@ struct GetValue<PrefixSumTable<TChar, TSpec> const>
 // ----------------------------------------------------------------------------
 // Metafunction Fibre
 // ----------------------------------------------------------------------------
+// TODO(singer): change the type to be dependent on a template argument
 // TODO(esiragusa): It should be possible to deduce the text size.
 
 template <typename TChar, typename TSpec>
 struct Fibre<PrefixSumTable<TChar, TSpec>, FibreEntries>
 {
-    typedef String<unsigned> Type;
+    typedef String<unsigned long long> Type;
 };
 
 // ----------------------------------------------------------------------------

@@ -51,4 +51,11 @@
 // NOTE(esiragusa): nvcc header must be included even if __CUDACC__ is not defined.
 #include "platform/platform_nvcc.h"
 
+// This macro defines an alias for the auto_ptr class template deprecated in C++11.
+#ifdef SEQAN_CXX11_STANDARD
+    #define SEQAN_AUTO_PTR_NAME unique_ptr
+#else  // #ifdef SEQAN_CXX11_STANDARD
+    #define SEQAN_AUTO_PTR_NAME auto_ptr
+#endif  // #ifdef SEQAN_CXX11_STANDARD
+
 #endif

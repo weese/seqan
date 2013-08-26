@@ -613,20 +613,18 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
  * 
  * @signature orderOccurrences(occString)
  * 
- * @param occString String of occurrences. Contains suffix array values returned
- *                  by @link getOccurrences @endlink.
+ * @param occString String of occurrences.
  * 
  * @section Remarks
  * 
  * The occurrences are sorted by increasing positions.
  * 
- * Demo: Demo.Mummy
+ * @link DemoMummy @endlink
+ * @link DemoSuperMaximalRepeats @endlink
+ * @link DemoMaximalUniqueMatches @endlink
  * 
- * Demo: Demo.Maximal Repeats
- * 
- * Demo: Demo.Maximal Unique Matches
- * 
- * @see getOccurrences
+ * @see VSTreeIterator#getOccurrences
+ * @see IndexQGram#getOccurrences
  * @see SAValue
  */
 	template <typename TValue, typename TSpec>
@@ -644,12 +642,16 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 .Function.indexCreate:
 ..summary:Creates a specific @Metafunction.Fibre@.
 ..cat:Index
-..signature:indexCreate(index, fibre_tag[, algo_tag])
+..signature:indexCreate(index, fibreTag[, algoTag])
 ..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
-..param.algo_tag:A tag that identifies the algorithm which is used to create the fibre.
+..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
+...type:Tag.ESA Index Fibres
+...type:Tag.QGram Index Fibres
+...type:Tag.WOTD Index Fibres
+...type:Tag.FM Index Fibres
+..param.algoTag:A tag that identifies the algorithm which is used to create the fibre.
 ...default:The result of @Metafunction.DefaultIndexCreator@.
 ..returns:A $bool$ which is $true$ on a successful creation.
 ..remarks:$indexCreate$ calls the fibre corresponding $createXXX(..)$ function (e.g. @Function.createSuffixArray@).
@@ -771,22 +773,41 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 .Function.indexRequire:
 ..summary:On-demand creation of a specific @Metafunction.Fibre@.
 ..cat:Index
-..signature:indexRequire(index, fibre_tag)
+..signature:indexRequire(index, fibreTag)
 ..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
+..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
+...type:Tag.ESA Index Fibres
+...type:Tag.QGram Index Fibres
+...type:Tag.WOTD Index Fibres
+...type:Tag.FM Index Fibres
 ..returns:A $bool$ which is $true$ on a successful creation.
 ..remarks:If the fibre already exists (@Function.indexSupplied@ is true) then $indexRequire$ does nothing.
 If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 ..include:seqan/index.h
+..example
+...text:The following code shows how the BWT of an text can be computed.
+...file:demos/index/index_textAt_indexText_saAt_indexRequire.cpp
+...output:BWT	Suffices
+P	PI
+S	SIPPI
+S	SISSIPPI
+M	MISSISSIPPI
+I	I
+P	PPI
+I	IPPI
+S	SSIPPI
+S	SSISSIPPI
+I	ISSIPPI
+I	ISSISSIPPI
 */
 /*!
  * @fn Index#indexRequire
  * 
  * @headerfile seqan/index.h
  * 
- * @brief On-demand creation of a specific @link Fibre @endlink.
+ * @brief On-demand creation of a specific @link Index#Fibre @endlink.
  * 
  * @signature indexRequire(index, fibre_tag)
  * 

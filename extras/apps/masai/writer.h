@@ -41,7 +41,7 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
-#include <seqan/file/file_stream.h>
+#include <seqan/stream.h>
 
 #include "tags.h"
 #include "store.h"
@@ -68,7 +68,7 @@ template <typename TGenome, typename TReads, typename TDistance, typename TSpec>
 struct Writer<TGenome, TReads, Raw, TDistance, TSpec>
 {
     typedef Match<>                                         TMatch;
-    typedef Stream<FileStream<WriteOnly, File<>, TMatch> >	TStream;
+    typedef Stream<FileStream<File<>, TMatch> >	TStream;
     
     TGenome                 & genome;
     TReads                  * reads;
@@ -89,7 +89,7 @@ struct Writer<TGenome, TReads, Sam, TDistance, TSpec>
 {
     typedef BamIOContext<TMasaiStore::TContigNameStore>     TBamIOContext;
     typedef unsigned long                                   TWord;
-    typedef Stream<FileStream<WriteOnly, File<> > >         TStream;
+    typedef Stream<FileStream<File<> > >         TStream;
 
     TGenome                 & genome;
     TReads                  * reads;

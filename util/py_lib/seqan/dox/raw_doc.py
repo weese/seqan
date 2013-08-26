@@ -8,6 +8,7 @@ and cross-linking.
 
 import textwrap
 import dox_tokens
+import raw_doc
 
 
 class DoxFormatter(object):
@@ -111,7 +112,7 @@ class RawDoc(object):
 
 class RawEntry(object):
     """One top-level entry of the documentation.
-    
+   
     @ivar name  The identifier of the entry.
     @ivar title The title of the entry.
     @ivar brief A string object with a brief summary of the entry.
@@ -749,6 +750,37 @@ class RawPage(RawEntry):
         return ''.join(res)
 
 
+class RawMainPage(RawPage):
+    """The main page in the documentation."""
+    
+    def __init__(self, briefs=[]):
+        RawPage.__init__(self, briefs=briefs)
+        self.command = 'mainpage'
+    
+    def getType(self):
+        return 'page'
+
+    def getFormatted(self, formatter):
+        res = []
+        if self.title.text:
+            res.append(formatter.formatCommand(self.command, self.title.text))
+        else:
+            res.append(formatter.formatCommand(self.command, 'NO TITLE'))
+        if self.briefs:
+            res.append('\n')
+        for x in self.briefs:
+            res.append(x.getFormatted(formatter))
+        if not self.body.empty:
+            res.append('\n')
+        res += self.body.getFormatted(formatter)
+        if self.sees:
+            res.append('\n')
+        for x in self.sees:
+            res.append(x.getFormatted(formatter))
+        res.append('\n')
+        return ''.join(res)
+
+
 class RawGroup(RawEntry):
     """A group in the documentation."""
 
@@ -841,11 +873,15 @@ class RawSection(object):
 class RawInclude(object):
     """An @include statement.
 
-    @ivar path: A RawText object with the path to the included file.
+    @ivar path   A RawText object with the path to the included file.
+    @ivar text   Alias of path.
+    @ivar tokens List of tokens for the include statement.
     """
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, tokens):
+        self.tokens = list(tokens)
+        self.path = RawText(tokens)
+        self.text = self.path
 
     def getType(self):
         return 'include'
@@ -861,13 +897,18 @@ class RawInclude(object):
 class RawSnippet(object):
     """A @snippet statement.
 
+    @ivar tokens: A list of Token object.
     @ivar path: A RawText object with the path to the included file.
     @ivar name: The name of the snippet, a RawText.
+    @ivar text: Alias to path, such that the begin token can be retrieved by
+                looking at text in exception handling.
     """
 
-    def __init__(self, path, name):
-        self.path = path
-        self.name = name
+    def __init__(self, path_tokens, name_tokens):
+        self.tokens = path_tokens + name_tokens
+        self.path = raw_doc.RawText(path_tokens)
+        self.name = raw_doc.RawText(name_tokens)
+        self.text = self.path
 
     def getType(self):
         return 'snippet'
@@ -1033,7 +1074,7 @@ class RawDeprecated(object):
 class RawSee(object):
     """A representation of a @see entry.
     
-    @ivar value The @see clauses's parameter.
+    @ivar text The @see clauses's parameter.
     """
     
     def __init__(self, text):

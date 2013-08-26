@@ -61,6 +61,22 @@ namespace seqan {
 // Function writeRecord()                                      [Bed3 BedRecord]
 // ----------------------------------------------------------------------------
 
+/*!
+ * @fn BedRecord#writeRecord
+ * @brief Write a BED record to a file.
+ * 
+ * @signature int writeRecord(stream, record[, context], Bed());
+ * 
+ * @param[in]     record  The BedRecord to write.
+ * @param[in,out] stream  @link StreamConcept Stream @endlink object to write to.
+ * @param[in,out] context The optional BedIOContext to use.
+ * 
+ * @return int Status code, 0 on success, other values on errors.
+ * 
+ * When <tt>context</tt> is given, the first field is written from the sequence with index <tt>record.rID</tt> in the
+ * context's name store.
+ */
+
 /**
 .Function.BedRecord#writeRecord
 ..cat:BED I/O
@@ -237,8 +253,17 @@ template <typename TStream, typename TRecordSpec, typename TNameStore, typename 
 int writeRecord(TStream & out, BedRecord<TRecordSpec> const & record,
                 BedIOContext<TNameStore, TNameStoreCache> const & context, Bed const & /*tag*/)
 {
-    if (_writeBedRecord(out, record, nameStore(context)[record.rID]) != 0)
-        return 1;
+
+    if (record.rID == BedRecord<TRecordSpec>::INVALID_REFID)
+    {
+        if (_writeBedRecord(out, record, record.ref) != 0)
+            return 1;
+    }
+    else
+    {
+        if (_writeBedRecord(out, record, nameStore(context)[record.rID]) != 0)
+            return 1;
+    }
 
     if (empty(record.data))
     {

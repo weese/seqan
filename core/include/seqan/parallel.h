@@ -40,13 +40,15 @@
 //____________________________________________________________________________
 // Prerequisites
 
-#include <seqan/basic.h>
 #include <seqan/platform.h>
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
 
 //____________________________________________________________________________
 // Module Headers
 
 // Misc.
+#include <seqan/parallel/parallel_tags.h>
 #include <seqan/parallel/parallel_macros.h>
 
 // Atomic operations.
@@ -55,6 +57,9 @@
 
 // Splitting.
 #include <seqan/parallel/parallel_splitting.h>
+
+// Parallel variants of basic algorithms
+#include <seqan/parallel/parallel_algorithms.h>
 
 //____________________________________________________________________________
 

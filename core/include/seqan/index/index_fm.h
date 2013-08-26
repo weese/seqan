@@ -34,6 +34,8 @@
 // Author: Enrico Siragusa <enrico.siragusa@fu-berlin.de>
 // ==========================================================================
 
+//SEQAN_NO_DDDOC:do not generate documentation for this file
+
 #ifndef INDEX_FM_H
 #define INDEX_FM_H
 
@@ -220,12 +222,27 @@ public:
     {}
 };
 
+// This function computes the length of the bwt string.
+template <typename TText>
+inline typename Size<TText>::Type
+_computeBwtLength(TText const & text)
+{
+    return length(text) + 1;
+}
+
+// This function computes the length of the bwt string.
+template <typename TText, typename TSetSpec>
+inline typename Size<typename StringSetLimits<TText>::Type>::Type
+_computeBwtLength(StringSet<TText, TSetSpec> const & text)
+{
+    return lengthSum(text) + countSequences(text);
+}
+
 // ----------------------------------------------------------------------------
 // Class FmIndexInfo_ 
 // ----------------------------------------------------------------------------
-//  TODO(esiragusa): Move compressionFactor into CSA and remove FmIndexInfo_.
-
 // Stores the information about an FM index file bundle and is written to the .fma file.
+//  TODO(esiragusa): Move compressionFactor into CSA and remove FmIndexInfo_.
 
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)

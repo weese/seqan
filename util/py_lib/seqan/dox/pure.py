@@ -17,10 +17,17 @@ import raw_doc
 import write_html
 import migration
 
+
+# The expected HTML tags, useful for differentiating between F<T>::Type and real tags.
+EXPECTED_TAGS = ['a', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'em', 'i', 'b',
+                 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'tt',
+                 'table', 'tbody', 'tr', 'th', 'td', 'caption', 'sup', 'img']
+
+
 class FileNameSource(object):
     def __init__(self, paths):
         self.paths = paths
-        self.extensions = ['.h', '.cpp']
+        self.extensions = ['.h', '.cpp', '.dox']
         self.ignore = ['.svn']
 
     def generate(self):
@@ -39,6 +46,8 @@ class FileNameSource(object):
 
 
 def doMain(args):
+    msg_printer = dox_parser.MessagePrinter(args.ignore_warnings_dirs)
+
     # Parse all legacy files.
     import seqan.dddoc.core as core
     app = core.App()
@@ -62,25 +71,30 @@ def doMain(args):
         lex = lexer.Lexer(dox_tokens.LEXER_TOKENS, skip_whitespace=False)
         for comment in the_file.comments:
             # TODO(holtgrew): Also give offset.
-            lex.input(comment.text, filename, comment.line, comment.col, comment.offset_col)
+            lex.input(comment.text, filename, comment.line + 1, comment.col, comment.offset_col)
             parser = dox_parser.Parser()
             try:
                 parser.parse(lex)
             except dox_parser.ParserError, e:
-                dox_parser.printParserError(e)
+                msg_printer.printParserError(e)
                 return 1
             master_doc.merge(parser.documentation)
     # Generate documentation.
     logging.basicConfig(format='%(message)s', level=logging.DEBUG)
     logger = logging.getLogger()
-    processor = proc_doc.DocProcessor(logger=logger, include_dir=args.base_dir)
+    processor = proc_doc.DocProcessor(logger=logger, include_dirs=args.base_dirs,
+                                      expected_tags=args.expected_tags,
+                                      msg_printer=msg_printer)
     try:
         doc_proc = processor.run(master_doc)
     except dox_parser.ParserError, e:
-        dox_parser.printParserError(e)
+        msg_printer.printParserError(e)
         return 1
     html_writer = write_html.HtmlWriter(doc_proc, args)
     html_writer.generateFor()
+
+
+    msg_printer.printStats()
     return 0
 
 
@@ -99,7 +113,11 @@ def main():
     parser.add_argument('--image-dir', dest='image_dirs', default=[],
                         action='append', help='Path to image directory.')
     parser.add_argument('-b', '--base-dir', help='Base directory for @include.',
-                        default='.', dest='base_dir')
+                        default=['.'], dest='base_dirs', action='append')
+    parser.add_argument('--expected-tags', help='Expected tags, warn about other tags.',
+                        action='append', default=EXPECTED_TAGS)
+    parser.add_argument('--ignore-warnings', help='Ignore warnings from directory.',
+                        default=[], dest='ignore_warnings_dirs', action='append')
     args = parser.parse_args()
     #if not args.inputs:
     #    parser.error('Missing input.')

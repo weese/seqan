@@ -160,19 +160,32 @@ struct Alloc {};
  * are models for the @link SequenceConcept sequence concept @endlink but extend the sequence concept by allowing
  * implicit conversion of other sequence into strings as long as the element conversion works:
  *
- * @snippet core/demos/sequence/string.cpp initializing strings
+ * @snippet demos/sequence/string.cpp initializing strings
  *
  * Aside from that, the usual operations (appending, insertion, removing, element access) are available as well.
  *
- * @snippet core/demos/sequence/string.cpp usual operations
+ * @snippet demos/sequence/string.cpp usual operations
  *
- * Strings have a size (the actual number of elements) and a capacity (the number of elements that memory has
- * been allocated for).  Note that clearing a string does not free the memory (as the STL, SeqAn assumes that
- * strings will later require a similar amount of memory as before).  Using @link String#shrinkToFit @endlink,
- * the user can force a re-allocation of the memory such that the string afterward uses the minimal amount
- * of memory to accomodate all of its objects.
+ * Strings have a size (the actual number of elements) and a capacity (the number of elements that memory has been
+ * allocated for).  Note that clearing a string does not free the memory (as the STL, SeqAn assumes that strings will
+ * later require a similar amount of memory as before).  Using @link ContainerConcept#shrinkToFit @endlink, the user can
+ * force a re-allocation of the memory such that the string afterward uses the minimal amount of memory to accomodate
+ * all of its objects.
  *
- * @snippet core/demos/sequence/string.cpp clear and resize
+ * @snippet demos/sequence/string.cpp clear and resize
+ *
+ * @section Examples
+ *
+ * This example shows a brute force pattern matching scheme for two character Strings.  Creation of String "text" shows
+ * the usage of some available String operating functions.  See class @link StringSet @endlink for an example of a
+ * String container with other than simple type values.  See class @link Index @endlink example for efficiently finding
+ * the same pattern matches using an index.
+ *
+ * @include demos/sequence/string2.cpp
+ *
+ * The output is as follows:
+ *
+ * @include demos/sequence/string2.cpp.stdout
  *
  * @see StringSet
  */
@@ -224,7 +237,7 @@ struct Alloc {};
  * @signature TPos posGlobalize(pos, limits)
  * 
  * @param pos A local or global position (pair or integer value). Types: Pair
- * @param limits The limits string returned by @link stringSetLimits @endlink.
+ * @param limits The limits string returned by @link TextConcept#stringSetLimits @endlink.
  * 
  * @return TPos The corresponding global position of <tt>pos</tt>. If
  *                 <tt>pos</tt> is an integral type <tt>pos</tt> is returned. If
@@ -237,19 +250,16 @@ struct Alloc {};
  * @brief Returns the sequence number of a position.
  * @headerfile <seqan/sequence.h>
  * 
- * @signature TSeqNo getSeqNo(pos[, limits])
+ * @signature TSeqNo getSeqNo(pos[, limits]);
  * 
  * @param pos A position. Types: Pair
- * @param limits The limits string returned by @link stringSetLimits @endlink.
+ * @param limits The limits string returned by @link TextConcept#stringSetLimits @endlink.
  * 
- * @return TSeqNo A single integer value that identifies the string within the
- *                stringset <tt>pos</tt> points at.If <tt>limits</tt> is
- *                omitted or @link Nothing @endlink <tt>getSeqNo</tt> returns
- *                0.If <tt>pos</tt> is a local position (of class @link Pair
- *                @endlink) then <tt>i1</tt> is returned.If <tt>pos</tt> is a
- *                global position (integer type and <tt>limits</tt> is a @link
- *                String @endlink) then <tt>pos</tt> is converted to a local
- *                position and <tt>i1</tt> is returned.
+ * @return TSeqNo A single integer value that identifies the string within the stringset <tt>pos</tt> points at. If
+ *                <tt>limits</tt> is omitted or @link Nothing @endlink <tt>getSeqNo</tt> returns 0.If <tt>pos</tt> is a
+ *                local position (of class @link Pair @endlink) then <tt>i1</tt> is returned.If <tt>pos</tt> is a global
+ *                position (integer type and <tt>limits</tt> is a @link String @endlink) then <tt>pos</tt> is converted
+ *                to a local position and <tt>i1</tt> is returned.
  */
 
 /*!
@@ -257,19 +267,16 @@ struct Alloc {};
  * @brief Returns the local sequence offset of a position.
  * @headerfile <seqan/sequence.h>
  * 
- * @signature TOffset getSeqOffset(pos[, limits])
+ * @signature TOffset getSeqOffset(pos[, limits]);
  * 
  * @param pos A position. Types: Pair
- * @param limits The limits string returned by @link stringSetLimits @endlink.
+ * @param limits The limits string returned by @link TextConcept#stringSetLimits @endlink.
  * 
- * @return TOffset A single integer value that identifies the position within
- *                 the string <tt>pos</tt> points at.If <tt>limits</tt> is
- *                 omitted or @link Nothing @endlink <tt>getSeqNo</tt> returns
- *                 <tt>pos</tt>.If <tt>pos</tt> is a local position (of class
- *                 @link Pair @endlink) then <tt>i2</tt> is returned.If
- *                 <tt>pos</tt> is a global position (integer type and
- *                 <tt>limits</tt> is a @link String @endlink) then <tt>pos</tt>
- *                 is converted to a local position and <tt>i2</tt> is returned.
+ * @return TOffset A single integer value that identifies the position within the string <tt>pos</tt> points at.If
+ *                 <tt>limits</tt> is omitted or @link Nothing @endlink <tt>getSeqNo</tt> returns <tt>pos</tt>.  If
+ *                 <tt>pos</tt> is a local position (of class @link Pair @endlink) then <tt>i2</tt> is returned.If
+ *                 <tt>pos</tt> is a global position (integer type and <tt>limits</tt> is a @link String @endlink) then
+ *                 <tt>pos</tt> is converted to a local position and <tt>i2</tt> is returned.
  */
 
 /**
@@ -288,6 +295,33 @@ Strings can be used to store arbitrary values and can be used for large biologic
 ...default:$Alloc<>$, see @Spec.Alloc String@.
 ..implements:Concept.ContainerConcept
 ..include:seqan/sequence.h
+..example
+...text:This example shows a brute force pattern matching scheme for two character Strings. Creation of String "text" shows the usage of some available String operating functions. See class @Class.StringSet@ for an example of a String container with other than simple type values. See class @Class.Index@ example for efficiently finding the same pattern matches using an index. 
+...file:demos/sequence/string2.cpp
+...text:The output of this demo is:
+...output:to be
+Last sign is whitespace? 1
+tobeornottobe
+hit at 2 11
+
+.Memfunc.String#String
+..class:Class.String
+..signature:String::String()
+..signature:String::String(other)
+..signature:String::String(seq)
+..summary:Constructor
+..description:
+The $String$ class provides the default constructor and copy constructor.
+Additionally, you can construct a string from any sequence.
+..param.other:Another $String$ object of the same type.
+..param.seq:A sequence to copy into the $String$.
+...type:Concept.SequenceConcept
+..remarks:
+The third variant (construction from sequence) first reserves the necessary space and then copies over the characters from $seq$.
+During this copying, the source characters are implicitely casted/converted into the alphabet of the String.
+For example, @Spec.Dna@ characters can be converted to @Spec.Dna5@ characters and vice versa.
+The conversion can be lossy, e.g. when converting from @Spec.Dna5@ to @Spec.Dna@, all $N$ characters are replaced by $A$ characters.
+Similarly, when converting from $char$ to @Spec.Dna5@, all characters except ${A, a, C, c, G, g, T, t}$ are converted to $N$.
 */
 
 template <typename TValue, typename TSpec = Alloc<> >
@@ -1645,7 +1679,6 @@ _reallocateStorage(
     String<TValue, TSpec> & me,
     TSize new_capacity)
 {
-    SEQAN_CHECKPOINT;
     return _allocateStorage(me, new_capacity);
 }
 
@@ -1658,14 +1691,9 @@ _reallocateStorage(
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
     if (static_cast<TStringSize>(new_capacity) <= capacity(me))
-    {
         return 0;
-    }
-    else
-    {
-        SEQAN_CHECKPOINT;
-        return _reallocateStorage(me, new_capacity);
-    }
+
+    return _reallocateStorage(me, new_capacity);
 }
 
 template <typename TValue, typename TSpec, typename TSize, typename TSize2>
@@ -1678,15 +1706,10 @@ _reallocateStorage(
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
     if (static_cast<TStringSize>(new_capacity) <= capacity(me))
-    {
         return 0;
-    }
-    else
-    {
-        SEQAN_CHECKPOINT;
-        if (new_capacity > limit) new_capacity = limit;
-        return _reallocateStorage(me, new_capacity);
-    }
+
+    if (new_capacity > limit) new_capacity = limit;
+    return _reallocateStorage(me, new_capacity);
 }
 
 template <typename TValue, typename TSpec, typename TSize>
@@ -1698,15 +1721,10 @@ _reallocateStorage(
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
     if (static_cast<TStringSize>(new_capacity) <= capacity(me))
-    {
         return 0;
-    }
-    else
-    {
-        SEQAN_CHECKPOINT;
-        new_capacity = computeGenerousCapacity(me, new_capacity);
-        return _reallocateStorage(me, new_capacity);
-    }
+
+    new_capacity = computeGenerousCapacity(me, new_capacity);
+    return _reallocateStorage(me, new_capacity);
 }
 
 template <typename TValue, typename TSpec, typename TSize, typename TSize2>
@@ -1719,16 +1737,11 @@ _reallocateStorage(
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
     if (static_cast<TStringSize>(new_capacity) <= capacity(me))
-    {
         return 0;
-    }
-    else
-    {
-        SEQAN_CHECKPOINT;
-        new_capacity = computeGenerousCapacity(me, new_capacity);
-        if (new_capacity > limit) new_capacity = limit;
-        return _reallocateStorage(me, new_capacity);
-    }
+
+    new_capacity = computeGenerousCapacity(me, new_capacity);
+    if (new_capacity > limit) new_capacity = limit;
+    return _reallocateStorage(me, new_capacity);
 }
 
 template <typename TValue, typename TSpec, typename TSize>

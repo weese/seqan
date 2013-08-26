@@ -45,7 +45,6 @@ namespace seqan {
 
 //////////////////////////////////////////////////////////////////////////////
 
-
 // TODO(holtgrew): Remove default implementation.
 // SEQREV: elements-are-containers should not have a default implementation
 
@@ -155,6 +154,21 @@ struct Host
 
 //____________________________________________________________________________
 
+/*!
+ * @mfn Cargo
+ * @brief Type of additional data stored in an object.
+ * 
+ * @signature Cargo<T>::Type
+ *
+ * @tparam T Type for which the cargo tpye is queried.
+ *
+ * @return Type  The cargo type of <tt>T</tt>.
+ *
+ * @section Remarks
+ *
+ * The definition of Cargo allows the addition of user-specified data into existing data structures.
+ */
+
 /**
 .Metafunction.Cargo:
 ..cat:Basic
@@ -178,6 +192,18 @@ struct Cargo<T const> {
 };
 
 //____________________________________________________________________________
+
+/*!
+ * @mfn VertexDescriptor
+ * @headerfile <seqan/basic.h>
+ * @brief Type of an object that represents a vertex descriptor.
+ *
+ * @signature VertexDescriptor<T>::Type;
+ *
+ * @tparam T The graph type to query.
+ *
+ * @return Type The resulting vertex descriptor type.
+ */
 
 /**
 .Metafunction.VertexDescriptor:
@@ -206,6 +232,17 @@ struct VertexDescriptor<T const>:
 
 //____________________________________________________________________________
 
+/*!
+ * @mfn Id
+ * @headerfile <seqan/basic.h>
+ * @brief Type of an object that represents an id.
+ *
+ * @signature Id<T>::Type
+ *
+ * @tparam T The type to query for its id type.
+ *
+ * @return Type The resulting identifier type.
+ */
     
 /**
 .Metafunction.Id:
@@ -231,6 +268,18 @@ template<typename T>
 struct Id<T const> : Id<T> {};
 
 //____________________________________________________________________________
+
+/*!
+ * @mfn Key
+ * @headerfile <seqan/basic.h>
+ * @brief Key type of a key to cargo mapping.
+ *
+ * @signature Key<T>::Type;
+ *
+ * @tparam T Type for which a key type is determined.
+ *
+ * @return Type The key type.
+ */
 
 /**
 .Metafunction.Key:
@@ -295,6 +344,34 @@ struct Source<T const>:
     Source<T>
 {
 };
+
+
+//____________________________________________________________________________
+
+/*!
+ * @mfn IsLightWeight
+ * @headerfile <seqan/basic.h>
+ * @brief Determines whether an object can efficiently be passed by copy.
+ *
+ * @signature IsLightWeight<T>::Type;
+ *
+ * @tparam T The type to query.
+ *
+ * @return Type Either True or False.  True if the object can efficiently be copied.
+ */
+
+/**
+.Metafunction.IsLightWeight:
+..cat:Metafunctions
+..summary:Determines whether an object can efficiently be passed by copy.
+..signature:IsLightWeight<T>::Type
+..param.T:A type.
+..returns.param.Type:@Tag.Logical Values.tag.True@ if the object is light-weight and can efficiently be copied, e.g. @Class.Segment@, otherwise @Tag.Logical Values.tag.False@.
+*/
+
+template <typename T>
+struct IsLightWeight:
+    False {};
 
 //____________________________________________________________________________
 
@@ -513,8 +590,39 @@ SEQAN_CHECKPOINT
     return _object;
 }
 
+// --------------------------------------------------------------------------
+// Function _dereference()
+// --------------------------------------------------------------------------
+
+// explicitly give desired dereferenced type as first argument,
+// e.g. _dereference<int>(int*) or _dereference<Segment<..> &>(Segment<..> &)
+template <typename T>
+inline T
+_dereference(typename RemoveReference<T>::Type & ptr)
+{
+    return ptr;
+}
+
+template <typename T>
+inline T
+_dereference(typename RemoveReference<T>::Type * ptr)
+{
+    return *ptr;
+}
+
+
 //____________________________________________________________________________
 
+/*!
+ * @mfn LENGTH
+ * @brief Number of elements in a fixed-size container/vector.
+ *
+ * @signature LENGTH<T>::VALUE;
+ *
+ * @tparam T The type to query for its length.
+ * 
+ * @return VALUE The length of <tt>T</tt>.
+ */
 
 /**
 .Metafunction.LENGTH:
@@ -541,6 +649,16 @@ struct LENGTH<T const>:
     LENGTH<T>
 {
 };
+
+/*!
+ * @mfn WEIGHT
+ * @brief Number of relevant positions in a shape.
+ * 
+ * @signature WEIGHT<T>::VALUE;
+ *
+ * @tparam T     The Shape type to query.
+ * @return VALUE The number of relevant positions in a shape.
+ */
 
 /**
 .Metafunction.WEIGHT:

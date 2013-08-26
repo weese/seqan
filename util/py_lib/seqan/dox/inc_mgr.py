@@ -16,13 +16,13 @@ class IncludeException(Exception):
 class IncludeManager(object):
     """Manages inclusion of files.
 
-    @ivar base_path: String, path to the include path.
+    @ivar base_paths: List of strings, paths to the include paths.
     @ivar snippet_cache: Cache from (path, snippet name) to snippet text.
     @ivar file_cache: Cache form path to file content.
     """
 
-    def __init__(self, base_path):
-        self.base_path = base_path
+    def __init__(self, base_paths):
+        self.base_paths = base_paths
         self.file_cache = {}
         self.snippet_cache = {}
 
@@ -32,6 +32,8 @@ class IncludeManager(object):
         """
         if not self.snippet_cache.get((path, name)):
             self._loadSnippets(path)
+        if not self.snippet_cache.get((path, name)):
+            raise IncludeException("Could not include snippet %s from file %s." % (path, name))
         return self.snippet_cache[(path, name)]
 
     def loadFile(self, path):
@@ -41,14 +43,25 @@ class IncludeManager(object):
         self._loadFile(path)
         return self.file_cache[path]
 
+    def resolvePath(self, path):
+        """Translate a path passed to @include to an absolute path.
+
+        The path is determined by looking at self.base_paths.
+        """
+        for base_path in self.base_paths:
+            if os.path.exists(os.path.join(base_path, path)):
+                return os.path.join(base_path, path)
+        raise IncludeException('Could not find file %s for inclusion.' % path)
+
     def _loadFile(self, path):
         """
         @raises IncludeException When there is an error loading the file.
         """
         if self.file_cache.get(path):
             return
+        full_path = self.resolvePath(path)
         try:
-            with open(os.path.join(self.base_path, path)) as f:
+            with open(full_path) as f:
                 self.file_cache[path] = f.read()
         except IOError, e:
             raise IncludeException('Could not load file %s: %s' % (path, e))

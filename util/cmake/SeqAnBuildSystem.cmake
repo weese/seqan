@@ -45,7 +45,6 @@
 # APP:${app_name}
 
 include (SeqAnUsabilityAnalyzer)
-include (SeqAnLegacyBuildSystem)
 
 # ---------------------------------------------------------------------------
 # Normalize CMAKE_CXX_FLAGS to be a string.
@@ -139,7 +138,7 @@ endmacro (seqan_add_app_subdirectory)
 
 macro (seqan_register_apps)
     # Set SeqAn flags.
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
+    set (SEQAN_FIND_ENABLE_TESTING 0)
     set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
@@ -402,6 +401,37 @@ macro (seqan_get_version)
 endmacro (seqan_get_version)
 
 # ---------------------------------------------------------------------------
+# Macro _seqan_setup_demo_test(cpp_file executable)
+#
+# When called with the file PATH.cpp, it will check whether PATH.cpp.stdout
+# and/or PATH.cpp.stderr exists.  If this is the case then we will add a test
+# that runs the demo and compares the standard output/error stream with the
+# given file.
+#
+# Used in seqan_build_demos_develop().
+# ---------------------------------------------------------------------------
+macro (_seqan_setup_demo_test CPP_FILE EXECUTABLE)
+    set (STDOUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${CPP_FILE}.stdout")
+    set (STDERR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${CPP_FILE}.stderr")
+    if (EXISTS "${STDOUT_PATH}" OR EXISTS "${STDERR_PATH}")
+        # Build the path to the demo_checker.py script.
+        set (CHECKER_PATH "${CMAKE_SOURCE_DIR}/util/bin/demo_checker.py")
+
+        # Compose arguments to the demo_checker.py script.
+        set (ARGS "--binary-path" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXECUTABLE}")
+        if (EXISTS "${STDOUT_PATH}")
+            set (ARGS ${ARGS} "--stdout-path" "${STDOUT_PATH}")
+        endif ()
+        if (EXISTS "${STDERR_PATH}")
+            set (ARGS ${ARGS} "--stderr-path" "${STDERR_PATH}")
+        endif()
+
+        # Add the test.
+        add_test (NAME test_${EXECUTABLE} COMMAND ${CHECKER_PATH} ${ARGS})
+    endif ()
+endmacro (_seqan_setup_demo_test CPP_FILE)
+
+# ---------------------------------------------------------------------------
 # Macro seqan_register_demos([prefix])
 #
 # Use this in demos directories and subdirectories.
@@ -416,7 +446,7 @@ endmacro (seqan_get_version)
 # Install all demo source files.
 macro (seqan_install_demos_release)
     # Set flags for SeqAn.
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
+    set (SEQAN_FIND_ENABLE_TESTING 0)
     set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
@@ -467,6 +497,8 @@ macro (seqan_build_demos_develop PREFIX)
             add_executable(${PREFIX}${BIN_NAME} ${ENTRY})
             target_link_libraries (${PREFIX}${BIN_NAME} ${SEQAN_LIBRARIES})
         endif ()
+
+        _seqan_setup_demo_test (${ENTRY} ${PREFIX}${BIN_NAME})
     endforeach (ENTRY ${ENTRIES})
 endmacro (seqan_build_demos_develop)
 

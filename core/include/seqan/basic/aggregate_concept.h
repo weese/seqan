@@ -45,6 +45,30 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/*!
+ * @concept AggregateConcept
+ * 
+ * @brief Aggregate types contain a fixed number of fixed-size values (pairs, triples, tuples).
+ * 
+ * @section Remarks
+ * 
+ * Stream output operators are not shown in the function list below, but required.
+ * 
+ * Comparison operators are not shown in the function list below, but required.
+ */
+
+/*!
+ * @fn AggregateConcept#operator<<
+ * @brief Stream output operator.
+ *
+ * @signature TStream AggregateConcept::operator<<(stream, aggregate);
+ *
+ * @param stream    The <tt>std::ostream</tt> to write to.
+ * @param aggregate The aggregate type to write to the stream.
+ *
+ * @return TStream Reference to <tt>stream</tt> after writing <tt>aggregate</tt> to it.
+ */
+
 /**
 .Concept.AggregateConcept
 ..summary:Aggregate types contain a fixed number of fixed-size values.
@@ -59,6 +83,19 @@ namespace seqan {
 .Metafunction.Value.concept:Concept.AggregateConcept
  */
 
+/*!
+ * @defgroup AggregateTags Aggregate Tags
+ * @brief Tags to use in aggregate (e.g. Pair, Triple, and Tuple) types.
+ */
+
+/*!
+ * @tag AggregateTags#Pack
+ * @headerfile <seqan/basic.h>
+ * @brief Tag to mark a packed specialization that disables address alignment for members.
+ *
+ * @signature typedef Tag<Pack_> Pack;
+ */
+
 /**
 .Tag.Pack
 ..cat:Aggregates
@@ -69,6 +106,21 @@ namespace seqan {
 
 struct Pack_;
 typedef Tag<Pack_> Pack;
+
+// TODO(holtgrew): We need @tparam for tag in the Dox system.
+
+/*!
+ * @tag AggregateTags#BitPacked
+ * @headerfile <seqan/basic.h>
+ * @brief Tag to mark a bit-packed specialization that avoids to waste bits.
+ *
+ * @signature template <[unsinged BITSIZE1[, unsigned BITSIZE2]]>
+ *            struct BitPacked;
+ *
+ * BITSIZE1 The number of bits for the first entry.
+ *
+ * BITSIZE2 The number of bits for the second entry.
+ */
 
 /**
 .Tag.BitPacked
@@ -88,6 +140,18 @@ struct BitPacked;
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+/*!
+ * @mfn MakePacked
+ * @headerfile <seqan/basic.h>
+ * @brief Return the corresponding packed type for a type.
+ *
+ * @signature MakePacked<TAggregate>::Type;
+ *
+ * @tparam TAggregate The aggregate type to transform.
+ *
+ * @return Type The resulting packed type.
+ */
 
 /**
 .Metafunction.MakePacked

@@ -35,6 +35,7 @@
 #include <seqan/store.h>
 #include <seqan/pipe.h>
 #include <seqan/parallel.h>
+#include <seqan/seq_io.h>
 
 #ifdef RAZERS_PROFILE
 #include "profile_timeline.h"
@@ -645,6 +646,20 @@ int getGenomeFileNameList(CharString filename, StringSet<CharString> & genomeFil
 
 }
 
+
+template <typename TId>
+inline void
+cropSequenceId(TId &seqId)
+{
+    typedef typename Iterator<TId, Standard>::Type TIterator;
+    
+    TIterator itBeg = begin(seqId, Standard());
+    TIterator it = itBeg;
+    
+    _seekLineBreak(it, end(seqId, Standard()));
+    resize(seqId, it - itBeg);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences with or w/o quality values
 template <typename TFSSpec, typename TFSConfig, typename TRazerSOptions>
@@ -655,33 +670,36 @@ bool loadReads(
 {
     bool countN = !(options.matchN || options.outputFormat == 1);
 
-    MultiFasta multiFasta;
-    if (!open(multiFasta.concat, fileName, OPEN_RDONLY))
-        return false;
-
-    AutoSeqFormat format;
-    guessFormat(multiFasta.concat, format);
-    split(multiFasta, format);
-
-    unsigned seqCount = length(multiFasta);
+    SequenceStream seqStream(fileName);
 
     String<__uint64> qualSum;
     String<Dna5Q>    seq;
     CharString       qual;
-    CharString       id;
+    CharString       seqId;
 
+    unsigned seqCount = 0;
     unsigned kickoutcount = 0;
-    for (unsigned i = 0; i < seqCount; ++i)
+
+    while (!atEnd(seqStream))
     {
+        ++seqCount;
+
+        if (readRecord(seqId, seq, qual, seqStream) != 0)
+        {
+            std::cerr << "Read error in file " << fileName << std::endl;
+            return false;
+        }
+
         if (options.readNaming == 0 || options.readNaming == 3)
         {
-            if (options.fullFastaId)
-                assignSeqId(id, multiFasta[i], format);         // read full Fasta id
-            else
-                assignCroppedSeqId(id, multiFasta[i], format);  // read Fasta id up to the first whitespace
+            if (!options.fullFastaId)
+                cropSequenceId(seqId);     // read Fasta id up to the first whitespace
         }
-        assignSeq(seq, multiFasta[i], format);                  // read Read sequence
-        assignQual(qual, multiFasta[i], format);                // read ascii quality values
+        else
+        {
+            clear(seqId);
+        }
+
         if (countN)
         {
             int count = 0;
@@ -691,7 +709,7 @@ bool loadReads(
                     if (++count > cutoffCount)
                     {
                         clear(seq);
-                        clear(id);
+                        clear(seqId);
                         clear(qual);  // So no qualities are assigned below.
                         ++kickoutcount;
                         break;
@@ -706,7 +724,7 @@ bool loadReads(
             resize(seq, options.trimLength);
 
         // append read to fragment store
-        appendRead(store, seq, id);
+        appendRead(store, seq, seqId);
 
         unsigned len = length(seq);
         if (length(qualSum) <= len)
@@ -830,7 +848,6 @@ struct LessBeginPos :
     {
         // genome position and orientation
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         if (a.beginPos < b.beginPos) return true;
@@ -848,29 +865,23 @@ struct LessRNoBeginPos :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // genome position and orientation
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         if (a.beginPos < b.beginPos) return true;
-
         if (a.beginPos > b.beginPos) return false;
 
         if (a.orientation == '-') return false;
-
         if (b.orientation == '-') return true;
 
         if (a.orientation < b.orientation) return true;
-
         if (a.orientation > b.orientation) return false;
 
         // quality
         if (a.score > b.score) return true;
-
         if (b.score > a.score) return false;
 
         if (a.endPos > b.endPos) return true;
@@ -888,33 +899,26 @@ struct LessRNoBeginPosMP :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // genome position and orientation
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         if (a.beginPos < b.beginPos) return true;
-
         if (a.beginPos > b.beginPos) return false;
 
         if (a.orientation == '-') return false;
-
         if (b.orientation == '-') return true;
 
         if (a.orientation < b.orientation) return true;
-
         if (a.orientation > b.orientation) return false;
 
         // quality
         if (a.pairScore > b.pairScore) return true;
-
         if (a.pairScore < b.pairScore) return false;
 
         if (a.libDiff < b.libDiff) return true;
-
         if (a.libDiff > b.libDiff) return false;
 
         if (a.endPos > b.endPos) return true;
@@ -933,29 +937,23 @@ struct LessRNoEndPos :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // genome position and orientation
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         if (a.endPos   < b.endPos) return true;
-
         if (a.endPos   > b.endPos) return false;
 
         if (a.orientation == '-') return false;
-
         if (b.orientation == '-') return true;
 
         if (a.orientation < b.orientation) return true;
-
         if (a.orientation > b.orientation) return false;
 
         // quality
         if (a.score > b.score) return true;
-
         if (b.score > a.score) return false;
 
         if (a.beginPos < b.beginPos) return true;
@@ -977,33 +975,26 @@ struct LessRNoEndPosMP :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // genome position and orientation
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         if (a.endPos   < b.endPos) return true;
-
         if (a.endPos   > b.endPos) return false;
 
         if (a.orientation == '-') return false;
-
         if (b.orientation == '-') return true;
 
         if (a.orientation < b.orientation) return true;
-
         if (a.orientation > b.orientation) return false;
 
         // quality
         if (a.pairScore > b.pairScore) return true;
-
         if (a.pairScore < b.pairScore) return false;
 
         if (a.libDiff < b.libDiff) return true;
-
         if (a.libDiff > b.libDiff) return false;
 
         if (a.beginPos < b.beginPos) return true;
@@ -1021,33 +1012,26 @@ struct LessScoreBackport :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // quality
         if (a.orientation == '-') return false;
-
         if (b.orientation == '-') return true;
 
         if (a.score > b.score) return true;
-
         if (b.score > a.score) return false;
 
         // Sort by leftmost begin pos, longest end pos on ties.
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         if (a.orientation < b.orientation) return true;
-
         if (a.orientation > b.orientation) return false;
 
         if (a.beginPos < b.beginPos) return true;
-
         if (a.beginPos > b.beginPos) return false;
 
         if (a.endPos < b.endPos) return false;
-
         if (a.endPos > b.endPos) return true;
 
         return false;
@@ -1065,36 +1049,29 @@ struct LessScoreBackport3Way :
     {
         // read number
         if (a.readId < b.readId) return -1;
-
         if (a.readId > b.readId) return 1;
 
         // quality
         if (a.orientation != '-' || b.orientation != '-')
         {
             if (a.orientation == '-') return -1;
-
             if (b.orientation == '-') return 1;
         }
 
         if (a.score > b.score) return -1;
-
         if (b.score > a.score) return 1;
 
         // Sort by leftmost begin pos, longest end pos on ties.
         if (a.contigId < b.contigId) return -1;
-
         if (a.contigId > b.contigId) return 1;
 
         if (a.orientation < b.orientation) return -1;
-
         if (a.orientation > b.orientation) return 1;
 
         if (a.beginPos < b.beginPos) return -1;
-
         if (a.beginPos > b.beginPos) return 1;
 
         if (a.endPos < b.endPos) return 1;
-
         if (a.endPos > b.endPos) return -1;
 
         return 0;
@@ -1119,19 +1096,16 @@ struct LessRNoGPos :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // contig number
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         // beginning position
         typename TAlignedRead::TPos ba = _min(a.beginPos, a.endPos);
         typename TAlignedRead::TPos bb = _min(b.beginPos, b.endPos);
         if (ba < bb) return true;
-
         if (ba > bb) return false;
 
         // orientation
@@ -1167,19 +1141,16 @@ struct LessRNoGEndPos :
     {
         // read number
         if (a.readId < b.readId) return true;
-
         if (a.readId > b.readId) return false;
 
         // contig number
         if (a.contigId < b.contigId) return true;
-
         if (a.contigId > b.contigId) return false;
 
         // end position
         typename TAlignedRead::TPos ea = _max(a.beginPos, a.endPos);
         typename TAlignedRead::TPos eb = _max(b.beginPos, b.endPos);
         if (ea < eb) return true;
-
         if (ea > eb) return false;
 
         // orientation
@@ -1215,22 +1186,18 @@ struct LessScore :
 
         // read number
         if (a.readId < b.readId) return -1;
-
         if (a.readId > b.readId) return 1;
 
         // quality
         if (a.id == TAlignedRead::INVALID_ID) return 1;
-
         if (b.id == TAlignedRead::INVALID_ID) return -1;
 
         typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
         typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
         if (qa.pairScore > qb.pairScore) return -1;
-
         if (qa.pairScore < qb.pairScore) return 1;
 
         if (qa.score > qb.score) return -1;
-
         if (qb.score > qa.score) return 1;
 
         return 0;
@@ -1263,22 +1230,18 @@ struct LessScore<TAlignedReadStore, TAlignedReadQualityStore, RazerSMode<RazerSP
 
         // read number
         if (a.readId < b.readId) return -1;
-
         if (a.readId > b.readId) return 1;
 
         // quality
         if (a.id == TAlignedRead::INVALID_ID) return 1;
-
         if (b.id == TAlignedRead::INVALID_ID) return -1;
 
         typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
         typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
         if (qa.errors < qb.errors) return -1;
-
         if (qa.errors > qb.errors) return 1;
 
         if (qa.score > qb.score) return -1;
-
         if (qb.score > qa.score) return 1;
 
         return 0;

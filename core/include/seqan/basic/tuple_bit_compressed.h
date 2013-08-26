@@ -47,6 +47,25 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/*!
+ * @class BitPackedTuple
+ * @extends Tuple
+ * @headerfile <seqan/basic.h>
+ * @brief A fixed-size tuple of values.  Memory is saved by packing bits.
+ *
+ * @signature template <typename TValue, unsigned SIZE>
+ *            class Tuple<TValue, SIZE, BitPacked<> >;
+ *
+ * @tparam TValue The value type.
+ * @tparam SIZE   The length of the tuple.
+ *
+ * The characters are stored as bit sequence in an ordinal type (char, ..., __int64).
+ *
+ * @section Remarks
+ *
+ * Only useful for small alphabets as small tuple sizes (|Sigma|^size &lt;= 2^64 as for Dna or AminoAcid m-grams).
+ */
+
 /**
 .Spec.Bit Packed Tuple:
 ..cat:Aggregates
@@ -85,8 +104,8 @@ struct Tuple<TValue, SIZE, BitPacked<> >
 {
     typedef typename BitVector_<SIZE * BitsPerValue<TValue>::VALUE>::Type TBitVector;
 
-    static const __uint64 BIT_MASK = (1 << BitsPerValue<TValue>::VALUE) - 1;
-    static const __uint64 MASK = ((__uint64)1 << (SIZE * BitsPerValue<TValue>::VALUE)) - 1;
+    static const __uint64 BIT_MASK = (1ull << BitsPerValue<TValue>::VALUE) - 1ull;
+    static const __uint64 MASK = (1ull << (SIZE * BitsPerValue<TValue>::VALUE)) - 1ull;
 
     // -----------------------------------------------------------------------
     // Members
@@ -179,7 +198,7 @@ struct Tuple<TValue, SIZE, BitPacked<> >
         SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
         SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(SIZE));
 
-        unsigned shift = ((SIZE - 1 - k) * BitsPerValue<TValue>::VALUE);
+        register unsigned shift = ((SIZE - 1 - k) * BitsPerValue<TValue>::VALUE);
         i = (i & ~(BIT_MASK << shift)) | (TBitVector)ordValue(source) << shift;
         return source;
     }
@@ -239,7 +258,7 @@ assignValue(Tuple<TValue, SIZE, BitPacked<> > & me,
     SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
     SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(SIZE));
 
-    unsigned shift = ((SIZE - 1 - k) * BitsPerValue<TValue>::VALUE);
+    register unsigned shift = ((SIZE - 1 - k) * BitsPerValue<TValue>::VALUE);
     me.i = (me.i & ~(me.BIT_MASK << shift)) | (TBitVector)ordValue(source) << shift;
     return source;
 }

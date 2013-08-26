@@ -41,7 +41,6 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/stream.h>
-#include <seqan/file/file_stream.h>
 
 using namespace seqan;
 
@@ -70,7 +69,7 @@ typedef Tag<Join_>              Join;
 template <typename TDb, typename TDbQuery, typename TSpec = Search>
 struct Writer
 {
-    typedef Stream<FileStream<WriteOnly, File<> > > TStream;
+    typedef Stream<FileStream<File<> > > TStream;
 
     TDb const       & db;
     TDbQuery /* const */  & query;

@@ -95,7 +95,7 @@ namespace seqan {
  * @section Naming Conventions
  *
  * <ul>
- * <li>Keep the short name short, ideally to one character.</tt>
+ * <li>Keep the short name short, ideally to one character.</li>
  * <li>Only use lower-case characters in the long name, use dashes to separate words, only use alphanumeric characters
  *     and dashes, no underline characters</li>.
  * </ul>
@@ -112,7 +112,7 @@ Although not suggested the short-name can contain more than 1 character.
 ..param.longName:A std::string containing the long-name option identifier (e.g. $"help"$ for the $-h/--help$ option).
 ...remarks:Note that the leading "--" is not passed.
 ..param.helpText:A std::string containing the help text associated with this option.
-..param.argument:A $ArgParseArgument::ArgumentType$ for the option (e.g., an integer argument).
+..param.argumentType:A $ArgParseArgument::ArgumentType$ for the option (e.g., an integer argument).
 ...type:Class.ArgParseArgument
 ..param.argumentLabel:The label to use for the argument in the help text, e.g. $"NUMBER"$ for an integer. Optional.
 ...default:$""$
@@ -363,14 +363,14 @@ inline void setDefaultValue(ArgParseOption & me, const TValue & value)
         std::stringstream strm;
         strm << value;
 
-        // check if all constraints are satisfied
-        _checkValue(me, strm.str());
-
         // clear old values
         me.defaultValue.clear();
 
         // add defaultValue
         me.defaultValue.push_back(strm.str());
+
+        // check if all constraints are satisfied
+        _checkValue(me, strm.str());
     }
     catch (ParseException & ex)
     {
@@ -418,11 +418,11 @@ inline void addDefaultValue(ArgParseOption & me, const TValue & value)
         std::stringstream strm;
         strm << value;
 
-        // check if all constraints are satisfied
-        _checkValue(me, strm.str());
-
         // add defaultValue
         me.defaultValue.push_back(strm.str());
+
+        // check if all constraints are satisfied
+        _checkValue(me, strm.str(), me.defaultValue.size() - 1);
     }
     catch (ParseException & ex)
     {

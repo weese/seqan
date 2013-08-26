@@ -233,7 +233,7 @@ class TplDocsCreator(object):
                overwritten there.
     """
 
-    def __init__(self, error_logger, tree, tpl_path, out_path):
+    def __init__(self, error_logger, tree, tpl_path, out_path, include_dirs):
         """Initialize the DocsCreator object.
 
         Args:
@@ -247,7 +247,8 @@ class TplDocsCreator(object):
         self.tree = tree
         self.tpl_path = tpl_path
         self.out_path = out_path
-        self.html_helper = HtmlHelper(self.error_logger, self.tree, out_path)
+        self.include_dirs = include_dirs
+        self.html_helper = HtmlHelper(self.error_logger, self.tree, out_path, self.include_dirs)
 
     def good(self):
         return True
@@ -300,7 +301,7 @@ class TplDocsCreator(object):
         else:
             type_num = TYPE_CLASS
         # Index functions.
-        for name, node in self.tree.find([cat_type]).children.iteritems():
+        for name, node in sorted(self.tree.find([cat_type]).children.iteritems()):
             ## if node.children.has_key('hidefromindex'):
             ##     continue  # Skip those that are not to appear in search.
             summary = ''
@@ -345,9 +346,12 @@ class TplDocsCreator(object):
         info = []
         # Get category types to index from DddocTree tree and build the index
         # data for this.
-        for cat_type in self.tree.find('globals.indexes').children.keys():
+        items = self.tree.find('globals.indexes').children.items()
+        key_entries = [(x[0], x[1].entry) for x in items if x[1].entry]
+        key_linenos = [(x[0], self.tree.entries[x[1][0]].line_no_begin) for x in key_entries]
+        cats = [x[0] for x in sorted(key_linenos, key=lambda a:a[1])]
+        for cat_type in cats:
             self._registerCategories(cat_type, search_index, long_search_index, info)
-        ## print search_index, long_search_index, info
         with open(destPath, 'wb') as f:
             s = 'var search_data = {"index":{"searchIndex":%s,"longSearchIndex":%s,"info":%s}};'
             f.write(s % (json.dumps(search_index), json.dumps(long_search_index), json.dumps(info)))
@@ -475,11 +479,12 @@ class MarkupParser(object):
 
 
 class HtmlHelper(object):
-    def __init__(self, error_logger, tree, out_path):
+    def __init__(self, error_logger, tree, out_path, include_dirs):
         self.error_logger = error_logger
         self.tree = tree
         self.markup_parser = MarkupParser(self.error_logger, tree, self)
         self.out_path = out_path
+        self.include_dirs = include_dirs
 
     def classHierarchyJS(self, node):
         def recurseDownwards(node):
@@ -669,7 +674,7 @@ class HtmlHelper(object):
 
         Returns a list of pairs.  Each pair contains the type of the entry in
         the first and the text of the entry in the second component.  The type
-        is either 'TEXT' or 'CODE'.
+        is either 'TEXT' or 'COD'E.
         """
         result = []
         curr_type = None
@@ -711,6 +716,12 @@ class HtmlHelper(object):
             return ''
 
     def includeFile(self, filename, class_=None, node=None):
+        # Get path candidate.
+        if not os.path.exists(filename):
+            for inc_dir in self.include_dirs:
+                if os.path.exists(os.path.join(inc_dir, filename)):
+                    filename = os.path.join(inc_dir, filename)
+                    break
         # Read in file.
         with open(filename, 'rb') as f:
             fcontents = f.read()
@@ -730,9 +741,55 @@ class HtmlHelper(object):
         
         return '\n'.join(txts)
 
+    def _loadSnippet(self, path, snippet_key):
+        result = []
+        current_key = None
+        current_lines = []
+        with open(path, 'rb') as f:
+            fcontents = f.read()
+        for line in fcontents.splitlines():
+            line = line.rstrip()  # Strip line ending and trailing whitespace.
+            if line.strip().startswith('//![') and line.strip().endswith(']'):
+                key = line.strip()[4:-1].strip()
+                if key == current_key:
+                    if key == snippet_key:
+                        result = current_lines
+                    current_lines = []
+                    current_key = None
+                else:
+                    current_key = key
+            elif current_key:
+                current_lines.append(line)
+        return result
+
+    def includeSnippet(self, line, class_=None, node=None):
+        filename, snippet_id = line, '<none>'
+        if '|' in line:
+            filename, snippet_id = line.split('|', 1)
+        # Get path candidate.
+        if not os.path.exists(filename):
+            for inc_dir in self.include_dirs:
+                if os.path.exists(os.path.join(inc_dir, filename)):
+                    filename = os.path.join(inc_dir, filename)
+                    break
+        snippet_lines = self._loadSnippet(filename, snippet_id)
+        # Read in file.
+        with open(filename, 'rb') as f:
+            fcontents = f.read()
+        # Write out file to same directory as filename.
+        with open(os.path.join(self.out_path, os.path.basename(filename)), 'wb') as f:
+            f.write(fcontents)
+        # Create HTML to output.
+        chunks = self._splitIncludeFile(fcontents)
+        next_lineno = 1
+        txt = self._formatCode('\n'.join(snippet_lines), next_lineno)
+        if not class_:
+            class_ = ''
+        return '<p class="' + class_ + '">' + txt + '</p>'
+
 
 class DocsCreator(object):
-    def __init__(self, error_logger, tree, tpl_path, out_path):
+    def __init__(self, error_logger, tree, tpl_path, out_path, include_dirs):
         print >>sys.stderr, 'Setting up Docs Creator'
         self.tree = tree
         self.error_logger = error_logger
@@ -746,6 +803,7 @@ class DocsCreator(object):
         self.out_path = os.path.join(out_path, 'files')
         if not os.path.exists(self.out_path):
             os.makedirs(self.out_path)
+        self.include_dirs = include_dirs
 
     def good(self):
         return True  # TODO(holtgrew): Actually look for errors!
@@ -772,7 +830,7 @@ class DocsCreator(object):
                                                time=time,  # for now.strftime()
                                                iterable=lambda x: type(x) is list,
                                                core=core,
-                                               html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename)),
+                                               html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename), self.include_dirs),
                                                json=json)
                 f.write(res.encode('utf-8'))
 
@@ -815,18 +873,18 @@ class DocsCreator(object):
                                              now=datetime.datetime.utcnow(),
                                              time=time,  # for now.strftime()
                                              core=core,
-                                             html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename)),
+                                             html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename), self.include_dirs),
                                              json=json)
                     f.write(res.encode('utf-8'))
                 print >>sys.stderr, '.',
             print >>sys.stderr
 
 
-def createDocs(error_logger, tree, tpl_path, out_path):
+def createDocs(error_logger, tree, tpl_path, out_path, include_dirs):
     """Fire off the documentation creation."""
     # Things that are created from templates, data JavaScript creation for the
     # client-side JS-driven search.
-    creator1 = TplDocsCreator(error_logger, tree, tpl_path, out_path)
+    creator1 = TplDocsCreator(error_logger, tree, tpl_path, out_path, include_dirs)
     creator1.copyTemplates()
     creator1.createRootIndexPage()
     creator1.createPanelSearchIndex()
@@ -834,7 +892,7 @@ def createDocs(error_logger, tree, tpl_path, out_path):
     #return 0
     # Actually create the documentation content; things that will be displayed
     # on the right hand frame.
-    creator2 = DocsCreator(error_logger, tree, tpl_path, out_path)
+    creator2 = DocsCreator(error_logger, tree, tpl_path, out_path, include_dirs)
     creator2.copyFiles()
     creator2.createIndexPages()
     creator2.createPages()

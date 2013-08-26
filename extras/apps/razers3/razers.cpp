@@ -313,10 +313,17 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> & options, Par
 
     // Need genome and reads (hg18.fa reads.fq)
     addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
-    setValidValues(parser, 0, getFileFormatExtensions(seqan::AutoSeqFormat()));
+	std::vector<std::string> seqExts = getFileFormatExtensions(seqan::AutoSeqFormat());
+#ifdef SEQAN_HAS_ZLIB
+    seqExts.push_back(".gz");
+#endif
+#ifdef SEQAN_HAS_BZIP2
+    seqExts.push_back(".bz2");
+#endif
+    setValidValues(parser, 0, seqExts);
     setHelpText(parser, 0, "A reference genome file.");
     addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, "READS", true));
-    setValidValues(parser, 1, getFileFormatExtensions(seqan::AutoSeqFormat()));
+    setValidValues(parser, 1, seqExts);
     setHelpText(parser, 1, "Either one (single-end) or two (paired-end) read files.");
 
     addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
@@ -353,7 +360,7 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> & options, Par
     addOption(parser, ArgParseOption("tr", "trim-reads", "Trim reads to given length. Default: off.", ArgParseOption::INTEGER));
     setMinValue(parser, "trim-reads", "14");
     addOption(parser, ArgParseOption("o", "output", "Mapping result filename. Default: <\\fIREADS FILE\\fP>.razers.", ArgParseOption::OUTPUTFILE));
-    setValidValues(parser, "output", "razers eland fa fasta gff sam afg");
+    setValidValues(parser, "output", ".razers .eland .fa .fasta .gff .sam .afg");
     addOption(parser, ArgParseOption("v", "verbose", "Verbose mode."));
     addOption(parser, ArgParseOption("vv", "vverbose", "Very verbose mode."));
 
@@ -514,6 +521,9 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> & options, Par
     addListItem(parser,
                 "\\fBrazers3\\fP \\fB-i\\fP \\fB96\\fP \\fB-tc\\fP \\fB12\\fP \\fB-o\\fP \\fBmapped.razers\\fP \\fBhg18.fa\\fP \\fBreads.fq\\fP",
                 "Map single-end reads with 4% error rate using 12 threads.");
+    addListItem(parser,
+                "\\fBrazers3\\fP \\fB-i\\fP \\fB95\\fP \\fB-no-gaps\\fP \\fB-o\\fP \\fBmapped.razers\\fP \\fBhg18.fa\\fP \\fBreads.fq.gz\\fP",
+                "Map single-end gzipped reads with 5% error rate and no indels.");
     addListItem(parser,
                 "\\fBrazers3\\fP \\fB-i\\fP \\fB94\\fP \\fB-rr\\fP \\fB95\\fP \\fB-tc\\fP \\fB12\\fP \\fB-ll\\fP \\fB280\\fP \\fB--le\\fP \\fB80\\fP \\fB-o\\fP \\fBmapped.razers\\fP \\fBhg18.fa\\fP \\fBreads_1.fq\\fP \\fBreads_2.fq\\fP",
                 "Map paired-end reads with up to 6% errors, 95% sensitivity, 12 threads, and only output aligned pairs with an outer distance of 200-360bp.");

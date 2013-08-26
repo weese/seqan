@@ -56,9 +56,13 @@ SEQAN_DEFINE_TEST(test_modifier_modified_string_metafunctions)
 
 SEQAN_DEFINE_TEST(test_modifier_modified_string_construct)
 {
-    typedef seqan::Dna5String                           TString;
-    typedef seqan::ModifiedString<TString>              TInnerModifiedString;
-    typedef seqan::ModifiedString<TInnerModifiedString> TOuterModifiedString;
+    typedef seqan::Dna5String                                       TString;
+    typedef seqan::ModifiedString<TString>                          TInnerModifiedString;
+    typedef seqan::ModifiedString<TString const>                    TInnerConstModifiedString;
+    typedef seqan::ModifiedString<TInnerModifiedString>             TOuterModifiedString;
+    typedef seqan::ModifiedString<TInnerModifiedString const>       TOuterConstModifiedString;
+    typedef seqan::ModifiedString<TInnerConstModifiedString>        TOuterModifiedConstString;
+    typedef seqan::ModifiedString<TInnerConstModifiedString const>  TOuterConstModifiedConstString;
 
     // Default Construction with one level.
     {
@@ -68,20 +72,52 @@ SEQAN_DEFINE_TEST(test_modifier_modified_string_construct)
     // Construct with underlying string and one level.
     {
         TString original;
-        TInnerModifiedString inner(original);
+        TInnerModifiedString        inner(original);
+        TInnerConstModifiedString   innerC(original);
+        TOuterModifiedString        outer(original);
+        TOuterModifiedConstString   outerC(original);
+        TOuterModifiedString        outer2(inner);
+        TOuterModifiedConstString   outer2C(innerC);
+//        TOuterModifiedString        outer3(innerC);     // should fail
     }
 
     // Construct with underlying string and two levels.
     {
+        // standard way
         TString original;
         TInnerModifiedString inner(original);
         TOuterModifiedString outer(inner);
+
+        TOuterConstModifiedString outer1(inner);
+        TOuterModifiedConstString outerC(original);
+        TOuterConstModifiedConstString outerCC(original);
     }
 
     // Construct with underlying string and two levels, direct construction.
     {
         TString original;
         TOuterModifiedString outer((TInnerModifiedString(original)));
+    }
+
+    {
+        typedef seqan::ModifiedString<seqan::Infix<TString>::Type> TModifiedString;
+
+        TString original;
+        TModifiedString modified(original);
+        TModifiedString modified2(suffix(original, 0));
+    }
+
+    {
+        TString original;
+        typedef seqan::Infix<TString const>::Type TFragment;
+        TFragment frag = infix(original, 0, 0);
+        
+        typedef seqan::ModifiedString<TFragment>            TInnerModifiedString;
+        typedef seqan::ModifiedString<TInnerModifiedString> TOuterModifiedString;
+
+        TInnerModifiedString modified(frag);
+        TOuterModifiedString modified2(frag);
+        TOuterModifiedString modified3(suffix(frag, 0));
     }
 }
 
@@ -181,20 +217,36 @@ SEQAN_DEFINE_TEST(test_modifier_modified_string_cascade)
 
 SEQAN_DEFINE_TEST(test_modifier_modified_iterator_construct)
 {
-    typedef seqan::Dna5String                                 TString;
-    typedef typename seqan::Iterator<seqan::Dna5String>::Type TIter;
-    typedef seqan::ModifiedIterator<TIter>                    TModifiedIter;
+    using namespace seqan;
+
+    typedef Dna5String                          TString;
+    typedef Iterator<TString, Standard>::Type   TIterator;
+    typedef Iterator<TString, Rooted>::Type     TRootedIterator;
+    typedef ModifiedIterator<TIterator>         TModifiedIterator;
+    typedef ModifiedIterator<TRootedIterator>   TModifiedRootedIterator;
 
     // Default construction.
     {
-        TModifiedIter itM;
+        TModifiedIterator itM;
     }
 
     // Construction from host iterator.
     {
         TString seq = "CGAT";
-        TIter it = begin(seq);
-        TModifiedIter itM(it);
+        TIterator it = begin(seq);
+        TModifiedIterator itM(it);
+    }
+    {
+        TString seq = "CGAT";
+        TModifiedIterator it(begin(seq, Standard()));
+        TModifiedIterator it2(begin(seq, Rooted()));
+        TModifiedRootedIterator itR(begin(seq, Rooted()));
+        TModifiedIterator it3(itR);
+    }
+    {
+        TModifiedIterator it;
+        TModifiedIterator it2(it);
+        ignoreUnusedVariableWarning(it2);
     }
 }
 

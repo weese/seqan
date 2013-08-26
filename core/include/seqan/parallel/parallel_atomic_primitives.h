@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 
 // SEQAN_NO_GENERATED_FORWARDS: No forwards are generated for this file.
@@ -60,6 +61,157 @@ namespace seqan {
 // ============================================================================
 // Functions
 // ============================================================================
+
+/*!
+ * @defgroup AtomicPrimitives Atomic Primitives
+ * @brief Portable atomic operations.
+ */
+
+/*!
+ * @fn AtomicPrimitives#atomicInc
+ * @headerfile <seqan/parallel.h>
+ * @brief Atomically increment an integer.
+ * 
+ * @signature TResult atomicInc(x);
+ * 
+ * @param[in,out] x An integer, by reference.
+ * 
+ * @return TResult The old value of $x$, <tt>TResult</tt> has the same type as <tt>x</tt>.
+ * 
+ * @section Remarks
+ * 
+ * This is equivalent to an atomic <tt>++x</tt>.
+ * 
+ * Note that atomic increments are limited to 32 bit and 64 bit with MSVC (64 bit is only available on 64 bit Windows).
+ * 
+ * You are responsible for correctly aligning <tt>x</tt> such that the atomic increment works on the hardware you
+ * target.
+ */
+
+/*!
+ * @fn AtomicPrimitives#atomicDec
+ * @headerfile <seqan/parallel.h>
+ * @brief Atomically decrement an integer.
+ * 
+ * @signature TResult atomicDec(x);
+ * 
+ * @param[in,out] x An integer, by reference.
+ * 
+ * @return TResult The old value of $x$, <tt>TResult</tt> has the same type as <tt>x</tt>.
+ * 
+ * @section Remarks
+ * 
+ * This is equivalent to an atomic <tt>--x</tt>.
+ * 
+ * Note that atomic decrements are limited to 32 bit and 64 bit with MSVC (64 bit is only available on 64 bit Windows).
+ * 
+ * You are responsible for correctly aligning <tt>x</tt> such that the atomic decrement works on the hardware you
+ * target.
+ */
+
+/*!
+ * @fn AtomicPrimitives#atomicAdd
+ * @headerfile <seqan/parallel.h>
+ * @brief Atomically add an integer to another integer.
+ * 
+ * @signature TResult atomicAdd(x, y)
+ * 
+ * @param[in,out] x Integer, by reference.
+ * @param[in]     y Integer to add to <tt>x</tt>.
+ * 
+ * @return TResult The old value of <tt>x</tt>.
+ * 
+ * @section Remarks
+ * 
+ * This is equivalent to an atomic <tt>x += y</tt>.
+ * 
+ * Note that atomic fetch-and-add is limited to 32 bit and 64 bit with MSVC (64 bit is only available on 64 bit
+ * Windows).
+ * 
+ * You are responsible for correctly aligning <tt>x</tt> such that the atomic increment works on the hardware you
+ * target.
+ */
+
+/*!
+ * @fn AtomicPrimitives#atomicOr
+ * @headerfile <seqan/parallel.h>
+ * @brief Atomically combine two integers with <tt>OR</tt> operation.
+ * 
+ * @signature TResult atomicOr(x, y);
+ * 
+ * @param[in,out] x Integer, by reference.
+ * @param[in]     y Integer to combine with <tt>OR</tt> operation.
+ * 
+ * @return TResult The old value of <tt>x</tt>, <tt>TResult</tt> is the type of <tt>x</tt>.
+ * 
+ * @section Remarks
+ * 
+ * This is equivalent to an atomic <tt>x |= y</tt>.
+ * 
+ * Atomic fetch-and-or for 64 bit integers is only available on 64 bit processors when targeting Intel.
+ * 
+ * Atomic fetch-and-or does not work in VS8 on 64 bit Windows, you can only use <tt>atomicOr()</tt> portably on 32 and
+ * 64 bit integers.
+ * 
+ * You are responsible for correctly aligning <tt>x</tt> such that the atomic increment works on the hardware you
+ * target.
+ */
+
+/*!
+ * @fn AtomicPrimitives#atomicXor
+ * @headerfile <seqan/parallel.h>
+ * @brief Atomically combine two integers with <tt>XOR</tt> operation.
+ * 
+ * @signature TResult atomicXor(x, y);
+ * 
+ * @param[in,out] x Integer, by reference.
+ * @param[in]     y Integer to combine with <tt>XOR</tt> operation.
+ * 
+ * @return TResult The old value of <tt>x</tt>, <tt>TResult</tt> is the type of <tt>x</tt>.
+ * 
+ * @section Remarks
+ * 
+ * This is equivalent to an atomic <tt>x ^= y</tt>.
+ * 
+ * Atomic fetch-and-xor fxor 64 bit integers is only available on 64 bit processxors when targeting Intel.
+ * 
+ * Atomic fetch-and-xor does not wxork in VS8 on 64 bit Windows, you can only use <tt>atomicXor()</tt> pxortably on 32 and
+ * 64 bit integers.
+ * 
+ * You are responsible fxor cxorrectly aligning <tt>x</tt> such that the atomic increment wxorks on the hardware you
+ * target.
+ */
+
+/*!
+ * @fn AtomicPrimitives#atomicCas
+ * @headerfile <seqan/parallel.h>
+ * @brief Atomic ompare-and-Swap operation.
+ * 
+ * @signature TResult atomicCas(x, cmp, y)
+ * 
+ * @param[in,out] x   Pointer to the integer to swap.
+ * @param[in,out] cmp Value to compare <tt>x</tt> with.
+ * @param[in]     y   Value to set <tt>x</tt> to if it is equal to <tt>cmp</tt>.
+ *
+ * @return TResult Returns the original value of x.
+ * 
+ * @section Remarks
+ * 
+ * The pseudo code for this is as follows:
+ * 
+ * @code
+ * atomic {
+ *     T val = *(&x);
+ *     if (val == cmp)
+ *         *(&x) = y;
+ *     return val;
+ * }
+ * 
+ * On Windows, atomic CAS is only available for 16, 32, and 64 bit integers, 64 bit is only available on 64 bit Windows.
+ * 
+ * You are responsible for correctly aligning <tt>x</tt> such that the atomic increment works on the hardware you
+ * target.
+ */
 
 // TODO(holtgrew): What about correct alignment?!
 
@@ -242,6 +394,11 @@ inline        __int64 atomicCas(       __int64 volatile & x,        __int64 cmp,
 inline       __uint64 atomicCas(      __uint64 volatile & x,       __uint64 cmp,       __uint64 y) { return _InterlockedCompareExchange64(reinterpret_cast<__int64 volatile *>(&x), y, cmp); }
 #endif  // #ifdef _WIN64
 
+
+template <typename T> inline T atomicPostInc(T volatile & x) { return atomicInc(x) - 1; }
+template <typename T> inline T atomicPostDec(T volatile & x) { return atomicDec(x) + 1; }
+
+
 #else  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
 
 // ----------------------------------------------------------------------------
@@ -251,11 +408,23 @@ inline       __uint64 atomicCas(      __uint64 volatile & x,       __uint64 cmp,
 template <typename T>
 inline T atomicInc(T volatile & x)
 {
+    return __sync_add_and_fetch(&x, 1);
+}
+
+template <typename T>
+inline T atomicPostInc(T volatile & x)
+{
     return __sync_fetch_and_add(&x, 1);
 }
 
 template <typename T>
 inline T atomicDec(T volatile & x)
+{
+    return __sync_add_and_fetch(&x, -1);
+}
+
+template <typename T>
+inline T atomicPostDec(T volatile & x)
 {
     return __sync_fetch_and_add(&x, -1);
 }
@@ -263,19 +432,19 @@ inline T atomicDec(T volatile & x)
 template <typename T1, typename T2>
 inline T1 atomicAdd(T1 volatile & x, T2 y)
 {
-    return __sync_fetch_and_add(&x, y);
+    return __sync_add_and_fetch(&x, y);
 }
 
 template <typename T>
 inline T atomicOr(T volatile & x, T y)
 {
-    return __sync_fetch_and_or(&x, y);
+    return __sync_or_and_fetch(&x, y);
 }
 
 template <typename T>
 inline T atomicXor(T volatile & x, T y)
 {
-    return __sync_fetch_and_xor(&x, y);
+    return __sync_xor_and_fetch(&x, y);
 }
 
 template <typename T>
@@ -285,7 +454,31 @@ inline T atomicCas(T volatile & x, T cmp, T y)
 }
 
 #endif  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
-	
+
+
+// ----------------------------------------------------------------------------
+// Wrappers to use faster non-synced functions in serial implementations
+// ----------------------------------------------------------------------------
+
+template <typename T>   inline T atomicInc(T          & x,             Serial)      { return ++x;                    }
+template <typename T>   inline T atomicPostInc(T      & x,             Serial)      { return x++;                    }
+template <typename T>   inline T atomicDec(T          & x,             Serial)      { return --x;                    }
+template <typename T>   inline T atomicPostDec(T      & x,             Serial)      { return x--;                    }
+template <typename T>   inline T atomicAdd(T          & x, T y,        Serial)      { return x = x + y;              }
+template <typename T>   inline T atomicOr (T          & x, T y,        Serial)      { return x = x | y;              }
+template <typename T>   inline T atomicXor(T          & x, T y,        Serial)      { return x = x ^ y;              }
+template <typename T>   inline T atomicCas(T          & x, T cmp, T y, Serial)      { if (x == cmp) x = y; return x; }
+ 
+template <typename T>   inline T atomicInc(T volatile & x,             Parallel)    { return atomicInc(x);           }
+template <typename T>   inline T atomicPostInc(T volatile & x,         Parallel)    { return atomicPostInc(x);       }
+template <typename T>   inline T atomicDec(T volatile & x,             Parallel)    { return atomicDec(x);           }
+template <typename T>   inline T atomicPostDec(T volatile & x,         Parallel)    { return atomicPostDec(x);       }
+template <typename T>   inline T atomicAdd(T volatile & x, T y,        Parallel)    { return atomicAdd(x, y);        }
+template <typename T>   inline T atomicOr (T volatile & x, T y,        Parallel)    { return atomicOr(x, y);         }
+template <typename T>   inline T atomicXor(T volatile & x, T y,        Parallel)    { return atomicXor(x, y);        }
+template <typename T>   inline T atomicCas(T volatile & x, T cmp, T y, Parallel)    { return atomicCas(x, cmp, y);   }
+
+
 } // namespace seqan
 
 #endif  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)

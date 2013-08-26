@@ -7,33 +7,67 @@ overkill (it can generate parser for some context-free grammars) and not
 as straightforward to use as writing a simple parser by hand.
 """
 
-import operator
 import itertools
+import operator
+import os.path
 import re
 import sys
 
+import termcolor
+
 import raw_doc
+import lexer
 import dox_tokens
 
 
-def printParserError(e):
-    """Print user-friendly error message for ParserError e."""
-    msg = e.msg
-    if not e.msg:
-        msg = 'Parse error'
-    if e.token:
+class MessagePrinter(object):
+    """Allows to pretty print warning and error messages.
+
+    @ivar ignore_dirs: The directories to ignore warnings for.
+    @ivar counts: Dict mapping 'error' and 'warning' to counts.
+    """
+
+    def __init__(self, ignore_dirs=[]):
+        self.ignore_dirs = [os.path.realpath(x) for x in ignore_dirs]
+        self.counts = {'error': 0, 'warning': 0}
+
+    def isIgnored(self, path):
+        """Return whether path is below one of the ignored directories."""
+        real_path = os.path.realpath(path)
+        return any([os.path.commonprefix([real_path, x]) == x for x in self.ignore_dirs])
+
+    def printTokenError(self, token, msg, level='error'):
+        """Print user-friendly error at location token."""
+        if self.isIgnored(token.file_name):
+            return  # Is ignored.
         # Print location and error message.
-        location = [e.token.file_name, e.token.lineno, e.token.column]
-        print >>sys.stderr, '%s:%d:%d: error: %s' % tuple(location + [msg])
+        location = (token.file_name, token.lineno + 1, token.column)
+        location_str = termcolor.colored('%s:%d:%d:' % location, 'white', attrs=['bold'])
+        error_str = termcolor.colored('%s:' % level, 'red', attrs=['bold'])
+        msg = termcolor.colored(msg, 'white', attrs=['bold'])
+        print >>sys.stderr, '%s %s %s' % (location_str, error_str, msg)
         # Load line with error and print it with an indicator of the error.
-        fcontents = open(e.token.file_name).read()
+        fcontents = open(token.file_name).read()
         lines = fcontents.splitlines()
-        if e.token.lineno > len(lines):
+        if token.lineno >= len(lines):
             return  # Invalid line number.
-        print >>sys.stderr, '%s' % lines[e.token.lineno].rstrip()
-        print >>sys.stderr, e.token.column * ' ' + '^'
-    else:
-        print >>sys.stderr, 'ERROR: %s' % msg
+        print >>sys.stderr, '%s' % lines[token.lineno].rstrip()
+        print >>sys.stderr, token.column * ' ' + termcolor.colored('^', 'green', attrs=['bold'])
+        self.counts[level] += 1
+
+    def printParserError(self, e):
+        """Print user-friendly error message for ParserError e."""
+        msg = e.msg
+        if not e.msg:
+            msg = 'Parse error'
+        if e.token:
+            self.printTokenError(e.token, e.msg)
+        else:
+            self.counts['error'] += 1
+            print >>sys.stderr, 'ERROR: %s' % msg
+
+    def printStats(self):
+        print >>sys.stderr, 'Issued %d warnings and %d errors.' % (self.counts['error'], self.counts['warning'])
 
 
 class ParserError(Exception):
@@ -283,7 +317,7 @@ class IncludeState(object):
         self.tokens = []
 
     def getEntry(self):
-        return raw_doc.RawInclude(raw_doc.RawText(self.tokens))
+        return raw_doc.RawInclude(self.tokens)
 
     def handle(self, token):
         if token.type in dox_tokens.LINE_BREAKS or token.type == 'EOF':
@@ -307,8 +341,7 @@ class SnippetState(object):
         self.name_tokens = []
 
     def getEntry(self):
-        return raw_doc.RawSnippet(raw_doc.RawText(self.path_tokens),
-                                  raw_doc.RawText(self.name_tokens))
+        return raw_doc.RawSnippet(self.path_tokens, self.name_tokens)
 
     def handle(self, token):
         if token.type in dox_tokens.LINE_BREAKS or token.type == 'EOF':
@@ -351,6 +384,7 @@ class TopLevelState(object):
                          'COMMAND_MACRO':        'macro',
                          'COMMAND_METAFUNCTION': 'metafunction',
                          'COMMAND_PAGE':         'page',
+                         'COMMAND_MAINPAGE':     'mainpage',
                          'COMMAND_DEFGROUP':     'group',
                          'COMMAND_VARIABLE':     'var',
                          'COMMAND_TAG':          'tag',
@@ -574,6 +608,22 @@ class PageState(GenericDocState):
                                      'COMMAND_INCLUDE', 'COMMAND_SNIPPET'])
 
 
+class MainPageState(GenericDocState):
+    """State for a documentation main page."""
+        
+    def __init__(self, parser):
+        GenericDocState.__init__(self, parser, raw_doc.RawMainPage, 'mainpage')
+        self.allowed_commands = set(['COMMAND_CODE',
+                                     'COMMAND_SEE', 'COMMAND_BRIEF',
+                                     'COMMAND_SECTION', 'COMMAND_SUBSECTION',
+                                     'COMMAND_INCLUDE', 'COMMAND_SNIPPET'])
+
+    def entered(self):
+        GenericDocState.entered(self)
+        self.name_read = True
+        self.name_tokens = [lexer.Token('IDENTIFIER', 'mainpage', 0, 0, 0)]
+
+
 class GroupState(GenericDocState):
     def __init__(self, parser):
         GenericDocState.__init__(self, parser, raw_doc.RawGroup, 'group')
@@ -695,6 +745,7 @@ class Parser(object):
             'metafunction': MetafunctionDocState(self),
             'concept':      ConceptDocState(self),
             'page':         PageState(self),
+            'mainpage':     MainPageState(self),
             'group':        GroupState(self),
             'var':          VariableState(self),
             'tag':          TagState(self),

@@ -37,13 +37,27 @@
 #ifndef SEQAN_HEADER_FIND_BASE_H
 #define SEQAN_HEADER_FIND_BASE_H
 
+// TODO(holtgrew): Should Finder implement the RootedIteratorConcept?
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
+
 //////////////////////////////////////////////////////////////////////////////
 // Tags
+
+// TODO(holtgrew): Define as Tag<FindInfix_>?
+
+/*!
+ * @tag FindInfix
+ * @headerfile <seqan/find.h>
+ *
+ * @brief Find needle as a substring of the hasystack (infix search).
+ *
+ * @signature struct FindInfix;
+ *
+ * @see FindPrefix
+ */
 
 /**
 .Tag.FindInfix:
@@ -56,7 +70,17 @@ namespace SEQAN_NAMESPACE_MAIN
  */
 struct FindInfix;
 
-	
+/*!
+ * @tag FindPrefix
+ * @headerfile <seqan/find.h>
+ *
+ * @brief Find needle as a substring of the hasystack (prefix search).
+ *
+ * @signature struct FindPrefix;
+ *
+ * @see FindInfix
+ */
+
 /**
 .Tag.FindPrefix:
 ..cat:Searching
@@ -69,6 +93,19 @@ struct FindInfix;
 struct FindPrefix;
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @mfn DefaultFinder
+ * @headerfile <seqan/find.h>
+ * @brief Default @link Finder @endlink specialization type.
+ *
+ * @signature DefaultFinder<THaystack>::Type;
+ *
+ * @tparam THaystack The given haystack type.
+ *
+ * @return Type The Finder specialization.  By default, this is <tt>void</tt> and <tt>EsaFindMlr</tt> is an @link Index
+ *              @endlink.
+ */
 
 /**
 .Metafunction.DefaultFinder:
@@ -85,6 +122,18 @@ struct DefaultFinder
 	typedef void Type;
 };
 
+/*!
+ * @mfn DefaultPattern
+ * @headerfile <seqan/find.h>
+ * @brief Default @link Pattern @endlink specialization type.
+ *
+ * @signature DefaultPattern<TNeedle>::Type;
+ *
+ * @tparam TNeedle The given needle type.
+ *
+ * @return Type Is <tt>void</tt> by default
+ */
+
 /**
 .Metafunction.DefaultPattern:
 ..cat:Searching
@@ -99,6 +148,19 @@ struct DefaultPattern
 {
 	typedef void Type;
 };
+
+/*!
+ * @mfn Finder#Haystack
+ * @headerfile <seqan/file.h>
+ * @brief Returns the haystack type of a @link Finder @endlink type.
+ *
+ * @signature Hasytack<TFinder>::Type;
+ *
+ * @tparam TFinder The finder to query.
+ *
+ * @return Type The haystack type of <tt>TFinder</tt>, i.e. <tt>THaystack</tt> for <tt>Finder&lt;THaystack,
+ *              TSpec&gt;</tt>.  This is an alias to function <tt>host()</tt> of the pattern function.
+ */
 
 /**
 .Metafunction.Haystack:
@@ -119,6 +181,18 @@ struct Haystack
 {
 	typedef typename Container<TFinder>::Type Type;
 };
+
+/*!
+ * @mfn Needle
+ * @headerfile <seqan/find.h>
+ * @brief Returns the needle type of a @link Pattern @endlink type.
+ *
+ * @signature Needle<TPattern>::Type;
+ *
+ * @tparam TPattern The pattern type to query.
+ *
+ * @return Type The needle type of <tt>TPattern</tt., i.e. <tt>TNeedle</tt> for <tt>Pattern&lt;TNeedle, TSpec&gt;</tt>.
+ */
 
 /**
 .Metafunction.Needle:
@@ -152,6 +226,47 @@ struct Needle<Segment<THost, TSpec> const>
 
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @fn find
+ * @headerfile <seqan/find.h>
+ * @brief Search for a @link Pattern @endlink in a @link Finder @endlink object.
+ *
+ * @signature bool find(finder, pattern[, k]);
+ *
+ * @param[in,out] finder  The @link Finder @endlink object to search through.  Types: @link Finder @endlink, @link
+ *                        RootedIteratorConcept @endlink.
+ * @param[in]     pattern The @link Pattern @endlink to search for.  For index finders, pattern can also be a text.
+ *                        Types: @link Pattern @endlink, @link TextConcept @endlink.
+ * @param[in]     k       Desired minimal score (for approximate matching).  <tt>k</tt> is a number <tt>&lt;= 0</tt>.
+ *                        Differences are deletions, insertions, and substitutions.
+ *
+ * @return bool <tt>true</tt> if an occurence was found and <tt>false</tt> if not.
+ *
+ * @section Remarks
+ *
+ * Repeated calls of this function iterate through all occurences of <tt>pattern</tt>.
+ *
+ * @section Examples
+ *
+ * The following example shows how one can search online for a pattern in a haystack.  Note that it is neccessary to
+ * reset the finder befor searching for another pattern.
+ *
+ * @include demos/find/finder_online.cpp
+ *
+ * The output is as follows.
+ *
+ * @include demos/find/finder_online.cpp.stdout
+ *
+ * In contrast to the example above the code below shows how one can use a Finder with an index as base.  Again, note
+ * that it is neccessary to reset the finder befor searching for another pattern.
+ *
+ * @include demos/find/finder_index.cpp
+ *
+ * The output is as follows.
+ *
+ * @include demos/find/finder_index.cpp.stdout
+ */
 
 /**
 .Function.find:
@@ -188,24 +303,36 @@ struct Needle<Segment<THost, TSpec> const>
 ...remarks:Leave empty for online pattern matching (see @Class.Pattern@).
 ...remarks:If $THaystack$ is an @Class.Index@, then $TSpec$ specifies the index search algorithm.
 ..remarks:$position(finder)$ returns the position of the current hit in the haystack.
-If $THaystack$ is a set of strings or an index of a set of strings, then $position(finder)$ returns a @Class.Pair@ $(hayNo, pos)$,
+If $THaystack$ is a set of strings or an index of a set of strings, then $position(finder)$ returns a @Class.Pair@$(hayNo, pos)$,
 in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
 ..remarks:To reset the finder object and use it on another text or different text position, use $clear(finder)$
 Note that $clear(finder)$ doesn't move the text iterator. To start the search from the beginning or somewhere else in the text, use
 @Function.goBegin@ or @Function.setPosition@.
-..example.text:The following example shows how to restart a search from the beginning of a text.
-..example.code:
-CharString hstck = "I spy with my little eye something that is yellow";
-Finder<CharString> finder(hstck);
-
-Pattern<CharString, Horspool> p1("y");
-findAll(finder, p1);
-
-goBegin(finder);    // move Finder to the beginning of the text
-clear(finder);      // reset Finder
-
-Pattern<CharString, Horspool> p2("t");
-findAll(finder, p2);
+..example
+...text:The following example shows how one can search online for a pattern in a haystack. Note that it is neccessary to reset the finder befor searching for another pattern.
+...file:demos/find/finder_online.cpp
+...output:Hit at position: 4
+Hit at position: 12
+Hit at position: 22
+Hit at position: 43
+Hit at position: 8
+Hit at position: 16
+Hit at position: 17
+Hit at position: 29
+Hit at position: 35
+Hit at position: 38
+...text:In contrast to the example above the code below shows how one can use a Finder with an index as base. Again, note that it is neccessary to reset the finder befor searching for another pattern.
+...file:demos/find/finder_index.cpp
+...output:Hit at position: 12
+Hit at position: 4
+Hit at position: 22
+Hit at position: 43
+Hit at position: 38
+Hit at position: 8
+Hit at position: 35
+Hit at position: 29
+Hit at position: 17
+Hit at position: 16
 ..include:seqan/find.h
 */
 
@@ -228,16 +355,13 @@ findAll(finder, p2);
  * 
  * @section Remarks
  * 
- * <tt>position(finder)</tt> returns the position of the current hit in the
- * haystack. If <tt>THaystack</tt> is a set of strings or an index of a set of
- * strings, then <tt>position(finder)</tt> returns a @link Pair @endlink
- * <tt>(hayNo, pos)</tt>, in which <tt>hayNo</tt> is the haystack index and
- * <tt>pos</tt> the local position of the hit.
+ * <tt>position(finder)</tt> returns the position of the current hit in the haystack.  If <tt>THaystack</tt> is a set of
+ * strings or an index of a set of strings, then <tt>position(finder)</tt> returns a @link Pair @endlink <tt>(hayNo,
+ * pos)</tt>, in which <tt>hayNo</tt> is the haystack index and <tt>pos</tt> the local position of the hit.
  * 
- * To reset the finder object and use it on another text or different text
- * position, use <tt>clear(finder)</tt> Note that <tt>clear(finder)</tt> doesn't
- * move the text iterator. To start the search from the beginning or somewhere
- * else in the text, use @link goBegin @endlink or @link setPosition @endlink.
+ * To reset the finder object and use it on another text or different text position, use <tt>clear(finder)</tt> Note
+ * that <tt>clear(finder)</tt> doesn't move the text iterator. To start the search from the beginning or somewhere else
+ * in the text, use @link Finder#goBegin @endlink or @link Finder#setPosition @endlink.
  * 
  * @section Examples
  * 
@@ -280,6 +404,20 @@ public:
 	TSize data_length;
 	bool _needReinit;					// if true, the Pattern needs to be reinitialized
 	bool _beginFind_called;					// if false, then findBegin was not yet called for this match position (see findBegin default implementation)
+
+/*!
+ * @fn Finder::Finder
+ * @brief Constructor
+ *
+ * @signature Finder::Finder();
+ * @signature Finder::Finder(other);
+ * @signature Finder::Finder(haystack);
+ * @signature Finder::Finder(iter);
+ *
+ * @param[in] other    Other Finder of the same type (copy constructor).
+ * @param[in] haystack The haystack to work on, of type <tt>THaystack</tt>.
+ * @param[in] iter     The iter to work on on, either const or non-const.
+ */
 
 /**
 .Memfunc.Finder#Finder:
@@ -430,6 +568,17 @@ _setFinderLength(Finder<THaystack, TSpec> & me,
 ///.Function.beginPosition.param.object.type:Class.Finder
 ///.Function.beginPosition.class:Class.Finder
 
+/*!
+ * @fn Finder#beginPosition
+ * @brief Return begin position of match.
+ *
+ * @signature TPosition beginPosition(finder);
+ *
+ * @param[in] finder The Finder to query.
+ *
+ * @return TPosition The begin position of the finder.  TPosition is the position type of THaystack.
+ */
+
 template <typename THaystack, typename TSpec>
 inline typename Position<THaystack>::Type 
 beginPosition(Finder<THaystack, TSpec> & me)
@@ -449,6 +598,19 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.begin.param.object.type:Class.Finder
 ///.Function.begin.class:Class.Finder
+
+/*!
+ * @fn Finder#begin
+ * @brief Return begin iterator of the match in the haystack.
+ *
+ * @signature TIter begin(finder[, tag]);
+ *
+ * @param[in] finder The Finder to query.
+ * @param[in] tag    The tag to select the iterator type.
+ *
+ * @return TIter The iterator to the begin of the match in the haystack.  TIter is the same type as returned by
+ *               <tt>begin(haystack[, tag])</tt> where <tt>haystack</tt> is the haystack.
+ */
 
 template <typename THaystack, typename TSpec, typename TTag>
 inline typename Iterator<THaystack, Tag<TTag> const>::Type
@@ -472,6 +634,17 @@ SEQAN_CHECKPOINT
 ///.Function.endPosition.param.object.type:Class.Finder
 ///.Function.endPosition.class:Class.Finder
 
+/*!
+ * @fn Finder#endPosition
+ * @brief Return end position of match.
+ *
+ * @signature TPosition endPosition(finder);
+ *
+ * @param[in] finder The Finder to query.
+ *
+ * @return TPosition The end position of the finder.  TPosition is the position type of THaystack.
+ */
+
 template <typename THaystack, typename TSpec>
 inline typename Position<THaystack>::Type 
 endPosition(Finder<THaystack, TSpec> & me)
@@ -491,6 +664,19 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.end.param.object.type:Class.Finder
 ///.Function.end.class:Class.Finder
+
+/*!
+ * @fn Finder#end
+ * @brief Return end iterator of the match in the haystack.
+ *
+ * @signature TIter end(finder[, tag]);
+ *
+ * @param[in] finder The Finder to query.
+ * @param[in] tag    The tag to select the iterator type.
+ *
+ * @return TIter The iterator to the end of the match in the haystack.  TIter is the same type as returned by
+ *               <tt>end(haystack[, tag])</tt> where <tt>haystack</tt> is the haystack.
+ */
 
 template <typename THaystack, typename TSpec, typename TTag>
 inline typename Iterator<THaystack, Tag<TTag> const>::Type
@@ -514,6 +700,15 @@ SEQAN_CHECKPOINT
 ///.Function.length.param.object.type:Class.Finder
 ///.Function.length.class:Class.Finder
 
+/*!
+ * @fn Finder#length
+ * @brief Return the length of the match.
+ *
+ * @signature TSize length(finder);
+ *
+ * @param[in] finder The finder to query for its match length.
+ */
+
 template <typename THaystack, typename TSpec>
 inline typename Size<THaystack>::Type 
 length(Finder<THaystack, TSpec> & me)
@@ -530,6 +725,22 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * @fn Finder#infix
+ * @brief Returns the segment of the last found match in the haystack.
+ *
+ * @signature TInfix infix(finder);
+ *
+ * @param[in] finder The Finder to query.
+ *
+ * @return TInfix The @link SegmentableConcept#Infix @endlink of the match in the haystack.
+ *
+ * @section Remarks
+ *
+ * This function works only correct if the begin position of the mtach was already found, see @link Finder#findBegin
+ * @endlink.
+ */
 
 /**
 .Function.Finder#infix:
@@ -687,6 +898,15 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
+/*!
+ * @fn Finder#goBegin
+ * @brief Go to the beginning of the text.
+ *
+ * @signature void goBegin(finder);
+ *
+ * @param[in] finder The finder to reset to the beginning of the text.
+ */
+
 /**
 .Function.goBegin
 ..signature:goBegin(finder)
@@ -702,6 +922,15 @@ SEQAN_CHECKPOINT
 	//_finderSetNonEmpty(me);
 	goBegin(hostIterator(me));
 }
+
+/*!
+ * @fn Finder#goEnd
+ * @brief Go to the end of the text.
+ *
+ * @signature void goEnd(finder);
+ *
+ * @param[in] finder The finder to reset to the end of the text.
+ */
 
 /**
 .Function.goEnd
@@ -720,6 +949,17 @@ SEQAN_CHECKPOINT
 }
 
 //____________________________________________________________________________
+
+/*!
+ * @fn Finder#position
+ * @brief Return current position of the finder in the haystack.
+ *
+ * @signature TPosition position(finder);
+ * 
+ * @param[in] finder The Finder to query.
+ *
+ * @return TPosition The current position.  TPosition is the position type of the haystack.
+ */
 
 template <typename THaystack, typename TSpec>
 inline typename Position<Finder<THaystack, TSpec> >::Type
@@ -740,6 +980,17 @@ SEQAN_CHECKPOINT
 }
 
 //____________________________________________________________________________
+
+/*!
+ * @fn Finder#setPosition
+ * @brief Sets the position of a finder.
+ *
+ * @signature void setPosition(finder, pos);
+ *
+ * @param[in,out] finder The Findre to set the position for.
+ * @param[in]     pos    The position to set the finder to.
+ */
+
 /**
 .Function.setPosition:
 ..cat:Searching
@@ -847,6 +1098,15 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
+/*!
+ * @fn Finder#setHaystack
+ * @brief Sets the hasytack of a @link Finder @endlink object.
+ *
+ * @signature void setHaystack(finder, haystack);
+ *
+ * @param[in,out] finder   The finder to set the haystack for.
+ * @param[in]     haystack The haystack to set.
+ */
 
 /**
 .Function.setHaystack:
@@ -866,6 +1126,17 @@ inline void
 setHaystack(Finder<THaystack, TSpec> &obj, THaystack const &hstk) {
 	setHost(obj, hstk);
 }
+
+/*!
+ * @fn Finder#haystack
+ * @brief Returns the haystack of a Finder.
+ *
+ * @signature THaystack haystack(finder);
+ *
+ * @param[in] finder The Finder to query for its haystack.
+ *
+ * @return THaystack The result type can be retrieved using @link Finder#Haystack @endlink.
+ */
 
 /**
 .Function.haystack:
@@ -978,6 +1249,6 @@ struct DefaultGetIteratorSpec< Finder<THaystack, TSpec> const>:
 
 //////////////////////////////////////////////////////////////////////////////
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

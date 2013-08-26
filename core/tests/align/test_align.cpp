@@ -59,9 +59,26 @@
 #include "test_align_global_alignment_specialized.h"
 
 #include "test_align_alignment_operations.h"
+#include "test_evaluate_alignment.h"
+
+SEQAN_DEFINE_TEST(test)
+{
+    using namespace seqan;
+    DnaString seqH = "TTTTAGCTTGCCTACCCCGTGAGTTCTGCACTCCAACGGCTATCGTAGTAAGGGGCTAAGATCCCGACTAGGAGGTGAAACACCGATGGATAGGTTACCAAAGTGATTTCACTCTATCCTCCCGTTCTTCATTCCCCAGGCAGTGACCTAAGACATCACCCAGTGGTGGCATTCCTGGAGAG";
+    DnaString seqV = "TTTTAGCTTGCCTACCCCGTGAGTTCTGCACTCCAACGGCTATCGTAGTAAGGGGCTCAGATCCCGACTAGGAGGTGAACACCGATGGATAGGTTACCAAAGGATTTCACGCTATCTTCCCGTTCTTCAATCCCCAGGCAGTGACCTAAGACATCTACCCAGGTGGTGGCATTCCTGGAGG";
+
+    Gaps<DnaString> gapsH(seqH);
+    Gaps<DnaString> gapsV(seqV);
+
+    globalAlignment(gapsH, gapsV, Score<int, EditDistance>(), AlignConfig<true, false, false, true>(), Gotoh());
+    std::cout << gapsH << std::endl;
+
+    std::cout << "\n" << gapsV << std::endl;
+}
 
 SEQAN_BEGIN_TESTSUITE(test_align)
 {
+//    SEQAN_CALL_TEST(test);
     // -----------------------------------------------------------------------
     // Test Gaps Data Structures.
     // -----------------------------------------------------------------------
@@ -89,6 +106,8 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_align_gaps_array_gaps_clipping_gaps_leading);
     SEQAN_CALL_TEST(test_align_gaps_array_gaps_clipping_gaps_trailing);
     SEQAN_CALL_TEST(test_align_gaps_array_gaps_clear_clipping);
+    SEQAN_CALL_TEST(test_align_gaps_array_gaps_copy_gaps);
+    SEQAN_CALL_TEST(test_align_gaps_array_gaps_copy_clipping);
 
     SEQAN_CALL_TEST(test_align_gaps_anchor_gaps_metafunctions);
     SEQAN_CALL_TEST(test_align_gaps_anchor_constructor_and_source);
@@ -113,6 +132,8 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_align_gaps_anchor_gaps_clipping_gaps_leading);
     SEQAN_CALL_TEST(test_align_gaps_anchor_gaps_clipping_gaps_trailing);
     SEQAN_CALL_TEST(test_align_gaps_anchor_gaps_clear_clipping);
+    SEQAN_CALL_TEST(test_align_gaps_anchor_gaps_copy_gaps);
+    SEQAN_CALL_TEST(test_align_gaps_anchor_gaps_copy_clipping);
 
     // -----------------------------------------------------------------------
     // Test Gaps Iterators.
@@ -452,6 +473,9 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_alignment_algorithms_fragments_gaps_semi_global_affine);
     SEQAN_CALL_TEST(test_alignment_algorithms_score_semi_global_affine);
 
+    // Global Alignment with Differnt Container Types
+    SEQAN_CALL_TEST(test_alignment_algorithms_global_different_container);
+
     // Local Alignment.
     SEQAN_CALL_TEST(test_alignment_algorithms_align_local_linear);
     SEQAN_CALL_TEST(test_alignment_algorithms_gaps_local_linear);
@@ -521,6 +545,9 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_align_global_alignment_banded_shorter_interfaces_linear);
     SEQAN_CALL_TEST(test_align_global_alignment_banded_shorter_interfaces_affine);
 
+    // Global Alignment with Differnt Container Types
+    SEQAN_CALL_TEST(test_alignment_algorithms_global_banded_different_container);
+
     // Local Alignment.
     SEQAN_CALL_TEST(test_alignment_algorithms_align_local_linear_banded);
     SEQAN_CALL_TEST(test_alignment_algorithms_gaps_local_linear_banded);
@@ -573,6 +600,7 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     // -----------------------------------------------------------------------
 
     SEQAN_CALL_TEST(test_align_integrate_align);
+    SEQAN_CALL_TEST(test_align_integrate_align_infix_of_infix);
 
     // -----------------------------------------------------------------------
     // Test Printing.
@@ -582,5 +610,11 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     SEQAN_CALL_TEST(test_align_stream_gaps_stream);
     SEQAN_CALL_TEST(test_align_stream_align_write);
     SEQAN_CALL_TEST(test_align_stream_align_stream);
+
+    // -----------------------------------------------------------------------
+    // Test Alignment Evaluation
+    // -----------------------------------------------------------------------
+
+    SEQAN_CALL_TEST(test_align_compute_alignment_stats);
 }
 SEQAN_END_TESTSUITE

@@ -101,25 +101,26 @@ struct SeqIOFileFormat_
 class SequenceStreamImpl_
 {
 public:
+
 #if SEQAN_HAS_ZLIB
-    std::auto_ptr<Stream<GZFile> > _gzStream;
+    std::SEQAN_AUTO_PTR_NAME<Stream<GZFile> > _gzStream;
 #endif  // #if SEQAN_HAS_ZLIB
 #if SEQAN_HAS_BZIP2
-    std::auto_ptr<Stream<BZ2File> > _bz2Stream;
+    std::SEQAN_AUTO_PTR_NAME<Stream<BZ2File> > _bz2Stream;
 #endif  // #if SEQAN_HAS_BZIP2
-    std::auto_ptr<String<char, MMap<> > > _mmapString;
+    std::SEQAN_AUTO_PTR_NAME<String<char, MMap<> > > _mmapString;
 
     // TODO(holtgrew): We could get rid of some of these with type erasure on streams and record readers. Would this be enough?
 
 #if SEQAN_HAS_ZLIB
-    std::auto_ptr<RecordReader<Stream<GZFile>, SinglePass<> > > _gzReader;
+    std::SEQAN_AUTO_PTR_NAME<RecordReader<Stream<GZFile>, SinglePass<> > > _gzReader;
 #endif  // #if SEQAN_HAS_ZLIB
 #if SEQAN_HAS_BZIP2
-    std::auto_ptr<RecordReader<Stream<BZ2File>, SinglePass<> > > _bz2Reader;
+    std::SEQAN_AUTO_PTR_NAME<RecordReader<Stream<BZ2File>, SinglePass<> > > _bz2Reader;
 #endif  // #if SEQAN_HAS_BZIP2
-    std::auto_ptr<RecordReader<String<char, MMap<> >, SinglePass<StringReader> > > _mmapReaderSinglePass;
-    std::auto_ptr<RecordReader<String<char, MMap<> >, DoublePass<StringReader> > > _mmapReaderDoublePass;
-    std::auto_ptr<RecordReader<std::istream, SinglePass<> > > _istreamReader;
+    std::SEQAN_AUTO_PTR_NAME<RecordReader<String<char, MMap<> >, SinglePass<StringReader> > > _mmapReaderSinglePass;
+    std::SEQAN_AUTO_PTR_NAME<RecordReader<String<char, MMap<> >, DoublePass<StringReader> > > _mmapReaderDoublePass;
+    std::SEQAN_AUTO_PTR_NAME<RecordReader<std::istream, SinglePass<> > > _istreamReader;
 
     CharString _filename;
     SeqIOFileFormat_::Type _fileFormat;
@@ -555,7 +556,8 @@ public:
             {
                 for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_mmapReaderSinglePass); ++i)
                 {
-                    res = seqan::readRecord(id, seq, qual, *_mmapReaderSinglePass, tag);
+                    if ((res = seqan::readRecord(id, seq, qual, *_mmapReaderSinglePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                     appendValue(quals, qual);
@@ -566,7 +568,8 @@ public:
             {
                 for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_mmapReaderDoublePass); ++i)
                 {
-                    res = seqan::readRecord(id, seq, qual, *_mmapReaderDoublePass, tag);
+                    if ((res = seqan::readRecord(id, seq, qual, *_mmapReaderDoublePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                     appendValue(quals, qual);
@@ -581,7 +584,8 @@ public:
         {
             for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_gzReader); ++i)
             {
-                res = seqan::readRecord(id, seq, qual, *_gzReader, tag);
+                if ((res = seqan::readRecord(id, seq, qual, *_gzReader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
                 appendValue(quals, qual);
@@ -596,7 +600,8 @@ public:
         {
             for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_bz2Reader); ++i)
             {
-                res = seqan::readRecord(id, seq, qual, *_bz2Reader, tag);
+                if ((res = seqan::readRecord(id, seq, qual, *_bz2Reader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
                 appendValue(quals, qual);
@@ -634,7 +639,8 @@ public:
             {
                 for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_mmapReaderSinglePass); ++i)
                 {
-                    res = seqan::readRecord(id, seq, *_mmapReaderSinglePass, tag);
+                    if ((res = seqan::readRecord(id, seq, *_mmapReaderSinglePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                 }
@@ -644,7 +650,8 @@ public:
             {
                 for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_mmapReaderDoublePass); ++i)
                 {
-                    res = seqan::readRecord(id, seq, *_mmapReaderDoublePass, tag);
+                    if ((res = seqan::readRecord(id, seq, *_mmapReaderDoublePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                 }
@@ -658,7 +665,8 @@ public:
         {
             for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_gzReader); ++i)
             {
-                res = seqan::readRecord(id, seq, *_gzReader, tag);
+                if ((res = seqan::readRecord(id, seq, *_gzReader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
             }
@@ -672,7 +680,8 @@ public:
         {
             for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_bz2Reader); ++i)
             {
-                res = seqan::readRecord(id, seq, *_bz2Reader, tag);
+                if ((res = seqan::readRecord(id, seq, *_bz2Reader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
             }
@@ -716,9 +725,10 @@ public:
         case SeqIOFileType_::FILE_TYPE_TEXT:
             if (!_hintDoublePass)
             {
-                while (!seqan::atEnd(*_mmapReaderSinglePass))
+                while (!seqan::atEnd(*_mmapReaderSinglePass) && res == 0)
                 {
-                    res = seqan::readRecord(id, seq, qual, *_mmapReaderSinglePass, tag);
+                    if ((res = seqan::readRecord(id, seq, qual, *_mmapReaderSinglePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                     appendValue(quals, qual);
@@ -727,9 +737,10 @@ public:
             }
             else
             {
-                while (!seqan::atEnd(*_mmapReaderDoublePass))
+                while (!seqan::atEnd(*_mmapReaderDoublePass) && res == 0)
                 {
-                    res = seqan::readRecord(id, seq, qual, *_mmapReaderDoublePass, tag);
+                    if ((res = seqan::readRecord(id, seq, qual, *_mmapReaderDoublePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                     appendValue(quals, qual);
@@ -742,9 +753,10 @@ public:
         case SeqIOFileType_::FILE_TYPE_GZ:
         case SeqIOFileType_::FILE_TYPE_GZ_DIRECT:
         {
-            while (!seqan::atEnd(*_gzReader))
+            while (!seqan::atEnd(*_gzReader) && res == 0)
             {
-                res = seqan::readRecord(id, seq, qual, *_gzReader, tag);
+                if ((res = seqan::readRecord(id, seq, qual, *_gzReader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
                 appendValue(quals, qual);
@@ -757,9 +769,10 @@ public:
 #if SEQAN_HAS_BZIP2
         case SeqIOFileType_::FILE_TYPE_BZ2:
         {
-            while (!seqan::atEnd(*_bz2Reader))
+            while (!seqan::atEnd(*_bz2Reader) && res == 0)
             {
-                res = seqan::readRecord(id, seq, qual, *_bz2Reader, tag);
+                if ((res = seqan::readRecord(id, seq, qual, *_bz2Reader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
                 appendValue(quals, qual);
@@ -794,9 +807,10 @@ public:
         case SeqIOFileType_::FILE_TYPE_TEXT:
             if (!_hintDoublePass)
             {
-                while (!seqan::atEnd(*_mmapReaderSinglePass))
+                while (!seqan::atEnd(*_mmapReaderSinglePass) && res == 0)
                 {
-                    res = seqan::readRecord(id, seq, *_mmapReaderSinglePass, tag);
+                    if ((res = seqan::readRecord(id, seq, *_mmapReaderSinglePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                 }
@@ -804,9 +818,10 @@ public:
             }
             else
             {
-                while (!seqan::atEnd(*_mmapReaderDoublePass))
+                while (!seqan::atEnd(*_mmapReaderDoublePass) && res == 0)
                 {
-                    res = seqan::readRecord(id, seq, *_mmapReaderDoublePass, tag);
+                    if ((res = seqan::readRecord(id, seq, *_mmapReaderDoublePass, tag)) != 0)
+                        continue;
                     appendValue(ids, id);
                     appendValue(seqs, seq);
                 }
@@ -818,9 +833,11 @@ public:
         case SeqIOFileType_::FILE_TYPE_GZ:
         case SeqIOFileType_::FILE_TYPE_GZ_DIRECT:
         {
-            while (!seqan::atEnd(*_gzReader))
+            while (!seqan::atEnd(*_gzReader) && res == 0)
             {
-                res = seqan::readRecord(id, seq, *_gzReader, tag);
+                if ((res = seqan::readRecord(id, seq, *_gzReader, tag)) != 0)
+                    continue;
+
                 appendValue(ids, id);
                 appendValue(seqs, seq);
             }
@@ -832,9 +849,10 @@ public:
 #if SEQAN_HAS_BZIP2
         case SeqIOFileType_::FILE_TYPE_BZ2:
         {
-            while (!seqan::atEnd(*_bz2Reader))
+            while (!seqan::atEnd(*_bz2Reader) && res == 0)
             {
-                res = seqan::readRecord(id, seq, *_bz2Reader, tag);
+                if ((res = seqan::readRecord(id, seq, *_bz2Reader, tag)) != 0)
+                    continue;
                 appendValue(ids, id);
                 appendValue(seqs, seq);
             }

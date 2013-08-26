@@ -38,6 +38,8 @@
 // prefix-sum table are stored.
 // ============================================================================
 
+//SEQAN_NO_DDDOC:do not generate documentation for this file
+
 #ifndef INDEX_FM_LF_TABLE_H_
 #define INDEX_FM_LF_TABLE_H_
 

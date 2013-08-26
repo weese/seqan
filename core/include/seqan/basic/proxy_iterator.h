@@ -50,6 +50,18 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/*!
+ * @class IteratorProxy
+ * @extends Proxy
+ * @headerfile <seqan/basic.h>
+ * @brief Proxy that is implemented by an iterator.
+ *
+ * @signature template <typename TIterator>
+ *            class Proxy<IteratorProxy<TIterator> >;
+ *
+ * @tparam TIterator The iterator to store internally.
+ */
+
 /**
 .Spec.Iterator Proxy
 ..cat:Proxies
@@ -101,7 +113,7 @@ public:
     // ------------------------------------------------------------------------
 
     Proxy const &
-    operator=(Proxy const & _other)
+    operator=(Proxy const & _other) const
     {
         SEQAN_CHECKPOINT;
         assignValue(data_iterator, getValue(_other.data_iterator));
@@ -109,7 +121,7 @@ public:
     }
 
     Proxy const &
-    operator=(TValue_ const & _value)
+    operator=(TValue_ const & _value) const
     {
         SEQAN_CHECKPOINT;
         assignValue(data_iterator, _value);
@@ -119,12 +131,6 @@ public:
     // ------------------------------------------------------------------------
     // Type conversion operators;  Have to be defined in class.
     // ------------------------------------------------------------------------
-
-    operator TAccessorNotConst_()
-    {
-        SEQAN_CHECKPOINT;
-        return getValue(data_iterator);
-    }
 
     operator TAccessorNotConst_() const
     {
@@ -264,17 +270,36 @@ iter(Proxy<IteratorProxy<TIterator> > const & me)
 // TODO(holtgrew): Deletion candidate, why should a proxy provide the iterator interface?
 
 template <typename TIterator>
-typename GetValue<Proxy<IteratorProxy<TIterator> > >::Type
+inline typename GetValue<Proxy<IteratorProxy<TIterator> > >::Type
 getValue(Proxy<IteratorProxy<TIterator> > & me)
 {
     return getValue(iter(me));
 }
 
 template <typename TIterator>
-typename GetValue<Proxy<IteratorProxy<TIterator> > const>::Type
+inline typename GetValue<Proxy<IteratorProxy<TIterator> > const>::Type
 getValue(Proxy<IteratorProxy<TIterator> > const & me)
 {
     return getValue(iter(me));
+}
+
+// ------------------------------------------------------------------------
+// Function assign()
+// ------------------------------------------------------------------------
+
+// additional const definitions (that are not covered by default assign() definition)
+template <typename TIterator, typename TValue>
+inline void
+assign(Proxy<IteratorProxy<TIterator> > const & me, TValue & value)
+{
+    me = value;
+}
+
+template <typename TIterator, typename TValue>
+inline void
+assign(Proxy<IteratorProxy<TIterator> > const & me, TValue const & value)
+{
+    me = value;
 }
 
 // ----------------------------------------------------------------------------
@@ -282,7 +307,8 @@ getValue(Proxy<IteratorProxy<TIterator> > const & me)
 // ----------------------------------------------------------------------------
 
 template <typename TStream, typename TIterator>
-TStream & operator<<(TStream & stream, Proxy<IteratorProxy<TIterator> > const & it)
+inline TStream &
+operator<<(TStream & stream, Proxy<IteratorProxy<TIterator> > const & it)
 {
     stream << getValue(it);
     return stream;

@@ -54,6 +54,34 @@ namespace seqan
 // Class ModView
 // --------------------------------------------------------------------------
 
+/*!
+ * @class ModViewModifiedIterator
+ * @extends ModifiedIterator
+ * @headerfile <seqan/modifier.h>
+ *
+ * @brief Transforms the character of a host using a custom functor.
+ *
+ * @signature template <typename THost, typename TFunctor>
+ *            class ModifiedIterator<THost, ModView<TFunctor> >;
+ *
+ * @tparam THost    The host iterator.
+ * @tparam TFunctor A unary functor type.
+ */
+
+/*!
+ * @class ModViewModifiedString
+ * @extends ModifiedString
+ * @headerfile <seqan/modifier.h>
+ *
+ * @brief Transforms the character of a host using a custom functor.
+ *
+ * @signature template <typename THost, typename TFunctor>
+ *            class ModifiedString<THost, ModView<TFunctor> >;
+ *
+ * @tparam THost    The host iterator.
+ * @tparam TFunctor A unary functor type.
+ */
+
 /**
 .Spec.ModView:
 ..summary:Transforms the characters of the $THost$ string/iterator using a custom function.
@@ -85,25 +113,24 @@ class ModifiedIterator<THost, ModView<TFunctor> >
 public:
     typedef typename Cargo<ModifiedIterator>::Type TCargo_;
 
-    Holder<THost, Simple>   _host;
+    THost _host;
     TCargo_ _cargo;
 
-    mutable typename Value<ModifiedIterator>::Type	tmp_value;
+    mutable typename Value<ModifiedIterator>::Type tmp_value;
 
-    ModifiedIterator() : _host(), _cargo()
+    ModifiedIterator()
+    {}
+
+    template <typename TOtherHost>
+    ModifiedIterator(ModifiedIterator<TOtherHost, ModView<TFunctor> > & origin):
+			_host(origin._host), _cargo(origin._cargo)
     {}
 
     explicit
-    ModifiedIterator(THost const & host) : _host(host), _cargo()
+    ModifiedIterator(THost const & host) : _host(host)
     {}
 
-    ModifiedIterator(THost const & host, TFunctor const & functor) : _host(host), _cargo()
-    {
-        cargo(*this).func = functor;
-    }
-
-    explicit
-    ModifiedIterator(TFunctor const & functor) : _host(), _cargo()
+    ModifiedIterator(THost const & host, TFunctor const & functor) : _host(host)
     {
         cargo(*this).func = functor;
     }
@@ -119,106 +146,134 @@ class ModifiedString<THost, ModView<TFunctor> >
 public:
     typedef typename Pointer_<THost>::Type       THostPointer_;
     typedef typename Cargo<ModifiedString>::Type TCargo_;
-    
-    typedef typename InnermostHost_<ModifiedString>::Type TInnermostHost_;
 
-    THostPointer_ _host;
+    mutable THostPointer_ _host;
     TCargo_ _cargo;
 
-    mutable typename Value<ModifiedString>::Type	tmp_value;
+    mutable typename Value<ModifiedString>::Type tmp_value;
 
     // Default constructor.
-    ModifiedString() : _host(), _cargo()
+    ModifiedString()
     {}
 
     // Construct with the actual host.
     explicit
-    ModifiedString(THost & host) : _host(_toPointer(host)), _cargo(), tmp_value()
+    ModifiedString(typename Parameter_<THost>::Type host) : _host(_toPointer(host))
     {}
 
     // Construct with the functor.
     explicit
-    ModifiedString(TFunctor const & functor) : _host(), _cargo(), tmp_value()
+    ModifiedString(TFunctor const & functor)
     {
         cargo(*this).func = functor;
     }
 
-    // Constructor for creating a ModifiedString with const host with a non-const host.
+    // Constructor for creating a ModifiedString with const host from a non-const host.
     template <typename THost_>
     explicit
-    ModifiedString(THost_ const & host,
-                   SEQAN_CTOR_ENABLE_IF(IsSameType<THost, THost_>)) :
-            _host(_toPointer(host)), _cargo(), tmp_value()
+    ModifiedString(THost_ & host,
+                   SEQAN_CTOR_ENABLE_IF(IsConstructible<THost, THost_>)) :
+            _host(_toPointer(host))
     {
         ignoreUnusedVariableWarning(dummy);
     }
 
     // Construct with the actual host; variant with functor.
-    ModifiedString(THost & host, TFunctor const & functor) :
-            _host(_toPointer(host)), _cargo(), tmp_value()
+    ModifiedString(typename Parameter_<THost>::Type host, TFunctor const & functor) :
+            _host(_toPointer(host))
     {
         cargo(*this).func = functor;
     }
 
     // Constructor for creating a ModifiedString with const host with a non-const host; variant with functor.
     template <typename THost_>
-    explicit ModifiedString(THost_ const & host,
-                            TFunctor const & functor,
-                            SEQAN_CTOR_ENABLE_IF(IsSameType<THost, THost_>)) :
-            _host(_toPointer(host)), _cargo(), tmp_value()
+    explicit
+    ModifiedString(THost_ & host,
+                   TFunctor const & functor,
+                   SEQAN_CTOR_ENABLE_IF(IsConstructible<THost, THost_>)) :
+            _host(_toPointer(host))
     {
         ignoreUnusedVariableWarning(dummy);
         cargo(*this).func = functor;
     }
 
+#ifdef SEQAN_CXX11_STANDARD
+
+    // Constructor for innermost type; hand down to _host which is a ModifiedString itself.
+    template <typename THost_>
+    explicit
+    ModifiedString(THost_ && host,
+                   SEQAN_CTOR_ENABLE_IF(IsAnInnerHost<
+                                            typename RemoveReference<THost>::Type,
+                                            typename RemoveReference<THost_>::Type >)) :
+            _host(std::forward<THost_>(host))
+    {
+        ignoreUnusedVariableWarning(dummy);
+    }
+
+    // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Variant with functor.
+    template <typename THost_>
+    explicit
+    ModifiedString(THost_ && host,
+                   TFunctor const & functor,
+                   SEQAN_CTOR_ENABLE_IF(IsAnInnerHost<
+                                            typename RemoveReference<THost>::Type,
+                                            typename RemoveReference<THost_>::Type >)) :
+            _host(std::forward<THost_>(host))
+    {
+        ignoreUnusedVariableWarning(dummy);
+        cargo(*this).func = functor;
+    }
+
+#else
+
     // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Non-const variant.
     template <typename THost_>
     explicit
     ModifiedString(THost_ & host,
-                   SEQAN_CTOR_ENABLE_IF(And<Not<IsSameType<TInnermostHost_, THost> >,
-                                            IsSameType<TInnermostHost_, THost_> >)) :
-            _host(host), _cargo(), tmp_value()
+                   SEQAN_CTOR_ENABLE_IF(IsAnInnerHost<THost, THost_>)) :
+            _host(host)
     {
         ignoreUnusedVariableWarning(dummy);
     }
 
-    // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Const variant.
+    // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Non-const variant.
     template <typename THost_>
     explicit
     ModifiedString(THost_ const & host,
-                   SEQAN_CTOR_ENABLE_IF(And<Not<IsSameType<TInnermostHost_, THost> >,
-                                            IsSameType<TInnermostHost_, THost_> >)) :
-            _host(host), _cargo(), tmp_value()
+                   SEQAN_CTOR_ENABLE_IF(IsAnInnerHost<THost, THost_ const>)) :
+            _host(host)
     {
         ignoreUnusedVariableWarning(dummy);
     }
-
+    
     // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Non-const variant with
     // functor.
     template <typename THost_>
     explicit
     ModifiedString(THost_ & host,
                    TFunctor const & functor,
-                   SEQAN_CTOR_ENABLE_IF(And<Not<IsSameType<TInnermostHost_, THost> >,
-                                            IsSameType<TInnermostHost_, THost_> >)) :
-            _host(host), _cargo(), tmp_value()
+                   SEQAN_CTOR_ENABLE_IF(IsAnInnerHost<THost, THost_>)) :
+            _host(host)
     {
         ignoreUnusedVariableWarning(dummy);
         cargo(*this).func = functor;
     }
 
-    // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Const variant with functor.
+    // Constructor for innermost type; hand down to _host which is a ModifiedString itself.  Non-const variant with
+    // functor.
     template <typename THost_>
     explicit
     ModifiedString(THost_ const & host,
                    TFunctor const & functor,
-                   SEQAN_CTOR_ENABLE_IF(And<Not<IsSameType<TInnermostHost_, THost> >,
-                                            IsSameType<TInnermostHost_, THost_> >)) :
-            _host(host), _cargo(), tmp_value()
+                   SEQAN_CTOR_ENABLE_IF(IsAnInnerHost<THost, THost_ const>)) :
+            _host(host)
     {
         ignoreUnusedVariableWarning(dummy);
         cargo(*this).func = functor;
     }
+    
+#endif
 
     template <typename TPos>
     inline typename Reference<ModifiedString>::Type 
@@ -366,6 +421,17 @@ inline typename GetValue<ModifiedString<THost, ModView<TFunctor> > const>::Type
 getValue(ModifiedString<THost, ModView<TFunctor> > const & me, TPos pos)
 {
     return cargo(me).func(getValue(host(me), pos));
+}
+
+// --------------------------------------------------------------------------
+// Function assignModViewFunctor()
+// --------------------------------------------------------------------------
+
+template <typename THost, typename TFunctor>
+inline void
+assignModViewFunctor(ModifiedString<THost, ModView<TFunctor> > & me, TFunctor const & functor)
+{
+    cargo(me).func = functor;
 }
 
 // --------------------------------------------------------------------------
