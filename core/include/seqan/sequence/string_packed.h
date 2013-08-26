@@ -46,8 +46,8 @@ namespace seqan {
 template <typename T>
 struct HostIterator;
 
-struct Device_ {};
-typedef Tag<Device_> Device;
+//struct Device_ {};
+//typedef Tag<Device_> Device;
 
 // ============================================================================
 // Tags, Classes, Enums
@@ -319,14 +319,14 @@ struct Host<String<TValue, Packed<THostspec> > >
 };
 
 
-#ifdef __CUDA__
-template <typename TValue>
-struct Host<String<TValue, Packed<Device> > >
-{
-    typedef typename PackedHostValue_<String<TValue, Packed<Device> > >::Type TInternalValue;
-    typedef device_vector<TInternalValue> Type;
-};
-#endif
+//#ifdef __CUDA__
+//template <typename TValue>
+//struct Host<String<TValue, Packed<Device> > >
+//{
+//    typedef typename PackedHostValue_<String<TValue, Packed<Device> > >::Type TInternalValue;
+//    typedef device_vector<TInternalValue> Type;
+//};
+//#endif
 
 template <typename TValue, typename THostspec>
 struct Host<String<TValue, Packed<THostspec> > const>
