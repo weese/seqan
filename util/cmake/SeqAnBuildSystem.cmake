@@ -418,7 +418,15 @@ macro (_seqan_setup_demo_test CPP_FILE EXECUTABLE)
         set (CHECKER_PATH "${CMAKE_SOURCE_DIR}/util/bin/demo_checker.py")
 
         # Compose arguments to the demo_checker.py script.
-        set (ARGS "--binary-path" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXECUTABLE}")
+        if (EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXECUTABLE}")
+            set (ARGS "--binary-path" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXECUTABLE}")
+        elseif (EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/${EXECUTABLE}")
+            set (ARGS "--binary-path" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/${EXECUTABLE}")
+        elseif (EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/${EXECUTABLE}")
+            set (ARGS "--binary-path" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/${EXECUTABLE}")
+        elseif (EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo/${EXECUTABLE}")
+            set (ARGS "--binary-path" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo/${EXECUTABLE}")
+        endif ()
         if (EXISTS "${STDOUT_PATH}")
             set (ARGS ${ARGS} "--stdout-path" "${STDOUT_PATH}")
         endif ()
@@ -427,7 +435,11 @@ macro (_seqan_setup_demo_test CPP_FILE EXECUTABLE)
         endif()
 
         # Add the test.
-        add_test (NAME test_${EXECUTABLE} COMMAND ${CHECKER_PATH} ${ARGS})
+        find_package (PythonInterp)
+        if (PYTHONINTERP_FOUND)
+          add_test (NAME test_${EXECUTABLE}
+                    COMMAND ${PYTHON_EXECUTABLE} ${CHECKER_PATH} ${ARGS})
+        endif (PYTHONINTERP_FOUND)
     endif ()
 endmacro (_seqan_setup_demo_test CPP_FILE)
 
