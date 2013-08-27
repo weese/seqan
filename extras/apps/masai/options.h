@@ -236,8 +236,8 @@ void getOptionValue(TOption & option,
 
 void setDateAndVersion(ArgumentParser & parser)
 {
-    std::string rev  = "$Revision: 13676 $";
-    std::string date = "$Date: 2013-02-28 18:38:02 +0100 (Thu, 28 Feb 2013) $";
+    std::string rev  = "$Revision$";
+    std::string date = "$Date$";
 
     setCategory(parser, "Read Mapping");
     setVersion(parser, "0.7.1 [" + rev.substr(11, rev.size() - 13) + "]");
