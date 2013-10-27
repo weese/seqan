@@ -99,13 +99,13 @@
  * @macro SEQAN_CATCH
  * @headerfile <seqan/basic.h>
  * @brief Replaces the C++ catch keyword.
- *
+ * 
  * @signature SEQAN_TRY {} SEQAN_CATCH() {}
  *
  * @section Remarks
  *
  * When exceptions are disabled, i.e. SEQAN_EXCEPTIONS is set to false, the code inside the catch block is never executed".
- *
+ * 
  * @see SEQAN_TRY
  * @see SEQAN_THROW
  * @see Exception
@@ -113,19 +113,20 @@
  * @section Examples
  *
  * See @link SEQAN_TRY @endlink for a full example.
+ *
  */
 
 /*!
  * @macro SEQAN_THROW
  * @headerfile <seqan/basic.h>
  * @brief Replaces the C++ throw keyword.
- *
+ * 
  * @signature SEQAN_THROW(Exception);
  *
  * @section Remarks
  *
  * When exceptions are disabled, i.e. SEQAN_EXCEPTIONS is set to false, the macro turns into SEQAN_FAIL".
- *
+ * 
  * @see SEQAN_TRY
  * @see SEQAN_CATCH
  * @see SEQAN_FAIL
@@ -134,8 +135,9 @@
  * @section Examples
  *
  * See @link SEQAN_TRY @endlink for a full example.
+ *
  */
-
+ 
 #ifdef SEQAN_EXCEPTIONS
 
 #define SEQAN_TRY           try
@@ -224,7 +226,6 @@ typedef std::runtime_error      RuntimeError;
 // Function globalExceptionHandler()
 // ----------------------------------------------------------------------------
 
-#ifdef SEQAN_EXCEPTIONS
 static void globalExceptionHandler()
 {
     SEQAN_TRY
@@ -238,6 +239,7 @@ static void globalExceptionHandler()
 }
 
 // Install global exception handler.
+#ifdef SEQAN_EXCEPTIONS
 static const std::terminate_handler _globalExceptionHandler = std::set_terminate(globalExceptionHandler);
 #endif
 
