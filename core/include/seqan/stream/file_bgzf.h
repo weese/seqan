@@ -101,24 +101,23 @@ struct PagingScheme<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >
 // ----------------------------------------------------------------------------
 
 template <typename TPos>
-inline Pair<__int64, unsigned>
-_getPageOffsetAndLength(RandomPagingScheme & table, TPos pos)
+inline FilePagePos
+_getPagePos(RandomPagingScheme & table, TPos pos)
 {
     // as we don't know the actual compressed size of a BGZF page here,
     // we have to read the whole 64K page
-    return Pair<__int64, unsigned>(pos, table.pageSize);
+    return FilePagePos(pos, table.pageSize);
 }
 
 // ----------------------------------------------------------------------------
 // Function _getFrameStart()
 // ----------------------------------------------------------------------------
 
-template <typename TFilePos, typename TSize>
 inline void *
-_getFrameStart(RandomPagingScheme const &table, TFilePos filePos, TSize)
+_getFrameStart(RandomPagingScheme const &table, FilePagePos const &pos)
 {
     typedef RandomPagingScheme::TMap TMap;
-    TMap::const_iterator iter = table.frameStart.find(filePos);
+    TMap::const_iterator iter = table.frameStart.find(pos.filePos);
 
     if (SEQAN_LIKELY(iter != table.frameStart.cend()))
         return iter->second;
@@ -130,11 +129,10 @@ _getFrameStart(RandomPagingScheme const &table, TFilePos filePos, TSize)
 // Function _setFrameStart()
 // ----------------------------------------------------------------------------
 
-template <typename TFilePos, typename TSize>
 inline void
-_setFrameStart(RandomPagingScheme &table, TFilePos filePos, TSize, void * frameStart)
+_setFrameStart(RandomPagingScheme &table, FilePagePos const &pos, void * frameStart)
 {
-    table.frameStart[filePos] = frameStart;
+    table.frameStart[pos.filePos] = frameStart;
 }
 
 // ----------------------------------------------------------------------------
