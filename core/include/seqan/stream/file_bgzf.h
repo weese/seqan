@@ -62,18 +62,19 @@ template <typename T>
 unsigned char const MagicHeader<BgzfFile, T>::VALUE[3] = { 0x1f, 0x8b, 0x08 };  // gzip's magic number
 
 
-template <typename TSpec = MMap<> >
+template <typename TSpec = void>
 struct Bgzf {};
 
 
 template <typename TValue, typename TDirection, typename TSpec>
 struct Host<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >:
-    public Host<FilePageTable<TValue, TDirection, TSpec> > {};
+    public Host<FilePageTable<TValue, TDirection, Async<> > > {};
 
 
-struct RandomPagingScheme
+struct VariablePagingScheme
 {
-    typedef std::map<__uint64, void *> TMap;
+    typedef std::map<void *> TMap;
+    typedef String<FilePagePos> TFramePos;
 
     enum { pageSize = 64 * 1024 };
 
@@ -81,6 +82,7 @@ struct RandomPagingScheme
     static void * ON_DISK;
 
     TMap frameStart;
+    TFramePos framePos;
 };
 
 void * RandomPagingScheme::EMPTY = NULL;
@@ -89,7 +91,7 @@ void * RandomPagingScheme::ON_DISK = (void *)-1;
 template <typename TValue, typename TDirection, typename TSpec>
 struct PagingScheme<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >
 {
-    typedef RandomPagingScheme Type;
+    typedef VariablePagingScheme Type;
 };
 
 // ============================================================================
@@ -345,6 +347,8 @@ _postprocessFilePage(FilePageTable<TValue, TDirection, Bgzf<TSpec> > &, TPageFra
     _bgzfPackInt16(header + 16, length(page.raw) - 1);
     _bgzfPackInt32(header + length(page.raw) - 8, crc);
     _bgzfPackInt32(header + length(page.raw) - 4, length(page.data));
+
+    // _setPageInfos(page.filePos, length(raw));
 
     return true;
 }
