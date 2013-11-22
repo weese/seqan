@@ -158,33 +158,33 @@ class StringTestCommon : public StringTest<T>
 {};
 
 typedef
-    seqan::TagList<String<Dna5, External<> >, 
-//     seqan::TagList<char,        seqan::TagList<seqan::External<> > >, seqan::TagList<
-    seqan::TagList<String< int, External<> >, 
-    seqan::TagList<String<CountingChar, External<> >, 
-    seqan::TagList<String<Dna5, MMap<> >, 
-//     seqan::TagList<char,        seqan::TagList<seqan::MMap<> > >, seqan::TagList<
-    seqan::TagList<String<int, MMap<> >,
-    seqan::TagList<String<CountingChar, MMap<> >, 
+//    seqan::TagList<String<Dna5, External<> >, 
+////     seqan::TagList<char,        seqan::TagList<seqan::External<> > >, seqan::TagList<
+//    seqan::TagList<String< int, External<> >, 
+//    seqan::TagList<String<CountingChar, External<> >, 
+//    seqan::TagList<String<Dna5, MMap<> >, 
+////     seqan::TagList<char,        seqan::TagList<seqan::MMap<> > >, seqan::TagList<
+//    seqan::TagList<String<int, MMap<> >,
+//    seqan::TagList<String<CountingChar, MMap<> >, 
     seqan::TagList<String<Dna, Packed<> >,
     seqan::TagList<String<Dna5, Packed<> >,
-    seqan::TagList<String<char, Packed<> >,
-    //     seqan::TagList<char,        seqan::TagList<seqan::Packed<> > >, seqan::TagList<
-    seqan::TagList<String<int, Packed<> >,
-    seqan::TagList<String<Dna5, Array<100> >, 
-//     seqan::TagList<char,        seqan::TagList<seqan::Array<100> > >, seqan::TagList<
-    seqan::TagList<String<int, Array<100> >, 
-    seqan::TagList<String<CountingChar,Array<100> >,
-    seqan::TagList<String<seqan::Dna5, Block<> >, 
-    //     seqan::TagList<char,        seqan::TagList<seqan::Block<> > >, seqan::TagList<
-    seqan::TagList<String<int, Block<> >, 
-    seqan::TagList<String<CountingChar,Block<> >,
-    seqan::TagList<String<seqan::Dna5, Alloc<> >, 
-//     seqan::TagList<char,        seqan::TagList<seqan::Alloc<> > >, seqan::TagList<
-    seqan::TagList<String<int, Alloc<> >, 
-    seqan::TagList<String<CountingChar, Alloc<> >//, seqan::TagList<
+    seqan::TagList<String<char, Packed<> >
+//    //     seqan::TagList<char,        seqan::TagList<seqan::Packed<> > >, seqan::TagList<
+//    seqan::TagList<String<int, Packed<> >,
+//    seqan::TagList<String<Dna5, Array<100> >, 
+////     seqan::TagList<char,        seqan::TagList<seqan::Array<100> > >, seqan::TagList<
+//    seqan::TagList<String<int, Array<100> >, 
+//    seqan::TagList<String<CountingChar,Array<100> >,
+//    seqan::TagList<String<seqan::Dna5, Block<> >, 
+//    //     seqan::TagList<char,        seqan::TagList<seqan::Block<> > >, seqan::TagList<
+//    seqan::TagList<String<int, Block<> >, 
+//    seqan::TagList<String<CountingChar,Block<> >,
+//    seqan::TagList<String<seqan::Dna5, Alloc<> >, 
+////     seqan::TagList<char,        seqan::TagList<seqan::Alloc<> > >, seqan::TagList<
+//    seqan::TagList<String<int, Alloc<> >, 
+//    seqan::TagList<String<CountingChar, Alloc<> >//, seqan::TagList<
 //     seqan::TagList<char,        seqan::TagList<seqan::CStyle> >
-    > > > > > > > > > > > > > > > > > > > // > > > > > > >
+    > > > // > > > > > > > > > > //> > > > > > // > > > > > > >
     StringTestCommonTypes;
 // typedef seqan::TagList<
 //     seqan::TagList<seqan::Dna5, seqan::TagList<seqan::External<> > >, seqan::TagList<
@@ -213,8 +213,145 @@ typedef
 // //     seqan::TagList<char,        seqan::TagList<seqan::CStyle> >
 //     > > > > > > > > > > > > > > > > > // > > > > > > >
 //     StringTestCommonTypes;
-// 
+//
+
+
+PRODUCT(PRODUCT(LIST(A,B),LIST(1,2)))
+
+LIST(
+    LIST(A,1,3)
+    LIST(A,2,4)
+    LIST(B,1,5)
+    LIST(B,2,6))
+
+VALUE<List,3>::
+
+
+LIST()
+
+typedef typename Product2<LIST(Alloc<>, Packed<>, Block<>), LIST(Dna, char, int)>::Type TestReadTypes;
+
+LIST(
+    Pair<StringTestRead, TestReadTypes>,
+    Pair<StringTestRead, TestReadTypes>,
+    Pair<StringTestRead, TestReadTypes>,
+    Pair<StringTestRead, TestReadTypes>,
+    Pair<StringTestCommon, StringTestCommonTypes>,
+    StringTestWrite, PRODUCT(LIST(Alloc<>, Packed<>, Block<>), LIST(Dna, char, int)))
+    IndexCreate(PRODUCT(LIST(Alloc<>, Packed<>, Block<>), PRODUCT(LIST(Dna, char, int))))
+
+
+template <typename TTestName, typename TArguments>
+struct Test
+{
+};
+
+
+template <typename TTest>
+TestArguments<TTest>
+{
+    static void* arguments[3];
+};
+
+{
+    forEach(GlobalList)
+    {
+        typendef Value<TPair, 1>::Type TTestName;
+        typendef Value<TPair, 2>::Type TArguments;
+
+        typedef Test<TTestName, TArguments> TTest;
+        for (argument:argumentTupleList)
+        {
+            TTest test(argument);
+            runTest(test);
+        }
+        std::cout << getName(test) << std::endl;
+    }
+
+}
+
+
+
+//SEQAN_REGISTER_TEST(StringTestRead)
+//template <typename TArguments>
+//struct Test<StringTestRead, TArguments>
+//{
+//
+//};
+
+
+
+
+#define SEQAN_TYPED_TEST(TestName) \
+template <typename TArguments> \
+void runTest(Test<TestName, TArguments> & test)
+
+
+template <typename TArguments>
+struct Test<MyTest, TArguments>
+{
+    template <typename T>
+    Test(T &x)
+    {
+        f.open(x);
+    }
+
+    fstream f;
+};
+
+template <typename TList>
+void *
+getFunc(Test<MyTest, TList> dummy)
+{
+    return "HALLO.txt";
+}
+
+template <typename T1, T2>
+void *
+getFunc(Test<MyTest, TagList< T1, TagList<Fasta, T2> > > dummy)
+{
+    return "HALLO.fa";
+}
+
+SEQAN_TYPED_TEST(StringTestRead)
+{
+    typename Value<TArguments,0>::Type TValue;
+    typename Value<TArguments,1>::Type TStringSpec;
+    String<TValue, TStringSpec> string;
+
+    append(string, "test");
+}
+
+
+template <typename TRight>
+struct TagValue<TagList<T1, TRight> >
+{
+    T1 x;
+    TRight right;
+}
+
+template <int i>
+Value<TagList<T1, TRight>, i>::Type
+value(TagValue<TagList<T1, TRight> >)
+{
+    return value(right);
+}
+
+template <int i>
+Value<TagList<T1, TRight>, i>::Type
+value(TagValue<TagList<T1, TRight> >)
+{
+    return value(right);
+}
+
+
+product(String<T1>, String<TagListValue<> >, )
+
+
 SEQAN_TYPED_TEST_CASE(StringTestCommon, StringTestCommonTypes);
+SEQAN_TYPED_TEST_CASE(StringTestCommon, Fasta, makeString<const char*>("HALLO", "intep.fa"));
+SEQAN_TYPED_TEST_CASE(StringTestCommon, Fastq, makeString<const char*>("HALLO", "intep.fq"));
+SEQAN_TYPED_TEST_CASE(StringTestCommon, StringTestCommonTypes, COMBINE(COMBINE(makeString<const char*>("HALLO", "intep.ha"),makeString<int>(2, 4));
 
 // ========================================================================== 
 // The tests start here
@@ -1621,10 +1758,13 @@ void testSequenceResize(TString & /*Tag*/)
     resize(string, 0);
     SEQAN_ASSERT_EQ(length(string), 0u);
     
-    resize(string, 5);
+    resize(string, 5, TValue());
     SEQAN_ASSERT_EQ(length(string), 5u);
 
+std::cout << string << std::endl;
     resize(string, 10, TValue('C'));
+
+std::cout << string << std::endl;
     SEQAN_ASSERT_EQ(string[0], TValue());
     SEQAN_ASSERT_EQ(string[5], TValue('C'));
 }
