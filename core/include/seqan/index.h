@@ -84,6 +84,7 @@
 #include <seqan/index/index_qgram.h>
 #include <seqan/index/index_qgram_openaddressing.h>
 //#include <seqan/index/index_qgram_nested.h>
+#include <seqan/modifier/cyclic_shape.h>
 
 // ----------------------------------------------------------------------------
 // Suffix array creators.
