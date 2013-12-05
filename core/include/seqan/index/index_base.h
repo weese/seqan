@@ -684,6 +684,25 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
     struct Infix< Index<TText, TSpec> const >:
 		public Infix<TText> {};
 
+    
+// ----------------------------------------------------------------------------
+// Metafunction Suffix                                                for Index
+// ----------------------------------------------------------------------------
+
+// general Index
+template <typename TText, typename TSpec>
+struct Suffix<Index<TText, TSpec> >
+{
+    typedef typename Suffix<TText>::Type Type;
+};
+
+// general Index; const variant
+template <typename TText, typename TSpec>
+struct Suffix<Index<TText, TSpec> const>
+{
+    typedef typename Suffix<TText const>::Type Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 // default table type
 
@@ -1263,6 +1282,27 @@ I	ISSISSIPPI*/
 	{
 		return infix(indexText(index), pos_begin, pos_end);
 	}
+
+    
+// ----------------------------------------------------------------------------
+// Function suffix()                                                  for Index
+// ----------------------------------------------------------------------------
+
+// general Index
+template <typename TText, typename TSpec, typename TPosBegin>
+inline typename Suffix<Index<TText, TSpec> >::Type
+suffix(Index<TText, TSpec> & t, TPosBegin pos_begin)
+{
+    return suffix(indexText(t), pos_begin);
+}
+
+// general Index: const variant
+template <typename TText, typename TSpec, typename TPosBegin>
+inline typename Suffix<Index<TText, TSpec> const>::Type
+suffix(Index<TText, TSpec> const &t, TPosBegin pos_begin)
+{
+    return suffix(indexText(t), pos_begin);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
