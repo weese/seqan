@@ -51,8 +51,14 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_strings_example1)
     stringToCyclicShape(shape, "1001010");
     
     CharString str = "hallallalalhal al al";
-    TIndex index(str, shape);
-    
+    TIndex index1(str, shape);
+    TIndex index2(index1);
+
+    CharString s1; cyclicShapeToString(s1, suffixModifier(index1));
+    std::cout << s1 << ": " << indexText(index1) << std::endl;
+
+    CharString s2; cyclicShapeToString(s2, suffixModifier(index2));
+    std::cout << s2 << ": " << indexText(index2) << std::endl;
     
 }
 

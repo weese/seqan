@@ -66,7 +66,7 @@ class Index<TText, IndexSa< Generalized<TSuffixMod, TSpec > > > :
     public Index<TText, IndexSa<TSpec> >
 {
 public:
-    typedef Index<TText, IndexSa<TSpec> >   TSuper;
+    typedef Index<TText, IndexSa<TSpec> >            TSuper;
     typedef typename Suffix<Index>::Type             TSuffix;
     typedef typename Cargo<TSuffix>::Type            TModifierCargo;
     
@@ -75,12 +75,12 @@ public:
     
     Index() {}
     
-    Index(Index & other) : TSuper(other), suffMod(other.suffMod)
+    Index(Index & other) : suffMod(other.suffMod)
+    {} //automatic call of TSuper's copy constructor
+
+    Index(Index const & other) : suffMod(other.suffMod)
     {}
-    
-    Index(Index const & other) : TSuper(other), suffMod(other.suffMod)
-    {}
-    
+
     template <typename TText_>
     Index(TText_ & _text) : TSuper(_text)
     {}
@@ -88,7 +88,14 @@ public:
     template <typename TText_>
     Index(TText_ const & _text) : TSuper(_text)
     {}
-    
+
+    template <typename TText_>
+    Index(TText_ & _text, TModifierCargo const & suffMod) : TSuper(_text), suffMod(suffMod)
+    {}
+
+    template <typename TText_>
+    Index(TText_ const & _text, TModifierCargo const & suffMod) : TSuper(_text), suffMod(suffMod)
+    {}
 };
 
 
