@@ -49,7 +49,7 @@ template < typename TSAValue, typename TText, typename TMod = void >
 struct SuffixLess_;
 
 // --------------------------------------------------------------------------
-// Class SuffixLess_                                         String, Standard
+// Class SuffixLess_                                     [String], [Standard]
 // --------------------------------------------------------------------------
 
 template < typename TSAValue, typename TText >
@@ -91,7 +91,7 @@ struct SuffixLess_<TSAValue, TText, void> :
 };
 
 // --------------------------------------------------------------------------
-// Class SuffixLess_                                      StringSet, Standard
+// Class SuffixLess_                                  [StringSet], [Standard]
 // --------------------------------------------------------------------------
 
 template < typename TSAValue, typename TString, typename TSetSpec >
@@ -171,67 +171,55 @@ SEQAN_CHECKPOINT
 }
 
 // --------------------------------------------------------------------------
-// Function createSuffixArray                                          String
+// function _initializeSA()
 // --------------------------------------------------------------------------
 
-template < typename TSA,
-           typename TText >
+template <typename TSA, typename TString>
+inline void _initializeSA(TSA & sa, TString const & /**/)
+{
+    typedef typename Iterator<TSA, Standard>::Type TIter;
+    typedef typename Value<TSA>::Type TSAVal;
+    TIter it = begin(sa, Standard());
+    TIter itEnd = end(sa, Standard());
+    for(TSAVal i = 0; it != itEnd; ++it, ++i)
+        *it = i;
+}
+template <typename TSA, typename TString, typename TSpec>
+inline void _initializeSA(TSA & sa, StringSet<TString, TSpec> const & strSet)
+{
+    typedef typename Iterator<TSA, Standard>::Type TIter;
+    typedef typename Value<TSA>::Type TSAVal;
+    typedef typename Size<TSA>::Type TSize; // TODO: derive Size Type from TSAVal, but how?
+
+    TIter it = begin(sa, Standard());
+    for(TSize j = 0; j < length(strSet); ++j)
+    {
+        TSize len = length(strSet[j]);
+        for(TSize i = 0; i < len; ++i, ++it)
+            *it = TSAVal(j, i);
+    }
+}
+
+// --------------------------------------------------------------------------
+// Function createSuffixArray
+// --------------------------------------------------------------------------
+
+template < typename TSA, typename TText>
 inline void createSuffixArray(
     TSA &SA,
     TText const &s,
     SAQSort const &)
 {
-SEQAN_CHECKPOINT
     typedef typename Size<TSA>::Type TSize;
-    typedef typename Iterator<TSA, Standard>::Type TIter;
 
     // 1. Fill suffix array with a permutation (the identity)
-    TIter it = begin(SA, Standard());
-    TIter itEnd = end(SA, Standard());
-    for(TSize i = 0; it != itEnd; ++it, ++i)
-        *it = i;
+    _initializeSA(SA, s);
 
     // 2. Sort suffix array with quicksort
     ::std::sort(
-        begin(SA, Standard()), 
-        end(SA, Standard()), 
+        begin(SA, Standard()), end(SA, Standard()),
         SuffixLess_<typename Value<TSA>::Type, TText const, void>(s));
 }
-
-// --------------------------------------------------------------------------
-// Function createSuffixArray                                       StringSet
-// --------------------------------------------------------------------------
-
-template < typename TSA,
-           typename TString,
-           typename TSSetSpec >
-inline void createSuffixArray(
-    TSA &SA,
-    StringSet< TString, TSSetSpec > const &s,
-    SAQSort const &)
-{
-SEQAN_CHECKPOINT
-    typedef StringSet< TString, TSSetSpec > TText;
-    typedef typename Size<TSA>::Type TSize;
-    typedef typename Iterator<TSA, Standard>::Type TIter;
-
-    // 1. Fill suffix array with a permutation (the identity)
-    TIter it = begin(SA, Standard());
-    for(unsigned j = 0; j < length(s); ++j)
-    {
-        TSize len = length(s[j]);
-        for(TSize i = 0; i < len; ++i, ++it)
-            *it = Pair<unsigned, TSize>(j, i);
-    }
-
-    // 2. Sort suffix array with quicksort
-    ::std::sort(
-        begin(SA, Standard()),
-        end(SA, Standard()),
-        SuffixLess_<typename Value<TSA>::Type, TText const, void>(s));
-}
-
-
 
 // Old stuff:
 
