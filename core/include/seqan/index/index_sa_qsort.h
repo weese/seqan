@@ -40,6 +40,13 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 // ==========================================================================
+// Forwards
+// ==========================================================================
+
+template <typename T> struct IndexSa;
+template <typename T, typename U> struct Generalized;
+
+// ==========================================================================
 // Tags, Classes, Enums
 // ==========================================================================
 
@@ -144,6 +151,93 @@ struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, void > :
     }
 };
 
+
+// --------------------------------------------------------------------------
+// SuffixLess_                                           [String], [Modified]
+// --------------------------------------------------------------------------
+
+template < typename TSAValue, typename TText, typename TModifier>
+struct SuffixLess_ :
+    public ::std::binary_function < TSAValue, TSAValue, bool >
+{
+    typedef typename Suffix<Index<TText, IndexSa<Generalized<TModifier, void> > > >::Type    TModString;
+    typedef typename Cargo<TModString>::Type                                            TModCargo;
+
+    TText const &               _text;
+    TModCargo          _modifier;
+    typename Size<TText>::Type  _offset;
+
+    SuffixLess_(TText const &text, TModCargo const & modifier):
+        _text(text), _modifier(modifier), _offset(0)
+    {}
+
+    // skip the first <offset> characters
+    template <typename TSize>
+    SuffixLess_(TText const &text, TModCargo const & modifier, TSize offset):
+        _text(text), _modifier(modifier), _offset(offset)
+    {}
+
+
+    inline bool operator() (TSAValue a, TSAValue b) const
+    {
+        if (a == b) return false;
+
+        a += _offset;
+        a += _offset;
+        TModString sa(suffix(_text, a), _modifier);
+        TModString sb(suffix(_text, b), _modifier);
+
+        if (sa < sb) return true;
+        else return false;
+    }
+};
+
+// --------------------------------------------------------------------------
+// SuffixLess_                                        [StringSet], [Modified]
+// --------------------------------------------------------------------------
+
+template <typename TSAValue, typename TString, typename TSetSpec, typename TModifier>
+struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TModifier> :
+    public ::std::binary_function<TSAValue, TSAValue, bool>
+{
+    typedef StringSet<TString, TSetSpec> const            TText;
+    typedef typename Suffix<Index<TText, IndexSa<Generalized<TModifier, void> > > >::Type     TModString;
+    typedef typename Cargo<TModString>::Type                                            TModCargo;
+
+    TText const &               _text;
+    TModCargo          _modifier;
+    typename Size<TText>::Type  _offset;
+
+    SuffixLess_(TText &text, TModCargo const & modifier):
+        _text(text), _modifier(modifier), _offset(0)
+    {}
+
+    // skip the first <offset> characters
+    template <typename TSize>
+    SuffixLess_(TText const & text, TModCargo const & modifier, TSize offset):
+        _text(text), _modifier(modifier), _offset(offset)
+    {}
+
+    inline bool operator() (TSAValue a, TSAValue b) const
+    {
+        if (a == b) return false;
+
+        a.i2 += _offset;
+        b.i2 += _offset;
+        TModString sa(suffix(_text, a), _modifier);
+        TModString sb(suffix(_text, b), _modifier);
+
+        if (sa < sb) return true;
+        if (sa > sb) return false;
+
+        if (getSeqNo(a) > getSeqNo(b)) return true;
+        if (getSeqNo(a) < getSeqNo(b)) return false;
+
+        return a > b;
+    }
+};
+
+
 // ==========================================================================
 // Functions
 // ==========================================================================
@@ -220,6 +314,30 @@ inline void createSuffixArray(
         begin(SA, Standard()), end(SA, Standard()),
         SuffixLess_<typename Value<TSA>::Type, TText const, void>(s));
 }
+
+// --------------------------------------------------------------------------
+// function createGeneralizedSuffixArray
+// --------------------------------------------------------------------------
+
+template <typename TMod, typename TSA, typename TText>
+inline void createGeneralizedSuffixArray(
+    TSA &SA,
+    TText const &s,
+    typename Cargo<ModifiedString<TText, TMod> >::Type const & suffixModifier,
+    SAQSort const &)
+{
+    typedef typename Size<TSA>::Type TSize;
+    typedef typename Iterator<TSA, Standard>::Type TIter;
+
+    // 1. Fill suffix array with a permutation (the identity)
+    _initializeSA(SA, s);
+
+    // 2. Sort suffix array with quicksort
+    ::std::sort(
+        begin(SA, Standard()), end(SA, Standard()),
+        SuffixLess_<typename Value<TSA>::Type, TText const, TMod>(s, suffixModifier));
+}
+
 
 // Old stuff:
 

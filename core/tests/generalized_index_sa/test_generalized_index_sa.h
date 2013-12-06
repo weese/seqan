@@ -38,8 +38,9 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/index.h>
+#include "../index/test_index_helpers.h"
 
-SEQAN_DEFINE_TEST(test_generalized_index_sa_strings_example1)
+SEQAN_DEFINE_TEST(test_generalized_index_sa_CURRENT_WORK)
 {
     using namespace seqan;
     
@@ -59,7 +60,105 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_strings_example1)
 
     CharString s2; cyclicShapeToString(s2, suffixModifier(index2));
     std::cout << s2 << ": " << indexText(index2) << std::endl;
+
+
+    //indexRequire(index1, FibreSA());
+}
+
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modcyclicshape)
+{
+    using namespace seqan;
+
+    typedef StringSet<CharString> TSet;
+    typedef CyclicShape<GenericShape> TShape;
+    typedef ModCyclicShape<TShape>    TModifier;
+    typedef Index<TSet, IndexSa<Generalized<TModifier> > > TGappedIndex;
+
+    TSet set;
+    appendValue(set, "012341");
+    appendValue(set, "12341");
+    appendValue(set, "01011");
+
+    unsigned correct[16][2]={   {2,4}, {1,4}, {0,5}, {2,1}, {2,3}, {2,2}, {1,3}, {0,4},
+                                {2,0}, {0,0}, {1,0}, {0,1}, {1,1}, {0,2}, {1,2}, {0,3} };
+
+    TShape shape;
+    stringToCyclicShape(shape, "01");
+
+    TGappedIndex gIndex(set, shape);
+    resize(indexSA(gIndex), lengthSum(set));
+    createGeneralizedSuffixArray<TModifier> (indexSA(gIndex), set, shape, SAQSort());
+
+    for (unsigned i=0; i< 16; ++i)
+    {
+        SEQAN_ASSERT_EQ(correct[i][0], indexSA(gIndex)[i].i1);
+        SEQAN_ASSERT_EQ(correct[i][1], indexSA(gIndex)[i].i2);
+    }
+}
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_withoutmod)
+{
+    using namespace seqan;
+
+    typedef StringSet<CharString> TSet;
+    typedef Index<TSet, IndexSa<> > TNormalIndex;
+
+    // String Set
+    TSet set;
+    appendValue(set, "012345");
+    appendValue(set, "12345");
+    appendValue(set, "0123456789");
+    appendValue(set, "12345");
+
+    TNormalIndex index1(set);
+    resize(indexSA(index1), lengthSum(set));
+    createSuffixArray(indexSA(index1), set, SAQSort());
+
+    TNormalIndex index2(set);
+    resize(indexSA(index2), lengthSum(set));
+    createSuffixArray(indexSA(index2), set, Skew7());
+
+    SEQAN_ASSERT_EQ(indexSA(index1), indexSA(index2));
+
+    // String
+    CharString str = "aklsdjfjklfjklsdjfjklaghkladshgkladjsfjladjsfjklf";
+    Index<CharString, IndexSa<> > index3(str);
+    resize(indexSA(index3), length(str));
+    createSuffixArray(indexSA(index3), str, SAQSort());
+    SEQAN_ASSERT( isSuffixArray(indexSA(index3), str) );
+}
+
+
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modreverse)
+{
+    using namespace seqan;
+
+    typedef StringSet<CharString> TSet;
+    typedef Index<TSet, IndexSa<Generalized<ModReverse> > > TRevIndex;
+
+    TSet set;
+    appendValue(set, "010101");
+    appendValue(set, "101");
+    appendValue(set, "000");
+    appendValue(set, "1000");
+
+    TRevIndex revIndex(set);
+    typename Cargo<ModReverse>::Type xxx; // = Nothing
+
+    resize(indexSA(revIndex), lengthSum(set));
+    createGeneralizedSuffixArray<ModReverse> (indexSA(revIndex), set, xxx, SAQSort());
+
+    unsigned correct[16][2]={   {3,3}, {2,2}, {3,2}, {2,1}, {3,1}, {2,0}, {3,0}, {1,2},
+                                {0,5}, {1,1}, {0,4}, {1,0}, {0,3}, {0,2}, {0,1}, {0,0} };
+    for (unsigned i=0; i< 16; ++i)
+    {
+        SEQAN_ASSERT_EQ(correct[i][0], indexSA(revIndex)[i].i1);
+        SEQAN_ASSERT_EQ(correct[i][1], indexSA(revIndex)[i].i2);
+    }
     
 }
+
 
 #endif  // CORE_TESTS_GENERALIZED_INDEX_SA_TEST_GENERALIZED_INDEX_SA_H_

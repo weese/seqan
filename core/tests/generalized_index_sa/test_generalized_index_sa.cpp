@@ -41,6 +41,10 @@
 SEQAN_BEGIN_TESTSUITE(test_generalized_index_sa)
 {
     // Call tests.
-	SEQAN_CALL_TEST(test_generalized_index_sa_strings_example1);
+	SEQAN_CALL_TEST(test_generalized_index_sa_CURRENT_WORK);
+	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_withoutmod);
+	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modcyclicshape);
+	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modreverse);
+
 }
 SEQAN_END_TESTSUITE
