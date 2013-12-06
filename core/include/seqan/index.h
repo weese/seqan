@@ -84,7 +84,6 @@
 #include <seqan/index/index_qgram.h>
 #include <seqan/index/index_qgram_openaddressing.h>
 //#include <seqan/index/index_qgram_nested.h>
-#include <seqan/modifier/cyclic_shape.h>
 
 // ----------------------------------------------------------------------------
 // Suffix array creators.
@@ -224,5 +223,13 @@
 #include <seqan/index/find2_index.h>
 #include <seqan/index/find_index_multiple.h>
 #include <seqan/index/find2_functors.h>
+
+
+// ==========================================================================
+// Generalized index (meiers)
+// ==========================================================================
+
+#include <seqan/modifier/cyclic_shape.h>
+#include <seqan/index/index_generalized_sa.h>
 
 #endif //#ifndef SEQAN_HEADER_...
