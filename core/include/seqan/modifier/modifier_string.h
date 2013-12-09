@@ -128,10 +128,10 @@ class ModifiedString
     //               the generalized index, all ModifiedString should have a
     //               constructor that takes the Host String as well as
     //               the Cargo type, even if this Cargo is useless.
-    //               I tried to integrate this here but I don't really know what I'm doing.
+    //               I tried to integrate this here (*) but I am not really know what I'm doing.
 public:
     typedef typename Pointer_<THost>::Type       THostPointer_;
-    typedef typename Cargo<ModifiedString>::Type TCargo_;
+    typedef typename Cargo<typename Iterator<ModifiedString>::Type>::Type TCargo_;
 
     mutable THostPointer_ _host;
     TCargo_ _cargo;
@@ -145,6 +145,7 @@ public:
     ModifiedString(typename Parameter_<THost>::Type host) : _host(_toPointer(host))
     {}
 
+    // (*)
     explicit
     ModifiedString(typename Parameter_<THost>::Type host, TCargo_ const & cargo) :
         _host(_toPointer(host)), _cargo(cargo)
@@ -160,6 +161,7 @@ public:
         ignoreUnusedVariableWarning(dummy);
     }
 
+    // (*)
     template <typename THost_>
     explicit
     ModifiedString(THost_ & host, TCargo_ const & cargo,

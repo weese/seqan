@@ -160,8 +160,9 @@ template < typename TSAValue, typename TText, typename TModifier>
 struct SuffixLess_ :
     public ::std::binary_function < TSAValue, TSAValue, bool >
 {
-    typedef typename Suffix<Index<TText, IndexSa<Generalized<TModifier, void> > > >::Type    TModString;
-    typedef typename Cargo<TModString>::Type                                            TModCargo;
+    typedef Index<TText, IndexSa<Generalized<TModifier, void> > > TIndex;
+    typedef typename Suffix<TIndex>::Type               TModString;
+    typedef typename Cargo<TIndex>::Type                TModCargo;
 
     TText const &               _text;
     TModCargo          _modifier;
@@ -183,7 +184,7 @@ struct SuffixLess_ :
         if (a == b) return false;
 
         a += _offset;
-        a += _offset;
+        b += _offset;
         TModString sa(suffix(_text, a), _modifier);
         TModString sb(suffix(_text, b), _modifier);
 
@@ -200,12 +201,13 @@ template <typename TSAValue, typename TString, typename TSetSpec, typename TModi
 struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TModifier> :
     public ::std::binary_function<TSAValue, TSAValue, bool>
 {
-    typedef StringSet<TString, TSetSpec> const            TText;
-    typedef typename Suffix<Index<TText, IndexSa<Generalized<TModifier, void> > > >::Type     TModString;
-    typedef typename Cargo<TModString>::Type                                            TModCargo;
+    typedef StringSet<TString, TSetSpec> const          TText;
+    typedef Index<TText, IndexSa<Generalized<TModifier, void> > > TIndex;
+    typedef typename Suffix<TIndex>::Type               TModString;
+    typedef typename Cargo<TIndex>::Type                TModCargo;
 
     TText const &               _text;
-    TModCargo          _modifier;
+    TModCargo                   _modifier;
     typename Size<TText>::Type  _offset;
 
     SuffixLess_(TText &text, TModCargo const & modifier):
@@ -319,11 +321,11 @@ inline void createSuffixArray(
 // function createGeneralizedSuffixArray
 // --------------------------------------------------------------------------
 
-template <typename TMod, typename TSA, typename TText>
+template <typename TMod, typename TSA, typename TText, typename TSpec=void>
 inline void createGeneralizedSuffixArray(
     TSA &SA,
     TText const &s,
-    typename Cargo<ModifiedString<TText, TMod> >::Type const & suffixModifier,
+    typename Cargo<Index<TText,IndexSa<Generalized<TMod, TSpec> > > >::Type const & suffixModifier,
     SAQSort const &)
 {
     typedef typename Size<TSA>::Type TSize;

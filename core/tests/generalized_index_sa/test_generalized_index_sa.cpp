@@ -41,10 +41,14 @@
 SEQAN_BEGIN_TESTSUITE(test_generalized_index_sa)
 {
     // Call tests.
-	SEQAN_CALL_TEST(test_generalized_index_sa_CURRENT_WORK);
+	//SEQAN_CALL_TEST(test_generalized_index_sa_CURRENT_WORK);
 	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_withoutmod);
 	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modcyclicshape);
 	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modreverse);
+    SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modview);
+
+	SEQAN_CALL_TEST(test_generalized_index_sa_find_modreverse);
+	SEQAN_CALL_TEST(test_generalized_index_sa_find_modcyclicshape);
 
 }
 SEQAN_END_TESTSUITE

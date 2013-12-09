@@ -40,7 +40,7 @@
 #include <seqan/index.h>
 #include "../index/test_index_helpers.h"
 
-SEQAN_DEFINE_TEST(test_generalized_index_sa_CURRENT_WORK)
+SEQAN_DEFINE_TEST(test_generalized_index_sa_Demo)
 {
     using namespace seqan;
     
@@ -145,7 +145,7 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modreverse)
     appendValue(set, "1000");
 
     TRevIndex revIndex(set);
-    typename Cargo<ModReverse>::Type xxx; // = Nothing
+    typename Cargo<TRevIndex>::Type xxx;
 
     resize(indexSA(revIndex), lengthSum(set));
     createGeneralizedSuffixArray<ModReverse> (indexSA(revIndex), set, xxx, SAQSort());
@@ -157,7 +157,88 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modreverse)
         SEQAN_ASSERT_EQ(correct[i][0], indexSA(revIndex)[i].i1);
         SEQAN_ASSERT_EQ(correct[i][1], indexSA(revIndex)[i].i2);
     }
+}
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modview)
+{
+    using namespace seqan;
+
+    typedef ModView<FunctorComplement<Dna> > TMod;
+    typedef Index<DnaString, IndexSa<Generalized<TMod > > > TViewIndex;
+
+    DnaString dna = "ACGTAACGC";
+    Cargo<TViewIndex>::Type cargo;
+
+    TViewIndex index(dna, cargo);
+    indexRequire(index, FibreSA());
+
+
+    // correct Index:
+    typedef ModifiedString<DnaString,TMod> TModString;
+    typedef Index<DnaString, IndexSa<> > TIndex;
+    DnaString newStr = TModString(dna);
+    TIndex corrIndex(newStr);
+    indexRequire(corrIndex, FibreSA());
+
+    for (unsigned i =0; i<length(dna);++i)
+        SEQAN_ASSERT_EQ(indexSA(index), indexSA(corrIndex));
     
+}
+
+
+
+
+
+
+
+// find
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_find_modreverse)
+{
+    using namespace seqan;
+
+    typedef StringSet<CharString> TSet;
+    typedef Index<TSet, IndexSa<Generalized<ModReverse> > > TRevIndex;
+
+    TSet set;
+    appendValue(set, "010101");
+    appendValue(set, "101");
+    appendValue(set, "000");
+    appendValue(set, "1000");
+
+    TRevIndex revIndex(set);
+    typename Cargo<TRevIndex>::Type xxx;
+
+    Finder<TRevIndex> finder(revIndex);
+    while (find(finder, "0001"))
+        std::cout << beginPosition(finder) << std::endl;
+
+    }
+
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_find_modcyclicshape)
+{
+    using namespace seqan;
+
+    typedef StringSet<CharString> TSet;
+    typedef CyclicShape<GenericShape> TShape;
+    typedef ModCyclicShape<TShape>    TModifier;
+    typedef Index<TSet, IndexSa<Generalized<TModifier> > > TGappedIndex;
+
+    TSet set;
+    appendValue(set, "012341");
+    appendValue(set, "12341");
+    appendValue(set, "01011");
+
+    TShape shape;
+    stringToCyclicShape(shape, "01");
+
+    TGappedIndex gIndex(set, shape);
+
+    Finder<TGappedIndex> finder(gIndex);
+    while(find(finder, "24"))
+        std::cout << beginPosition(finder) << std::endl;
+
 }
 
 
