@@ -1266,31 +1266,71 @@ I	ISSISSIPPI*/
 		return value(value(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
 	}
 
-//////////////////////////////////////////////////////////////////////////////
-// infix
+// ----------------------------------------------------------------------------
+// Function infix()                                                   for Index
+// ----------------------------------------------------------------------------
 
-	template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
-	inline typename Infix<TText>::Type
-	infix(Index<TText, TSpec> &index, TPosBegin pos_begin, TPosEnd pos_end)
-	{
-		return infix(indexText(index), pos_begin, pos_end);
-	}
+template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Index<TText, TSpec> >::Type
+infix(Index<TText, TSpec> &index, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return infix(indexText(index), pos_begin, pos_end);
+}
 
-	template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
-	inline typename Infix<TText>::Type
-	infix(Index<TText, TSpec> const &index, TPosBegin pos_begin, TPosEnd pos_end)
-	{
-		return infix(indexText(index), pos_begin, pos_end);
-	}
+template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Index<TText, TSpec> const>::Type
+infix(Index<TText, TSpec> const &index, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return infix(indexText(index), pos_begin, pos_end);
+}
 
-    
+// ----------------------------------------------------------------------------
+// Function infixWithLength()                                         for Index
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Index<TText, TSpec> >::Type
+infixWithLength(Index<TText, TSpec> &index, TPosBegin pos_begin, TSize length)
+{
+    return infix(index, pos_begin, pos_begin + length);
+}
+
+template <typename TText, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Index<TText, TSpec> const>::Type
+infixWithLength(Index<TText, TSpec> const &index, TPosBegin pos_begin, TSize length)
+{
+    return infix(indexText(index), pos_begin, pos_begin + length);
+}
+
+// ----------------------------------------------------------------------------
+// Function infixWithLength()                            for Index on StringSet
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TTextSpec, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Index<StringSet<TText, TTextSpec>, TSpec> >::Type
+infixWithLength(Index<StringSet<TText, TTextSpec>, TSpec> &index, TPosBegin pos_begin, TSize length)
+{
+    typename RemoveConst<TPosBegin>::Type pos_end = pos_begin;
+    pos_end.i2 += length;
+    return infix(index, pos_begin, pos_end);
+}
+
+template <typename TText, typename TTextSpec, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Index<StringSet<TText, TTextSpec>, TSpec> const>::Type
+infixWithLength(Index<StringSet<TText, TTextSpec>, TSpec> const &index, TPosBegin pos_begin, TSize length)
+{
+    typename RemoveConst<TPosBegin>::Type pos_end = pos_begin;
+    pos_end.i2 += length;
+    return infix(index, pos_begin, pos_end);
+}
+
 // ----------------------------------------------------------------------------
 // Function suffix()                                                  for Index
 // ----------------------------------------------------------------------------
 
 // general Index
 template <typename TText, typename TSpec, typename TPosBegin>
-inline typename Suffix<Index<TText, TSpec> >::Type
+inline typename Suffix<TText>::Type
 suffix(Index<TText, TSpec> & t, TPosBegin pos_begin)
 {
     return suffix(indexText(t), pos_begin);
@@ -1298,7 +1338,7 @@ suffix(Index<TText, TSpec> & t, TPosBegin pos_begin)
 
 // general Index: const variant
 template <typename TText, typename TSpec, typename TPosBegin>
-inline typename Suffix<Index<TText, TSpec> const>::Type
+inline typename Suffix<TText>::Type
 suffix(Index<TText, TSpec> const &t, TPosBegin pos_begin)
 {
     return suffix(indexText(t), pos_begin);

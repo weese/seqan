@@ -1571,7 +1571,8 @@ The string ISSI occurs 2 times in MISSISSIPPI and has 4 characters.
 	SEQAN_HOST_DEVICE inline typename Infix< typename Fibre<TIndex, FibreText>::Type const >::Type 
 	representative(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
-		return infixWithLength(indexText(container(it)), getOccurrence(it), repLength(it));
+        TIndex const & index = container(it);
+		return infixWithLength(index, getOccurrence(it), repLength(it));
 	}
 
 

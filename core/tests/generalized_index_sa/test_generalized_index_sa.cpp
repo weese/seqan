@@ -50,5 +50,7 @@ SEQAN_BEGIN_TESTSUITE(test_generalized_index_sa)
 	SEQAN_CALL_TEST(test_generalized_index_sa_find_modreverse);
 	SEQAN_CALL_TEST(test_generalized_index_sa_find_modcyclicshape);
 
+	SEQAN_CALL_TEST(test_generalized_index_sa_stree_modcyclicshape);
+
 }
 SEQAN_END_TESTSUITE

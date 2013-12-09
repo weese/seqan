@@ -242,4 +242,43 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_find_modcyclicshape)
 }
 
 
+
+
+
+
+// stree interface
+
+SEQAN_DEFINE_TEST(test_generalized_index_sa_stree_modcyclicshape)
+{
+    using namespace seqan;
+
+    typedef StringSet<CharString>                       TSet;
+    typedef CyclicShape<GenericShape>                   TShape;
+    typedef ModCyclicShape<TShape>                      TModifier;
+    typedef Index<TSet, IndexSa<Generalized<TModifier> > > TGappedIndex;
+    typedef Iterator<CharString, Standard>::Type        TQueryIter;
+    typedef Iterator<TGappedIndex, TopDown<> >::Type    TTreeIter;
+
+    TSet set;
+    appendValue(set, "012341");
+    appendValue(set, "12341");
+    appendValue(set, "01011");
+    CharString  query = "24";
+
+    TShape shape;
+    stringToCyclicShape(shape, "01");
+
+    TGappedIndex index(set, shape);
+    TTreeIter treeIter(index);
+    TQueryIter qry = begin(query, Standard());
+    TQueryIter qryEnd = end(query, Standard());
+    while(qry < qryEnd)
+    {
+        std::cout << repLength(treeIter) << " : " << countOccurrences(treeIter) << "\t\"" << representative(treeIter) << "\"" << std::endl;
+        if(!goDown(treeIter, *(qry++)))
+            break;
+    }
+}
+
+
 #endif  // CORE_TESTS_GENERALIZED_INDEX_SA_TEST_GENERALIZED_INDEX_SA_H_

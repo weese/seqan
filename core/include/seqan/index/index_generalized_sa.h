@@ -146,6 +146,25 @@ struct Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>
     typedef ModifiedString<typename Suffix<TText const>::Type, TSuffixMod >     Type;
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction Infix                                                   general
+// ----------------------------------------------------------------------------
+
+// general modified suffix
+template <typename TText, typename TSuffixMod, typename TSpec>
+struct Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >
+{
+    typedef typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type>::Type Type;
+};
+
+// general modified suffix; const variant
+template <typename TText, typename TSuffixMod, typename TSpec>
+struct Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>
+{
+    typedef typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type>::Type Type;
+};
+
+
 // ============================================================================
 // Functions
 // ============================================================================
@@ -196,7 +215,7 @@ suffix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBeg
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
-inline typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type>::Type
+inline typename Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type
 infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, TPosBegin pos_begin, TPosEnd pos_end)
 {
     return prefix(suffix(t, pos_begin), pos_end - pos_begin);
@@ -204,10 +223,30 @@ infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, TPosBegin pos_
 
 // const variant
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
-inline typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type>::Type
+inline typename Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type
 infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin, TPosEnd pos_end)
 {
     return prefix(suffix(t, pos_begin), pos_end - pos_begin);
+}
+
+// ----------------------------------------------------------------------------
+// Function infix()                                      for Index on StringSet
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TTextSpec, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type
+infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, TPosBegin pos_begin, TPosEnd pos_end)
+{
+
+    return prefix(suffix(t, pos_begin), pos_end.i2 - pos_begin.i2);
+}
+
+// const variant
+template <typename TText, typename TTextSpec, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type
+infix(Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return prefix(suffix(t, pos_begin), pos_end.i2 - pos_begin.i2);
 }
 
 // ----------------------------------------------------------------------------
