@@ -111,7 +111,7 @@ inline bool parse(GenomicRegion & region, CharString const & regionString);
  */
 
 /*!
- * @var CharString GenomicRegion::seqName;
+ * @var CharString GenomicRegion::seqName; 
  * @brief Name of the sequence the region lies on, default is the empty string.
  * 
  * @var __int32 GenomicRegion::seqId;

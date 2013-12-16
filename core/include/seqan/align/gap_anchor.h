@@ -65,8 +65,8 @@ typedef Tag<SortGapPos_> const SortGapPos;
  * @headerfile <seqan/align.h>
  * @brief Stores the position of an alignment character in sequence-space and in gap-space.
  * 
- * @signature template <typename TPosition>
- *            struct GapAnchor;
+ * @signature template <typename TPos>
+ *            struct GapAnchor<TPos>;
  * 
  * @tparam TPos Type to store gapped/ungapped positions.
  * 
@@ -106,14 +106,14 @@ template <typename TPos>
 struct GapAnchor
 {
 /*!
- * @var VariableType GapAnchor::seqPos
- * @brief Sequence character position in the ungapped sequence.
+ * @var TPos GapAnchor::seqPos
+ * @brief Sequence character position in the ungapped sequence (e.g. @link IntegerConcept @endlink).
  */
 	TPos	seqPos;			// sequence character position in the ungapped sequence
 
 /*!
- * @var VariableType GapAnchor::gapPos
- * @brief Sequence character position in the gapped sequence.
+ * @var TPos GapAnchor::gapPos
+ * @brief Sequence character position in the gapped sequence (e.g. @link IntegerConcept @endlink).
  */
 	TPos	gapPos;			// sequence character position in the gapped sequence
 

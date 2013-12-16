@@ -78,7 +78,7 @@ typedef Tag<ArrayGaps_> ArrayGaps;
  * @brief Store the gapped version of a sequence.
  *
  * @signature template <typename TSequence, typename TSpec>
- *            class Gaps;
+ *            class Gaps<TSequence, TSpec>;
  *
  * @tparam TSequence The type of the underlying sequence.
  * @tparam TSpec     Tag for specialization.

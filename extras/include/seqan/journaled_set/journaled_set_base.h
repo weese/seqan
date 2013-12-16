@@ -205,7 +205,7 @@ struct GlobalAlign{};
  *
  * @section Remarks
  *
- * The JournaledManhattan strategy fills the gaps between the anchors with a single insertion node whil the
+ * The JournaledManhatten strategy fills the gaps between the anchors with a single insertion node whil the
  * corresponding part of the reference sequence is deleted.
  */
 
