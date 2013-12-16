@@ -253,10 +253,9 @@ struct DefaultFinder<Index<TText, FMIndex<TSpec, TConfig> > >
  *            class Index<TText, FMIndex<TSpec, TConfig> >;
  * 
  * @tparam TSpec FM index specialisation. 
- * @tparam TText The text type. Types: @link String @endlink, @link StringSet @endlink
- * @tparam TConfig A config object which determines the data types of the different fibres.
- *
- *
+ * @tparam TText The text type. Types: @link String @endlink, @link StringSet @endlink.
+ * @tparam TConfig A config object which determines the data types of the different fibres. Defaults to
+ *		   @link FMIndexConfig @endlink.
  */
 
 template <typename TText, typename TSpec, typename TConfig>
@@ -379,11 +378,11 @@ indexLF(Index<TText, FMIndex<TSpec, TConfig> > const & index)
  *        containing entries for the sentinels). The returned position corresponds to the suffix array of the original
  *        text without sentinels.
  * 
- * @signature toSuffixPosition(fmIndex, pos, offset)
+ * @signature toSuffixPosition(index, pos, offset)
  * 
  * @param pos The position in the suffix array of the fm index (with sentinels).
  *            Types: @link UnsignedIntegerConcept @endlink
- * @param fmIndex The FM index.
+ * @param index The FM index.
  * @param offset The number of sequences in the original text. Types:
  *               @link UnsignedIntegerConcept @endlink
  *

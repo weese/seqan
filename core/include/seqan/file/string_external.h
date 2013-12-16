@@ -57,22 +57,26 @@ namespace SEQAN_NAMESPACE_MAIN
 /*!
  * @class ExternalConfig
  * @headerfile <seqan/file.h>
- * @brief Standard configuration for the @link ExternalString @endlink.
+ * @brief 32 bit configuration for the @link ExternalString @endlink.
  *
  * @signature template <[typename TFile[, unsigned PAGE_SIZE[, unsigned FRAMES]]>
- *            struct ExternalConfig;
+ *            class ExternalConfig;
  *
  * @tparam TFile     The @link File @endlink type to use.  Default: <tt>File&lt;&gt;</tt>.
  * @tparam PAGE_SIZE The number of values in one page.  This should be a power of 2 to speed up transfer and
- *                   calculations.  Default: 2<sup>20</sup>.
+ *                   calculations.  Default: 2<sup>22</sup>.
  * @tparam FRAMES    The number of pages that should reside in internal memory.  To enable prefetching and automatic
- *                   swap-out, <tt>frames</tt> should be greater than 1.  Default: 2.
+ *                   swap-out, <tt>FRAMES</tt> should be greater than 1.  Default: 2.
  *
  * @section Remarks
  *
- * When using this configuration, the Size type of the ExternalString is <tt>unsigned</tt>.  Thus, with this configuration at most 4.294.967.296 values can be stored in an ExternalString on a 32 bit system.
+ * When using this configuration, the Size type of the ExternalString is <tt>unsigned</tt>.  Thus, with this 
+ * configuration at most 4.294.967.296 values can be stored in an ExternalString on a 32 bit system.
  *
- * For a larger size type use ExternalConfigLarge.
+ * For a larger size type use @link ExternalConfigLarge @endlink.
+ * 
+ * @see ExternalConfigLarge
+ * @see ExternalConfigSize
  */
 
 /*!
@@ -85,17 +89,21 @@ namespace SEQAN_NAMESPACE_MAIN
  *
  * @tparam TFile     The @link File @endlink type to use.  Default: <tt>File&lt;&gt;</tt>.
  * @tparam PAGE_SIZE The number of values in one page.  This should be a power of 2 to speed up transfer and
- *                   calculations.  Default: 2<sup>20</sup>.
+ *                   calculations.  Default: 2<sup>22</sup>.
  * @tparam FRAMES    The number of pages that should reside in internal memory.  To enable prefetching and automatic
- *                   swap-out, <tt>frames</tt> should be greater than 1.  Default: 2.
+ *                   swap-out, <tt>FRAMES</tt> should be greater than 1.  Default: 2.
  *
  * @section Remarks
  *
- * When using this configuration ,th eSize type o fthe ExternalString is Size type of <tt>TFile</tt>.  Normally, this is
- * a 64 bit integer.  For a smaller size type use ExternalConfig.
+ * Default configuration for External Strings.
+ * When using this configuration, the Size type of the ExternalString is the Size type of <tt>TFile</tt>.  Normally, 
+ * this is a 64 bit integer. For a smaller size type use @link ExternalConfig @endlink.
  *
- * Some data structures store size types values (e.g. suffix arrays in indices).  To save memory, you should think o
- * fusing ExternalConfig.
+ * Some data structures store size types values (e.g. suffix arrays in indices).  To save even more memory, you should 
+ * think of adapting the size type arbitrarily using @link ExternalConfigSize @endlink.
+ *
+ * @see ExternalConfigSize
+ * @see ExternalConfig
  */
 
 /*!
@@ -109,9 +117,15 @@ namespace SEQAN_NAMESPACE_MAIN
  * @tparam TSize The size type of the ExternalString.
  * @tparam TFile Type of file the ExternalString will be based on.  Defaults to <tt>File&lt;&gt;</tt>.
  * @tparam PAGE_SIZE The number of values in one page.  This should be a power of 2 to speed up transfer and
- *                   calculations.  Default: 2<sup>20</sup>.
+ *                   calculations.  Default: 2<sup>22</sup>.
  * @tparam FRAMES    The number of pages that should reside in internal memory.  To enable prefetching and automatic
- *                   swap-out, <tt>frames</tt> should be greater than 1.  Default: 2.
+ *                   swap-out, <tt>FRAMES</tt> should be greater than 1.  Default: 2.
+ *
+ * Unlike @link ExternalConfig @endlink or @link ExternalConfigLarge @endlink, this configuration class allows you to
+ * specify the size type of ExternalStrings arbitrarily.
+ *
+ * @see ExternalConfig
+ * @see ExternalConfigLarge
  */
 
 /*!
@@ -119,12 +133,14 @@ namespace SEQAN_NAMESPACE_MAIN
  * @headerfile <seqan/file.h>
  * @brief String that is stored in external memory.
  *
+ * @extends String
+ *
  * @signature template <typename TValue[, typename TConfig]>
  *            class String<TValue, External<TConfig> >;
  *
  * @tparam TValue  The type that is used for the items/characters stored in the string.
- * @tparam TConfig A structure to confgure the external string.  Defaults to <tt>ExternalConfigLarge&lt;&gt;.  See
- *                 ExternalConfig, ExternalConfigLarge, and ExternalConfigSize.
+ * @tparam TConfig A structure to confgure the external string.  Defaults to ExternalConfigLarge&lt;&gt;.  See
+ *         @link ExternalConfig @endlink, @link ExternalConfigLarge @endlink, and @link ExternalConfigSize @endlink.
  *
  * @section Remarks
  *
@@ -135,8 +151,8 @@ namespace SEQAN_NAMESPACE_MAIN
  *
  * This String also supports fast appending and removing of values at the end (see Block String, appendValue)
  *
- * The External String implements a LRU mechanism to swap out pages.  The External String's Iterator detects a forward or
- * backward iteration and asynchronously prefetches pages that certainly will be accessed and automatically swaps out
+ * The External String implements a LRU mechanism to swap out pages.  The External String's Iterator detects a forward 
+ * or backward iteration and asynchronously prefetches pages that certainly will be accessed and automatically swaps out
  * pages that certainly won't be accessed any more in the iteration process.
  *
  * The String is implemented like a virtual memory manager.  It divides its character sequence into pages of a fixed
@@ -1245,8 +1261,8 @@ you should think of using @Tag.ExternalConfig@.
  * @param[in]     file     The @link File @endlink to use for reading and writing.  You must ensture that
  *                         <tt>file</tt> is open as the string will not call <tt>open</tt> and <tt>close</tt>
  *                         on the file.
- * @param[in]     fileName The path to open. Type: <tt>char const *</tt>
- * @param[in,out] openMode The open mode.
+ * @param[in]     fileName The path to open. Type: <tt>char const *</tt>.
+ * @param[in,out] openMode The open mode (<tt>int</tt>). Defaults to <tt>DefaultOpenMode<TFile>::VALUE</tt>.
  *
  * @section Remarks
  *

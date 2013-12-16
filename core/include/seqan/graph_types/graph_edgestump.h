@@ -53,7 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
  *            class EdgeStump;
  *
  * @tparam TCargo       The cargo type of an edge.  The cargo can be used to store arbitrary information with an
- *                      edge or be <tt>void</tt.>.  Default: <tt>void</tt>.
+ *                      edge or be <tt>void</tt>.  Default: <tt>void</tt>.
  * @tparam IS_LIST      A bool value that indicates whether it is a list or not.  Default: <tt>true</tt>.
  * @tparam STORE_SOURCE A bool value that indicates whether the source is stored in the EdgeStump or not.
  *                      Default: <tt>false</tt>.
@@ -63,7 +63,7 @@ namespace SEQAN_NAMESPACE_MAIN
  *
  * @section Remarks
  *
- * The default EdgeStump in all graph types does not consider a cargo.  However, ni default usage every graph does store
+ * The default EdgeStump in all graph types does not consider a cargo.  However, in default usage every graph does store
  * an edge id.  Edge ids are used to append additional properties to edges with the help of external property maps.
  */
 
@@ -502,9 +502,7 @@ cargo(EdgeStump<void, TList, TSource, TId, TSpec> const*)
  *
  * @signature void assignCargo(stump, cargo);
  *
- * @param[in] stump Pointer to the EdgeStump to set the cargo of.
- *
- * @return TCargo Reference to the cargo of the EdgeStump.
+ * @param[in,out] stump Pointer to the EdgeStump to set the cargo of.
  *
  * Calling assignCargo on EdgeStump objects without cargo does nothing.
  */
@@ -589,11 +587,12 @@ assignTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
  * @fn EdgeStump#target
  * @brief Access to the target of an EdgeStump.
  *
- * @signature TVertexDescriptor target(stump);
+ * @signature TVertex target(stump);
  *
  * @param[in] stump Pointer to the EdgeStump to access the target of.
+ * @tparam TVertex Type of the VertexDescriptor of the underlying graph.
  *
- * @return TVertexDescriptor Reference to the target vertex descriptor of stump.
+ * @return TVertex Reference to the target vertex descriptor of stump.
  */
 
 /**
@@ -634,11 +633,12 @@ target(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
  * @fn EdgeStump#getTarget
  * @brief Get method for the target.
  *
- * @signature TVertexDescriptor getTarget(stump);
+ * @signature TVertex getTarget(stump);
  *
  * @param[in] stump Pointer to the EdgeStump to get the target of.
+ * @tparam TVertex Type of the VertexDescriptor of the underlying graph.
  *
- * @return TVertexDescriptor The vetex descriptor stored in stump.
+ * @return TVertex The vetex descriptor stored in stump.
  */
 
 /**
@@ -734,11 +734,12 @@ assignSource(EdgeStump<TCargo, TList, false, TId, TSpec>*,
  * @fn EdgeStump#source
  * @brief Access to the source of an EdgeStump.
  *
- * @signature TVertexDescriptor source(stump);
+ * @signature TVertex source(stump);
  *
  * @param[in] stump Pointer to the EdgeStump to access the source of.
+ * @tparam TVertex Type of the VertexDescriptor of the underlying graph.
  *
- * @return TVertexDescriptor Reference to the source vertex descriptor of stump.
+ * @return TVertex Reference to the source vertex descriptor of stump.
  *
  * @section Remarks
  *
@@ -794,11 +795,12 @@ source(EdgeStump<TCargo, TList, false, TId, TSpec> const*)
  * @fn EdgeStump#getSource
  * @brief Get method for the source.
  *
- * @signature TVertexDescriptor getSource(stump);
+ * @signature TVertex getSource(stump);
  *
  * @param[in] stump Pointer to the EdgeStump to get the source of.
+ * @tparam TVertex Type of the VertexDescriptor of the underlying graph.
  *
- * @return TVertexDescriptor The vetex descriptor stored in stump.
+ * @return TVertex The vetex descriptor stored in stump.
  *
  * @section Remarks
  *
@@ -871,10 +873,10 @@ getSource(EdgeStump<TCargo, TList, false, TId, TSpec>*)
  * @fn EdgeStump#assignNextT
  * @brief Assigns another EdgeStump to the next target pointer.
  *
- * @signature void assignNextT(es, es2);
+ * @signature void assignNextT(stump, stump2);
  *
- * @param[in,out] es  Pointer to the EdgeStump.
- * @param[in]     es2 Pointer to the following EdgeStump.
+ * @param[in,out] stump  Pointer to the EdgeStump.
+ * @param[in]     stump2 Pointer to the following EdgeStump.
  */
 
 /**
@@ -908,9 +910,10 @@ assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es,
  * @fn EdgeStump#nextT
  * @brief Accesses the next target pointer.
  *
- * @signature TEdgeStump nextT(es);
+ * @signature TEdgeStump nextT(stump);
  *
- * @param[in] es Pointer to the EdgeStump.
+ * @param[in] stump Pointer to the EdgeStump.
+ * @tparam TEdgeStump EdgeStump. Same type as input.
  *
  * @return TEdgeStump Reference to the next target pointer.
  */
@@ -952,9 +955,10 @@ nextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
  * @fn EdgeStump#getNextT
  * @brief Get method for the next target pointer.
  *
- * @signature TEdgeStump getNextT(es);
+ * @signature TEdgeStump getNextT(stump);
  *
- * @param[in] es Pointer to the EdgeStump.
+ * @param[in] stump Pointer to the EdgeStump.
+ * @tparam TEdgeStump EdgeStump. Same type as input.
  *
  * @return TEdgeStump Reference to the next target pointer.
  */
@@ -997,10 +1001,10 @@ getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
  * @fn EdgeStump#assignNextS
  * @brief Assigns another EdgeStump to the next source pointer.
  *
- * @signature void assignNextS(es, es2);
+ * @signature void assignNextS(stump, stump2);
  *
- * @param[in,out] es  Pointer to the EdgeStump.
- * @param[in]     es2 Pointer to the following EdgeStump.
+ * @param[in,out] stump  Pointer to the EdgeStump.
+ * @param[in]     stump2 Pointer to the following EdgeStump.
  *
  * Edge Stumps can be configured to have no source.  In this case, there is no next source pointer.
  */
@@ -1049,11 +1053,12 @@ assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>*,
  * @fn EdgeStump#nextS
  * @brief Accesses the next source pointer.
  *
- * @signature TEdgeStump nextS(es);
+ * @signature TEdgeStump nextS(stump);
  *
- * @param[in,out] es  Pointer to the EdgeStump.
+ * @param[in] stump  Pointer to the EdgeStump.
+ * @tparam TEdgeStump EdgeStump. Same type as input.
  *
- * @return Reference to the next source pointer.
+ * @return TEdgeStump Reference to the next source pointer.
  *
  * Edge Stumps can be configured to have no source.  In this case, there is no next source pointer.
  */
@@ -1117,11 +1122,12 @@ nextS(EdgeStump<TCargo, true, false, TId, TSpec> const*)
  * @fn EdgeStump#getNextS
  * @brief Accesses the next source pointer.
  *
- * @signature TEdgeStump getNextS(es);
+ * @signature TEdgeStump getNextS(stump);
  *
- * @param[in,out] es  Pointer to the EdgeStump.
+ * @param[in,out] stump  Pointer to the EdgeStump.
+ * @tparam TEdgeStump EdgeStump. Same type as input.
  *
- * @return Reference to the next source pointer.
+ * @return TEdgeStump Reference to the next source pointer.
  *
  * Edge Stumps can be configured to have no source.  In this case, there is no next source pointer.
  */

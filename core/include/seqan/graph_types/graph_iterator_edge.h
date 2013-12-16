@@ -41,10 +41,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(meiers): Write more docu, for example in which order edges are iterated
 /*!
  * @class EdgeIterator
  * @headerfile <seqan/graph_types.h>
  * @brief Edge iterator for @link Graph @endlink.
+ * @implements BidirectionalIteratorConcept
  *
  * @signature Iterator<TGraph, EdgeIterator>::Type;
  * @signature template <typename TGraph, typename TSpec>
@@ -260,6 +262,16 @@ operator * (Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*!
+ * @fn EdgeIterator#hostGraph
+ * @brief Constructor.
+ *
+ * @signature TGraph hostGraph(iter);
+ *
+ * @param[in] iter EdgeIterator.
+ * @return TGraph Returns a reference to the graph underlying this iterator.
+ */
+ // TODO(meiers): this return a const &, shouldn't it return a Reference<>::Type ?
 template<typename TGraph, typename TSpec>
 inline typename Host<Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > > >::Type const&
 hostGraph(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
@@ -485,6 +497,18 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*!
+ * @fn EdgeIterator#sourceVertex
+ * @brief Return the source vertex of the edge referenced by <tt>iter</tt>.
+ *
+ * @signature TVertexDescriptor sourceVertex(iter);
+ *
+ * @param[in] iter EdgeIterator.
+ * @return VertexDescriptor Returns a VertexDescriptor object of the source node of the
+ * edge <tt>iter</tt> points to.
+ *
+ * @see Graph#sourceVertex
+ */
 template<typename TGraph, typename TSpec>
 inline typename VertexDescriptor<TGraph>::Type 
 sourceVertex(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
@@ -495,6 +519,18 @@ sourceVertex(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*!
+ * @fn EdgeIterator#targetVertex
+ * @brief Return the target vertex of the edge referenced by <tt>iter</tt>.
+ *
+ * @signature TVertexDescriptor targetVertex(iter);
+ *
+ * @param[in] iter EdgeIterator.
+ * @return VertexDescriptor Returns a VertexDescriptor object of the target node of the
+ * edge <tt>iter</tt> points to.
+ *
+ * @see Graph#targetVertex
+ */
 template<typename TGraph, typename TSpec>
 inline typename VertexDescriptor<TGraph>::Type 
 targetVertex(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
@@ -505,6 +541,7 @@ targetVertex(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(meiers): specialization for Automaton, why?
 template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpec>
 inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > >::Type
 label(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
