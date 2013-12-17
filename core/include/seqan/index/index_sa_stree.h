@@ -521,9 +521,11 @@ inline bool _goDownChar(Iter<Index<TText, IndexSa<TIndexSpec> >, VSTree<TopDown<
 
     TSAIterator saBegin = begin(sa, Standard()) + value(it).range.i1;
     TSASize saLen = isRoot(it) ? length(sa) : value(it).range.i2 - value(it).range.i1;
+
+    SuffixFunctor<TText const, typename Value<TSA>::Type> dereferer(text);
     TSearchTreeIterator node(saBegin, saLen);
 
-    Pair<TSAIterator> range = _equalRangeSA(index, node, c, value(it).repLen);
+    Pair<TSAIterator> range = _equalRangeSA(dereferer, node, c, value(it).repLen);
 
     if (range.i1 >= range.i2)
         return false;
