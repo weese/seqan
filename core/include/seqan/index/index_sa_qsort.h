@@ -156,16 +156,15 @@ struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, void > :
 // SuffixLess_                                           [String], [Modified]
 // --------------------------------------------------------------------------
 
-template < typename TSAValue, typename TText, typename TModifier>
+template < typename TSAValue, typename TText, typename TSuffixMod>
 struct SuffixLess_ :
     public ::std::binary_function < TSAValue, TSAValue, bool >
 {
-    typedef Index<TText, IndexSa<Generalized<TModifier, void> > > TIndex;
-    typedef typename Suffix<TIndex>::Type               TModString;
-    typedef typename Cargo<TIndex>::Type                TModCargo;
+    typedef ModifiedString<typename Suffix<TText const>::Type, TSuffixMod>      TSuffix;
+    typedef typename Cargo<TSuffix>::Type                                       TModCargo;
 
     TText const &               _text;
-    TModCargo          _modifier;
+    TModCargo                   _modifier;
     typename Size<TText>::Type  _offset;
 
     SuffixLess_(TText const &text, TModCargo const & modifier):
@@ -185,8 +184,8 @@ struct SuffixLess_ :
 
         a += _offset;
         b += _offset;
-        TModString sa(suffix(_text, a), _modifier);
-        TModString sb(suffix(_text, b), _modifier);
+        TSuffix sa(suffix(_text, a), _modifier);
+        TSuffix sb(suffix(_text, b), _modifier);
 
         if (sa < sb) return true;
         else return false;
@@ -197,20 +196,19 @@ struct SuffixLess_ :
 // SuffixLess_                                        [StringSet], [Modified]
 // --------------------------------------------------------------------------
 
-template <typename TSAValue, typename TString, typename TSetSpec, typename TModifier>
-struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TModifier> :
+template <typename TSAValue, typename TString, typename TSetSpec, typename TSuffixMod>
+struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TSuffixMod> :
     public ::std::binary_function<TSAValue, TSAValue, bool>
 {
-    typedef StringSet<TString, TSetSpec> const          TText;
-    typedef Index<TText, IndexSa<Generalized<TModifier, void> > > TIndex;
-    typedef typename Suffix<TIndex>::Type               TModString;
-    typedef typename Cargo<TIndex>::Type                TModCargo;
+    typedef StringSet<TString, TSetSpec>                                    TText;
+    typedef ModifiedString<typename Suffix<TText const>::Type, TSuffixMod>  TSuffix;
+    typedef typename Cargo<TSuffix>::Type                                   TModCargo;
 
     TText const &               _text;
     TModCargo                   _modifier;
     typename Size<TText>::Type  _offset;
 
-    SuffixLess_(TText &text, TModCargo const & modifier):
+    SuffixLess_(TText const &text, TModCargo const & modifier):
         _text(text), _modifier(modifier), _offset(0)
     {}
 
@@ -226,8 +224,8 @@ struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TModifier> :
 
         a.i2 += _offset;
         b.i2 += _offset;
-        TModString sa(suffix(_text, a), _modifier);
-        TModString sb(suffix(_text, b), _modifier);
+        TSuffix sa(suffix(_text, a), _modifier);
+        TSuffix sb(suffix(_text, b), _modifier);
 
         if (sa < sb) return true;
         if (sa > sb) return false;
@@ -321,11 +319,12 @@ inline void createSuffixArray(
 // function createGeneralizedSuffixArray
 // --------------------------------------------------------------------------
 
-template <typename TMod, typename TSA, typename TText, typename TSpec=void>
+template <typename TSA, typename TText, typename TCargo, typename TMod>
 inline void createGeneralizedSuffixArray(
     TSA &SA,
     TText const &s,
-    typename Cargo<Index<TText,IndexSa<Generalized<TMod, TSpec> > > >::Type const & suffixModifier,
+    TCargo const & modifierCargo,
+    TMod const &,
     SAQSort const &)
 {
     typedef typename Size<TSA>::Type TSize;
@@ -337,7 +336,7 @@ inline void createGeneralizedSuffixArray(
     // 2. Sort suffix array with quicksort
     ::std::sort(
         begin(SA, Standard()), end(SA, Standard()),
-        SuffixLess_<typename Value<TSA>::Type, TText const, TMod>(s, suffixModifier));
+        SuffixLess_<typename Value<TSA>::Type, TText const, TMod>(s, modifierCargo));
 }
 
 

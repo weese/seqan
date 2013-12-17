@@ -55,10 +55,10 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_Demo)
     TIndex index1(str, shape);
     TIndex index2(index1);
 
-    CharString s1; cyclicShapeToString(s1, suffixModifier(index1));
+    CharString s1; cyclicShapeToString(s1, shape);
     std::cout << s1 << ": " << indexText(index1) << std::endl;
 
-    CharString s2; cyclicShapeToString(s2, suffixModifier(index2));
+    CharString s2; cyclicShapeToString(s2, index2.modifierCargo);
     std::cout << s2 << ": " << indexText(index2) << std::endl;
 
 
@@ -88,7 +88,7 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modcyclicshape)
 
     TGappedIndex gIndex(set, shape);
     resize(indexSA(gIndex), lengthSum(set));
-    createGeneralizedSuffixArray<TModifier> (indexSA(gIndex), set, shape, SAQSort());
+    createGeneralizedSuffixArray(indexSA(gIndex), set, shape, TModifier(), SAQSort());
 
     for (unsigned i=0; i< 16; ++i)
     {
@@ -148,7 +148,7 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modreverse)
     typename Cargo<TRevIndex>::Type xxx;
 
     resize(indexSA(revIndex), lengthSum(set));
-    createGeneralizedSuffixArray<ModReverse> (indexSA(revIndex), set, xxx, SAQSort());
+    createGeneralizedSuffixArray (indexSA(revIndex), set, xxx, ModReverse(), SAQSort());
 
     unsigned correct[16][2]={   {3,3}, {2,2}, {3,2}, {2,1}, {3,1}, {2,0}, {3,0}, {1,2},
                                 {0,5}, {1,1}, {0,4}, {1,0}, {0,3}, {0,2}, {0,1}, {0,0} };
@@ -167,7 +167,7 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_qsort_modview)
     typedef Index<DnaString, IndexSa<Generalized<TMod > > > TViewIndex;
 
     DnaString dna = "ACGTAACGC";
-    Cargo<TViewIndex>::Type cargo;
+    Cargo<Suffix<TViewIndex>::Type>::Type cargo;
 
     TViewIndex index(dna, cargo);
     indexRequire(index, FibreSA());
@@ -278,6 +278,8 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_stree_modcyclicshape)
         if(!goDown(treeIter, *(qry++)))
             break;
     }
+
+    SEQAN_ASSERT_EQ(representative(treeIter), "24");
 }
 
 

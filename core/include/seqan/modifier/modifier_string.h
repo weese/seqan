@@ -131,7 +131,7 @@ class ModifiedString
     //               I tried to integrate this here (*) but I am not really know what I'm doing.
 public:
     typedef typename Pointer_<THost>::Type       THostPointer_;
-    typedef typename Cargo<typename Iterator<ModifiedString>::Type>::Type TCargo_;
+    typedef typename Cargo<ModifiedString>::Type TCargo_;
 
     mutable THostPointer_ _host;
     TCargo_ _cargo;

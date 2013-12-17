@@ -1292,36 +1292,14 @@ template <typename TText, typename TSpec, typename TPosBegin, typename TSize>
 inline typename Infix<Index<TText, TSpec> >::Type
 infixWithLength(Index<TText, TSpec> &index, TPosBegin pos_begin, TSize length)
 {
-    return infix(index, pos_begin, pos_begin + length);
+    return infixWithLength(index, pos_begin, length);
 }
 
 template <typename TText, typename TSpec, typename TPosBegin, typename TSize>
 inline typename Infix<Index<TText, TSpec> const>::Type
 infixWithLength(Index<TText, TSpec> const &index, TPosBegin pos_begin, TSize length)
 {
-    return infix(indexText(index), pos_begin, pos_begin + length);
-}
-
-// ----------------------------------------------------------------------------
-// Function infixWithLength()                            for Index on StringSet
-// ----------------------------------------------------------------------------
-
-template <typename TText, typename TTextSpec, typename TSpec, typename TPosBegin, typename TSize>
-inline typename Infix<Index<StringSet<TText, TTextSpec>, TSpec> >::Type
-infixWithLength(Index<StringSet<TText, TTextSpec>, TSpec> &index, TPosBegin pos_begin, TSize length)
-{
-    typename RemoveConst<TPosBegin>::Type pos_end = pos_begin;
-    pos_end.i2 += length;
-    return infix(index, pos_begin, pos_end);
-}
-
-template <typename TText, typename TTextSpec, typename TSpec, typename TPosBegin, typename TSize>
-inline typename Infix<Index<StringSet<TText, TTextSpec>, TSpec> const>::Type
-infixWithLength(Index<StringSet<TText, TTextSpec>, TSpec> const &index, TPosBegin pos_begin, TSize length)
-{
-    typename RemoveConst<TPosBegin>::Type pos_end = pos_begin;
-    pos_end.i2 += length;
-    return infix(index, pos_begin, pos_end);
+    return infixWithLength(indexText(index), pos_begin, length);
 }
 
 // ----------------------------------------------------------------------------
