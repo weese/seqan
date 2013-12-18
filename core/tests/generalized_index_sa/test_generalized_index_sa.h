@@ -280,6 +280,7 @@ SEQAN_DEFINE_TEST(test_generalized_index_sa_stree_modcyclicshape)
     }
 
     SEQAN_ASSERT_EQ(representative(treeIter), "24");
+    SEQAN_ASSERT_EQ(countOccurrences(treeIter), 2u);
 }
 
 

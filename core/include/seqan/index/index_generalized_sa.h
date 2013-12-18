@@ -62,6 +62,31 @@ template <typename TSuffixMod, typename TSpec = void>
 struct Generalized {};
 
 
+template <typename TText, typename TSAValue, typename TModifier>
+struct GeneralizedSuffixFunctor :
+std::unary_function<TSAValue, typename Suffix<TText>::Type>
+{
+    typedef ModifiedString<typename Suffix<TText>::Type, TModifier> TModString;
+    typedef typename Cargo<TModString>::Type                        TModifierCargo;
+
+    TText                   &text;
+    TModifierCargo const    &modifierCargo;
+
+    GeneralizedSuffixFunctor(TText &text, TModifierCargo const &modifierCargo) :
+        text(text),
+        modifierCargo(modifierCargo)
+    {}
+
+    // TODO(meiers): Reference Type ?
+    TModString
+    operator() (TSAValue const &pos) const
+    {
+        return TModString(suffix(text, pos));
+    }
+};
+
+
+
 template <typename TText, typename TSuffixMod, typename TSpec>
 class Index<TText, IndexSa< Generalized<TSuffixMod, TSpec > > > :
     public Index<TText, IndexSa<TSpec> >
@@ -69,7 +94,7 @@ class Index<TText, IndexSa< Generalized<TSuffixMod, TSpec > > > :
 public:
     typedef Index<TText, IndexSa<TSpec> >           TBase;
     typedef typename Suffix<Index>::Type            TSuffix;
-    typedef typename Cargo<TSuffix>::Type           TModifierCargo;     // TODO: Cargo of index not overload. cargo<suffix<index>>
+    typedef typename Cargo<TSuffix>::Type           TModifierCargo;
     
     // derive           text, cargo, sa
     TModifierCargo      modifierCargo;
@@ -296,15 +321,10 @@ _findFirstIndex(Finder< Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > >,
     TIndex &index = haystack(finder);
     indexRequire(index, EsaSA());
 
-    // NOTE(meiers):
-    // Usually you would pass the text to equalRangeSA-functions, we pass the index.
-    // this saves a lot of copy code
+    // TODO(meiers): Do not access the index member directly
+    GeneralizedSuffixFunctor<TText, typename Value<TSA>::Type, TSuffixMod> dereferer(indexText(index), index.modifierCargo);
 
-
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-// TODO(meiers): use dereferer
-//    finder.range = _equalRangeSA(indexText(index), SearchTreeIterator<TSA const, SortedList>(indexSA(index)), pattern);
+    finder.range = _equalRangeSA(indexText(index), SearchTreeIterator<TSA const, SortedList>(indexSA(index)), pattern);
 
 }
 
