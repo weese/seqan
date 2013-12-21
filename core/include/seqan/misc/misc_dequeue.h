@@ -42,10 +42,10 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 /*!
- * @class Deque
- * @implements ContainerConcept
+ * @class Dequeue
  * @headerfile <seqan/basic.h>
  * @brief A double-ended queue implementation on top of a @link String @endlink.
+ * @implements SequenceConcept
  *
  * @signature template <typename TValue[, typename TSpec]>
  *            class Deque;
@@ -73,6 +73,10 @@ public:
 	typedef String<TValue, TSpec>						TString;
 	typedef typename Iterator<TString, Standard>::Type	TIter;
 
+	/*!
+	 * @var String<TValue, TSpec> data_string
+	 * @brief Internal String the Deque is based on.
+	 */
 	String<TValue, TSpec> data_string;
 
 	TIter data_begin;	// string beginning
@@ -85,6 +89,10 @@ public:
 //____________________________________________________________________________
 
 public:
+	/* @fn Dequeue::Dequeue
+     * @brief The (only) constructor.
+     * @signature Dequeue::Dequeue();
+     */
 	inline Dequeue()
 	{
 		clear(*this);
@@ -246,6 +254,12 @@ back(Dequeue<TValue, TSpec> const &me)
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*! 
+ * @fn Dequeue#popFront
+ * @brief Erase the front element of the dequeue.
+ * @signature void popFront(dequeue);
+ * @param[in,out] dequeue Dequeue object
+ */
 template <typename TValue, typename TSpec>
 inline bool
 popFront(Dequeue<TValue, TSpec> &me)
@@ -263,6 +277,12 @@ popFront(Dequeue<TValue, TSpec> &me)
 	return true;
 }
 
+/*! 
+ * @fn Dequeue#popBack
+ * @brief Erase the front element of the dequeue.
+ * @signature void popBack(dequeue);
+ * @param[in,out] dequeue Dequeue object
+ */
 template <typename TValue, typename TSpec>
 inline bool
 popBack(Dequeue<TValue, TSpec> &me)
@@ -283,6 +303,13 @@ popBack(Dequeue<TValue, TSpec> &me)
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*! 
+ * @fn Dequeue#pushFront
+ * @brief Insert an element at the front of the dequeue.
+ * @signature void pushFront(dequeue, value);
+ * @param[in,out] dequeue Dequeue object
+ * @param[in] value Element to push.
+ */
 template <typename TValue, typename TSpec>
 inline void
 pushFront(Dequeue<TValue, TSpec> &me, TValue const & _value)
@@ -315,6 +342,13 @@ pushFront(Dequeue<TValue, TSpec> &me, TValue const & _value)
 	assign(*me.data_front, _value);
 }
 
+/*! 
+ * @fn Dequeue#pushBack
+ * @brief Insert an element at the back of the dequeue.
+ * @signature void pushBack(dequeue, value);
+ * @param[in,out] dequeue Dequeue object
+ * @param[in] value Element to push.
+ */
 template <typename TValue, typename TSpec>
 inline void
 pushBack(Dequeue<TValue, TSpec> &me, TValue const & _value)

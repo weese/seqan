@@ -50,14 +50,16 @@ namespace seqan {
 /*!
  * @class DefaultSeedConfig
  * @headerfile <seqan/seeds.h>
- * @brief Default configuration for seeds without score.
+ * @brief Default configuration for @link Seed @endlink without score.
  *
- * @signature struct DefaultSeedConfig.
+ * @signature struct DefaultSeedConfig;
  *
- * @section Remarks
+ * @brief Defines types used in Seed/SeedSet.
  *
- * The default definition is as follows.  You use this as a blueprint for your own TConfig struct for a Seed or SeedSet
- * class.
+ * TConfig type of @link Seed @endlink. The default definition is as follows. Use this as
+ * a blueprint for your own TConfig struct for a Seed or SeedSet class.
+ *
+ * @section Example
  *
  * @code{.cpp}
  * struct DefaultSeedConfig
@@ -68,6 +70,30 @@ namespace seqan {
  *     typedef int TScoreValue;
  * };
  * @endcode
+ * 
+ * @typedef DefaultSeedConfig::TPosition
+ *
+ * @brief Position type of DefaultSeedConfig (@link IntegerConcept @endlink).
+ *
+ * @signature typedef (..) DefaultSeedConfig::TPosition;
+ *
+ * @typedef DefaultSeedConfig::TSize
+ *
+ * @brief Size type of DefaultSeedConfig (@link IntegerConcept @endlink).
+ *
+ * @signature typedef (..) DefaultSeedConfig::TSize;
+ * 
+ * @typedef DefaultSeedConfig::TDiagonal
+ *
+ * @brief Diagonal type of DefaultSeedConfig (@link SignedIntegerConcept @endlink).
+ *
+ * @signature typedef (..) DefaultSeedConfig::TDiagonal;
+ *
+ * @typedef DefaultSeedConfig::TScoreValue
+ *
+ * @brief Score type of DefaultSeedConfig, a numerical type.
+ *
+ * @signature typedef (..) DefaultSeedConfig::TScoreValue;
  */
 
 // Default configuration for seeds without score.
