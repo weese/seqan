@@ -316,11 +316,11 @@ inline void createSuffixArray(
 }
 
 // --------------------------------------------------------------------------
-// function createGeneralizedSuffixArray
+// function createGappedSuffixArray
 // --------------------------------------------------------------------------
 
 template <typename TSA, typename TText, typename TCargo, typename TMod>
-inline void createGeneralizedSuffixArray(
+inline void createGappedSuffixArray(
     TSA &SA,
     TText const &s,
     TCargo const & modifierCargo,

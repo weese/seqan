@@ -95,6 +95,8 @@
 #include <seqan/index/index_sa_mm.h>
 #include <seqan/index/index_sa_qsort.h>
 #include <seqan/index/index_sa_bwtwalk.h>
+
+#include <seqan/index/radix_inplace.h> // after index_sa_qsort
 #include <seqan/index/index_sa_radixSort.h>
 
 #include <seqan/index/pump_extender3.h>
