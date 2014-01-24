@@ -455,18 +455,29 @@ struct Dislex{};
 // --------------------------------------------------------------------------
 // function createGappedSuffixArray()                                [Dislex]
 // --------------------------------------------------------------------------
+// Only defined for CyclicShapes
 
-    // Only defined for CyclicShapes
+template < typename TSA, typename TText, typename TCyclicShape>
+inline void createGappedSuffixArray(TSA &SA, // must already be resized already
+                                    TText const &s,
+                                    TCyclicShape const & shape,
+                                    ModCyclicShape<TCyclicShape> const &,
+                                    Dislex const &)
+{
+    createGappedSuffixArray(SA, s, shape, ModCyclicShape<TCyclicShape>(), Dislex(), Skew7());
+}
 
 template < typename TSA,
 typename TText,
-typename TCyclicShape>
+typename TCyclicShape,
+typename TSAConstructionAlgorithmTag>
 inline void createGappedSuffixArray(
                                     TSA &SA, // must already be resized already
                                     TText const &s,
                                     TCyclicShape const & shape,
                                     ModCyclicShape<TCyclicShape> const &,
-                                    Dislex const &)
+                                    Dislex const &,
+                                    TSAConstructionAlgorithmTag const &)
 {
     typedef typename LexText<TText, TCyclicShape>::Type         TLexText;
 
@@ -509,9 +520,9 @@ inline void createGappedSuffixArray(
 
     // Build Index using Skew7
     Index<TLexText, IndexSa<> > normalIndex(lexText);
-    indexRequire(normalIndex, EsaSA());
+    indexCreate(normalIndex, EsaSA(), TSAConstructionAlgorithmTag());
 
-    std::cout << "   |     skew: " << sysTime() - teim << "s (len = " << length(concat(lexText)) << ")" << std::endl; teim = sysTime();
+    std::cout << "   |     saca: " << sysTime() - teim << "s (len = " << length(concat(lexText)) << ")" << std::endl; teim = sysTime();
 
 
     // reverse Transform of Index:

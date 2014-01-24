@@ -294,8 +294,7 @@ struct InplaceRadixSorter {
     InplaceRadixSorter(TAccessFunctor const & f, TOrderFunctor const & c) : textAccess(f), comp(c)
     {}
 
-    inline void operator()(
-                           TValue * beg,
+    inline void operator()(TValue * beg,
                            TValue * end,
                            TSize depth,
                            RadixRecursionStack<TValue, TSize> & stack)
@@ -310,12 +309,12 @@ struct InplaceRadixSorter {
         {
             uchar oracle [ORACLESIZE]; // buffer for the next chars
             uchar* oracleEnd = oracle + std::min( sizeof(oracle), std::size_t(end - i) );
+
             for( uchar* j = oracle; j < oracleEnd; ++j )
-            {
                 *j = textAccess(*i++, depth);
-            }
+
             for( uchar* j = oracle; j < oracleEnd; ++j )
-            ++bucketSize[ *j ];
+                ++bucketSize[ *j ];
         }
 
         // get bucket ends, and put buckets on the stack to sort within them later:

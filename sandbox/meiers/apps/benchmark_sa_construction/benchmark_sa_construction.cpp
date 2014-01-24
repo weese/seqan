@@ -233,19 +233,31 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
         String<Pair<typename Size<TString>::Type> > correctSA1;
         String<typename Size<TString>::Type> correctSA2;
 
+        if (qsort)
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            benchmarkSACA(index, SAQSort(), correctSA1, shape101, saqsort, stringset);
+
+            correctSA1 = indexSA(index);
+        }
+        if(qsort)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            benchmarkSACA(index, SAQSort(), correctSA2, shape101, saqsort, string);
+            
+            correctSA2 = indexSA(index);
+        }
         {
             typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             benchmarkSACA(index, InplaceRadixSort(), correctSA1, shape101, radix, stringset);
-
-            correctSA1 = indexSA(index);
         }
         {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
             benchmarkSACA(index, InplaceRadixSort(), correctSA2, shape101, radix, string);
-
-            correctSA2 = indexSA(index);
         }
         if (qsort)
         {
