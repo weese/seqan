@@ -123,18 +123,16 @@ template <typename TSAValue,
 typename TSize,
 typename TString,
 typename TShape>
-struct RadixTextAccessor<TSAValue, TSize,TString,CyclicShape<TShape> > :
+struct RadixTextAccessor<TSAValue, TSize,TString,ModCyclicShape<CyclicShape<TShape> > > :
 public std::unary_function<TSAValue, TSize> // in, out
 {
     TString const & text;
     TSize const L,w,s;
     String<unsigned> positions;
 
+    // Cargo < ModifiedString<ModCyclicShape> > = CyclicShape
     RadixTextAccessor(TString const &str, CyclicShape<TShape> const & shape) :
-    text(str),
-    L(length(str)),
-    w(weight(shape)),
-    s(shape.span)
+        text(str), L(length(str)), w(weight(shape)), s(shape.span)
     {
         carePositions(positions, shape);
     }
@@ -161,7 +159,7 @@ typename TString,
 typename TSetSpec,
 typename TShape>
 struct RadixTextAccessor<TSAValue, TSize, StringSet<TString, TSetSpec>,
-CyclicShape<TShape> > : public std::unary_function<TSAValue, TSize>
+ModCyclicShape<CyclicShape<TShape> > >: public std::unary_function<TSAValue, TSize>
 {
     StringSet<TString, TSetSpec> const & text;
     String<typename Size<TString>::Type> L;
@@ -501,8 +499,9 @@ template <typename TSA, typename TString, typename TMod>
 void inplaceRadixSort(
                       TSA & sa,
                       TString const & str,
-                      TMod const & suffixModifier,
-                      typename Size<TString>::Type maxDepth)
+                      typename Size<TString>::Type maxDepth,
+                      typename Cargo<ModifiedString<TString, TMod> >::Type const & modiferCargo,
+                      TMod const &)
 {
     typedef typename Value<typename Concatenator<TString>::Type>::Type TAlphabet;
     typedef typename Value<TSA>::Type                               TSAValue;
@@ -513,7 +512,7 @@ void inplaceRadixSort(
     static const unsigned SIGMA = ValueSize<TAlphabet>::VALUE + 1;
     typedef InplaceRadixSorter<TSAValue, SIGMA, TAccessFunctor, TCompareFunctor, TSize>    TSorter;
 
-    TAccessFunctor textAccess(str, suffixModifier);
+    TAccessFunctor textAccess(str, modiferCargo);
     TSorter radixSort(textAccess, TCompareFunctor());
 
     RadixRecursionStack<TSAValue, TSize> stack;
@@ -592,7 +591,8 @@ void inplaceFullRadixSort( TSA & sa, TString const & str)
 // ----------------------------------------------------------------------------
 // Function inplaceFullRadixSort()                          [modified Suffixes]
 // ----------------------------------------------------------------------------
-
+// NOTE: General for all cyclic suffix modifiers, as long as a corresponding
+//      text accessor in radixSort exists.
 template <typename TSA, typename TString, typename TMod>
 void inplaceFullRadixSort(TSA & sa,
                           TString const & str,

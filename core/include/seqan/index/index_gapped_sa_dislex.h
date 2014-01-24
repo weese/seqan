@@ -456,17 +456,19 @@ struct Dislex{};
 // function createGappedSuffixArray()                                [Dislex]
 // --------------------------------------------------------------------------
 
+    // Only defined for CyclicShapes
 
 template < typename TSA,
 typename TText,
-typename TSuffixModifier>
+typename TCyclicShape>
 inline void createGappedSuffixArray(
                                     TSA &SA, // must already be resized already
                                     TText const &s,
-                                    TSuffixModifier const & shape,
+                                    TCyclicShape const & shape,
+                                    ModCyclicShape<TCyclicShape> const &,
                                     Dislex const &)
 {
-    typedef typename LexText<TText, TSuffixModifier>::Type         TLexText;
+    typedef typename LexText<TText, TCyclicShape>::Type         TLexText;
 
     // if alph too big, problem with counter array!
     SEQAN_ASSERT_GEQ(256u, valueSize<typename Value<TText>::Type>());
@@ -484,7 +486,7 @@ inline void createGappedSuffixArray(
     std::cout << "   |     init: " << sysTime() - teim << "s" << std::endl; teim = sysTime();
 
     // sort newSA according to the Shape
-    inplaceRadixSort(SA, s, shape, weight(shape)+1);
+    inplaceRadixSort(SA, s, weight(shape)+1, shape, ModCyclicShape<TCyclicShape>());
 
     //std::cout << "SA: ";
     //for(unsigned i=0; i< length(SA); ++i) std::cout << SA[i] << ", ";

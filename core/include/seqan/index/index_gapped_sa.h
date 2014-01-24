@@ -86,7 +86,8 @@ std::unary_function<TSAValue, typename Suffix<TText>::Type>
 };
 
 
-
+// Carries a modifierCargo
+// of type TModifierCargo a.k.a. Cargo<Suffix<Index> >
 template <typename TText, typename TSuffixMod, typename TSpec>
 class Index<TText, IndexSa< Gapped<TSuffixMod, TSpec > > > :
     public Index<TText, IndexSa<TSpec> >

@@ -73,14 +73,17 @@ inline void createSuffixArray(
 // ----------------------------------------------------------------------------
 // function createGappedSuffixArray()                          InplaceRadixSort
 // ----------------------------------------------------------------------------
+// Note: Only defined for cyclic shapes, not for arbitrary modifiers
 
 template < typename TSA,
 typename TText,
-typename TShape>
+typename TCargo,
+typename TMod>
 inline void createGappedSuffixArray(
                                     TSA &SA,
                                     TText const &s,
-                                    CyclicShape<TShape> const & shape,
+                                    TCargo const & modifierCargo,
+                                    TMod const &,
                                     InplaceRadixSort const &)
 {
     //static_cast<Nothing>(shape);
@@ -92,7 +95,7 @@ inline void createGappedSuffixArray(
     _initializeSA(SA, s);
     
     // 2. Sort suffix array with inplace radix Sort
-    inplaceFullRadixSort(SA, s, shape);
+    inplaceFullRadixSort(SA, s, modifierCargo, TMod());
 }
     
 }
