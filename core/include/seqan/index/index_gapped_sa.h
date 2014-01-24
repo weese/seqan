@@ -31,11 +31,11 @@
 // ==========================================================================
 // Author: Sascha Meiers <meiers@inf.fu-berlin.de>
 // ==========================================================================
-// The generalized suffix array as a subclass of IndexSa
+// The gapped suffix array as a subclass of IndexSa
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_INDEX_GENREALIZED_SA_H
-#define SEQAN_HEADER_INDEX_GENREALIZED_SA_H
+#ifndef SEQAN_HEADER_INDEX_GAPPED_SA_H
+#define SEQAN_HEADER_INDEX_GAPPED_SA_H
 
 // TODO(meiers): Fibre access to modifierCargo
 
@@ -59,11 +59,11 @@ struct DefaultFinder< Index<TText, IndexSa<TSpec> > > {
 };
 
 template <typename TSuffixMod, typename TSpec = void>
-struct Generalized {};
+struct Gapped {};
 
 
 template <typename TText, typename TSAValue, typename TModifier>
-struct GeneralizedSuffixFunctor :
+struct GappedSuffixFunctor :
 std::unary_function<TSAValue, typename Suffix<TText>::Type>
 {
     typedef ModifiedString<typename Suffix<TText>::Type, TModifier> TModString;
@@ -72,7 +72,7 @@ std::unary_function<TSAValue, typename Suffix<TText>::Type>
     TText                   &text;
     TModifierCargo const    &modifierCargo;
 
-    GeneralizedSuffixFunctor(TText &text, TModifierCargo const &modifierCargo) :
+    GappedSuffixFunctor(TText &text, TModifierCargo const &modifierCargo) :
         text(text),
         modifierCargo(modifierCargo)
     {}
@@ -88,7 +88,7 @@ std::unary_function<TSAValue, typename Suffix<TText>::Type>
 
 
 template <typename TText, typename TSuffixMod, typename TSpec>
-class Index<TText, IndexSa< Generalized<TSuffixMod, TSpec > > > :
+class Index<TText, IndexSa< Gapped<TSuffixMod, TSpec > > > :
     public Index<TText, IndexSa<TSpec> >
 {
 public:
@@ -147,7 +147,7 @@ public:
 // TODO(meiers): Update to a better method like RadixSort
 // TODO(meiers): Specialise this for CyclicShape to be Dislex
 template < typename TText, typename TSuffixMod, typename TSpec>
-struct DefaultIndexCreator<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > >, FibreSA> {
+struct DefaultIndexCreator<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > >, FibreSA> {
     typedef SAQSort Type;
 };
 
@@ -157,14 +157,14 @@ struct DefaultIndexCreator<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> >
 
 // general modified suffix
 template <typename TText, typename TSuffixMod, typename TSpec>
-struct Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >
+struct Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >
 {
     typedef ModifiedString<typename Suffix<TText>::Type, TSuffixMod>    Type;
 };
 
 // general modified suffix; const variant
 template <typename TText, typename TSuffixMod, typename TSpec>
-struct Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>
+struct Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>
 {
     typedef ModifiedString<typename Suffix<TText const>::Type, TSuffixMod >     Type;
 };
@@ -175,16 +175,16 @@ struct Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>
 
 // general modified suffix
 template <typename TText, typename TSuffixMod, typename TSpec>
-struct Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >
+struct Infix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >
 {
-    typedef typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type>::Type Type;
+    typedef typename Prefix<typename Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type>::Type Type;
 };
 
 // general modified suffix; const variant
 template <typename TText, typename TSuffixMod, typename TSpec>
-struct Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>
+struct Infix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>
 {
-    typedef typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type>::Type Type;
+    typedef typename Prefix<typename Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>::Type>::Type Type;
 };
 
 
@@ -199,7 +199,7 @@ struct Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>
     
 template <typename TText, typename TSuffixMod, typename TSpec>
     inline typename Cargo<Suffix<>::Type>::Type &
-suffixModifier(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > & t)
+suffixModifier(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > & t)
 {
     return t.suffMod;
 }
@@ -207,8 +207,8 @@ suffixModifier(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > & t)
 // TODO(meiers): Replace & by seqan Reference type
 
 template <typename TText, typename TSuffixMod, typename TSpec>
-inline typename Cargo<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type const &
-suffixModifier(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const & t)
+inline typename Cargo<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type const &
+suffixModifier(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const & t)
 {
     return t.suffMod;
 }
@@ -219,36 +219,36 @@ suffixModifier(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const & t
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin>
-inline typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type
-suffix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > & t, TPosBegin pos_begin)
+inline typename Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type
+suffix(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > & t, TPosBegin pos_begin)
 {
-    typedef typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type TModifiedSuffix;
+    typedef typename Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type TModifiedSuffix;
     return TModifiedSuffix(suffix(indexText(t), pos_begin), t.modifierCargo);
 }
 
 // const variant
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin>
-inline typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type
-suffix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin)
+inline typename Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>::Type
+suffix(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin)
 {
-    typedef typename Suffix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type TModifiedSuffix;
+    typedef typename Suffix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>::Type TModifiedSuffix;
     return TModifiedSuffix(suffix(indexText(t), pos_begin), t.modifierCargo);
 }
 
 // ----------------------------------------------------------------------------
-// Function infixWithLength()                           for Generalized IndexSa
+// Function infixWithLength()                           for Gapped IndexSa
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TSize>
-inline typename Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type
-infixWithLength(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &index, TPosBegin pos_begin, TSize length)
+inline typename Infix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type
+infixWithLength(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > &index, TPosBegin pos_begin, TSize length)
 {
     return prefix(suffix(index, pos_begin), length);
 }
 
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TSize>
-inline typename Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type
-infixWithLength(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &index, TPosBegin pos_begin, TSize length)
+inline typename Infix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>::Type
+infixWithLength(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const &index, TPosBegin pos_begin, TSize length)
 {
     return prefix(suffix(index, pos_begin), length);
 }
@@ -259,16 +259,16 @@ infixWithLength(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &i
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
-inline typename Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type
-infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, TPosBegin pos_begin, TPosEnd pos_end)
+inline typename Infix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type
+infix(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > &t, TPosBegin pos_begin, TPosEnd pos_end)
 {
     return prefix(suffix(t, pos_begin), pos_end - pos_begin);
 }
 
 // const variant
 template <typename TText, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
-inline typename Infix<Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type
-infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin, TPosEnd pos_end)
+inline typename Infix<Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const>::Type
+infix(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin, TPosEnd pos_end)
 {
     return prefix(suffix(t, pos_begin), pos_end - pos_begin);
 }
@@ -278,8 +278,8 @@ infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBegi
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TTextSpec, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
-inline typename Infix<Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> > > >::Type
-infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, TPosBegin pos_begin, TPosEnd pos_end)
+inline typename Infix<Index<StringSet<TText, TTextSpec>, IndexSa<Gapped<TSuffixMod, TSpec> > > >::Type
+infix(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > &t, TPosBegin pos_begin, TPosEnd pos_end)
 {
 
     return prefix(suffix(t, pos_begin), pos_end.i2 - pos_begin.i2);
@@ -287,8 +287,8 @@ infix(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, TPosBegin pos_
 
 // const variant
 template <typename TText, typename TTextSpec, typename TSuffixMod, typename TSpec, typename TPosBegin, typename TPosEnd>
-inline typename Infix<Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> > > const>::Type
-infix(Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin, TPosEnd pos_end)
+inline typename Infix<Index<StringSet<TText, TTextSpec>, IndexSa<Gapped<TSuffixMod, TSpec> > > const>::Type
+infix(Index<StringSet<TText, TTextSpec>, IndexSa<Gapped<TSuffixMod, TSpec> > > const &t, TPosBegin pos_begin, TPosEnd pos_end)
 {
     return prefix(suffix(t, pos_begin), pos_end.i2 - pos_begin.i2);
 }
@@ -299,10 +299,10 @@ infix(Index<StringSet<TText, TTextSpec>, IndexSa<Generalized<TSuffixMod, TSpec> 
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSuffixMod, typename TSpec, typename TSpecAlg>
-inline bool indexCreate(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > &t, FibreSA, TSpecAlg const alg)
+inline bool indexCreate(Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > &t, FibreSA, TSpecAlg const alg)
 {
     resize(indexSA(t), length(indexRawText(t)), Exact());
-    createGeneralizedSuffixArray(indexSA(t), indexText(t), t.modifierCargo, TSuffixMod(), alg);
+    createGappedSuffixArray(indexSA(t), indexText(t), t.modifierCargo, TSuffixMod(), alg);
     return true;
 }
 
@@ -312,17 +312,17 @@ inline bool indexCreate(Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > 
 
 template < typename TText, typename TSuffixMod, typename TSpec, typename TSpecFinder, typename TPattern >
 inline void
-_findFirstIndex(Finder< Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > >, TSpecFinder > &finder,
+_findFirstIndex(Finder< Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > >, TSpecFinder > &finder,
                 TPattern const &pattern,
                 EsaFindMlr const)
 {
-    typedef Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > > TIndex;
+    typedef Index<TText, IndexSa<Gapped<TSuffixMod, TSpec> > > TIndex;
     typedef typename Fibre<TIndex, FibreSA>::Type TSA;
     TIndex &index = haystack(finder);
     indexRequire(index, EsaSA());
 
     // TODO(meiers): Do not access the index member directly
-    GeneralizedSuffixFunctor<TText, typename Value<TSA>::Type, TSuffixMod> dereferer(indexText(index), index.modifierCargo);
+    GappedSuffixFunctor<TText, typename Value<TSA>::Type, TSuffixMod> dereferer(indexText(index), index.modifierCargo);
 
     finder.range = _equalRangeSA(indexText(index), SearchTreeIterator<TSA const, SortedList>(indexSA(index)), pattern);
 
@@ -355,10 +355,10 @@ _findFirstIndex(Finder< Index<TText, IndexSa<Generalized<TSuffixMod, TSpec> > >,
 
 // copy 'n paste from index_sa_stree.h
 template <typename TText, typename TShapeSpec, typename TIndexSpec, typename TSpec, typename TString, typename TSize>
-inline bool _goDownString(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >, VSTree<TopDown<TSpec> > > & it,
+inline bool _goDownString(Iter<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >, VSTree<TopDown<TSpec> > > & it,
                           TString const & pattern, TSize & lcp)
 {
-    typedef Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >   TIndex;
+    typedef Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >   TIndex;
     typedef typename Fibre<TIndex, FibreSA>::Type                       TSA;
     typedef typename Size<TSA const>::Type                              TSASize;
     typedef typename Iterator<TSA const, Standard>::Type                TSAIterator;
@@ -395,15 +395,15 @@ inline bool _goDownString(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TInd
 
 
 template < typename TText, typename TShapeSpec, typename TIndexSpec, typename TSpec >
-inline typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > >::Type>::Type
-representative(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >, VSTree<TSpec> > &it)
+inline typename Prefix<typename Suffix<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > >::Type>::Type
+representative(Iter<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >, VSTree<TSpec> > &it)
 {
     return prefix(suffix(container(it), getOccurrence(it)), repLength(it));
 }
 
 template < typename TText, typename TShapeSpec, typename TIndexSpec, typename TSpec >
-inline typename Prefix<typename Suffix<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > const>::Type>::Type
-representative(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > const, VSTree<TSpec> > const &it)
+inline typename Prefix<typename Suffix<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > const>::Type>::Type
+representative(Iter<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > const, VSTree<TSpec> > const &it)
 {
     return prefix(suffix(container(it), getOccurrence(it)), repLength(it));
 }
@@ -411,38 +411,38 @@ representative(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >
 
 // seperate specializations for String and StringSet needed to avoid ambiguities
 template <typename TPos, typename TText, typename TShapeSpec, typename TIndexSpec>
-inline typename Size<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > const>::Type
-suffixLength(TPos pos, Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > const &index)
+inline typename Size<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > const>::Type
+suffixLength(TPos pos, Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > const &index)
 {
     return length(suffix(index, pos));
 }
     
 template <typename TPos, typename TString, typename TSSetSpec, typename TShapeSpec, typename TIndexSpec>
-inline typename Size<Index<StringSet<TString, TSSetSpec>, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > const>::Type
-suffixLength(TPos pos, Index<StringSet<TString, TSSetSpec>, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > const &index)
+inline typename Size<Index<StringSet<TString, TSSetSpec>, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > const>::Type
+suffixLength(TPos pos, Index<StringSet<TString, TSSetSpec>, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > const &index)
 {
     return length(suffix(index, pos));
 }
 
 template <typename TPos, typename TText, typename TShapeSpec, typename TIndexSpec>
-inline typename Size<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > >::Type
-suffixLength(TPos pos, Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > &index)
+inline typename Size<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > >::Type
+suffixLength(TPos pos, Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > &index)
 {
     return length(suffix(index, pos));
 }
 template <typename TPos, typename TString, typename TSSetSpec, typename TShapeSpec, typename TIndexSpec>
-inline typename Size<Index<StringSet<TString, TSSetSpec>, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > >::Type
-suffixLength(TPos pos, Index<StringSet<TString, TSSetSpec>, IndexSa<Generalized<TShapeSpec, TIndexSpec> > > &index)
+inline typename Size<Index<StringSet<TString, TSSetSpec>, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > >::Type
+suffixLength(TPos pos, Index<StringSet<TString, TSSetSpec>, IndexSa<Gapped<TShapeSpec, TIndexSpec> > > &index)
 {
     return length(suffix(index, pos));
 }
 
 
 template <typename TText, typename TShapeSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _goDown(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >, VSTree<TopDown<TSpec> > > & it,
+inline bool _goDown(Iter<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >, VSTree<TopDown<TSpec> > > & it,
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
-    typedef Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >              TIndex;
+    typedef Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >              TIndex;
     typedef typename Fibre<TIndex, FibreSA>::Type           TSA;
     typedef typename Size<TIndex>::Type                     TSASize;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIterator;
@@ -512,10 +512,10 @@ inline bool _goDown(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec
     
     
 template <typename TText, typename TShapeSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder>
-inline bool _goRight(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >, VSTree<TopDown<TSpec> > > & it,
+inline bool _goRight(Iter<Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >, VSTree<TopDown<TSpec> > > & it,
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
-    typedef Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpec> > >              TIndex;
+    typedef Index<TText, IndexSa<Gapped<TShapeSpec, TIndexSpec> > >              TIndex;
     typedef typename Fibre<TIndex, FibreSA>::Type           TSA;
     typedef typename Size<TIndex>::Type                     TSASize;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIterator;
@@ -599,5 +599,5 @@ inline bool _goRight(Iter<Index<TText, IndexSa<Generalized<TShapeSpec, TIndexSpe
 
 }
 
-#endif // SEQAN_HEADER_INDEX_GENREALIZED_SA_H
+#endif // SEQAN_HEADER_INDEX_GAPPED_SA_H
 

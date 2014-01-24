@@ -1,4 +1,4 @@
-// ==========================================================================
+/// ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
@@ -43,8 +43,8 @@ namespace SEQAN_NAMESPACE_MAIN
 // Forwards
 // ==========================================================================
 
-template <typename T> struct IndexSa;
-template <typename T, typename U> struct Generalized;
+//template <typename T> struct IndexSa;
+//template <typename T, typename U> struct Generalized;
 
 // ==========================================================================
 // Tags, Classes, Enums
