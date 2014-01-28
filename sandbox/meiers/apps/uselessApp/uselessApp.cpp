@@ -36,14 +36,8 @@
 #include <seqan/sequence.h>
 #include <seqan/seq_io.h>
 #include <seqan/index.h>
-#include <seqan/index_extras.h>
 
 using namespace seqan;
-
-template <>
-struct SAValue<Index<CharString, IndexEsa<> > > {
-    typedef unsigned Type;
-};
 
 int main(int argc, char * argv[])
 {
@@ -51,6 +45,7 @@ int main(int argc, char * argv[])
     StringSet<CharString> ids;
     StringSet<Dna5String> seqs;
 
+    /*
     // use the sequenceStream
     SequenceStream seqStream(argv[1]);
     if (!isGood(seqStream))
@@ -63,22 +58,22 @@ int main(int argc, char * argv[])
         std::cerr << "ERROR: Could not read from file" << std::endl;
         return 1;
     }
-
+     */
 
 
     // variable typedefs:
-    typedef CyclicShape<FixedShape<0, GappedShape<HardwiredShape<1,1,2> >, 1> > TShape;
-    typedef GappedTupler<TShape, 2, false> GappedTupler_;
+    typedef CyclicShape<FixedShape<1, GappedShape<HardwiredShape<1,1,2> >, 1> > TShape;
+    typedef GappedTupler<TShape, false> GappedTupler_;
 
     CharString shape;
     cyclicShapeToString(shape, TShape());
-    std::cout << shape << std::endl;
+    std::cout << "Shape: " << shape << std::endl << std::endl;
 
 
 
     // Strings
-    std::cout << "String" << std::endl;
     CharString str = "0123456789012345678901234567890123456789";
+    std::cout << "String: " << str << std::endl;
 
     typedef Pipe< CharString, Source<> >            src_t;
     typedef Pipe< src_t, GappedTupler_ >	        tupler_t;
