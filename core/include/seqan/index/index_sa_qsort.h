@@ -162,6 +162,7 @@ struct SuffixLess_ :
 {
     typedef ModifiedString<typename Suffix<TText const>::Type, TSuffixMod>      TSuffix;
     typedef typename Cargo<TSuffix>::Type                                       TModCargo;
+    typedef typename Iterator<TSuffix,Standard>::Type                           TSuffIter;
 
     TText const &               _text;
     TModCargo                   _modifier;
@@ -182,13 +183,27 @@ struct SuffixLess_ :
     {
         if (a == b) return false;
 
-        a += _offset;
-        b += _offset;
         TSuffix sa(suffix(_text, a), _modifier);
         TSuffix sb(suffix(_text, b), _modifier);
 
-        if (sa < sb) return true;
-        else return false;
+        TSuffIter saIt = begin(sa, Standard()) + _offset;
+        TSuffIter sbIt = begin(sb, Standard()) + _offset;
+
+        TSuffIter saEnd = end(sa, Standard());
+        TSuffIter sbEnd = end(sb, Standard());
+
+        for (; saIt < saEnd && sbIt < sbEnd; ++saIt, ++sbIt)
+        {
+            if (*saIt < *sbIt) return true;
+            if (*saIt > *sbIt) return false;
+        }
+
+        // if both suffixes are empty, the suff pos decides
+        if (!(saIt < saEnd) && !(sbIt < sbEnd))
+            return a > b;
+
+        return sbIt < sbEnd; // a < b only if sb is not empty
+
     }
 };
 
@@ -203,6 +218,7 @@ struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TSuffixMod> :
     typedef StringSet<TString, TSetSpec>                                    TText;
     typedef ModifiedString<typename Suffix<TText const>::Type, TSuffixMod>  TSuffix;
     typedef typename Cargo<TSuffix>::Type                                   TModCargo;
+    typedef typename Iterator<TSuffix,Standard>::Type                       TSuffIter;
 
     TText const &               _text;
     TModCargo                   _modifier;
@@ -222,18 +238,32 @@ struct SuffixLess_<TSAValue, StringSet<TString, TSetSpec> const, TSuffixMod> :
     {
         if (a == b) return false;
 
-        a.i2 += _offset;
-        b.i2 += _offset;
         TSuffix sa(suffix(_text, a), _modifier);
         TSuffix sb(suffix(_text, b), _modifier);
 
-        if (sa < sb) return true;
-        if (sa > sb) return false;
+        TSuffIter saIt = begin(sa, Standard()) + _offset;
+        TSuffIter sbIt = begin(sb, Standard()) + _offset;
 
-        if (getSeqNo(a) > getSeqNo(b)) return true;
-        if (getSeqNo(a) < getSeqNo(b)) return false;
+        TSuffIter saEnd = end(sa, Standard());
+        TSuffIter sbEnd = end(sb, Standard());
 
-        return a > b;
+        for (; saIt < saEnd && sbIt < sbEnd; ++saIt, ++sbIt)
+        {
+            if (*saIt < *sbIt) return true;
+            if (*saIt > *sbIt) return false;
+        }
+
+        // if both suffixes are empty, the first the seqId and then the suff pos decide
+        if (!(saIt < saEnd) && !(sbIt < sbEnd))
+        {
+            if (getSeqNo(a) == getSeqNo(b))
+                return a.i2 > b.i2;
+            else
+                return getSeqNo(a) > getSeqNo(b);
+        }
+
+        // a < b  if sb is not yet empty
+        return sbIt < sbEnd;
     }
 };
 

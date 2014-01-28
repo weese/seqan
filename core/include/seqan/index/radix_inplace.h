@@ -39,6 +39,9 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
+// turn on debug output for radix sort (will spam the screen)
+//#define CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+
 // ============================================================================
 // struct RadixTextAccessor
 // ============================================================================
@@ -344,17 +347,15 @@ struct InplaceRadixSorter {
         }
 
         // sort the 0 bucket using std::sort
-        if(zeroBucketSize > 0) {
+        if(zeroBucketSize > 1) {
+
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+            std::cout << "Sorted zero bucket of size " << zeroBucketSize << std::endl;
+#endif
             std::sort(beg, beg+zeroBucketSize, comp);
             //std::cout << "sort 0 bucket: " << zeroBucketSize << std::endl;
         }
 
-        // DEBUG
-        //        std::cout << "depth: " << depth << std::endl;
-        //        for(TValue* p = beg; p < end; ++p)
-        //            std::cout << "[" << (unsigned)textAccess(*p, depth) << "]" << *p << ", ";
-        //        std::cout << std::endl;
-        // END DEBUG
     }
 };
 
@@ -416,6 +417,15 @@ struct InplaceRadixSorter {
  stack.push(end0, end1, depth+1);
  }
  }; */
+template <typename TStr, typename TSA, typename TPos>
+void __outputSA(TStr const & str, TSA const & sa, TPos from, TPos to)
+{
+    for(TPos x = from; x < to; ++x)
+        if (length(suffix(str, sa[x])) > 20)
+            std::cout << x << ": " << sa[x] << "  \t" << prefix(suffix(str, sa[x]),20) << "..." << std::endl;
+        else
+            std::cout << x << ": " << sa[x] << "  \t" << suffix(str, sa[x]) << std::endl;
+}
 
 // ----------------------------------------------------------------------------
 // Functors to compare suffixes from 0 bucket (no proper suffixes)
@@ -481,9 +491,16 @@ void inplaceRadixSort(
 
         if(currDepth >= maxDepth)
         continue;
-        if(to - from < 2)
-        continue;
+
         radixSort(from, to, currDepth, stack);
+
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+        unsigned dbg_from = from - &sa[0];
+        unsigned dbg_to = to - &sa[0];
+        std::cout << "Sorted from " << dbg_from << " to " << dbg_to << " in depth " << currDepth <<  std::endl;
+        __outputSA(str, sa, dbg_from, dbg_to);
+#endif
+
     }
 }
 
@@ -525,12 +542,17 @@ void inplaceRadixSort(
         stack.pop(from, to, currDepth);
 
         if(currDepth >= maxDepth)
-        continue;
-        // this part is handled inside radixSort now!
-        // TODO: Remove
-        // if(to - from < 2)
-        //     continue;
+            continue;
+
         radixSort(from, to, currDepth, stack);
+
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+        unsigned dbg_from = from - &sa[0];
+        unsigned dbg_to = to - &sa[0];
+        std::cout << "Sorted from " << dbg_from << " to " << dbg_to << " in depth " << currDepth <<  std::endl;
+        __outputSA(str, sa, dbg_from, dbg_to);
+#endif
+
     }
 }
 
@@ -573,16 +595,30 @@ void inplaceFullRadixSort( TSA & sa, TString const & str)
 
         if(to - from < 2)
         continue;
-
+        /*
         // other sort algorithm for small buckets:
         if(to - from < 9)
         {
             ::std::sort( from, to,
                         SuffixLess_<TSAValue, TString const, void>(str, currDepth));
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+            unsigned dbg_from = from - &sa[0];
+            unsigned dbg_to = to - &sa[0];
+            std::cout << "Sorted from " << dbg_from << " to " << dbg_to << " in depth " << currDepth <<  " with Q Sort " << std::endl;
+            __outputSA(str, sa, dbg_from, dbg_to);
+#endif
             continue;
         }
-
+        */
         radixSort(from, to, currDepth, stack);
+
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+        unsigned dbg_from = from - &sa[0];
+        unsigned dbg_to = to - &sa[0];
+        std::cout << "Sorted from " << dbg_from << " to " << dbg_to << " in depth " << currDepth <<  std::endl;
+        __outputSA(str, sa, dbg_from, dbg_to);
+#endif
+
     }
 }
 
@@ -622,15 +658,29 @@ void inplaceFullRadixSort(TSA & sa,
         
         if(to - from < 2)
         continue;
-        
+        /*
         // other sort algorithm for small buckets:
         if(to - from < 9)
         {
             ::std::sort( from, to,
                         SuffixLess_<TSAValue, TString const, TMod>(str, modiferCargo, currDepth));
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+            unsigned dbg_from = from - &sa[0];
+            unsigned dbg_to = to - &sa[0];
+            std::cout << "Sorted from " << dbg_from << " to " << dbg_to << " in depth " << currDepth << " with Q Sort " <<  std::endl;
+            __outputSA(str, sa, dbg_from, dbg_to);
+#endif
             continue;
         }
+        */
         radixSort(from, to, currDepth, stack);
+
+#ifdef CORE_INCLUDE_SEQAN_INDEX_RADIX_INPLACE_H_DEBUG_RADIX_SORT
+        unsigned dbg_from = from - &sa[0];
+        unsigned dbg_to = to - &sa[0];
+        std::cout << "Sorted from " << dbg_from << " to " << dbg_to << " in depth " << currDepth <<  std::endl;
+        __outputSA(str, sa, dbg_from, dbg_to);
+#endif
     }
 }
     

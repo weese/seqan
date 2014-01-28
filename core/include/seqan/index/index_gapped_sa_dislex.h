@@ -333,7 +333,7 @@ inline void _dislex(
     typedef typename Value<TSA>::Type                       TSAValue;
     typedef typename Value<typename Concatenator<TLexText>::Type>::Type TRank;
     typedef ModifiedString<typename Suffix<TText const
-    >::Type, ModCyclicShape<TSuffixModifier> >          TModText;
+    >::Type, ModCyclicShape<TSuffixModifier> >              TModText;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
 
 
@@ -375,7 +375,9 @@ inline void _dislex(
         TCompInput tup1 = TCompInput(pair1, suf1);
         TCompInput tup2 = TCompInput(pair2, suf2);
         if(comp(tup1, tup2))
-        ++rank;
+            ++rank;
+
+        //std::cout << tup1 << "  ...   " << tup2 << " -> " << comp(tup1, tup2) << std::endl;
 
         SEQAN_ASSERT_GEQ(0, comp(tup1,tup2));
     }
@@ -572,11 +574,15 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
         _span = TShape::span,
         _weight = WEIGHT<TShape>::VALUE
     };
-    TSize realLengths[_span];
+    TSize realLengths[2*_span];
 
     _dislexTupleComp(TShape const & shape)
     {
         cyclicShapeToSuffixLengths(realLengths, shape);
+
+        // extend the table to a size of 2*_span
+        for (unsigned i=0; i<_span; ++i)
+        realLengths[i+_span] = _weight + realLengths[i];
     }
 
 
@@ -593,10 +599,9 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
         TIter sa = begin(a.i2, Standard()); // pointer to first char in this tuple
         TIter sb = begin(b.i2, Standard());
 
-        // both tuples have full length, normal comparison
-        // TODO: is there a single compare function for tuples already?? (not the ==, < and > operators)
+        // both tuples have more than _weight characters
         // TODO: Tell compiler this is the more likely if-branch?
-        if(a.i1 > _span && b.i1 > _span)
+        if(a.i1 >= 2* _span && b.i1 >= 2*_span)
         {
             // TODO: Unroll loop using Loop struct?
             for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
@@ -607,11 +612,15 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
             return 0;
         }
 
-        // else (at least one tuple too short):
+        // we get here only if one of the tuples might be too short.
         // find out the real lengths of the gapped strings
-        TSize la = a.i1 < _span ? realLengths[a.i1] : _weight;
-        TSize lb = b.i1 < _span ? realLengths[b.i1] : _weight;
-        TSize n  = la < lb ? la : lb;
+        // (at least one of them must be < 2*_weight)
+        TSize la = (a.i1 < 2*_span ? realLengths[a.i1] : 2*_weight);
+        TSize lb = (b.i1 < 2*_span ? realLengths[b.i1] : 2*_weight);
+
+        TSize n = la < lb ? la : lb;    // min(la, lb, n)
+        n = _weight < n ? _weight : n;
+
 
         // compare the overlap of the first n bases
         for (TSize i = 0; i < n; i++, ++sa, ++sb)
@@ -619,17 +628,25 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
             if (*sa == *sb) continue;
             return (*sa < *sb)? -1 : 1;
         }
-        if (la < lb) return -1; // TODO: This if and the next one are redundant, aren't they?
-        if (la > lb) return 1;
 
-        // number of accessible characters was equal.
-        // Now the length of the virtual suffix decides
+        // if both strings have more than _weight chars, they are equal.
+        if (la > _weight && lb > _weight) return 0;
+
+        // if they differ in size, the shorter one is smaller.
+        if (la != lb)
+        return (la < lb ? -1 : 1);
+
+        // if both have the same number of chars:
+
+        // the length of the virtual suffix decides:
         if (a.i1 < b.i1) return -1;
         if (a.i1 > b.i1) return 1;
 
-        // this last case will never occur since
-        // all suffixes have different lengths
+        // last case will never occur
+        SEQAN_ASSERT_EQ(true, false);
         return 0;
+
+
     }
 };
 
@@ -665,11 +682,15 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
         _span = TShape::span,
         _weight = WEIGHT<TShape>::VALUE
     };
-    TSize realLengths[_span];
+    TSize realLengths[2*_span];
 
     _dislexTupleCompMulti(TShape const & shape)
     {
         cyclicShapeToSuffixLengths(realLengths, shape);
+
+        // extend the table to a size of 2*_span
+        for (unsigned i=0; i<_span; ++i)
+            realLengths[i+_span] = _weight + realLengths[i];
     }
 
 
@@ -688,8 +709,13 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
 
         // both tuples have full length, normal comparison
         // TODO: is there a single compare function for tuples already?? (not the ==, < and > operators)
+
+
+        // the usual case:
+        // both tuples have more than _weight real characters.
+
         // TODO: Tell compiler this is the more likely if-branch?
-        if(a.i1.i2 > _span && b.i1.i2 > _span)
+        if(a.i1.i2 >= 2*_span && b.i1.i2 >= 2*_span)
         {
             // TODO: Unroll loop using Loop struct?
             for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
@@ -700,12 +726,15 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
             return 0;
         }
 
-        // else (at least one tuple too short):
+        // we get here only if one of the tuples might be too short.
         // find out the real lengths of the gapped strings
+        // (at least one of them must be < 2*_weight)
+        TSize la = (a.i1.i2 < 2*_span ? realLengths[a.i1.i2] : 2*_weight);
+        TSize lb = (b.i1.i2 < 2*_span ? realLengths[b.i1.i2] : 2*_weight);
 
-        TSize la = a.i1.i2 < _span ? realLengths[a.i1.i2] : _weight;
-        TSize lb = b.i1.i2 < _span ? realLengths[b.i1.i2] : _weight;
-        TSize n  = la < lb ? la : lb;
+        TSize n = la < lb ? la : lb;    // min(la, lb, n)
+        n = _weight < n ? _weight : n;
+
 
         // compare the overlap of the first n bases
         for (TSize i = 0; i < n; i++, ++sa, ++sb)
@@ -713,12 +742,17 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
             if (*sa == *sb) continue;
             return (*sa < *sb)? -1 : 1;
         }
-        if (la < lb) return -1;
-        if (la > lb) return 1;
 
-        // If the number of real characters is equal, the LATER position
-        // in the virtual concatenation is defined to be the SMALLER suffix.
-        // So first the string ID is relevant:
+        // if both strings have more than _weight chars, they are equal.
+        if (la > _weight && lb > _weight) return 0;
+
+        // if they differ in size, the shorter one is smaller.
+        if (la != lb)
+            return (la < lb ? -1 : 1);
+
+        // if both have the same number of chars:
+
+        // first the string ID is relevant:
         if (a.i1.i1 > b.i1.i1) return -1;
         if (a.i1.i1 < b.i1.i1) return 1;
 
@@ -727,6 +761,7 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
         if (a.i1.i2 > b.i1.i2) return 1;
 
         // last case will never occur
+        SEQAN_ASSERT_EQ(true, false);
         return 0;
     }
 };
