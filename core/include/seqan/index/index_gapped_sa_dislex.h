@@ -824,10 +824,10 @@ public std::unary_function<TValue, TResult>
 // --------------------------------------------------------------------------
 
 template <
-typename TShape,
-unsigned tupleLen = WEIGHT<TShape>::VALUE,
-bool omitLast = false,
-typename TPack = void>
+    typename TShape,
+    unsigned tupleLen = WEIGHT<TShape>::VALUE,
+    bool omitLast = false,
+    typename TPack = void>
 struct GappedTupler;
 
 // --------------------------------------------------------------------------
@@ -868,7 +868,20 @@ struct Value< Pipe< TInput, Multi< GappedTupler< TShape, tupleLen, omitLast, TPa
 // TODO(meiers): Replace TuplerLastTuples_ with TuplerNumberOfLastTuples_ as done in pipe_tupler
 // TODO(meiers): Adapt all the code below
 
-/*
+    /*
+// output only fully filled tuples
+template <unsigned SIZE, bool omitLast>
+struct TuplerNumberOfLastTuples_
+{
+    enum { VALUE = 1 };
+};
+
+// output SIZE-1 half filled tuples at the end
+template <unsigned SIZE>
+struct TuplerNumberOfLastTuples_<SIZE, false>
+{
+    enum { VALUE = SIZE };
+};
 
 // Redirect for Multi
 template < typename TInput, typename TSpec, typename TPair, typename TLimits >
@@ -882,6 +895,7 @@ struct TuplerLastTuples_< Pipe< TInput, GappedTupler<TShape, tupleLen, false, TP
     enum { VALUE = TPipe::BuffSize };
 };
 
+     */
 
 struct ShiftLeftWorker2_ {
     template <typename Arg>
@@ -895,11 +909,11 @@ struct ShiftLeftWorker2_ {
 // --------------------------------------------------------------------------
 
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack>
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack>
 struct Pipe< TInput, GappedTupler<TShape, tupleLen, omitLast, TPack> >
 {
     typedef typename Value<Pipe>::Type          TOutput;
@@ -941,7 +955,7 @@ struct Pipe< TInput, GappedTupler<TShape, tupleLen, omitLast, TPack> >
         // memmove is probably faster than unrolled loop:
         // Loop<ShiftLeftWorker2_, BuffSize - 1>::run(this->buffer);
 
-        if (lastTuples < TuplerLastTuples_<Pipe>::VALUE)
+        if (lastTuples < TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE)
         buffer[BuffSize - 1] = TValue();
         else
         {
@@ -962,8 +976,8 @@ struct Pipe< TInput, GappedTupler<TShape, tupleLen, omitLast, TPack> >
         buffer[i] = *in;
 
         // set lastTuples depending on the omitLast flag
-        if (TuplerLastTuples_<Pipe>::VALUE > BuffSize - i)
-        lastTuples = TuplerLastTuples_<Pipe>::VALUE - (BuffSize - i);
+        if (TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE > BuffSize - i)
+        lastTuples = TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE - (BuffSize - i);
         else
         lastTuples = 0; // this will cause eof() of this pipe
 
@@ -1030,7 +1044,7 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, tupleLen, omitLast, TPack>, TPai
             if(j== WEIGHT<TShape>::VALUE) j=0;
             carePos[i] = carePos[i-1] + TShape::diffs[j];
         }
-        std::cout << TuplerLastTuples_<Pipe>::VALUE << std::endl;
+        std::cout << TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE << std::endl;
     }
 
     inline TOutput const & operator*() const
@@ -1054,7 +1068,7 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, tupleLen, omitLast, TPack>, TPai
         memmove(buffer, buffer+1, (BuffSize-1)*sizeof(TValue) );
         assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
 
-        if (lastTuples < TuplerLastTuples_<Pipe>::VALUE)
+        if (lastTuples < TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE)
         {
             buffer[BuffSize - 1] = TValue();
         } else
@@ -1079,7 +1093,7 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, tupleLen, omitLast, TPack>, TPai
                 ++i;
                 ++localPos;
             } while ((i < BuffSize) && !eos());
-            lastTuples = TuplerLastTuples_<Pipe>::VALUE;
+            lastTuples = TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE;
 
             // eventually, reduce the number of half-filled tuples
             if (lastTuples <= BuffSize - i)
@@ -1124,11 +1138,11 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, tupleLen, omitLast, TPack>, TPai
 
 
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack >
 inline bool
 control(
         Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > &me,
@@ -1139,11 +1153,11 @@ control(
     return true;
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack >
 inline bool
 control(
         Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > &me,
@@ -1152,43 +1166,40 @@ control(
     return me.lastTuples == 0;
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack >
 inline bool
-control(
-        Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > &me,
-        ControlEos const &)
+control(Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > &me,
+    ControlEos const &)
 {
     return control(me, ControlEof());
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack >
 inline typename Size< Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > >::Type
-length(
-       Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > const &me)
+length(Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > const &me)
 {
     typedef Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > >	TPipe;
-    if (length(me.in) >= (TPipe::BuffSize - TuplerLastTuples_<TPipe>::VALUE))
-    return length(me.in) - (TPipe::BuffSize - TuplerLastTuples_<TPipe>::VALUE);
+    if (length(me.in) >= (TPipe::BuffSize - TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE))
+    return length(me.in) - (TPipe::BuffSize - TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE);
     else
     return 0;
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack >
 inline unsigned
-countSequences(
-               Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > const &)
+countSequences(Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > > const &)
 {
     return 1;
 }
@@ -1199,17 +1210,16 @@ countSequences(
 
 
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack,
-typename TPair,
-typename TLimitsString >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack,
+    typename TPair,
+    typename TLimitsString >
 inline bool
-control(
-        Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me,
-        ControlBeginRead const &command)
+control(Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me,
+    ControlBeginRead const &command)
 {
     if (!control(me.in, command)) return false;
     setHost(me.localPos, me.limits);
@@ -1218,62 +1228,60 @@ control(
     return true;
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack,
-typename TPair,
-typename TLimitsString >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack,
+    typename TPair,
+    typename TLimitsString >
 inline bool
-control(
-        Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me,
-        ControlEof const &)
+control(Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me,
+    ControlEof const &)
 {
     return (me.lastTuples == 0 && getValueI1(static_cast<TPair>(me.localPos)) >= length(me.limits) -1);
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack,
-typename TPair,
-typename TLimitsString >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack,
+    typename TPair,
+    typename TLimitsString >
 inline bool
-control(
-        Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me,
-        ControlEos const &)
+control(Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me,
+    ControlEos const &)
 {
     return (getValueI1(me.tmp.i1) > 0) && (getValueI2(me.tmp.i1) == 0);
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack,
-typename TPair,
-typename TLimitsString >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack,
+    typename TPair,
+    typename TLimitsString >
 inline typename Size< Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > >::Type
 length(Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > const &me)
 {
     typedef Pipe< TInput, GappedTupler< TShape, tupleLen, omitLast, TPack > >	TPipe;
     unsigned seqs = countSequences(me);
 
-    if (length(me.in) >= seqs * (TPipe::BuffSize - TuplerLastTuples_<TPipe>::VALUE))
-    return length(me.in) - seqs * (TPipe::BuffSize - TuplerLastTuples_<TPipe>::VALUE);
+    if (length(me.in) >= seqs * (TPipe::BuffSize - TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE))
+    return length(me.in) - seqs * (TPipe::BuffSize - TuplerNumberOfLastTuples_<tupleLen, omitLast>::VALUE);
     else
     return 0;
 }
 template <
-typename TInput,
-typename TShape,
-unsigned tupleLen,
-bool omitLast,
-typename TPack,
-typename TPair,
-typename TLimitsString >
+    typename TInput,
+    typename TShape,
+    unsigned tupleLen,
+    bool omitLast,
+    typename TPack,
+    typename TPair,
+    typename TLimitsString >
 inline unsigned
 countSequences(Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPack >, TPair, TLimitsString> > const &me)
 {
@@ -1281,7 +1289,7 @@ countSequences(Pipe< TInput, Multi<GappedTupler< TShape, tupleLen, omitLast, TPa
 }
 
 
-*/
+
 
 
 
