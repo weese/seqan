@@ -62,73 +62,77 @@ int main(int argc, char * argv[])
 
 
     // variable typedefs:
-    typedef CyclicShape<FixedShape<1, GappedShape<HardwiredShape<1,1,2> >, 1> > TShape;
+    typedef CyclicShape<FixedShape<0, GappedShape<HardwiredShape<1,1,2> >, 1> > TShape;
     typedef GappedTupler<TShape, false> GappedTupler_;
 
-    CharString shape;
-    cyclicShapeToString(shape, TShape());
-    std::cout << "Shape: " << shape << std::endl << std::endl;
+    CharString shapeString;
+    cyclicShapeToString(shapeString, TShape());
+    std::cout << "Shape: " << shapeString << std::endl << std::endl;
+
+    {
+        // StringSet
+        std::cout << "StringSet" << std::endl;
+        StringSet<CharString> set;
+        appendValue(set, "0123456789");
+        appendValue(set, "012");
+        appendValue(set, "0");
+        appendValue(set, "0123456789");
+        appendValue(set, "012");
 
 
 
-    // Strings
-    CharString str = "0123456789012345678901234567890123456789";
-    std::cout << "String: " << str << std::endl;
+        typedef Concatenator<StringSet<CharString> >::Type         TConcat;
+        typedef StringSetLimits<StringSet<CharString> >::Type      TLimits;
+        typedef Multi< GappedTupler_, Pair<Size<CharString>::Type>, TLimits> TMultiGappedTupler;
+        typedef Pipe< TConcat, Source<> >                                   TPipeSource;
+        typedef Pipe< TPipeSource, TMultiGappedTupler >                     TPipeTupler;
 
-    typedef Pipe< CharString, Source<> >            src_t;
-    typedef Pipe< src_t, GappedTupler_ >	        tupler_t;
-    src_t		src(str);
-    tupler_t	tupler(src);
-    std::cout << tupler;
-
-
+        typedef _dislexTupleCompMulti<TypeOf_(TPipeTupler), TShape, TLimits> _tupleComparator;
+        typedef Pool<TypeOf_(TPipeTupler),
+                SorterSpec< SorterConfigSize<_tupleComparator, TSizeOf_(TPipeTupler) > > > TPoolSorter;
 
 
+        // begin pipeline
 
-    // StringSet
-    std::cout << "StringSet" << std::endl;
-    StringSet<CharString> set;
-    appendValue(set, "0123456789");
-    appendValue(set, "012");
-    appendValue(set, "0");
-    appendValue(set, "0123456789");
+        // Generate Tuples
+        TPipeSource src(concat(set));
+        TPipeTupler	tupler(src, stringSetLimits(set));
 
-    typedef typename Concatenator<StringSet<CharString> >::Type         TConcat;
-    typedef typename StringSetLimits<StringSet<CharString> >::Type      TLimits;
-    typedef Multi< GappedTupler_, Pair<typename Size<CharString>::Type>, TLimits>             TMultiGappedTupler;
-    typedef Pipe< TConcat, Source<> >                                   src_t2;
-    typedef Pipe< src_t2, TMultiGappedTupler >                          tupler_t2;
-    src_t2		src2(concat(set));
-    tupler_t2	tupler2(src2,stringSetLimits(set));
-    std::cout << tupler2;
+        // Sort Tuples
+        _tupleComparator comp(TShape(), stringSetLimits(set));
+        TPoolSorter sorter(tupler, comp);
+
+        sorter << tupler;
+        std::cout << sorter;
+    }
+
+    {
+        // String
+        std::cout << "String" << std::endl;
+        CharString s = "01234567890123456789abaaabbacb0123456789";
+
+        typedef Pipe< CharString, Source<> >                    TPipeSource;
+        typedef Pipe< TPipeSource, GappedTupler_ >              TPipeTupler;
+
+        typedef _dislexTupleComp<TypeOf_(TPipeTupler), TShape> _tupleComparator;
+        typedef Pool<TypeOf_(TPipeTupler),
+            SorterSpec< SorterConfigSize<_tupleComparator, TSizeOf_(TPipeTupler) > > > TPoolSorter;
 
 
+        // begin pipeline
 
+        // Generate Tuples
+        TPipeSource src(s);
+        TPipeTupler	tupler(src);
 
-    /*
-     // test for aldabi praktikum
-     // write SA as binary file
+        // Sort Tuples
+        _tupleComparator comp(TShape(), length(s));
+        TPoolSorter sorter(tupler, comp);
+        
+        sorter << tupler;
+        std::cout << sorter;
+    }
 
-     using namespace std;
-     ifstream f(argv[1], ios::in);
-     CharString text;
-     string line;
-     while(getline(f, line))
-     append(text,line);
-
-     cout << "length = " << length(text) << endl;
-     toUpper(text);
-
-     typedef Index<CharString, IndexEsa<> > TIndex;
-     TIndex index(text);
-
-     indexRequire(index, FibreSA());
-     cout << "sizeof(SAValue) = " << sizeof(SAValue<TIndex>::Type) << endl;
-
-     save(index, "/Users/mauli87/Downloads/chr1_noN.sa");
-     f.close();
-     
-     */
     
 }
 

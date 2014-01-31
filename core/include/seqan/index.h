@@ -234,7 +234,8 @@
 // ==========================================================================
 
 #include <seqan/modifier/cyclic_shape.h>
-#include <seqan/index/index_gapped_sa_dislex.h>
+#include <seqan/index/index_gapped_dislex.h>
+#include <seqan/index/index_gapped_dislex_external.h>
 #include <seqan/index/index_gapped_sa.h>
 
 

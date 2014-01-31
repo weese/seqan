@@ -35,6 +35,7 @@
 #ifndef CORE_INCLUDE_SEQAN_PIPE_PIPE_GAPPED_TUPLER_H_
 #define CORE_INCLUDE_SEQAN_PIPE_PIPE_GAPPED_TUPLER_H_
 
+namespace seqan {
 
 // ============================================================================
 // Tags, Classes, Enums
@@ -384,10 +385,12 @@ length(Pipe< TInput, Multi<GappedTupler< TShape, omitLast, TPack >, TPair, TLimi
 }
 
 template <typename TInput, typename TShape, bool omitLast, typename TPack, typename TPair, typename TLimitsString >
-inline Size< Pipe< TInput, Multi<GappedTupler< TShape, omitLast, TPack >, TPair, TLimitsString> > >::Type
+inline typename Size< Pipe< TInput, Multi<GappedTupler< TShape, omitLast, TPack >, TPair, TLimitsString> > >::Type
 countSequences(Pipe< TInput, Multi<GappedTupler< TShape, omitLast, TPack >, TPair, TLimitsString> > const &me)
 {
     return length(me.limits) - 1;
+}
+
 }
 
 #endif  // #ifndef CORE_INCLUDE_SEQAN_PIPE_PIPE_GAPPED_TUPLER_H_

@@ -1,0 +1,325 @@
+// ==========================================================================
+//                       index_gapped_dislex_external.h
+// ==========================================================================
+// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of Knut Reinert or the FU Berlin nor the names of
+//       its contributors may be used to endorse or promote products derived
+//       from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL KNUT REINERT OR THE FU BERLIN BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+// DAMAGE.
+//
+// ==========================================================================
+// Author: Sascha Meiers <meiers@inf.fu-berlin.de>
+// ==========================================================================
+
+#ifndef CORE_INCLUDE_SEQAN_INDEX_INDEX_GAPPED_DISLEX_EXTERNAL_H_
+#define CORE_INCLUDE_SEQAN_INDEX_INDEX_GAPPED_DISLEX_EXTERNAL_H_
+
+
+
+// --------------------------------------------------------------------------
+// Filter to transform positions to lengths                          [String]
+// --------------------------------------------------------------------------
+
+template <typename TSize>
+struct _positionToLengthTransform
+{
+    TSize N;
+    _positionToLengthTransform(TSize len): N(len)
+    {}
+
+    TSize operator()(TSize pos) const
+    {
+        return N - pos;
+    }
+};
+
+// --------------------------------------------------------------------------
+// Filter to transform positions to lengths                       [StringSet]
+// --------------------------------------------------------------------------
+
+template <typename TLimitString, typename TIdAndPosPair>
+struct _positionToLengthTransformMulti
+{
+    typedef typename Value<TIdAndPosPair, 2>::Type TSize;
+    TLimitString const & limits;
+
+    _positionToLengthTransformMulti(TLimitString const & limitStr) : limits(limitStr)
+    {}
+
+    inline TIdAndPosPair operator() (TIdAndPosPair x) const
+    {
+        TSize N = limits[x.i1+1] - limits[x.i1];
+        x.i2 = N - x.i2;
+        return x;
+    }
+};
+
+
+// --------------------------------------------------------------------------
+// Comparator for naming tuples                                      [String]
+// --------------------------------------------------------------------------
+
+// TODO: _dislexTupleComp for bitvectors
+
+/*
+ * @signature _dislexTupleComp<TValue, TShape, TResult = int>
+ *
+ * @tparam TValue expects a Pair<TSize, Tuple> where the 1st parameter contains the
+ *                <b>length</b> of the underlying suffix and the 2nd parameter the
+ *                fixed-length sequence tuple (possibly bitpacked)
+ * @tparam TShape expects a fixed CyclicShape (CyclicShape<FixedShape<...> >)
+ *
+ * Only for hardwired cyclic shapes!!
+ *
+ * @see _dislexTupleCompMulti
+ */
+template <typename TValue, typename TShape, typename TResult=int>
+struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
+{
+    typedef typename Value<TValue, 1>::Type                 TSize;
+    typedef typename Value<TValue, 2>::Type                 TTuple;
+    typedef typename Value<TTuple>::Type                    TTupleValue;
+    typedef typename StoredTupleValue_<TTupleValue>::Type TStoredValue;
+
+    enum
+    {
+        _span = TShape::span,
+        _weight = WEIGHT<TShape>::VALUE
+    };
+    TSize realLengths[2*_span];
+    _positionToLengthTransform<TSize> posToLen;
+
+    _dislexTupleComp(TShape const & shape, TSize strLen) : posToLen(strLen)
+    {
+        cyclicShapeToSuffixLengths(realLengths, shape);
+
+        // extend the table to a size of 2*_span
+        for (unsigned i=0; i<_span; ++i)
+            realLengths[i+_span] = _weight + realLengths[i];
+    }
+
+    inline TResult operator() (const TValue &a, const TValue &b) const
+    {
+        const TStoredValue * sa = a.i2.i;
+        const TStoredValue * sb = b.i2.i;
+
+        TSize la = posToLen(a.i1);
+        TSize lb = posToLen(b.i1);
+
+        /*
+         // the usual case:
+         // both tuples have more than _weight real characters.
+         // TODO: Tell compiler this is the more likely if-branch?
+         if(la >= 2* _span && lb >= 2*_span)
+         {
+         // TODO: Unroll loop using Loop struct?
+         for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
+         {
+         if (*sa == *sb) continue;
+         return (*sa < *sb)? -1 : 1;
+         }
+         return 0;
+         }
+         */
+
+        // find out the real lengths of the gapped strings
+        TSize rla = (la < 2*_span ? realLengths[la] : 2*_weight);
+        TSize rlb = (lb < 2*_span ? realLengths[lb] : 2*_weight);
+
+        // compare the overlap of the first n bases
+        TSize n = std::min(static_cast<TSize>(_weight), std::min(rla, rlb) );
+        for (TSize i = 0; i < n; i++, ++sa, ++sb)
+        {
+            if (*sa == *sb) continue;
+            return (*sa < *sb)? -1 : 1;
+        }
+
+        // if both strings have more than _weight chars, they are equal.
+        if (rla > _weight && rlb > _weight) return 0;
+
+        // if they differ in size, the shorter one is smaller.
+        if (rla != rlb)
+            return (rla < rlb ? -1 : 1);
+
+        // In the same string, the length of the underlying suffix decides:
+        if (la < lb) return -1;
+        if (la > lb) return 1;
+
+        // last case a.i1 == b.i1
+        return 0;
+    }
+};
+
+// --------------------------------------------------------------------------
+// Comparator for naming tuples                                   [StringSet]
+// --------------------------------------------------------------------------
+
+// TODO: _dislexTupleCompMulti for bitvectors
+
+/*
+ * @signature _dislexTupleCompMulti<TValue, TShape, TResult = int>
+ *
+ * @tparam TValue expects a Pair<Pair<TSize, TSize>, Tuple> where the 1st parameter
+ *                is a Pair of sequence ID and suffix <b>length</b> and the 2nd parameter
+ *                the fixed-length sequence tuple (possibly bitpacked)
+ * @tparam TShape expects a fixed CyclicShape (CyclicShape<FixedShape<...> >)
+ *
+ * @see _dislexTupleComp
+ */
+template <typename TValue, typename TShape, typename TLimitString, typename TResult=int>
+struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TResult>
+{
+    typedef typename Value<TValue, 1>::Type                 TSetPos;
+    typedef typename Value<TSetPos, 2>::Type                TSize;
+    typedef typename Value<TValue, 2>::Type                 TTuple;
+    typedef typename Value<TTuple>::Type                    TTupleValue;
+    typedef typename StoredTupleValue_<TTupleValue>::Type TStoredValue;
+
+    enum {
+        _span = TShape::span,
+        _weight = WEIGHT<TShape>::VALUE
+    };
+    TSize realLengths[2*_span];
+    _positionToLengthTransformMulti<TLimitString, TSetPos> posToLen;
+
+    _dislexTupleCompMulti(TShape const & shape, TLimitString const & limits) : posToLen(limits)
+    {
+        cyclicShapeToSuffixLengths(realLengths, shape);
+
+        // extend the table to a size of 2*_span
+        for (unsigned i=0; i<_span; ++i)
+            realLengths[i+_span] = _weight + realLengths[i];
+    }
+
+
+    inline TResult operator() (const TValue &a, const TValue &b) const
+    {
+        const TStoredValue * sa = a.i2.i;
+        const TStoredValue * sb = b.i2.i;
+
+        TSetPos la = posToLen(a.i1);
+        TSetPos lb = posToLen(b.i1);
+
+        /*
+         // the usual case:
+         // both tuples have more than _weight real characters.
+
+         // TODO: Tell compiler this is the more likely if-branch?
+         if(la.i2 >= 2*_span && lb.i2 >= 2*_span)
+         {
+         // TODO: Unroll loop using Loop struct?
+         for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
+         {
+         if (*sa == *sb) continue;
+         return (*sa < *sb)? -1 : 1;
+         }
+         return 0;
+         }
+         */
+
+        // find out the real lengths of the gapped strings
+        TSize rla = (la.i2 < 2*_span ? realLengths[la.i2] : 2*_weight);
+        TSize rlb = (lb.i2 < 2*_span ? realLengths[lb.i2] : 2*_weight);
+
+        // compare the overlap of the first n bases
+        TSize n = std::min(static_cast<TSize>(_weight), std::min(rla, rlb) );
+        for (TSize i = 0; i < n; i++, ++sa, ++sb)
+        {
+            if (*sa == *sb) continue;
+            return (*sa < *sb)? -1 : 1;
+        }
+
+        // if both strings have more than _weight chars, they are equal.
+        if (rla > _weight && rlb > _weight) return 0;
+
+        // if they differ in size, the shorter one is smaller.
+        if (rla != rlb)
+            return (rla < rlb ? -1 : 1);
+
+        // if both have the same number of chars,
+        // at first the string ID is relevant:
+        if (la.i1 > lb.i1) return -1;
+        if (la.i1 < lb.i1) return 1;
+
+        // In the same string, the length of the underlying suffix decides:
+        if (la.i2 < lb.i2) return -1;
+        if (lb.i2 > lb.i2) return 1;
+
+        // last case a.i1 == b.i1
+        return 0;
+    }
+};
+
+
+
+
+// wrapper for the dislex Pipe
+// takes a tuple <l, ACGACA> where p is the suffix position
+// and returns L(N-l)
+template <
+typename TValue,
+typename TResult = typename Value<TValue, 1>::Type>
+struct _dislexMap :
+public std::unary_function<TValue, TResult>
+{
+    _dislexTransform<TResult> formula;
+
+    _dislexMap(TResult S_, TResult N_) : formula(S_, N_)
+    {}
+
+    inline TResult operator() (const TValue & x) const
+    {
+        return formula(x.i1);
+    }
+};
+
+
+
+// dislex transformation used in the mapper pool
+// takes a Pair( Pair(s,p), ACGATCG), where s is the seq id and p the suffix position,
+// returns a global position L(s,p)=pos
+template <
+typename TValue,
+typename TString,
+typename TResult = typename Value<typename Value<TValue, 1>::Type, 2>::Type >
+struct _dislexMapMulti :
+public std::unary_function<TValue, TResult>
+{
+    typedef typename Value<TValue, 1>::Type TPair;
+    typedef typename Value<TPair, 2>::Type TSize;
+
+    _dislexTransformMulti<TPair, TString> formula;
+    
+    _dislexMapMulti(TResult S_, TString const & stringSetLimits) : formula(S_, stringSetLimits)
+    {}
+    
+    inline TResult operator() (const TValue & x) const
+    {
+        return formula(x);
+    }
+};
+
+
+
+#endif  // #ifndef CORE_INCLUDE_SEQAN_INDEX_INDEX_GAPPED_DISLEX_EXTERNAL_H_

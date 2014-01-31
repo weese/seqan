@@ -48,7 +48,7 @@ template <typename T, typename A>
 void printStrSet(StringSet<T,A> const & strSet) { for(unsigned i=0; i< length(strSet); ++i) {
     std::cout << "[" << i << "]"; printStr(strSet[i]); std::cout << std::endl; } }
 
-
+struct Dislex{};
 
 
 // ==========================================================================
@@ -241,18 +241,153 @@ public std::unary_function<TInput, TResult>
 // DisLex comparsion functors
 // ==========================================================================
 
-// NOTE: For a full suffix comparison use _SuffixLess (index_sa_gapped_qsort.h)
-//       For the comparison of suffixes of which we know are equal up to their
-//       last character use _ZeroBucketComparator (radix_inplace.h)
-// NOTE: Inside the _dislex() we need to compare k-mers. We use the _dislexTupleComp
-//       functors from the external algorithm for that. Here: forward decl.
+// NOTE:
+//  - For a full suffix comparison use _SuffixLess (index_sa_gapped_qsort.h)
+//  - For the comparison of suffixes of which we know are equal up to their
+//    last character, use _ZeroBucketComparator (radix_inplace.h)
+//  - Inside the _dislex() we need to compare k-mers. We use the
+//    GappedSuffixQgramLess_ functors for that.
+//  - The external algorithm saves a part of the sequence into a tuple and
+//    then uses _dislexTupleComp to compare them
 
-template <typename TValue, typename TShape,  typename TResult = int>
-struct _dislexTupleComp;
 
-template <typename TValue, typename TShape,  typename TResult = int>
-struct _dislexTupleCompMulti;
+// --------------------------------------------------------------------------
+// struct GappedSuffixQgramLess_                                     [String]
+// --------------------------------------------------------------------------
 
+    template <typename TSAValue, typename TShape, typename TText, typename TResult=int>
+    struct GappedSuffixQgramLess_;
+
+    template <typename TSAValue, typename TShape, typename TText, typename TResult>
+    struct GappedSuffixQgramLess_ : public std::binary_function<TSAValue, TSAValue, TResult>
+    {
+        typedef typename Size<TText>::Type                                          TSize;
+        typedef ModifiedString<typename Suffix<TText const>::Type, ModCyclicShape<TShape> >      TSuffix;
+        typedef typename Iterator<TSuffix,Standard>::Type                           TSuffIter;
+
+        TText const &   _text;
+        TShape const &  _shape;
+        TSize const     _weight;
+
+        GappedSuffixQgramLess_(TText const &text, TShape const & shape, TSize weight):
+        _text(text), _shape(shape), _weight(weight)
+        {}
+
+        inline int operator() (TSAValue a, TSAValue b) const
+        {
+            if (a == b) return 0;
+
+            TSuffix sa(suffix(_text, a), _shape);
+            TSuffix sb(suffix(_text, b), _shape);
+
+            TSuffIter saIt = begin(sa, Standard());
+            TSuffIter sbIt = begin(sb, Standard());
+
+            TSuffIter saEnd = end(sa, Standard());
+            TSuffIter sbEnd = end(sb, Standard());
+
+            TSize p = 0;
+
+            for (; saIt < saEnd && sbIt < sbEnd && p < _weight; ++saIt, ++sbIt, ++p)
+            {
+                if (*saIt < *sbIt) return -1;
+                if (*saIt > *sbIt) return 1;
+            }
+
+            // if both suffixes are not yet empty, the they are equal
+            if (saIt < saEnd && sbIt < sbEnd)
+                return 0;
+
+            // if both suffixes are empty, the underlying suffix length decides
+            if (!(saIt < saEnd) && !(sbIt < sbEnd))
+            {
+                if (a > b) return -1;
+                if (a < b) return 1;
+
+                // Does not occur
+                SEQAN_ASSERT_EQ(true, false);
+                return 0;
+            }
+
+            // only one suffix is empty
+            if (!(saIt < saEnd)) return -1;
+            if (!(saIt < sbEnd)) return 1;
+
+            // Does not occur
+            SEQAN_ASSERT_EQ(true, false);
+            return 0;
+        }
+    };
+
+// --------------------------------------------------------------------------
+// struct GappedSuffixQgramLess_                                  [StringSet]
+// --------------------------------------------------------------------------
+
+    template <typename TSAValue, typename TShape, typename TText, typename TSpec, typename TResult>
+    struct GappedSuffixQgramLess_ <TSAValue, TShape, StringSet<TText, TSpec>, TResult> :
+        public std::binary_function<TSAValue, TSAValue, TResult>
+    {
+        typedef StringSet<TText, TSpec>                         TSet;
+        typedef typename Size<TText>::Type                      TSize;
+        typedef ModifiedString<typename Suffix<TText const>::Type, ModCyclicShape<TShape> >      TSuffix;
+        typedef typename Iterator<TSuffix,Standard>::Type       TSuffIter;
+
+        TSet const &   _text;
+        TShape const &  _shape;
+        TSize const     _weight;
+
+        GappedSuffixQgramLess_(TSet const &text, TShape const & shape, TSize weight):
+        _text(text), _shape(shape), _weight(weight)
+        {}
+
+        inline int operator() (TSAValue a, TSAValue b) const
+        {
+            if (a == b) return 0;
+
+            TSuffix sa(suffix(_text, a), _shape);
+            TSuffix sb(suffix(_text, b), _shape);
+
+            TSuffIter saIt = begin(sa, Standard());
+            TSuffIter sbIt = begin(sb, Standard());
+
+            TSuffIter saEnd = end(sa, Standard());
+            TSuffIter sbEnd = end(sb, Standard());
+
+            TSize p = 0;
+
+            for (; saIt < saEnd && sbIt < sbEnd && p < _weight; ++saIt, ++sbIt, ++p)
+            {
+                if (*saIt < *sbIt) return -1;
+                if (*saIt > *sbIt) return 1;
+            }
+
+            // if both suffixes are not yet empty, the they are equal
+            if (saIt < saEnd && sbIt < sbEnd)
+                return 0;
+
+            // if both suffixes are empty, the seq. id and then the underlying suffix length decides
+            if (!(saIt < saEnd) && !(sbIt < sbEnd))
+            {
+                if (getSeqNo(a) > getSeqNo(b)) return -1;
+                if (getSeqNo(a) < getSeqNo(b)) return 1;
+
+                if (getSeqOffset(a) > getSeqOffset(b)) return -1;
+                if (getSeqOffset(a) < getSeqOffset(b)) return 1;
+
+                // Does not occur
+                SEQAN_ASSERT_EQ(true,false);
+                return 0;
+            }
+
+            // only one suffix is empty
+            if (!(saIt < saEnd)) return -1;
+            if (!(saIt < sbEnd)) return 1;
+
+            // Does not occur
+            SEQAN_ASSERT_EQ(true, false);
+            return 0;
+        }
+    };
 
 // ==========================================================================
 // DisLex Transformation Random Access
@@ -267,35 +402,32 @@ template <
 typename TLexText,
 typename TSA,
 typename TText,
-typename TSuffixModifier>
+typename TCyclicShape>
 inline void _dislex(
                     TLexText & lexText,                         // random access (write)
                     TSA const & partiallyOrderedSA,             // sequential scan
                     TText const & origText,                     // random access
-                    TSuffixModifier const & cyclic)
+                    TCyclicShape const & cyclic)
 {
     typedef typename Size<TSA>::Type                        TSize;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
     typedef typename Value<TSA>::Type                       TSAValue;
     typedef typename Value<TLexText>::Type                  TRank;
     typedef ModifiedString<typename Suffix<TText const
-    >::Type, ModCyclicShape<TSuffixModifier> >      TModText;
+    >::Type, ModCyclicShape<TCyclicShape> >      TModText;
 
     // dislex position calculator
     _dislexTransform<TSize> dislex(cyclic.span, length(origText));
 
-    // tuple comparator to determine rank
-    typedef Pair<TSAValue, TModText> TCompInput;
-    _dislexTupleComp<TCompInput, TSuffixModifier> comp(cyclic);
+    // q-gram comparator to determine rank
+    GappedSuffixQgramLess_<TSAValue, TCyclicShape,TText> comp(origText, cyclic, weight(cyclic));
 
-    // allocate lexText
     resize(lexText, length(origText), Exact());
 
     TSAIter sa    = begin(partiallyOrderedSA, Standard());
     TSAIter saEnd = end(partiallyOrderedSA, Standard());
     TRank       rank    = 0;
     TSAValue    txtPos  = *sa++;
-    TSize N = length(origText);
 
     // scan along the SA
     for(; sa < saEnd; txtPos = *sa++)
@@ -304,12 +436,11 @@ inline void _dislex(
         lexText[dislex(txtPos)] = rank;
 
         // compare two consecutive values: this is probably slow
-        TModText suf1(suffix(origText, txtPos), cyclic);
-        TModText suf2(suffix(origText, *sa), cyclic);
-        TCompInput tup1 = TCompInput(N - txtPos, suf1);
-        TCompInput tup2 = TCompInput(N - *sa, suf2);
-        if(comp(tup1, tup2))
-        ++rank;
+        if(comp(txtPos, *sa))
+            ++rank;
+
+        //std::cout << tup1 << "  ...   " << *sa << " -> " << comp(txtPos, *sa) << std::endl;
+        SEQAN_ASSERT_GEQ(0, comp(txtPos,*sa));
     }
     lexText[dislex(txtPos)] = rank;
 }
@@ -322,18 +453,18 @@ inline void _dislex(
 template < typename TLexText,
 typename TSA,
 typename TText,      typename TTextSpec,
-typename TSuffixModifier>
+typename TCyclicShape>
 inline void _dislex(
                     TLexText & lexText,                             // random access
                     TSA const & partiallyOrderedSA,                 // sequential scan
                     StringSet<TText, TTextSpec> const & origText,   // random access
-                    TSuffixModifier const & cyclic)
+                    TCyclicShape const & cyclic)
 {
     typedef typename Size<TSA>::Type                        TSize;
     typedef typename Value<TSA>::Type                       TSAValue;
     typedef typename Value<typename Concatenator<TLexText>::Type>::Type TRank;
     typedef ModifiedString<typename Suffix<TText const
-    >::Type, ModCyclicShape<TSuffixModifier> >              TModText;
+    >::Type, ModCyclicShape<TCyclicShape> >              TModText;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
 
 
@@ -347,9 +478,8 @@ inline void _dislex(
     dislex(cyclic.span, xxx);
 
 
-    // tuple comparator to determine rank
-    typedef Pair<TSAValue, TModText> TCompInput;
-    _dislexTupleCompMulti<TCompInput, TSuffixModifier> comp(cyclic);
+    // q-gram comparator to determine rank
+    GappedSuffixQgramLess_<TSAValue, TCyclicShape, StringSet<TText, TTextSpec> > comp(origText, cyclic, static_cast<TSize>(weight(cyclic)));
 
     resize(lexText, lengthSum(origText));
 
@@ -368,18 +498,11 @@ inline void _dislex(
         lexText[dislex(txtPos)] = rank;
 
         // compare two consecutive values, this is probably slow
-        TSAValue pair1(txtPos.i1, length(origText[txtPos.i1]) - txtPos.i2);
-        TSAValue pair2(sa->i1,    length(origText[sa->i1]) - sa->i2);
-        TModText suf1(suffix(origText, txtPos), cyclic);
-        TModText suf2(suffix(origText, *sa), cyclic);
-        TCompInput tup1 = TCompInput(pair1, suf1);
-        TCompInput tup2 = TCompInput(pair2, suf2);
-        if(comp(tup1, tup2))
+        if(comp(txtPos, *sa))
             ++rank;
 
-        //std::cout << tup1 << "  ...   " << tup2 << " -> " << comp(tup1, tup2) << std::endl;
-
-        SEQAN_ASSERT_GEQ(0, comp(tup1,tup2));
+        //std::cout << txtPos << "  ...   " << *sa << " -> " << comp(txtPos, *sa) << std::endl;
+        SEQAN_ASSERT_GEQ(0, comp(txtPos,*sa));
     }
     lexText[dislex(txtPos)] = rank;
 }
@@ -391,14 +514,14 @@ inline void _dislex(
 
 template <
 typename TSA,
-typename TSuffixModifier,
+typename TCyclicShape,
 typename TText,
 typename TLexSA>
 void _dislexReverse(
                     TSA & finalSA,                                  // random access
                     TLexSA const & lexSA,                           // sequential scan
                     TText const &,                                  // not needed
-                    TSuffixModifier const & cyclic)
+                    TCyclicShape const & cyclic)
 {
     typedef typename Iterator<TSA const, Standard>::Type    TLexSAIter;
     typedef typename Iterator<TSA, Standard>::Type          TSAIter;
@@ -421,13 +544,13 @@ void _dislexReverse(
 template <
 typename TSA,
 typename TLexSA,
-typename TSuffixModifier,
+typename TCyclicShape,
 typename TText, typename TTextSpec>
 void _dislexReverse(
                     TSA & finalSA,                                  // random access
                     TLexSA const & lexSA,                           // sequential scan
                     StringSet<TText, TTextSpec> const & origText,
-                    TSuffixModifier const & cyclic)
+                    TCyclicShape const & cyclic)
 {
     typedef typename Iterator<TLexSA const, Standard>::Type TLexSAIter;
     typedef typename Iterator<TSA, Standard>::Type          TSAIter;
@@ -451,8 +574,6 @@ void _dislexReverse(
 
 
 
-
-struct Dislex{};
 
 // --------------------------------------------------------------------------
 // function createGappedSuffixArray()                                [Dislex]
@@ -540,288 +661,6 @@ inline void createGappedSuffixArray(
 
 
 
-// ==========================================================================
-// DisLex using external memory
-// ==========================================================================
-
-
-
-// --------------------------------------------------------------------------
-// Comparator for naming tuples                                      [String]
-// --------------------------------------------------------------------------
-
-// TODO: _dislexTupleComp for bitvectors
-
-/*
- * @signature _dislexTupleComp<TValue, TShape, TResult = int>
- *
- * @tparam TValue expects a Pair<TSize, Tuple> where the 1st parameter contains the
- *                length of the underlying suffix and the 2nd parameter the
- *                fixed-length sequence tuple (possibly bitpacked)
- * @tparam TShape expects a fixed CyclicShape (CyclicShape<FixedShape<...> >)
- *
- * @see _dislexTupleCompMulti
- */
-template <
-typename TValue,
-typename TShape, // only fixed shapes
-typename TResult>
-struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
-{
-    typedef typename Value<TValue, 1>::Type TSize;
-
-    enum {
-        _span = TShape::span,
-        _weight = WEIGHT<TShape>::VALUE
-    };
-    TSize realLengths[2*_span];
-
-    _dislexTupleComp(TShape const & shape)
-    {
-        cyclicShapeToSuffixLengths(realLengths, shape);
-
-        // extend the table to a size of 2*_span
-        for (unsigned i=0; i<_span; ++i)
-        realLengths[i+_span] = _weight + realLengths[i];
-    }
-
-
-    inline TResult operator() (const TValue &a, const TValue &b) const
-    {
-        typedef typename Value<TValue, 2>::Type                 TTuple;
-        typedef typename Value<TTuple>::Type                    TTupleValue;
-        typedef typename Iterator<TTuple const, Standard>::Type TIter;
-
-        // TODO: This was called  const TStoredValue *sa = a.i2.i
-        //       before. I changed it so that I can also plug in a suffix instead of a tuple
-        //       Ask David whether this is ok.
-
-        TIter sa = begin(a.i2, Standard()); // pointer to first char in this tuple
-        TIter sb = begin(b.i2, Standard());
-
-        // both tuples have more than _weight characters
-        // TODO: Tell compiler this is the more likely if-branch?
-        if(a.i1 >= 2* _span && b.i1 >= 2*_span)
-        {
-            // TODO: Unroll loop using Loop struct?
-            for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
-            {
-                if (*sa == *sb) continue;
-                return (*sa < *sb)? -1 : 1;
-            }
-            return 0;
-        }
-
-        // we get here only if one of the tuples might be too short.
-        // find out the real lengths of the gapped strings
-        // (at least one of them must be < 2*_weight)
-        TSize la = (a.i1 < 2*_span ? realLengths[a.i1] : 2*_weight);
-        TSize lb = (b.i1 < 2*_span ? realLengths[b.i1] : 2*_weight);
-
-        TSize n = la < lb ? la : lb;    // min(la, lb, n)
-        n = _weight < n ? _weight : n;
-
-
-        // compare the overlap of the first n bases
-        for (TSize i = 0; i < n; i++, ++sa, ++sb)
-        {
-            if (*sa == *sb) continue;
-            return (*sa < *sb)? -1 : 1;
-        }
-
-        // if both strings have more than _weight chars, they are equal.
-        if (la > _weight && lb > _weight) return 0;
-
-        // if they differ in size, the shorter one is smaller.
-        if (la != lb)
-        return (la < lb ? -1 : 1);
-
-        // if both have the same number of chars:
-
-        // the length of the virtual suffix decides:
-        if (a.i1 < b.i1) return -1;
-        if (a.i1 > b.i1) return 1;
-
-        // last case will never occur
-        SEQAN_ASSERT_EQ(true, false);
-        return 0;
-
-
-    }
-};
-
-// --------------------------------------------------------------------------
-// Comparator for naming tuples                                   [StringSet]
-// --------------------------------------------------------------------------
-
-// TODO: _dislexTupleCompMulti for bitvectors
-
-/*
- * @signature _dislexTupleCompMulti<TValue, TShape, TResult = int>
- *
- * @tparam TValue expects a Pair<Pair<TSize, TSize>, Tuple> where the 1st parameter
- *                is a Pair of sequence ID and suffix length and the 2nd parameter
- *                the fixed-length sequence tuple (possibly bitpacked)
- * @tparam TShape expects a fixed CyclicShape (CyclicShape<FixedShape<...> >)
- *
- * @see _dislexTupleComp
- */
-template <
-typename TValue,
-typename TShape, // only fixed shapes
-typename TResult>
-struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TResult>
-{
-    typedef typename Value<TValue, 1>::Type                 TSetPos;
-    typedef typename Value<TSetPos, 2>::Type                TSize;
-    typedef typename Value<TValue, 2>::Type                 TTuple;
-    typedef typename Value<TTuple>::Type                    TTupleValue;
-    typedef typename Iterator<TTuple const, Standard>::Type TIter;
-
-    enum {
-        _span = TShape::span,
-        _weight = WEIGHT<TShape>::VALUE
-    };
-    TSize realLengths[2*_span];
-
-    _dislexTupleCompMulti(TShape const & shape)
-    {
-        cyclicShapeToSuffixLengths(realLengths, shape);
-
-        // extend the table to a size of 2*_span
-        for (unsigned i=0; i<_span; ++i)
-            realLengths[i+_span] = _weight + realLengths[i];
-    }
-
-
-    inline TResult operator() (const TValue &a, const TValue &b) const
-    {
-        typedef typename Value<TValue, 2>::Type                 TTuple;
-        typedef typename Value<TTuple>::Type                    TTupleValue;
-        typedef typename StoredTupleValue_<TTupleValue>::Type TStoredValue;
-
-
-        // TODO: This was called  const TStoredValue *sa = a.i2.i
-        //       before. I changed it so that I can also plug in a suffix instead of a tuple
-        //       Ask David whether this is ok.
-        TIter sa = begin(a.i2, Standard());
-        TIter sb = begin(b.i2, Standard());
-
-        // both tuples have full length, normal comparison
-        // TODO: is there a single compare function for tuples already?? (not the ==, < and > operators)
-
-
-        // the usual case:
-        // both tuples have more than _weight real characters.
-
-        // TODO: Tell compiler this is the more likely if-branch?
-        if(a.i1.i2 >= 2*_span && b.i1.i2 >= 2*_span)
-        {
-            // TODO: Unroll loop using Loop struct?
-            for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
-            {
-                if (*sa == *sb) continue;
-                return (*sa < *sb)? -1 : 1;
-            }
-            return 0;
-        }
-
-        // we get here only if one of the tuples might be too short.
-        // find out the real lengths of the gapped strings
-        // (at least one of them must be < 2*_weight)
-        TSize la = (a.i1.i2 < 2*_span ? realLengths[a.i1.i2] : 2*_weight);
-        TSize lb = (b.i1.i2 < 2*_span ? realLengths[b.i1.i2] : 2*_weight);
-
-        TSize n = la < lb ? la : lb;    // min(la, lb, n)
-        n = _weight < n ? _weight : n;
-
-
-        // compare the overlap of the first n bases
-        for (TSize i = 0; i < n; i++, ++sa, ++sb)
-        {
-            if (*sa == *sb) continue;
-            return (*sa < *sb)? -1 : 1;
-        }
-
-        // if both strings have more than _weight chars, they are equal.
-        if (la > _weight && lb > _weight) return 0;
-
-        // if they differ in size, the shorter one is smaller.
-        if (la != lb)
-            return (la < lb ? -1 : 1);
-
-        // if both have the same number of chars:
-
-        // first the string ID is relevant:
-        if (a.i1.i1 > b.i1.i1) return -1;
-        if (a.i1.i1 < b.i1.i1) return 1;
-
-        // In the same string, the length of the virtual suffix decides:
-        if (a.i1.i2 < b.i1.i2) return -1;
-        if (a.i1.i2 > b.i1.i2) return 1;
-
-        // last case will never occur
-        SEQAN_ASSERT_EQ(true, false);
-        return 0;
-    }
-};
-
-
-
-
-// wrapper for the dislex Pipe
-// takes a tuple <l, ACGACA> where l is the suffix length
-// and returns L(N-l)
-template <
-typename TValue,
-typename TResult = typename Value<TValue, 1>::Type>
-struct _dislexMap :
-public std::unary_function<TValue, TResult>
-{
-    _dislexTransform<TResult> formula;
-    TResult N;
-
-    _dislexMap(TResult S_, TResult N_) : formula(S_, N_), N(N_)
-    {}
-
-    inline TResult operator() (const TValue & x) const
-    {
-        return formula( N - x.i1);
-    }
-};
-
-
-
-// dislex transformation used in the mapper pool
-// takes a Pair( Pair(s,l), ACGATCG), where s is the seq id and l the suffix LENGTH,
-// returns a global position L(s,l)=pos
-template <
-typename TValue,
-typename TString,
-typename TResult = typename Value<typename Value<TValue, 1>::Type, 2>::Type >
-struct _dislexMapMulti :
-public std::unary_function<TValue, TResult>
-{
-    typedef typename Value<TValue, 1>::Type TPair;
-    typedef typename Value<TPair, 2>::Type TSize;
-
-    _dislexTransformMulti<TPair, TString> formula;
-    TString const & limits;
-
-    _dislexMapMulti(TResult S_, TString const & stringSetLimits) : formula(S_, stringSetLimits), limits(stringSetLimits)
-    {}
-
-    inline TResult operator() (const TValue & x) const
-    {
-        TSize N = limits[x.i1.i1+1] - limits[x.i1.i1];
-        return formula(TPair(x.i1.i1, N - x.i1.i2));
-    }
-};
-
-
-
-
-
 
 
 
@@ -833,10 +672,10 @@ template <typename TSA,
 typename TSuffixModifier,
 typename TText, typename TTextSpec>
 void dislexReverse___old(
-                         TSA & finalSA,                              // random access
-                         TSA const & lexSA,                          // sequential scan
-                         StringSet<TText, TTextSpec> const & text,   // only needed for lengths
-                         TSuffixModifier const & cyclic)
+     TSA & finalSA,                              // random access
+     TSA const & lexSA,                          // sequential scan
+     StringSet<TText, TTextSpec> const & text,   // only needed for lengths
+     TSuffixModifier const & cyclic)
 {
     typedef typename Iterator<TSA const, Standard>::Type    TLexSAIter;
     typedef typename Iterator<TSA, Standard>::Type          TSAIter;
