@@ -48,7 +48,8 @@ template <typename T, typename A>
 void printStrSet(StringSet<T,A> const & strSet) { for(unsigned i=0; i< length(strSet); ++i) {
     std::cout << "[" << i << "]"; printStr(strSet[i]); std::cout << std::endl; } }
 
-struct Dislex{};
+template <typename TSACA>
+struct Dislex {};
 
 
 // ==========================================================================
@@ -166,8 +167,8 @@ public std::unary_function<TValue, TResult>
 // --------------------------------------------------------------------------
 
 template <
-typename TInput,
-typename TResult = TInput>
+    typename TInput,
+    typename TResult = TInput>
 struct _dislexReverseTransform :
 public std::unary_function<TInput, TResult>
 {
@@ -198,9 +199,9 @@ public std::unary_function<TInput, TResult>
 // --------------------------------------------------------------------------
 
 template <
-typename TInput,                    // global pos
-typename TString,                   // limits
-typename TResult = Pair<TInput> >   // local pos
+    typename TInput,                    // global pos
+    typename TString,                   // limits
+    typename TResult = Pair<TInput> >   // local pos
 struct _dislexReverseTransformMulti :
 public std::unary_function<TInput, TResult>
 {
@@ -389,25 +390,20 @@ public std::unary_function<TInput, TResult>
         }
     };
 
-// ==========================================================================
-// DisLex Transformation Random Access
-// ==========================================================================
-
+// ============================================================================
+// Functions
+// ============================================================================
 
 // --------------------------------------------------------------------------
 // function _dislex()                                                [String]
 // --------------------------------------------------------------------------
 
-template <
-typename TLexText,
-typename TSA,
-typename TText,
-typename TCyclicShape>
+template <typename TLexText, typename TSA, typename TText, typename TCyclicShape>
 inline void _dislex(
-                    TLexText & lexText,                         // random access (write)
-                    TSA const & partiallyOrderedSA,             // sequential scan
-                    TText const & origText,                     // random access
-                    TCyclicShape const & cyclic)
+    TLexText & lexText,                         // random access (write)
+    TSA const & partiallyOrderedSA,             // sequential scan
+    TText const & origText,                     // random access
+    TCyclicShape const & cyclic)
 {
     typedef typename Size<TSA>::Type                        TSize;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
@@ -450,15 +446,12 @@ inline void _dislex(
 // function _dislex()                                             [StringSet]
 // --------------------------------------------------------------------------
 
-template < typename TLexText,
-typename TSA,
-typename TText,      typename TTextSpec,
-typename TCyclicShape>
+template < typename TLexText, typename TSA, typename TText, typename TTextSpec, typename TCyclicShape>
 inline void _dislex(
-                    TLexText & lexText,                             // random access
-                    TSA const & partiallyOrderedSA,                 // sequential scan
-                    StringSet<TText, TTextSpec> const & origText,   // random access
-                    TCyclicShape const & cyclic)
+    TLexText & lexText,                             // random access
+    TSA const & partiallyOrderedSA,                 // sequential scan
+    StringSet<TText, TTextSpec> const & origText,   // random access
+    TCyclicShape const & cyclic)
 {
     typedef typename Size<TSA>::Type                        TSize;
     typedef typename Value<TSA>::Type                       TSAValue;
@@ -512,16 +505,12 @@ inline void _dislex(
 // function _dislexReverse()                                         [String]
 // --------------------------------------------------------------------------
 
-template <
-typename TSA,
-typename TCyclicShape,
-typename TText,
-typename TLexSA>
+template <typename TSA, typename TCyclicShape, typename TText, typename TLexSA>
 void _dislexReverse(
-                    TSA & finalSA,                                  // random access
-                    TLexSA const & lexSA,                           // sequential scan
-                    TText const &,                                  // not needed
-                    TCyclicShape const & cyclic)
+    TSA & finalSA,                                  // random access
+    TLexSA const & lexSA,                           // sequential scan
+    TText const &,                                  // not needed
+    TCyclicShape const & cyclic)
 {
     typedef typename Iterator<TSA const, Standard>::Type    TLexSAIter;
     typedef typename Iterator<TSA, Standard>::Type          TSAIter;
@@ -541,16 +530,12 @@ void _dislexReverse(
 // function _dislexReverse()                                      [StringSet]
 // --------------------------------------------------------------------------
 
-template <
-typename TSA,
-typename TLexSA,
-typename TCyclicShape,
-typename TText, typename TTextSpec>
+template <typename TSA, typename TLexSA, typename TCyclicShape, typename TText, typename TTextSpec>
 void _dislexReverse(
-                    TSA & finalSA,                                  // random access
-                    TLexSA const & lexSA,                           // sequential scan
-                    StringSet<TText, TTextSpec> const & origText,
-                    TCyclicShape const & cyclic)
+    TSA & finalSA,                                  // random access
+    TLexSA const & lexSA,                           // sequential scan
+    StringSet<TText, TTextSpec> const & origText,
+    TCyclicShape const & cyclic)
 {
     typedef typename Iterator<TLexSA const, Standard>::Type TLexSAIter;
     typedef typename Iterator<TSA, Standard>::Type          TSAIter;
@@ -571,36 +556,18 @@ void _dislexReverse(
     *insert = dislexRev (*sa);
 }
 
-
-
-
-
 // --------------------------------------------------------------------------
 // function createGappedSuffixArray()                                [Dislex]
 // --------------------------------------------------------------------------
 // Only defined for CyclicShapes
 
-template < typename TSA, typename TText, typename TCyclicShape>
-inline void createGappedSuffixArray(TSA &SA, // must already be resized already
-                                    TText const &s,
-                                    TCyclicShape const & shape,
-                                    ModCyclicShape<TCyclicShape> const &,
-                                    Dislex const &)
-{
-    createGappedSuffixArray(SA, s, shape, ModCyclicShape<TCyclicShape>(), Dislex(), Skew7());
-}
-
-template < typename TSA,
-    typename TText,
-    typename TCyclicShape,
-    typename TSAConstructionAlgorithmTag>
+template < typename TSA, typename TText, typename TCyclicShape, typename TSACA>
 inline void createGappedSuffixArray(
-                                    TSA &SA, // must already be resized already
-                                    TText const &s,
-                                    TCyclicShape const & shape,
-                                    ModCyclicShape<TCyclicShape> const &,
-                                    Dislex const &,
-                                    TSAConstructionAlgorithmTag const &)
+    TSA &SA, // must already be resized already
+    TText const &s,
+    TCyclicShape const & shape,
+    ModCyclicShape<TCyclicShape> const &,
+    Dislex<TSACA> const &)
 {
     typedef typename LexText<TText, TCyclicShape>::Type         TLexText;
 
@@ -643,7 +610,7 @@ inline void createGappedSuffixArray(
 
     // Build Index using Skew7
     Index<TLexText, IndexSa<> > normalIndex(lexText);
-    indexCreate(normalIndex, EsaSA(), TSAConstructionAlgorithmTag());
+    indexCreate(normalIndex, EsaSA(), TSACA());
 
     std::cout << "   |     saca: " << sysTime() - teim << "s (len = " << length(concat(lexText)) << ")" << std::endl; teim = sysTime();
 
@@ -654,6 +621,8 @@ inline void createGappedSuffixArray(
     std::cout << "   |  reverse: " << sysTime() - teim << "s (len = " << length(indexSA(normalIndex)) << ")" << std::endl; teim = sysTime();
 
 }
+
+
 
 
 

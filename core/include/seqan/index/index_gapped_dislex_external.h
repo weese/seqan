@@ -35,7 +35,11 @@
 #ifndef CORE_INCLUDE_SEQAN_INDEX_INDEX_GAPPED_DISLEX_EXTERNAL_H_
 #define CORE_INCLUDE_SEQAN_INDEX_INDEX_GAPPED_DISLEX_EXTERNAL_H_
 
+namespace SEQAN_NAMESPACE_MAIN
+{
 
+template <typename TShape, typename TInnerAlgorithm>
+struct DislexExternal {};
 
 // --------------------------------------------------------------------------
 // Filter to transform positions to lengths                          [String]
@@ -272,7 +276,9 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
 };
 
 
-
+// --------------------------------------------------------------------------
+// Mapping functor from text to lexText                              [String]
+// --------------------------------------------------------------------------
 
 // wrapper for the dislex Pipe
 // takes a tuple <l, ACGACA> where p is the suffix position
@@ -295,6 +301,9 @@ public std::unary_function<TValue, TResult>
 };
 
 
+// --------------------------------------------------------------------------
+// Mapping functor from text to lexText                           [StringSet]
+// --------------------------------------------------------------------------
 
 // dislex transformation used in the mapper pool
 // takes a Pair( Pair(s,p), ACGATCG), where s is the seq id and p the suffix position,
@@ -316,10 +325,136 @@ public std::unary_function<TValue, TResult>
     
     inline TResult operator() (const TValue & x) const
     {
-        return formula(x);
+        return formula(x.i1);
     }
 };
 
+// --------------------------------------------------------------------------
+// Pipe Dislex                                                       [String]
+// --------------------------------------------------------------------------
+
+    // TODO(meiers): Define metafunctions, e.g. Value
+
+template <typename TInput, typename TShape, typename TSACA>
+struct Pipe<TInput, DislexExternal<TShape, TSACA> >
+{
+    Pipe()
+    {}
+
+    Pipe(TInput & textIn)
+    {
+        process(textIn);
+    }
+
+    inline typename Value<Pipe>::Type const operator*() {
+        return *in;
+    }
+
+    inline Pipe& operator++() {
+        ++in;
+        return *this;
+    }
+
+    template < typename TInput_ >
+    bool process(TInput_ &textIn)
+    {
+        // 1. Generate Gapped Tuples
+        typedef Pipe< TInput_, GappedTupler_ >                  TPipeTupler;
+        TPipeTupler                                             tupler(textIn);
 
 
+        // 2. Sort Tuples by the first few characters
+        typedef _dislexTupleComp<TypeOf_(TPipeTupler), TShape>  TTupleComparator;
+        typedef Pool<TypeOf_(TPipeTupler), SorterSpec<
+                SorterConfigSize<TTupleComparator,
+                TSizeOf_(TPipeTupler) > > >                     TPoolSorter;
+        TTupleComparator                                        _comp(TShape(), length(textIn));
+        TPoolSorter                                             sorter(tupler, _comp);
+
+
+        // 3. Name tuples by their rank
+        typedef Pipe< TPoolSorter, Namer<TTupleComparator> >    TPipeNamer;
+        TPipeNamer                                              namer(sorter, _comp);
+
+
+        // 4. Map text Positions to lexText positions
+        typedef _dislexMap<TypeOf_(TPipeNamer) >                TDislexMapper;
+        typedef Pool< TypeOf_(TPipeNamer), MapperSpec<
+                MapperConfigSize< TDislexMapper,
+                TSizeOf_(TPipeNamer) > > >                      TPoolMapper;
+        TDislexMapper                                           _map(TShape::span, length(textIn));
+        TPoolMapper                                             mapper(namer, _map);
+
+
+        // 5. Discard positions, keep rank
+        typedef Pipe< TPoolMapper, Filter<
+                filterI2<TypeOf_(TPoolMapper)> > >              TPipeFilterI2;
+        TPipeFilterI2                                           filter(mapper);
+
+        // 6. Run SACA on lex text
+        typedef Pipe<TPipeFilterI2, TSACA>                      TPipeSACA;
+        TPipeSACA                                               saca(filter);
+
+
+        // 7. Reverse transform lexText positions
+        typedef _dislexReverseTransform<TypeOf_(TPipeSACA),
+            TypeOf_(Pipe)>                                      TDislexReverse;
+        typedef Pipe<TPipeSACA, Filter<TDislexReverse> >        TPipeReverseTransform;
+        TDislexReverse                                          _rev(TShape::span, length(textIn));
+        TPipeReverseTransform                                   reverse(saca, _rev);
+
+
+        // Now start working, do I need this ???
+        mapper << namer;
+    }
+
+};
+
+// --------------------------------------------------------------------------
+// Pipe Dislex                                                    [StringSet]
+// --------------------------------------------------------------------------
+
+template <typename TInput, typename TShape, typename TSACA, typename TPair, typename TLimitString>
+struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimitString> >
+{
+
+};
+
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// --------------------------------------------------------------------------
+// function createGappedSuffixArray()                                [String]
+// --------------------------------------------------------------------------
+
+template < typename TSA, typename TText, typename TCyclicShape, typename TSACA>
+inline void createGappedSuffixArray(
+    TSA &SA, // must already be resized already
+    TText const &s,
+    TCyclicShape const & shape,
+    ModCyclicShape<TCyclicShape> const &,
+    DislexExternal<TCyclicShape, TSACA> const &)
+{
+    // TODO
+}
+
+// --------------------------------------------------------------------------
+// function createGappedSuffixArray()                             [StringSet]
+// --------------------------------------------------------------------------
+
+template < typename TSA, typename TText, typename TSpec, typename TCyclicShape, typename TSACA>
+inline void createGappedSuffixArray(
+    TSA &SA, // must already be resized already
+    StringSet<TText, TSpec> const &s,
+    TCyclicShape const & shape,
+    ModCyclicShape<TCyclicShape> const &,
+    DislexExternal<TCyclicShape, TSACA> const &)
+{
+    // TODO
+}
+
+
+}
 #endif  // #ifndef CORE_INCLUDE_SEQAN_INDEX_INDEX_GAPPED_DISLEX_EXTERNAL_H_

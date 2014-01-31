@@ -39,7 +39,7 @@
 
 using namespace seqan;
 
-int main(int argc, char * argv[])
+int main()
 {
 
     StringSet<CharString> ids;
@@ -62,7 +62,7 @@ int main(int argc, char * argv[])
 
 
     // variable typedefs:
-    typedef CyclicShape<FixedShape<0, GappedShape<HardwiredShape<1,1,2> >, 1> > TShape;
+    typedef CyclicShape<FixedShape<0, GappedShape<HardwiredShape<2> >, 0> > TShape;
     typedef GappedTupler<TShape, false> GappedTupler_;
 
     CharString shapeString;
@@ -90,8 +90,21 @@ int main(int argc, char * argv[])
         typedef _dislexTupleCompMulti<TypeOf_(TPipeTupler), TShape, TLimits> _tupleComparator;
         typedef Pool<TypeOf_(TPipeTupler),
                 SorterSpec< SorterConfigSize<_tupleComparator, TSizeOf_(TPipeTupler) > > > TPoolSorter;
+        typedef Pipe< TPoolSorter, Namer<_tupleComparator> > TPipeNamer;
+
+        typedef _dislexMapMulti<TypeOf_(TPipeNamer), TLimits > _dislexMapper;
+        typedef Pool< TypeOf_(TPipeNamer), MapperSpec< MapperConfigSize< _dislexMapper, TSizeOf_(TPipeNamer) > > > TPoolMapper;
+
+        typedef Pipe< TPoolMapper, Filter< filterI2<TypeOf_(TPoolMapper)> > > TFilterI2;
+
+        typedef Pipe<TFilterI2, Skew7> TSkew;
+
+        typedef _dislexReverseTransformMulti<TypeOf_(TSkew), TLimits> _dislexReverse;
+        // TODO(meiers): Specify TResult (third tmp arg) to be what the final SA wants.
+        typedef Pipe<TSkew, Filter<_dislexReverse> > TPipeReverseTransform;
 
 
+        
         // begin pipeline
 
         // Generate Tuples
@@ -101,15 +114,34 @@ int main(int argc, char * argv[])
         // Sort Tuples
         _tupleComparator comp(TShape(), stringSetLimits(set));
         TPoolSorter sorter(tupler, comp);
-
         sorter << tupler;
-        std::cout << sorter;
+
+        // Name sorted Tuples
+        TPipeNamer namer(sorter, comp);
+
+        // Map to LexText
+        _dislexMapper map(TShape::span, stringSetLimits(set));
+        TPoolMapper mapper(namer, map);
+        mapper << namer;
+
+        // Discard the original position
+        TFilterI2 filter(mapper);
+
+        // Run Skew
+        TSkew skew(filter);
+
+        // Reverse Map
+        _dislexReverse mapReverse(TShape::span, stringSetLimits(set));
+        TPipeReverseTransform reverse(skew, mapReverse);
+
+//        reverseMapper << skew;
+          std::cout << reverse;
     }
 
     {
         // String
         std::cout << "String" << std::endl;
-        CharString s = "01234567890123456789abaaabbacb0123456789";
+        CharString s = "banaaanaaa";
 
         typedef Pipe< CharString, Source<> >                    TPipeSource;
         typedef Pipe< TPipeSource, GappedTupler_ >              TPipeTupler;
@@ -117,6 +149,22 @@ int main(int argc, char * argv[])
         typedef _dislexTupleComp<TypeOf_(TPipeTupler), TShape> _tupleComparator;
         typedef Pool<TypeOf_(TPipeTupler),
             SorterSpec< SorterConfigSize<_tupleComparator, TSizeOf_(TPipeTupler) > > > TPoolSorter;
+
+        typedef Pipe< TPoolSorter, Namer<_tupleComparator> > TPipeNamer;
+
+        typedef _dislexMap<TypeOf_(TPipeNamer) > _dislexMapper;
+        typedef Pool< TypeOf_(TPipeNamer), MapperSpec< MapperConfigSize< _dislexMapper, TSizeOf_(TPipeNamer) > > > TPoolMapper;
+
+        typedef Pipe< TPoolMapper, Filter< filterI2<TypeOf_(TPoolMapper)> > > TFilterI2;
+
+        typedef Pipe<TFilterI2, Skew7> TSkew;
+
+        typedef _dislexReverseTransform<TypeOf_(TSkew)> _dislexReverse;
+        // TODO(meiers): Specify TResult (third tmp arg) to be what the final SA wants.
+        typedef Pipe< TSkew, Filter<_dislexReverse> > TPipeReverseTransform;
+        
+        
+
 
 
         // begin pipeline
@@ -128,9 +176,32 @@ int main(int argc, char * argv[])
         // Sort Tuples
         _tupleComparator comp(TShape(), length(s));
         TPoolSorter sorter(tupler, comp);
-        
         sorter << tupler;
-        std::cout << sorter;
+
+        // Name sorted Tuples
+        TPipeNamer namer(sorter, comp);
+
+        // Map to LexText
+        _dislexMapper map(TShape::span, length(s));
+        TPoolMapper mapper(namer, map);
+        mapper << namer;
+
+
+
+        // Discard the original position
+        TFilterI2 filter(mapper);
+
+        // Run Skew
+        TSkew skew(filter);
+
+// up to here correct
+
+        // Reverse Map
+        _dislexReverse mapReverse(TShape::span, length(s));
+        TPipeReverseTransform reverse(skew, mapReverse);
+
+std::cout << reverse << std::endl;
+        
     }
 
     
