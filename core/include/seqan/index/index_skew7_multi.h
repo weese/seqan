@@ -437,7 +437,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
     // for the first we would need no _in member
 	template < typename TInput, typename TObject, typename TPair, typename TLimitsString >
-    inline bool operator<<(Pipe< TInput, Multi<Skew7, TPair, TLimitsString> > &me, TObject &textIn) {
+    inline bool operator<<(Pipe<TInput, Multi<Skew7, TPair, TLimitsString> > &me, TObject &textIn) {
         return me.process(textIn);
     }
 

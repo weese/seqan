@@ -386,6 +386,7 @@ struct Pipe<TInput, DislexExternal<TShape, TSACA> >
         // 2. Sort Tuples by the first few characters
         TTupleComparator                                        _comp(TShape(), length(textIn));
         TPoolSorter                                             sorter(tupler, _comp);
+        sorter << tupler;
 
         // 3. Name tuples by their rank
         TPipeNamer                                              namer(sorter, _comp);
