@@ -345,7 +345,6 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
             TIndex index(concat(set));
             benchmarkSACA(index, Dislex<Skew7>(), correctSA2, shape101, dislex, string);
         }
-
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
@@ -402,7 +401,16 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
             TIndex index(concat(set));
             benchmarkSACA(index, Dislex<Skew7>(), correctSA2, shape2, dislex, string);
         }
-
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            benchmarkSACA(index, DislexExternal<TShape>(), correctSA1, shape2, dislexExt, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            benchmarkSACA(index, DislexExternal<TShape>(), correctSA2, shape2, dislexExt, string);
+        }
     }
 
     { //----- Gapped Indices: 0001010 ---------------------------------------------------------
@@ -446,6 +454,16 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
             benchmarkSACA(index, Dislex<Skew7>(), correctSA2, shape3, dislex, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            benchmarkSACA(index, DislexExternal<TShape>(), correctSA1, shape3, dislexExt, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            benchmarkSACA(index, DislexExternal<TShape>(), correctSA2, shape3, dislexExt, string);
         }
     }
 

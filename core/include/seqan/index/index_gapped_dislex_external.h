@@ -474,6 +474,7 @@ struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
         // 2. Sort Tuples by the first few characters
         TTupleComparator                                        _comp(TShape(), limits);
         TPoolSorter                                             sorter(tupler, _comp);
+        sorter << tupler;
 
         // 3. Name tuples by their rank
         TPipeNamer                                              namer(sorter, _comp);
@@ -492,6 +493,26 @@ struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
         // 7. Reverse Transform is done during the reading process
         return true;
     }
+};
+
+
+// ==========================================================================
+// Metafunctions
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// Value
+// --------------------------------------------------------------------------
+
+template < typename TInput, typename TA, typename TB >
+struct Value< Pipe< TInput, DislexExternal<TA,TB> > > :
+    public Size<TInput>
+{};
+
+template < typename TInput, typename TA, typename TB, typename TPair, typename TLimits>
+struct Value< Pipe< TInput, Multi<DislexExternal<TA, TB>, TPair, TLimits> > >
+{
+    typedef TPair Type;
 };
 
 
@@ -535,7 +556,7 @@ template < typename TSA, typename TText, typename TCyclicShape, typename TSACA>
 inline void createGappedSuffixArray(
     TSA &SA, // must already be resized already
     TText const &s,
-    TCyclicShape const & shape,
+    TCyclicShape const &,
     ModCyclicShape<TCyclicShape> const &,
     DislexExternal<TCyclicShape, TSACA> const &)
 {
@@ -550,11 +571,11 @@ template < typename TSA, typename TText, typename TSpec, typename TCyclicShape, 
 inline void _createGappedSuffixArrayPipelining(
     TSA &SA, // must already be resized already
     StringSet<TText, TSpec> const &s,
-    TCyclicShape const & shape,
+    TCyclicShape const &,
     ModCyclicShape<TCyclicShape> const &,
     DislexExternal<TCyclicShape, TSACA> const &)
 {
-    // TODO
+    _createSuffixArrayPipelining(SA, s, DislexExternal<TCyclicShape, TSACA>());
 }
 
 

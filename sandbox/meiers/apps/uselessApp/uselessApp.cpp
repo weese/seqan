@@ -79,11 +79,18 @@ int main()
         appendValue(set, "0123456789");
         appendValue(set, "012");
 
+        typedef Concatenator<StringSet<CharString> >::Type      TConcat;
+        typedef StringSetLimits<StringSet<CharString> >::Type   TLimits;
+		typedef Multi<DislexExternal<TShape>, Pair<unsigned>, TLimits>  TMulti;
+        typedef Pipe<TConcat, Source<> >                        TPipeSource;
 
+        typedef Pipe<TPipeSource, TMulti >                      TPipeDislex;
+        TPipeSource source(concat(set));
+        TPipeDislex dislex(source, stringSetLimits(set));
 
-        typedef Concatenator<StringSet<CharString> >::Type         TConcat;
-        typedef StringSetLimits<StringSet<CharString> >::Type      TLimits;
-;
+        String<Pair<unsigned> > sa;
+        sa << dislex;
+        std::cout << sa;
     }
 
     {
