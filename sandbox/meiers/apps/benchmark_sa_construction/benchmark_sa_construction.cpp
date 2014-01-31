@@ -232,17 +232,18 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
     std::cout <<  "algor.\tpattern_______\ttext\truntime\tcheck" << std::endl;
 
     // labels for output
-    CharString ungapped = "ungapped______";
-    CharString shape101 = "101___________";
-    CharString shape2   = "11000100101110";
-    CharString shape3   = "0001010_______";
-    CharString skew7    = "Skew7";
-    CharString skew3    = "Skew3";
-    CharString saqsort  = "QSort";
-    CharString dislex   = "Dislex";
-    CharString radix    = "Radix";
-    CharString string   = "String";
-    CharString stringset= "StrSet";
+    CharString ungapped  = "ungapped______";
+    CharString shape101  = "101___________";
+    CharString shape2    = "11000100101110";
+    CharString shape3    = "0001010_______";
+    CharString skew7     = "Skew7";
+    CharString skew3     = "Skew3";
+    CharString saqsort   = "QSort";
+    CharString dislex    = "Dislex";
+    CharString dislexExt = "Extern";
+    CharString radix     = "Radix";
+    CharString string    = "String";
+    CharString stringset = "StrSet";
 
 
     {   //- Ungapped Indices ----------------------------------------------------------------
@@ -337,12 +338,23 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
-            benchmarkSACA(index, Dislex(), correctSA1, shape101, dislex, stringset);
+            benchmarkSACA(index, Dislex<Skew7>(), correctSA1, shape101, dislex, stringset);
         }
         {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
-            benchmarkSACA(index, Dislex(), correctSA2, shape101, dislex, string);
+            benchmarkSACA(index, Dislex<Skew7>(), correctSA2, shape101, dislex, string);
+        }
+
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            benchmarkSACA(index, DislexExternal<TShape>(), correctSA1, shape101, dislexExt, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            benchmarkSACA(index, DislexExternal<TShape>(), correctSA2, shape101, dislexExt, string);
         }
     }
 
@@ -383,12 +395,12 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
-            benchmarkSACA(index, Dislex(), correctSA1, shape2, dislex, stringset);
+            benchmarkSACA(index, Dislex<Skew7>(), correctSA1, shape2, dislex, stringset);
         }
         {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
-            benchmarkSACA(index, Dislex(), correctSA2, shape2, dislex, string);
+            benchmarkSACA(index, Dislex<Skew7>(), correctSA2, shape2, dislex, string);
         }
 
     }
@@ -428,12 +440,12 @@ void callBenchmarks(StringSet<TString, TSpec> const & set, bool qsort) {
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
-            benchmarkSACA(index, Dislex(), correctSA1, shape3, dislex, stringset);
+            benchmarkSACA(index, Dislex<Skew7>(), correctSA1, shape3, dislex, stringset);
         }
         {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
-            benchmarkSACA(index, Dislex(), correctSA2, shape3, dislex, string);
+            benchmarkSACA(index, Dislex<Skew7>(), correctSA2, shape3, dislex, string);
         }
     }
 

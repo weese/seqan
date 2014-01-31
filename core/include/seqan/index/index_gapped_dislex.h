@@ -48,7 +48,7 @@ template <typename T, typename A>
 void printStrSet(StringSet<T,A> const & strSet) { for(unsigned i=0; i< length(strSet); ++i) {
     std::cout << "[" << i << "]"; printStr(strSet[i]); std::cout << std::endl; } }
 
-template <typename TSACA>
+template <typename TSACA = Skew7>
 struct Dislex {};
 
 
@@ -200,15 +200,15 @@ public std::unary_function<TInput, TResult>
 
 template <
     typename TInput,                    // global pos
-    typename TString,                   // limits
+    typename TLimits,                   // limits
     typename TResult = Pair<TInput> >   // local pos
 struct _dislexReverseTransformMulti :
 public std::unary_function<TInput, TResult>
 {
-    TString const & limits;
+    TLimits const & limits;
     TInput const S;
 
-    _dislexReverseTransformMulti(TInput S_, TString const & stringSetLimits) : limits(stringSetLimits), S(S_)
+    _dislexReverseTransformMulti(TInput S_, TLimits const & stringSetLimits) : limits(stringSetLimits), S(S_)
     {}
 
     inline TResult operator() (const TInput & x) const

@@ -50,7 +50,7 @@ struct GappedTupler;
 
 
 // --------------------------------------------------------------------------
-// Pipe < TInput, GappedTupler >                                   [Sequence]
+// Pipe < TInput, GappedTupler >                                     [String]
 // --------------------------------------------------------------------------
 
 template <typename TInput, typename TShape, bool omitLast, typename TPack>
