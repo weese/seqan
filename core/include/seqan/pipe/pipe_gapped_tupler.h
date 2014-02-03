@@ -48,6 +48,29 @@ namespace seqan {
 template <typename TShape, bool omitLast = false, typename TPack = void>
 struct GappedTupler;
 
+template <typename TShape>
+void _createGappedTuplerMap(typename Size<TShape>::Type map[TShape::span][WEIGHT<TShape>::VALUE], TShape const &)
+{
+    typedef typename Size<TShape>::Type TSize;
+    TSize weight = static_cast<TSize>(WEIGHT<TShape>::VALUE);
+    TSize span   = static_cast<TSize>(TShape::span);
+
+    // for index 0 fill in th usual carePositions
+    for (TSize j=0; j < weight; ++j)
+        map[0][j] = TShape::carePos[j];
+
+    for (TSize i=1; i < span; ++i)
+    {
+        for (TSize j=0; j < weight; ++j)
+        {
+            TSize next = map[i-1][j] +1;
+            if (next == span)
+                map[i][j] = 0;
+            else
+                map[i][j] = next;
+        }
+    }
+}
 
 // --------------------------------------------------------------------------
 // Pipe < TInput, GappedTupler >                                     [String]
@@ -64,77 +87,74 @@ struct Pipe< TInput, GappedTupler<TShape, omitLast, TPack> >
     enum { BufferSize = TShape::span };
     enum { TupleSize = LENGTH<TTuple>::VALUE };
 
-    TInput      &in;
-    TOutput     tmp;
-    TSize       lastTuples;
+    TInput                      &in;
+    TOutput                     tmp;
+    TSize                       lastTuples;
 
-    // all elements will be shifted in ++ (ring buffer is complicated
-    // due to many if(p > TShape::span) queries, maybe I will try that later)
-    TValue      buffer[BufferSize];
-    TSize       carePos[TupleSize];
+    TValue                      buffer[BufferSize];
+    TSize                       buffIndex; // position in buffer to put next *in
+    typename Size<TShape>::Type map [BufferSize][TupleSize];
 
     Pipe(TInput& _in): in(_in), buffer()
     {
-        // TODO(meiers): These care positions of the shape are known at compile time
-        //       They should be computed at compile time
-        String<TSize> cpos;
-        carePositions(cpos, TShape());
-        for(TSize i=0; i< TupleSize; ++i)
-            carePos[i] = cpos[i];
+        _createGappedTuplerMap(map, TShape());
     }
 
     inline TOutput const & operator*() const {
         return tmp;
     }
 
-    inline Pipe& operator++() {
+    inline Pipe& operator++()
+    {
         if (eof(in)) --lastTuples;
 
-        // it's just a jump to the left
-        // memmove is probably faster than unrolled loop:
-        // Loop<ShiftLeftWorker2_, BufferSize - 1>::run(this->buffer);
-        memmove(buffer, buffer+1, (BufferSize-1)*sizeof(TValue) );
-
         if (lastTuples < TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE)
-            buffer[BufferSize - 1] = TValue();
+        {
+            buffer[buffIndex] = TValue();
+            ++buffIndex;
+            if (buffIndex >= BufferSize)
+                buffIndex = 0;
+        }
         else
         {
-            buffer[BufferSize - 1] = *in;
+            buffer[buffIndex] = *in;
             ++in;
+            ++buffIndex;
+            if (buffIndex >= BufferSize)
+                buffIndex = 0;
         }
 
         ++tmp.i1;
-        _fillTmp2(); // a bit expensive, but easier to implement
+        _fillTmp2();
         return *this;
     }
 
 
     inline void fill() {
 
-        unsigned i;
-        for(i = 0; i < BufferSize && !eof(in); ++i, ++in)
-            buffer[i] = *in;
+        for(buffIndex = 0; buffIndex < BufferSize && !eof(in); ++buffIndex, ++in)
+            buffer[buffIndex] = *in;
 
         // set lastTuples depending on the omitLast flag
-        if (TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE > BufferSize - i)
-            lastTuples = TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE - (BufferSize - i);
+        if (TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE > BufferSize - buffIndex)
+            lastTuples = TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE - (BufferSize - buffIndex);
         else
             lastTuples = 0; // this will cause eof() of this pipe
 
         // fill remaining buffer, if it hasn't been filled yet
-        for (; i < BufferSize; ++i)
-            buffer[i] = TValue();
+        for (; buffIndex < BufferSize; ++buffIndex)
+            buffer[buffIndex] = TValue();
 
         // fill tmp
         tmp.i1 = 0;
+        buffIndex = 0;
         _fillTmp2();
     }
 
     inline void _fillTmp2()
     {
-        // TODO: Use Loop struct?
         for(unsigned i = 0; i < TupleSize; ++i)
-            tmp.i2[i] = buffer[carePos[i]];
+            tmp.i2[i] = buffer[ map[buffIndex][i] ];
     }
 };
 
@@ -162,18 +182,15 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
     TLimitsString const        &limits;
 
     TValue                      buffer[BufferSize];
-    TSize                       carePos[TupleSize];
+    TSize                       buffIndex; // position in buffer to put next *in
+    typename Size<TShape>::Type map [BufferSize][TupleSize];
+
 
     template <typename TLimitsString_>
     // const &_limits is intentionally omitted to suppress implicit casts (if types mismatch) and taking refs of them
     Pipe(TInput& _in, TLimitsString_ &_limits):  in(_in), limits(_limits)
     {
-        /// TODO(meiers): These care positions of the shape are known at compile time
-        //       They should be computed at compile time
-        String<TSize> cpos;
-        carePositions(cpos, TShape());
-        for(TSize i=0; i< TupleSize; ++i)
-            carePos[i] = cpos[i];
+        _createGappedTuplerMap(map, TShape());
     }
 
     inline TOutput const & operator*() const
@@ -187,23 +204,28 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
         if (eos())
             if (--lastTuples == 0)
             {
-                assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+                assignValueI1(tmp.i1, getValueI1(static_cast<TPair>(localPos)));
                 fill();
                 return *this;
             }
 
-        // shift left 1 character
-        memmove(buffer, buffer+1, (BufferSize-1)*sizeof(TValue) );
         assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
 
         if (lastTuples < TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE)
         {
-            buffer[BufferSize - 1] = TValue();
-        } else
+            buffer[buffIndex] = TValue();
+            ++buffIndex;
+            if (buffIndex >= BufferSize)
+                buffIndex = 0;
+        }
+        else
         {
-            buffer[BufferSize - 1] = *in;
+            buffer[buffIndex] = *in;
             ++localPos;
             ++in;
+            ++buffIndex;
+            if (buffIndex >= BufferSize)
+                buffIndex = 0;
         }
 
         _fillTmp2();
@@ -213,33 +235,36 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
     inline void fill()
     {
         do {
-            unsigned i = 0;
+            buffIndex = 0;
             if (!eof(in))
                 do {
-                    buffer[i] = *in;
+                    buffer[buffIndex] = *in;
                     ++in;
-                    ++i;
+                    ++buffIndex;
                     ++localPos;
-                } while ((i < BufferSize) && !eos());
+                } while ((buffIndex < BufferSize) && !eos());
+
+            // lastTuples = 1 (omitLast true) or span (omitLast false)
             lastTuples = TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE;
 
             // eventually, reduce the number of half-filled tuples
-            if (lastTuples <= BufferSize - i)
+            if (lastTuples <= BufferSize - buffIndex)
                 lastTuples = 0;
             else
             {
-                lastTuples -= BufferSize - i;
+                lastTuples -= BufferSize - buffIndex;
 
                 // fill up with null chars
-                for(; i < BufferSize; ++i)
-                    tmp.i2.i[i] = TValue();
+                for(; buffIndex < BufferSize; ++buffIndex)
+                    buffer[buffIndex] = TValue();
             }
 
             if (lastTuples == 0)
-                assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+                assignValueI1(tmp.i1, getValueI1(static_cast<TPair>(localPos)));
 
         } while ((lastTuples == 0) && !eof(in));
 
+        buffIndex = 0;
         assignValueI2(tmp.i1, 0);
         _fillTmp2();
     }
@@ -253,10 +278,216 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
     {
         // TODO: Use Loop struct?
         for(unsigned i = 0; i < TupleSize; ++i)
-            tmp.i2[i] = buffer[carePos[i]];
+            tmp.i2[i] = buffer[ map[buffIndex][i] ];
     }
 };
 
+
+/*
+    template <typename TInput, typename TShape, bool omitLast, typename TPack>
+    struct Pipe< TInput, GappedTupler<TShape, omitLast, TPack> >
+    {
+        typedef typename Value<Pipe>::Type          TOutput;
+        typedef typename Value<TOutput, 2 >::Type	TTuple;
+        typedef typename Value<TTuple>::Type		TValue;
+        typedef typename Size<TInput>::Type         TSize;
+
+        enum { BufferSize = TShape::span };
+        enum { TupleSize = LENGTH<TTuple>::VALUE };
+
+        TInput      &in;
+        TOutput     tmp;
+        TSize       lastTuples;
+
+        // all elements will be shifted in ++ (ring buffer is complicated
+        // due to many if(p > TShape::span) queries, maybe I will try that later)
+        TValue      buffer[BufferSize];
+        TSize       carePos[TupleSize];
+
+        Pipe(TInput& _in): in(_in), buffer()
+        {
+            // TODO(meiers): These care positions of the shape are known at compile time
+            //       They should be computed at compile time
+            String<TSize> cpos;
+            carePositions(cpos, TShape());
+            for(TSize i=0; i< TupleSize; ++i)
+                carePos[i] = cpos[i];
+        }
+
+        inline TOutput const & operator*() const {
+            return tmp;
+        }
+
+        inline Pipe& operator++() {
+            if (eof(in)) --lastTuples;
+
+            // it's just a jump to the left
+            // memmove is probably faster than unrolled loop:
+            // Loop<ShiftLeftWorker2_, BufferSize - 1>::run(this->buffer);
+            memmove(buffer, buffer+1, (BufferSize-1)*sizeof(TValue) );
+
+            if (lastTuples < TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE)
+                buffer[BufferSize - 1] = TValue();
+            else
+            {
+                buffer[BufferSize - 1] = *in;
+                ++in;
+            }
+
+            ++tmp.i1;
+            _fillTmp2(); // a bit expensive, but easier to implement
+            return *this;
+        }
+
+
+        inline void fill() {
+
+            unsigned i;
+            for(i = 0; i < BufferSize && !eof(in); ++i, ++in)
+                buffer[i] = *in;
+
+            // set lastTuples depending on the omitLast flag
+            if (TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE > BufferSize - i)
+                lastTuples = TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE - (BufferSize - i);
+            else
+                lastTuples = 0; // this will cause eof() of this pipe
+
+            // fill remaining buffer, if it hasn't been filled yet
+            for (; i < BufferSize; ++i)
+                buffer[i] = TValue();
+
+            // fill tmp
+            tmp.i1 = 0;
+            _fillTmp2();
+        }
+
+        inline void _fillTmp2()
+        {
+            // TODO: Use Loop struct?
+            for(unsigned i = 0; i < TupleSize; ++i)
+                tmp.i2[i] = buffer[carePos[i]];
+        }
+    };
+
+
+    // --------------------------------------------------------------------------
+    // Pipe < TInput, GappedTupler >                                      [Multi]
+    // --------------------------------------------------------------------------
+
+    template <typename TInput, typename TShape, bool omitLast, typename TPack, typename TPair, typename TLimitsString >
+    struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimitsString> >
+    {
+        typedef typename Value<Pipe>::Type                              TOutput;
+        typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
+        typedef typename Value<TTuple>::Type							TValue;
+        typedef typename Size<TInput>::Type                             TSize;
+        typedef PairIncrementer_<TPair, TLimitsString>                  Incrementer;
+
+        enum { BufferSize = TShape::span };
+        enum { TupleSize = LENGTH<TTuple>::VALUE };
+
+        TInput                     &in;
+        Incrementer					localPos;
+        TOutput                     tmp;
+        TSize                       seqLength, lastTuples;
+        TLimitsString const        &limits;
+
+        TValue                      buffer[BufferSize];
+        TSize                       carePos[TupleSize];
+
+        template <typename TLimitsString_>
+        // const &_limits is intentionally omitted to suppress implicit casts (if types mismatch) and taking refs of them
+        Pipe(TInput& _in, TLimitsString_ &_limits):  in(_in), limits(_limits)
+        {
+            /// TODO(meiers): These care positions of the shape are known at compile time
+            //       They should be computed at compile time
+            String<TSize> cpos;
+            carePositions(cpos, TShape());
+            for(TSize i=0; i< TupleSize; ++i)
+                carePos[i] = cpos[i];
+        }
+
+        inline TOutput const & operator*() const
+        {
+            return tmp;
+        }
+
+        inline Pipe& operator++()
+        {
+            // process next sequence
+            if (eos())
+                if (--lastTuples == 0)
+                {
+                    assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+                    fill();
+                    return *this;
+                }
+
+            // shift left 1 character
+            memmove(buffer, buffer+1, (BufferSize-1)*sizeof(TValue) );
+            assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
+
+            if (lastTuples < TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE)
+            {
+                buffer[BufferSize - 1] = TValue();
+            } else
+            {
+                buffer[BufferSize - 1] = *in;
+                ++localPos;
+                ++in;
+            }
+
+            _fillTmp2();
+            return *this;
+        }
+
+        inline void fill()
+        {
+            do {
+                unsigned i = 0;
+                if (!eof(in))
+                    do {
+                        buffer[i] = *in;
+                        ++in;
+                        ++i;
+                        ++localPos;
+                    } while ((i < BufferSize) && !eos());
+                lastTuples = TuplerNumberOfLastTuples_<BufferSize, omitLast>::VALUE;
+
+                // eventually, reduce the number of half-filled tuples
+                if (lastTuples <= BufferSize - i)
+                    lastTuples = 0;
+                else
+                {
+                    lastTuples -= BufferSize - i;
+                    
+                    // fill up with null chars
+                    for(; i < BufferSize; ++i)
+                        tmp.i2.i[i] = TValue();
+                }
+                
+                if (lastTuples == 0)
+                    assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+                
+            } while ((lastTuples == 0) && !eof(in));
+            
+            assignValueI2(tmp.i1, 0);
+            _fillTmp2();
+        }
+        
+        inline bool eos() const
+        {
+            return (getValueI1(static_cast<TPair>(localPos)) > 0) && (getValueI2(static_cast<TPair>(localPos)) == 0);
+        }
+        
+        inline void _fillTmp2()
+        {
+            // TODO: Use Loop struct?
+            for(unsigned i = 0; i < TupleSize; ++i)
+                tmp.i2[i] = buffer[carePos[i]];
+        }
+    };
+*/
 
 // ============================================================================
 // Metafunctions
@@ -368,7 +599,7 @@ inline bool
 control(Pipe< TInput, Multi<GappedTupler< TShape, omitLast, TPack >, TPair, TLimitsString> > &me,
         ControlEos const &)
 {
-    return (getValueI1(me.tmp.i1) > 0) && (getValueI2(me.tmp.i1) == 0);
+    return me.eos();
 }
 
 template <typename TInput, typename TShape, bool omitLast, typename TPack, typename TPair, typename TLimitsString >
