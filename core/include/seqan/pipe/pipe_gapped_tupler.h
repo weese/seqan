@@ -75,7 +75,7 @@ void _createGappedTuplerMap(typename Size<TShape>::Type map[TShape::span][WEIGHT
 // --------------------------------------------------------------------------
 // Pipe < TInput, GappedTupler >                                     [String]
 // --------------------------------------------------------------------------
-
+/*
 template <typename TInput, typename TShape, bool omitLast, typename TPack>
 struct Pipe< TInput, GappedTupler<TShape, omitLast, TPack> >
 {
@@ -283,7 +283,7 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
 };
 
 
-/*
+*/
     template <typename TInput, typename TShape, bool omitLast, typename TPack>
     struct Pipe< TInput, GappedTupler<TShape, omitLast, TPack> >
     {
@@ -487,7 +487,7 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
                 tmp.i2[i] = buffer[carePos[i]];
         }
     };
-*/
+
 
 // ============================================================================
 // Metafunctions
