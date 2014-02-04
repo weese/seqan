@@ -118,7 +118,7 @@ void callBenchmarks(StringSet<TString, TSpec> const & set) {
 
     {
         typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
-        typedef Multi<GappedTupler<TShape, false>,
+        typedef Multi<GappedTupler<TShape, false, BitPacked<> >,
                 Pair<typename Size<TString>::Type>,
                 typename StringSetLimits<StringSet<TString, TSpec> >::Type>     TMulti;
 
