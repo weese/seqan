@@ -118,7 +118,7 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
     {
         cyclicShapeToSuffixLengths(realLengths, TShape());
 
-        std::cout << "STRING: NORMAL MODE" << std::endl;
+        //std::cout << "STRING: NORMAL MODE" << std::endl;
 
         // extend the table to a size of 2*_span // see TODO above (for Strings not needed)
         for (unsigned i=0; i<_span; ++i)
@@ -200,7 +200,7 @@ template <typename TSize, typename TTupleValue,typename TShape, typename TResult
     {
         cyclicShapeToSuffixLengths(realLengths, TShape());
 
-        std::cout << "STRING: BITPACKED MODE" << std::endl;
+        //std::cout << "STRING: BITPACKED MODE" << std::endl;
 
         // extend the table to a size of 2*_span // see TODO above (for Strings not needed)
         for (unsigned i=0; i<_span; ++i)
@@ -273,7 +273,7 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
     {
         cyclicShapeToSuffixLengths(realLengths, TShape());
 
-        std::cout << "MULTI: NORMAL MODE" << std::endl;
+        //std::cout << "MULTI: NORMAL MODE" << std::endl;
 
         // extend the table to a size of 2*_span
         for (unsigned i=0; i<_span; ++i)
@@ -362,7 +362,7 @@ struct _dislexTupleCompMulti<Pair<TSetPos, Tuple<TTupleValue, WEIGHT<TShape>::VA
     {
         cyclicShapeToSuffixLengths(realLengths, TShape());
 
-        std::cout << "MULTI: BITPACKED MODE" << std::endl;
+        //std::cout << "MULTI: BITPACKED MODE" << std::endl;
 
         // extend the table to a size of 2*_span
         for (unsigned i=0; i<_span; ++i)
