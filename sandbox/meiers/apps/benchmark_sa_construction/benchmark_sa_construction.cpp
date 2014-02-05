@@ -53,8 +53,7 @@ using namespace seqan;
 
 struct AppOptions
 {
-    seqan::String<char> infile;
-    seqan::String<char> outfile;
+    CharString infile;
     CharString mode;
     bool qsort;
 };
@@ -74,7 +73,7 @@ parseCommandLine(AppOptions & options, int argc, char const ** argv)
     // Setup ArgumentParser.
     seqan::ArgumentParser parser("seqanBuildSuffixArray");
     // Set short description, version, and date.
-    setShortDescription(parser, "Builds an ESA-index.");
+    setShortDescription(parser, "Builds a (gapped) suffix array with different methods");
     setVersion(parser, "Sascha.0.1");
     setDate(parser, "July 2013");
 
@@ -85,22 +84,28 @@ parseCommandLine(AppOptions & options, int argc, char const ** argv)
     // We require one argument.
     addArgument(parser, seqan::ArgParseArgument(seqan::ArgParseArgument::INPUTFILE, "IN"));
 
-    addOption(parser, seqan::ArgParseOption("o",
-                                            "output",
-                                            "Output file (<IN>.index if not specified)",
-                                            seqan::ArgParseArgument::OUTPUTFILE, "OUT"));
-
     addOption(parser, seqan::ArgParseOption("n", "noqsort", "Disable QuickSort (for large input files)"));
-    addOption(parser, seqan::ArgParseOption("m", "mode", "Mode: correct, external",
+    addOption(parser, seqan::ArgParseOption("m", "mode", "What kind of benchmark?",
                                             seqan::ArgParseArgument::STRING, "STR"));
-    setValidValues(parser, "mode", "correct external");
+    setValidValues(parser, "mode", "correct external runtime linear medium");
     setDefaultValue(parser, "m", "correct");
 
     addTextSection(parser, "Modes");
-    addText(parser, "Correct mode (-m correct): Checks whether different Methods get the same result. Runs all exisiting methods.");
-    addText(parser, "External mode (-m external): Only runs the external versions of Skew7, Skew3 and Dislex."
-                    "You can monitor the external memory consumption using lsof by giving the PID to lsof and grepping for the tmp directory");
-    addText(parser, ".......");
+    addText(parser, "Correct mode (-m correct): Checks whether different Methods get the "
+                    "same result. Runs all exisiting methods.");
+    addText(parser, "External mode (-m external): Only runs the external versions of Skew7, "
+                    "Skew3 and Dislex. You can monitor the external memory consumption "
+                    "using lsof by giving the PID to lsof and grepping for the tmp directory");
+    addText(parser, "Runtime mode (-m runtime): Run all methods and measure their runtime. "
+                    "Does not specify whether the internal or external algorithms are "
+                    "called, but this happens in all modi except for external");
+    addText(parser, "Linear mode (-m linear): Like runtime mode, but only for linear "
+                    "time methods, so Skew and dislex. ");
+    addText(parser, "Medium mode (-m medium): Somewhere between runtime mode and linear mode. "
+                    "It runs the linear methods and inplace radix sort. This can be used on "
+                    "larger files than runtime, but those should not be too repeat- (or N)-rich "
+                    "as this usually kills radix Sort");
+
 
 
     // Parse command line.
@@ -120,8 +125,6 @@ parseCommandLine(AppOptions & options, int argc, char const ** argv)
 
     outfile = options.	infile;
     outfile += ".index";
-    getOptionValue(outfile, parser, "output");
-    options.outfile = outfile;
 
     return seqan::ArgumentParser::PARSE_OK;
 }
@@ -170,6 +173,18 @@ void externalBenchmark( TIndex & index,
 {
     double start = sysTime();
     _createSuffixArrayPipelining(indexSA(index), indexText(index), algo);
+    std::cout << labelAlgorithm << "\t" << labelPattern << "\t" << labelText << "\t" << sysTime() - start << std::endl;
+}
+
+template <typename TIndex, typename TAlgo, typename TLabel>
+void runtime(  TIndex & index,
+               TAlgo const & algo,
+               TLabel const & labelPattern,
+               TLabel const & labelAlgorithm,
+               TLabel const & labelText)
+{
+    double start = sysTime();
+    indexCreate(index, EsaSA(), algo);
     std::cout << labelAlgorithm << "\t" << labelPattern << "\t" << labelText << "\t" << sysTime() - start << std::endl;
 }
 
@@ -317,13 +332,11 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             TIndex index (concat(set));
             createAndCheckSACA(index, Skew3(), correctSA2, ungapped, skew3, string);
         }
-        if (qsort)
         {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, SAQSort(), correctSA1, ungapped, saqsort, stringset);
         }
-        if (qsort)
         {
             typedef Index<TString, IndexSa<> > TIndex;
             TIndex index (concat(set));
@@ -501,6 +514,234 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
 
 }
 
+
+// --------------------------------------------------------------------------
+// Function callBenchmarks()
+// --------------------------------------------------------------------------
+
+template <typename TString, typename TSpec>
+void callBenchmarks(StringSet<TString, TSpec> const & set, int level=3) {
+
+    // header
+    std::cout << "# Mode: Runtime measurment" << std::endl << std::endl;
+    std::cout <<  "algor.\tpattern_______\ttext  \truntime" << std::endl;
+
+    // labels for output
+    CharString ungapped  = "ungapped______";
+    CharString shape101  = "101___________";
+    CharString shape2    = "11000100101110";
+    CharString shape3    = "0001010_______";
+    CharString skew7     = "Skew7";
+    CharString skew3     = "Skew3";
+    CharString saqsort   = "QSort";
+    CharString dislex    = "Dislex";
+    CharString dislexExt = "Extern";
+    CharString radix     = "Radix";
+    CharString string    = "String";
+    CharString stringset = "StrSet";
+
+
+    {   //- Ungapped Indices ----------------------------------------------------------------
+
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
+            TIndex index(set);
+            runtime(index, Skew7(), ungapped, skew7, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index (concat(set));
+            runtime(index, Skew7(), ungapped, skew7, string);
+        }
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
+            TIndex index(set);
+            runtime(index, Skew3(), ungapped, skew3, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index (concat(set));
+            runtime(index, Skew3(), ungapped, skew3, string);
+        }
+        if (level>2)
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
+            TIndex index(set);
+            runtime(index, SAQSort(), ungapped, saqsort, stringset);
+        }
+        if (level>2)
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index (concat(set));
+            runtime(index, SAQSort(), ungapped, saqsort, string);
+        }
+        if (level>1)
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
+            TIndex index(set);
+            runtime(index, InplaceRadixSort(), ungapped, radix, stringset);
+        }
+        if (level>1)
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index(concat(set));
+            runtime(index, InplaceRadixSort(), ungapped, radix, string);
+        }
+    }
+
+    {   //- Gapped Indices: 101 ----------------------------------------------------------------
+
+        typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<2> >, 0> > TShape;
+
+        if (level>1)
+        {
+            typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, InplaceRadixSort(), shape101, radix, stringset);
+        }
+        if (level>1)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, InplaceRadixSort(), shape101, radix, string);
+        }
+        if (level>2)
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, SAQSort(), shape101, saqsort, stringset);
+        }
+        if (level>2)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, SAQSort(), shape101, saqsort, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, Dislex<Skew7>(), shape101, dislex, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, Dislex<Skew7>(), shape101, dislex, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, DislexExternal<TShape>(), shape101, dislexExt, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, DislexExternal<TShape>(), shape101, dislexExt, string);
+        }
+    }
+
+
+
+    { //----- Gapped Indices: 11000100101110 ---------------------------------------------------------
+
+        typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<1,4,3,2,1,1> >, 1> > TShape;
+
+        if (level>1)
+        {
+            typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, InplaceRadixSort(), shape2, radix, stringset);
+        }
+        if (level>1)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, InplaceRadixSort(), shape2, radix, string);
+        }
+        if (level>2)
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, SAQSort(), shape2, saqsort, stringset);
+        }
+        if (level>2)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, SAQSort(), shape2, saqsort, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, Dislex<Skew7>(), shape2, dislex, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, Dislex<Skew7>(), shape2, dislex, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, DislexExternal<TShape>(), shape2, dislexExt, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, DislexExternal<TShape>(), shape2, dislexExt, string);
+        }
+    }
+
+    {   //----- Gapped Indices: 0001010 ---------------------------------------------------------
+
+        typedef CyclicShape<FixedShape<3,GappedShape<HardwiredShape<2> >, 1> > TShape;
+
+        if (level>1)
+        {
+            typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, InplaceRadixSort(), shape3, radix, stringset);
+        }
+        if (level>1)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, InplaceRadixSort(), shape3, radix, string);
+        }
+        if (level>2)
+        {
+            typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, SAQSort(), shape3, saqsort, stringset);
+        }
+        if (level>2)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, SAQSort(), shape3, saqsort, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, Dislex<Skew7>(), shape3, dislex, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, Dislex<Skew7>(), shape3, dislex, string);
+        }
+        {
+            typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set);
+            runtime(index, DislexExternal<TShape>(), shape3, dislexExt, stringset);
+        }
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(concat(set));
+            runtime(index, DislexExternal<TShape>(), shape3, dislexExt, string);
+        }
+    }
+}
+
 // --------------------------------------------------------------------------
 // Function main()
 // --------------------------------------------------------------------------
@@ -555,6 +796,14 @@ int main(int argc, char const ** argv)
         callBenchmarksForCorrectness(seqs);
     if (options.mode == "external")
         callBenchmarksExternal(seqs);
+    if (options.mode == "runtime")
+        callBenchmarks(seqs, 3);
+    if (options.mode == "medium")
+        callBenchmarks(seqs, 2);
+    if (options.mode == "linear")
+        callBenchmarks(seqs, 1);
+
+
 
     
     return 0;
