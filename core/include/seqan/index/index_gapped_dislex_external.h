@@ -77,6 +77,8 @@ struct _positionToLengthTransformMulti
     }
 };
 
+    // TODO(meiers): Comparator for Strings compares one char too much right now.
+    //               Only for string sets this is necessary!
 
 // --------------------------------------------------------------------------
 // Comparator for naming tuples                                      [String]
@@ -112,11 +114,13 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
     TSize realLengths[2*_span];
     _positionToLengthTransform<TSize> posToLen;
 
-    _dislexTupleComp(TShape const & shape, TSize strLen) : posToLen(strLen)
+    _dislexTupleComp(TSize strLen) : posToLen(strLen)
     {
-        cyclicShapeToSuffixLengths(realLengths, shape);
+        cyclicShapeToSuffixLengths(realLengths, TShape());
 
-        // extend the table to a size of 2*_span
+        std::cout << "STRING: NORMAL MODE" << std::endl;
+
+        // extend the table to a size of 2*_span // see TODO above (for Strings not needed)
         for (unsigned i=0; i<_span; ++i)
             realLengths[i+_span] = _weight + realLengths[i];
     }
@@ -173,6 +177,66 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
     }
 };
 
+// BitPacked version of _dislexTupleComp
+
+template <typename TSize, typename TTupleValue,typename TShape, typename TResult>
+    struct _dislexTupleComp<Pair<TSize, Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> >, Pack>, TShape, TResult> :
+    public std::binary_function<Pair<TSize, Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> >, Pack>,
+                                Pair<TSize, Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> >, Pack>,
+                                TResult>
+{
+    typedef Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> > TTuple;
+    typedef Pair<TSize, TTuple, Pack>                               TValue;
+
+    enum
+    {
+        _span = TShape::span,
+        _weight = WEIGHT<TShape>::VALUE
+    };
+    TSize realLengths[2*_span];
+    _positionToLengthTransform<TSize> posToLen;
+
+    _dislexTupleComp(TSize strLen) : posToLen(strLen)
+    {
+        cyclicShapeToSuffixLengths(realLengths, TShape());
+
+        std::cout << "STRING: BITPACKED MODE" << std::endl;
+
+        // extend the table to a size of 2*_span // see TODO above (for Strings not needed)
+        for (unsigned i=0; i<_span; ++i)
+            realLengths[i+_span] = _weight + realLengths[i];
+    }
+
+    inline TResult operator() (const TValue &a, const TValue &b) const
+    {
+        // compare Tuples right away (filled with 0s in the rear)
+        if (a.i2 < b.i2) return -1;
+        if (a.i2 > b.i2) return 1;
+
+        // find out the real lengths of the gapped strings
+        TSize la = posToLen(a.i1);
+        TSize lb = posToLen(b.i1);
+
+        TSize rla = (la < 2*_span ? realLengths[la] : 2*_weight);
+        TSize rlb = (lb < 2*_span ? realLengths[lb] : 2*_weight);
+
+        // if both strings have more than _weight chars, they are equal.
+        if (rla > _weight && rlb > _weight) return 0;
+
+        // if they differ in size, the shorter one is smaller.
+        if (rla != rlb)
+            return (rla < rlb ? -1 : 1);
+        
+        // In the same string, the length of the underlying suffix decides:
+        if (la < lb) return -1;
+        if (la > lb) return 1;
+        
+        // last case a.i1 == b.i1
+        return 0;
+    }
+};
+
+
 // --------------------------------------------------------------------------
 // Comparator for naming tuples                                   [StringSet]
 // --------------------------------------------------------------------------
@@ -205,9 +269,11 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
     TSize realLengths[2*_span];
     _positionToLengthTransformMulti<TLimitString, TSetPos> posToLen;
 
-    _dislexTupleCompMulti(TShape const & shape, TLimitString const & limits) : posToLen(limits)
+    _dislexTupleCompMulti(TLimitString const & limits) : posToLen(limits)
     {
-        cyclicShapeToSuffixLengths(realLengths, shape);
+        cyclicShapeToSuffixLengths(realLengths, TShape());
+
+        std::cout << "MULTI: NORMAL MODE" << std::endl;
 
         // extend the table to a size of 2*_span
         for (unsigned i=0; i<_span; ++i)
@@ -268,6 +334,71 @@ struct _dislexTupleCompMulti  : public std::binary_function<TValue, TValue, TRes
         if (la.i2 < lb.i2) return -1;
         if (lb.i2 > lb.i2) return 1;
 
+        // last case a.i1 == b.i1
+        return 0;
+    }
+};
+
+// BitPacked version of _dislexTupleCompMulti
+
+template <typename TSetPos, typename TTupleValue, typename TShape, typename TLimitString, typename TResult>
+struct _dislexTupleCompMulti<Pair<TSetPos, Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> >, Pack>, TShape, TLimitString, TResult> :
+    public std::binary_function<Pair<TSetPos, Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> >, Pack>,
+                                Pair<TSetPos, Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> >, Pack>,
+                                TResult>
+{
+    typedef Tuple<TTupleValue, WEIGHT<TShape>::VALUE, BitPacked<> > TTuple;
+    typedef Pair<TSetPos, TTuple, Pack>                             TValue;
+    typedef typename Value<TSetPos, 2>::Type                        TSize;
+
+    enum {
+        _span = TShape::span,
+        _weight = WEIGHT<TShape>::VALUE
+    };
+    TSize realLengths[2*_span];
+    _positionToLengthTransformMulti<TLimitString, TSetPos> posToLen;
+
+    _dislexTupleCompMulti(TLimitString const & limits) : posToLen(limits)
+    {
+        cyclicShapeToSuffixLengths(realLengths, TShape());
+
+        std::cout << "MULTI: BITPACKED MODE" << std::endl;
+
+        // extend the table to a size of 2*_span
+        for (unsigned i=0; i<_span; ++i)
+            realLengths[i+_span] = _weight + realLengths[i];
+    }
+
+
+    inline TResult operator() (const TValue &a, const TValue &b) const
+    {
+        // compare Tuples right away (filled with 0s in the rear)
+        if (a.i2 < b.i2) return -1;
+        if (a.i2 > b.i2) return 1;
+
+        TSetPos la = posToLen(a.i1);
+        TSetPos lb = posToLen(b.i1);
+
+        // find out the real lengths of the gapped strings
+        TSize rla = (la.i2 < 2*_span ? realLengths[la.i2] : 2*_weight);
+        TSize rlb = (lb.i2 < 2*_span ? realLengths[lb.i2] : 2*_weight);
+
+        // if both strings have more than _weight chars, they are equal.
+        if (rla > _weight && rlb > _weight) return 0;
+
+        // if they differ in size, the shorter one is smaller.
+        if (rla != rlb)
+            return (rla < rlb ? -1 : 1);
+
+        // if both have the same number of chars,
+        // at first the string ID is relevant:
+        if (la.i1 > lb.i1) return -1;
+        if (la.i1 < lb.i1) return 1;
+        
+        // In the same string, the length of the underlying suffix decides:
+        if (la.i2 < lb.i2) return -1;
+        if (lb.i2 > lb.i2) return 1;
+        
         // last case a.i1 == b.i1
         return 0;
     }
@@ -336,7 +467,9 @@ public std::unary_function<TValue, TResult>
 template <typename TInput, typename TShape, typename TSACA>
 struct Pipe<TInput, DislexExternal<TShape, TSACA> >
 {
-    typedef Pipe<TInput, GappedTupler<TShape, false> >          TPipeTupler;
+    typedef Pack         TPack;
+
+    typedef Pipe<TInput, GappedTupler<TShape, false, TPack> >   TPipeTupler;
     typedef _dislexTupleComp<TypeOf_(TPipeTupler), TShape>      TTupleComparator;
     typedef Pool<TypeOf_(TPipeTupler), SorterSpec<
             SorterConfigSize<TTupleComparator,
@@ -384,7 +517,7 @@ struct Pipe<TInput, DislexExternal<TShape, TSACA> >
         TPipeTupler                                             tupler(textIn);
 
         // 2. Sort Tuples by the first few characters
-        TTupleComparator                                        _comp(TShape(), length(textIn));
+        TTupleComparator                                        _comp(length(textIn));
         TPoolSorter                                             sorter(tupler, _comp);
         sorter << tupler;
 
@@ -414,7 +547,9 @@ struct Pipe<TInput, DislexExternal<TShape, TSACA> >
 template <typename TInput, typename TShape, typename TSACA, typename TPair, typename TLimits>
 struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
 {
-    typedef Pipe<TInput, Multi<GappedTupler<TShape, false>,
+    typedef Pack         TPack;
+
+    typedef Pipe<TInput, Multi<GappedTupler<TShape, false, TPack>,
             TPair, TLimits> >                                   TPipeTupler;
     typedef _dislexTupleCompMulti<TypeOf_(TPipeTupler),
             TShape, TLimits>                                    TTupleComparator;
@@ -472,7 +607,7 @@ struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
         TPipeTupler                                             tupler(textIn, limits);
 
         // 2. Sort Tuples by the first few characters
-        TTupleComparator                                        _comp(TShape(), limits);
+        TTupleComparator                                        _comp(limits);
         TPoolSorter                                             sorter(tupler, _comp);
         sorter << tupler;
 
