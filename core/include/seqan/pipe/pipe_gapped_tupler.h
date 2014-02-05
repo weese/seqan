@@ -459,7 +459,7 @@ struct Pipe< TInput, Multi<GappedTupler<TShape, omitLast, TPack>, TPair, TLimits
         if (eos())
             if (--lastTuples == 0)
             {
-                assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+                assignValueI1(tmp.i1, getValueI1(static_cast<TPair>(localPos)));
                 fill();
                 return *this;
             }
