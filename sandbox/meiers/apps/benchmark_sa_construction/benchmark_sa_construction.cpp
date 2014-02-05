@@ -208,6 +208,7 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
     CharString skew3     = "Skew3         ";
     CharString dislex7   = "Dislex + Skew7";
     CharString dislex3   = "Dislex + Skew3";
+    CharString skewLex   = "Skew7 lexText ";
     CharString string    = "String";
     CharString stringset = "StrSet";
 
@@ -250,6 +251,42 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
             TIndex index(concat(set));
             externalBenchmark(index, DislexExternal<TShape, Skew3>(), shape, dislex3, string);
         }
+        {
+            String<Pair<typename Size<StringSet<TString, TSpec> >::Type, typename Size<TString>::Type> > SA;
+            typedef String<typename Size<StringSet<TString,TSpec> >::Type> TLexText;
+            TLexText lexText;
+
+            resize(SA, lengthSum(set));
+            _initializeSA(SA, set);
+
+            inplaceRadixSort(SA, set, WEIGHT<TShape>::VALUE +1, TShape(), ModCyclicShape<TShape>());
+
+            // disLexTransformation
+            _dislex(lexText, SA, set, TShape());
+            clear(SA);
+
+            typedef Index<TLexText const, IndexSa<> > TIndex;
+            TIndex index(lexText);
+            externalBenchmark(index, Skew7(), shape, skewLex, stringset);
+        }
+        {
+            typedef String<typename Size<TString>::Type> TLexText;
+            TLexText SA, lexText;
+
+            resize(SA, length(concat(set)));
+            _initializeSA(SA, concat(set));
+
+            inplaceRadixSort(SA, concat(set), WEIGHT<TShape>::VALUE +1, TShape(), ModCyclicShape<TShape>());
+
+            // disLexTransformation
+            // TODO(meiers): Without the static_cast (copy!!) there is an problem in instantiation of the modified iterator
+            _dislex(lexText, SA, static_cast<TString>(concat(set)), TShape());
+            clear(SA);
+
+            typedef Index<TLexText const, IndexSa<> > TIndex;
+            TIndex index(lexText);
+            externalBenchmark(index, Skew7(), shape, skewLex, string);
+        }
     }
     { //----- Gapped Indices: 1111111111 ----------------------------------------------------
 
@@ -268,6 +305,42 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
             externalBenchmark(index, DislexExternal<TShape, Skew3>(), shape111, dislex3, string);
+        }
+        {
+            String<Pair<typename Size<StringSet<TString, TSpec> >::Type, typename Size<TString>::Type> > SA;
+            typedef String<typename Size<StringSet<TString,TSpec> >::Type> TLexText;
+            TLexText lexText;
+
+            resize(SA, lengthSum(set));
+            _initializeSA(SA, set);
+
+            inplaceRadixSort(SA, set, WEIGHT<TShape>::VALUE +1, TShape(), ModCyclicShape<TShape>());
+
+            // disLexTransformation
+            _dislex(lexText, SA, set, TShape());
+            clear(SA);
+
+            typedef Index<TLexText const, IndexSa<> > TIndex;
+            TIndex index(lexText);
+            externalBenchmark(index, Skew7(), shape, skewLex, stringset);
+        }
+        {
+            typedef String<typename Size<TString>::Type> TLexText;
+            TLexText SA, lexText;
+
+            resize(SA, length(concat(set)));
+            _initializeSA(SA, concat(set));
+
+            inplaceRadixSort(SA, concat(set), WEIGHT<TShape>::VALUE +1, TShape(), ModCyclicShape<TShape>());
+
+            // disLexTransformation
+            // TODO(meiers): Without the static_cast (copy!!) there is an problem in instantiation of the modified iterator
+            _dislex(lexText, SA, static_cast<TString>(concat(set)), TShape());
+            clear(SA);
+
+            typedef Index<TLexText const, IndexSa<> > TIndex;
+            TIndex index(lexText);
+            externalBenchmark(index, Skew7(), shape, skewLex, string);
         }
     }
 }
