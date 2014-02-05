@@ -469,6 +469,9 @@ struct Pipe<TInput, DislexExternal<TShape, TSACA> >
 {
     typedef Pack         TPack;
 
+    // TODO(meiers): Define TPack depending on input type!
+    //               Either Pack or BitPacked<>
+
     typedef Pipe<TInput, GappedTupler<TShape, false, TPack> >   TPipeTupler;
     typedef _dislexTupleComp<TypeOf_(TPipeTupler), TShape>      TTupleComparator;
     typedef Pool<TypeOf_(TPipeTupler), SorterSpec<
@@ -548,6 +551,9 @@ template <typename TInput, typename TShape, typename TSACA, typename TPair, type
 struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
 {
     typedef Pack         TPack;
+
+    // TODO(meiers): Define TPack depending on input type!
+    //               Either Pack or BitPacked<>
 
     typedef Pipe<TInput, Multi<GappedTupler<TShape, false, TPack>,
             TPair, TLimits> >                                   TPipeTupler;

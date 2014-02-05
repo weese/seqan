@@ -152,8 +152,8 @@ void createAndCheckSACA(
         typename Size<TIndex>::Type errs =0;
         typename Iterator<typename Fibre<TIndex, EsaSA>::Type>::Type it2 = begin(indexSA(index));
         for(typename Iterator<TSuffAr const>::Type it=begin(correctSA); it < end(correctSA); ++it, ++it2)
-        if(*it != *it2) std::cout << std::endl << "   |-> err " << ++errs << " at pos " << it - begin(correctSA) << ": correct " << *it << " , seen " << *it2;
-        //if(*it != *it2) ++errs;
+        //if(*it != *it2) std::cout << std::endl << "   |-> err " << ++errs << " at pos " << it - begin(correctSA) << ": correct " << *it << " , seen " << *it2;
+        if(*it != *it2) ++errs;
         std::cout << "errors:" << errs << std::endl;
     } else {
         std::cout << "/" << std::endl;
@@ -286,7 +286,7 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
 
     // header
     std::cout << "# Mode: Correctness check" << std::endl << std::endl;
-    std::cout <<  "algor.\tpattern_______\ttext\truntime\tcheck" << std::endl;
+    std::cout <<  "algor.\tpattern_______\ttext   \truntime\tcheck" << std::endl;
 
     // labels for output
     CharString ungapped  = "ungapped______";

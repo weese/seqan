@@ -112,13 +112,13 @@ void callBenchmarks(StringSet<TString, TSpec> const & set) {
     CharString string    = "String";
     CharString stringset = "StrSet";
 
-    //- Gapped Indices: 10011001100 ----------------------------------------------------------------
+    //- Gapped Indices: 011 ----------------------------------------------------------------
 
-    typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<2,1,3,1> >, 2> > TShape;
+    typedef CyclicShape<FixedShape<1,GappedShape<HardwiredShape<1> >, 0> > TShape;
 
     {
         typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
-        typedef Multi<GappedTupler<TShape, false, BitPacked<> >,
+        typedef Multi<GappedTupler<TShape, false /* not bitpacked */>,
                 Pair<typename Size<TString>::Type>,
                 typename StringSetLimits<StringSet<TString, TSpec> >::Type>     TMulti;
 
@@ -130,8 +130,14 @@ void callBenchmarks(StringSet<TString, TSpec> const & set) {
         TTupler tupler(source, stringSetLimits(set));
         beginRead(tupler);
         while (!eof(tupler))
-            pop(tupler);
+        {
+            TypeOf_(TTupler) c;
+            pop(tupler,c);
+            std::cout << c << std::endl;
+        }
         endRead(tupler);
+
+
     }
 
 }
