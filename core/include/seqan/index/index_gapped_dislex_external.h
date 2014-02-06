@@ -463,7 +463,7 @@ public std::unary_function<TValue, TResult>
 template <typename TInput, typename TShape, typename TSACA>
 struct Pipe<TInput, DislexExternal<TShape, TSACA> >
 {
-    typedef Pack         TPack;
+    typedef BitPacked<>         TPack;
 
     // TODO(meiers): Define TPack depending on input type!
     //               Either Pack or BitPacked<>
@@ -546,7 +546,7 @@ struct Pipe<TInput, DislexExternal<TShape, TSACA> >
 template <typename TInput, typename TShape, typename TSACA, typename TPair, typename TLimits>
 struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
 {
-    typedef Pack         TPack;
+    typedef BitPacked<>         TPack;
 
     // TODO(meiers): Define TPack depending on input type!
     //               Either Pack or BitPacked<>

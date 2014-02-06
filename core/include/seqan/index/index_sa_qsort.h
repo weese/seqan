@@ -316,10 +316,12 @@ inline void _initializeSA(TSA & sa, StringSet<TString, TSpec> const & strSet)
     typedef typename Size<TSA>::Type TSize; // TODO: derive Size Type from TSAVal, but how?
 
     TIter it = begin(sa, Standard());
-    for(TSize j = 0; j < length(strSet); ++j)
+    TIter itEnd = end(sa, Standard());
+    TSize const setLen = length(strSet);
+    for(TSize j = 0; j < setLen && it != itEnd; ++j)
     {
-        TSize len = length(strSet[j]);
-        for(TSize i = 0; i < len; ++i, ++it)
+        TSize const len = length(strSet[j]);
+        for(TSize i = 0; i < len && it != itEnd; ++i, ++it)
             *it = TSAVal(j, i);
     }
 }

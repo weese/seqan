@@ -462,7 +462,6 @@ inline void _dislex(
 
     resize(lexText, lengthSum(origText));
 
-
     // scan along the SA
     TSAIter sa    = begin(partiallyOrderedSA, Standard());
     TSAIter saEnd = end(partiallyOrderedSA, Standard());
