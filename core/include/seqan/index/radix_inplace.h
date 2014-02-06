@@ -81,8 +81,7 @@ public std::unary_function<TSAValue, TSize>
         typename Size<TString>::Type pos = x + depth;
         if (pos >= L)   return 0;
         TSize ret = ordValue(text[pos]);
-        ++ret;
-        return ret;
+        return ret+1;
     }
 };
 
@@ -113,8 +112,7 @@ public std::unary_function<TSAValue, TSize>
         typename Size<TString>::Type seq = getSeqNo(x);
         if (pos >= L[seq])   return 0;
         TSize ret = ordValue(text[seq][pos]);
-        ++ret;
-        return ret;
+        return ret+1;
     }
 };
 
@@ -145,8 +143,7 @@ public std::unary_function<TSAValue, TSize> // in, out
         typename Size<TString>::Type pos = x + depth/w * s + positions[ depth % w ];
         if (pos >= L) return 0;
         TSize ret = ordValue(text[pos]);
-        ++ret;
-        return ret;
+        return ret+1;
     }
 };
 
@@ -187,8 +184,7 @@ ModCyclicShape<CyclicShape<TShape> > >: public std::unary_function<TSAValue, TSi
         typename Size<TString>::Type seq = getSeqNo(x);
         if (pos >= L[seq])   return 0;
         TSize ret = ordValue(text[seq][pos]);
-        ++ret;
-        return ret;
+        return ret+1;
     }
 };
 
