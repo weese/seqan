@@ -476,6 +476,8 @@ void inplaceRadixSort(
     static const unsigned SIGMA = ValueSize<TAlphabet>::VALUE + 1;
     typedef InplaceRadixSorter<TSAValue, SIGMA, TAccessFunctor, TCompareFunctor, TSize>    TSorter;
 
+    if (length(sa) < 1) return; // otherwise access sa[0] fails
+
     TAccessFunctor textAccess(str);
     TSorter radixSort(textAccess, TCompareFunctor());
 
@@ -528,6 +530,8 @@ void inplaceRadixSort(
     static const unsigned SIGMA = ValueSize<TAlphabet>::VALUE + 1;
     typedef InplaceRadixSorter<TSAValue, SIGMA, TAccessFunctor, TCompareFunctor, TSize>    TSorter;
 
+    if (length(sa) < 1) return; // otherwise access sa[0] fails
+
     TAccessFunctor textAccess(str, modiferCargo);
     TSorter radixSort(textAccess, TCompareFunctor());
 
@@ -572,6 +576,8 @@ void inplaceFullRadixSort( TSA & sa, TString const & str)
     typedef _ZeroBucketComparator<TSAValue>                         TCompareFunctor;
     static const unsigned SIGMA = ValueSize<TAlphabet>::VALUE + 1;
     typedef InplaceRadixSorter<TSAValue, SIGMA, TAccessFunctor, TCompareFunctor, TSize>    TSorter;
+
+    if (length(sa) < 1) return; // otherwise access sa[0] fails
 
     TAccessFunctor textAccess(str);
     TSorter radixSort(textAccess, TCompareFunctor());
@@ -643,6 +649,8 @@ void inplaceFullRadixSort(TSA & sa,
     static const unsigned SIGMA = ValueSize<TAlphabet>::VALUE + 1;
     typedef InplaceRadixSorter<TSAValue, SIGMA, TAccessFunctor, TCompareFunctor, TSize>    TSorter;
     
+    if (length(sa) < 1) return; // otherwise access sa[0] fails
+
     TAccessFunctor textAccess(str, modiferCargo);
     TSorter radixSort(textAccess, TCompareFunctor());
     
