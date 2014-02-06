@@ -49,7 +49,7 @@ template <typename TShape, bool omitLast = false, typename TPack = void>
 struct GappedTupler;
 
 // --------------------------------------------------------------------------
-// Helper struct to fill the tupler from the text buffer
+// Helper struct to fill the tuple from the text buffer
 // --------------------------------------------------------------------------
 
 template <typename TShape, typename TTuple>
