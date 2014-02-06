@@ -43,6 +43,8 @@
 using namespace seqan;
 
 
+int globalWrongMethods = 0;
+
 // ==========================================================================
 // Classes
 // ==========================================================================
@@ -147,7 +149,7 @@ void createAndCheckSACA(
 
     std::cout << labelAlgorithm << "\t" << labelPattern << "\t" << labelText << "\t" << sysTime() - start << "\t";
 
-    if(length(correctSA) == length(indexSA(index)))
+    if(length(correctSA) == length(indexSA(index)) && length(indexText(index)) > 0)
     {
         typename Size<TIndex>::Type errs =0;
         typename Iterator<typename Fibre<TIndex, EsaSA>::Type>::Type it2 = begin(indexSA(index));
@@ -155,6 +157,8 @@ void createAndCheckSACA(
         //if(*it != *it2) std::cout << std::endl << "   |-> err " << ++errs << " at pos " << it - begin(correctSA) << ": correct " << *it << " , seen " << *it2;
         if(*it != *it2) ++errs;
         std::cout << "errors:" << errs << std::endl;
+        if (errs > 0)
+            ++globalWrongMethods;
     } else {
         std::cout << "/" << std::endl;
     }
@@ -361,6 +365,8 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
     std::cout << "# Mode: Correctness check" << std::endl << std::endl;
     std::cout <<  "algor.\tpattern_______\ttext   \truntime\tcheck" << std::endl;
 
+
+
     // labels for output
     CharString ungapped  = "ungapped______";
     CharString shape101  = "101___________";
@@ -376,11 +382,10 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
     CharString stringset = "StrSet";
 
 
+    std:: cout << "Whole String Set" << std::endl;
     {   //- Ungapped Indices ----------------------------------------------------------------
 
         String<Pair<typename Size<TString>::Type> > correctSA1;
-        String<typename Size<TString>::Type> correctSA2;
-
         {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
             TIndex index(set);
@@ -389,21 +394,9 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             correctSA1 = indexSA(index);
         }
         {
-            typedef Index<TString, IndexSa<> > TIndex;
-            TIndex index (concat(set));
-            createAndCheckSACA(index, Skew7(), correctSA2, ungapped, skew7, string);
-
-            correctSA2 = indexSA(index);
-        }
-        {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, Skew3(), correctSA1, ungapped, skew3, stringset);
-        }
-        {
-            typedef Index<TString, IndexSa<> > TIndex;
-            TIndex index (concat(set));
-            createAndCheckSACA(index, Skew3(), correctSA2, ungapped, skew3, string);
         }
         {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
@@ -411,28 +404,15 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             createAndCheckSACA(index, SAQSort(), correctSA1, ungapped, saqsort, stringset);
         }
         {
-            typedef Index<TString, IndexSa<> > TIndex;
-            TIndex index (concat(set));
-            createAndCheckSACA(index, SAQSort(), correctSA2, ungapped, saqsort, string);
-        }
-        {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, InplaceRadixSort(), correctSA1, ungapped, radix, stringset);
         }
-        {
-            typedef Index<TString, IndexSa<> > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, InplaceRadixSort(), correctSA2, ungapped, radix, string);
-        }
     }
-
     {   //- Gapped Indices: 101 ----------------------------------------------------------------
 
         typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<2> >, 0> > TShape;
         String<Pair<typename Size<TString>::Type> > correctSA1;
-        String<typename Size<TString>::Type> correctSA2;
-
         {
             typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
@@ -441,21 +421,9 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             correctSA1 = indexSA(index);
         }
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, InplaceRadixSort(), correctSA2, shape101, radix, string);
-
-            correctSA2 = indexSA(index);
-        }
-        {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, SAQSort(), correctSA1, shape101, saqsort, stringset);
-        }
-        {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, SAQSort(), correctSA2, shape101, saqsort, string);
         }
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
@@ -463,30 +431,15 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             createAndCheckSACA(index, Dislex<Skew7>(), correctSA1, shape101, dislex, stringset);
         }
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, Dislex<Skew7>(), correctSA2, shape101, dislex, string);
-        }
-        {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, DislexExternal<TShape>(), correctSA1, shape101, dislexExt, stringset);
         }
-        {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, DislexExternal<TShape>(), correctSA2, shape101, dislexExt, string);
-        }
     }
-
-
-
     { //----- Gapped Indices: 11000100101110 ---------------------------------------------------------
 
         typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<1,4,3,2,1,1> >, 1> > TShape;
         String<Pair<typename Size<TString>::Type> > correctSA1;
-        String<typename Size<TString>::Type> correctSA2;
-
         {
             typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
@@ -495,21 +448,9 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             correctSA1 = indexSA(index);
         }
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, InplaceRadixSort(), correctSA2, shape2, radix, string);
-
-            correctSA2 = indexSA(index);
-        }
-        {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, SAQSort(), correctSA1, shape2, saqsort, stringset);
-        }
-        {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, SAQSort(), correctSA2, shape2, saqsort, string);
         }
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
@@ -517,28 +458,15 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             createAndCheckSACA(index, Dislex<Skew7>(), correctSA1, shape2, dislex, stringset);
         }
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, Dislex<Skew7>(), correctSA2, shape2, dislex, string);
-        }
-        {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, DislexExternal<TShape>(), correctSA1, shape2, dislexExt, stringset);
         }
-        {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, DislexExternal<TShape>(), correctSA2, shape2, dislexExt, string);
-        }
     }
-
     { //----- Gapped Indices: 0001010 ---------------------------------------------------------
 
         typedef CyclicShape<FixedShape<3,GappedShape<HardwiredShape<2> >, 1> > TShape;
         String<Pair<typename Size<TString>::Type> > correctSA1;
-        String<typename Size<TString>::Type> correctSA2;
-
         {
             typedef Index<StringSet<TString, TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
@@ -547,21 +475,9 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             correctSA1 = indexSA(index);
         }
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, InplaceRadixSort(), correctSA2, shape3, radix, string);
-
-            correctSA2 = indexSA(index);
-        }
-        {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, SAQSort(), correctSA1, shape3, saqsort, stringset);
-        }
-        {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, SAQSort(), correctSA2, shape3, saqsort, string);
         }
         {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
@@ -569,21 +485,151 @@ void callBenchmarksForCorrectness(StringSet<TString, TSpec> const & set) {
             createAndCheckSACA(index, Dislex<Skew7>(), correctSA1, shape3, dislex, stringset);
         }
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, Dislex<Skew7>(), correctSA2, shape3, dislex, string);
-        }
-        {
             typedef Index<StringSet<TString,TSpec>, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(set);
             createAndCheckSACA(index, DislexExternal<TShape>(), correctSA1, shape3, dislexExt, stringset);
         }
+    }
+
+
+    std:: cout << "Now for single strings String Set" << std::endl;
+    
+    {   //- Ungapped Indices ----------------------------------------------------------------
+
+        StringSet<String<typename Size<TString>::Type> > correctSAs;
+        resize(correctSAs, length(set));
+
+        for (unsigned i=0; i<length(set); ++i)
         {
-            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
-            TIndex index(concat(set));
-            createAndCheckSACA(index, DislexExternal<TShape>(), correctSA2, shape3, dislexExt, string);
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index (set[i]);
+            createAndCheckSACA(index, Skew7(), correctSAs[i], ungapped, skew7, string);
+
+            correctSAs[i] = indexSA(index);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index (set[i]);
+            createAndCheckSACA(index, Skew3(), correctSAs[i], ungapped, skew3, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index (set[i]);
+            createAndCheckSACA(index, SAQSort(), correctSAs[i], ungapped, saqsort, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<> > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, InplaceRadixSort(), correctSAs[i], ungapped, radix, string);
         }
     }
+
+    {   //- Gapped Indices: 101 ----------------------------------------------------------------
+
+        typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<2> >, 0> > TShape;
+        StringSet<String<typename Size<TString>::Type> > correctSAs;
+        resize(correctSAs, length(set));
+
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, InplaceRadixSort(), correctSAs[i], shape101, radix, string);
+
+            correctSAs[i] = indexSA(index);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, SAQSort(), correctSAs[i], shape101, saqsort, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, Dislex<Skew7>(), correctSAs[i], shape101, dislex, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, DislexExternal<TShape>(), correctSAs[i], shape101, dislexExt, string);
+        }
+    }
+    { //----- Gapped Indices: 11000100101110 ---------------------------------------------------------
+
+        typedef CyclicShape<FixedShape<0,GappedShape<HardwiredShape<1,4,3,2,1,1> >, 1> > TShape;
+        StringSet<String<typename Size<TString>::Type> > correctSAs;
+        resize(correctSAs, length(set));
+
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, InplaceRadixSort(), correctSAs[i], shape2, radix, string);
+
+            correctSAs[i] = indexSA(index);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, SAQSort(), correctSAs[i], shape2, saqsort, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, Dislex<Skew7>(), correctSAs[i], shape2, dislex, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, DislexExternal<TShape>(), correctSAs[i], shape2, dislexExt, string);
+        }
+    }
+    { //----- Gapped Indices: 0001010 ---------------------------------------------------------
+
+        typedef CyclicShape<FixedShape<3,GappedShape<HardwiredShape<2> >, 1> > TShape;
+        StringSet<String<typename Size<TString>::Type> > correctSAs;
+        resize(correctSAs, length(set));
+
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, InplaceRadixSort(), correctSAs[i], shape3, radix, string);
+
+            correctSAs[i] = indexSA(index);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, SAQSort(), correctSAs[i], shape3, saqsort, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, Dislex<Skew7>(), correctSAs[i], shape3, dislex, string);
+        }
+        for (unsigned i=0; i<length(set); ++i)
+        {
+            typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
+            TIndex index(set[i]);
+            createAndCheckSACA(index, DislexExternal<TShape>(), correctSAs[i], shape3, dislexExt, string);
+        }
+    }
+
+
+    std::cout << std::endl << std::endl;
+    std::cout << "Number of test cases that are incorrect: " << globalWrongMethods << std::endl;
 
 }
 
