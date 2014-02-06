@@ -111,7 +111,7 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
         _span = TShape::span,
         _weight = WEIGHT<TShape>::VALUE
     };
-    TSize realLengths[2*_span];
+    TSize realLengths[_span];
     _positionToLengthTransform<TSize> posToLen;
 
     _dislexTupleComp(TSize strLen) : posToLen(strLen)
@@ -119,10 +119,6 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
         cyclicShapeToSuffixLengths(realLengths, TShape());
 
         //std::cout << "STRING: NORMAL MODE" << std::endl;
-
-        // extend the table to a size of 2*_span // see TODO above (for Strings not needed)
-        for (unsigned i=0; i<_span; ++i)
-            realLengths[i+_span] = _weight + realLengths[i];
     }
 
     inline TResult operator() (const TValue &a, const TValue &b) const
@@ -133,46 +129,46 @@ struct _dislexTupleComp : public std::binary_function<TValue, TValue, TResult>
         TSize la = posToLen(a.i1);
         TSize lb = posToLen(b.i1);
 
-        /*
-         // the usual case:
-         // both tuples have more than _weight real characters.
-         // TODO: Tell compiler this is the more likely if-branch?
-         if(la >= 2* _span && lb >= 2*_span)
-         {
-         // TODO: Unroll loop using Loop struct?
-         for (TSize i = 0; i < _weight; ++i, ++sa, ++sb)
-         {
-         if (*sa == *sb) continue;
-         return (*sa < *sb)? -1 : 1;
-         }
-         return 0;
-         }
-         */
-
         // find out the real lengths of the gapped strings
-        TSize rla = (la < 2*_span ? realLengths[la] : 2*_weight);
-        TSize rlb = (lb < 2*_span ? realLengths[lb] : 2*_weight);
+        TSize rla = (la < _span ? realLengths[la] : _weight);
+        TSize rlb = (lb < _span ? realLengths[lb] : _weight);
+
+//        std::cout << a.i2 << "(" << la<< "), " << b.i2 << "(" << lb<< "). Real lengths are " << rla << "," << rlb;
 
         // compare the overlap of the first n bases
         TSize n = std::min(static_cast<TSize>(_weight), std::min(rla, rlb) );
         for (TSize i = 0; i < n; i++, ++sa, ++sb)
         {
             if (*sa == *sb) continue;
+//            std::cout << " return unequal because of diff. characters " << std::endl;
             return (*sa < *sb)? -1 : 1;
         }
 
         // if both strings have more than _weight chars, they are equal.
-        if (rla > _weight && rlb > _weight) return 0;
+        if (la >= _span && lb >= _span) {
+//            std::cout << " return 0" << std::endl;
+            return 0;
+        }
 
         // if they differ in size, the shorter one is smaller.
         if (rla != rlb)
+        {
+//            std::cout << " return -1 or 1 because real lengths differ." << std::endl;
             return (rla < rlb ? -1 : 1);
+        }
 
         // In the same string, the length of the underlying suffix decides:
-        if (la < lb) return -1;
-        if (la > lb) return 1;
+        if (la < lb) {
+//            std::cout << " return -1 because la < lb" << std::endl;
+            return -1;
+        }
+        if (la > lb) {
+//            std::cout << " return 1 because la > lb" << std::endl;
+            return 1;
+        }
 
         // last case a.i1 == b.i1
+//        std::cout << " return 0 because they are equal in every aspect" << std::endl;
         return 0;
     }
 };
@@ -595,6 +591,7 @@ struct Pipe<TInput, Multi<DislexExternal<TShape, TSACA>, TPair, TLimits> >
     {
         // fill pool right away
         process(_textIn);
+        ignoreUnusedVariableWarning(dummy);
     }
 
     inline typename Value<Pipe>::Type const operator*() {

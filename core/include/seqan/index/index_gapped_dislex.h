@@ -249,7 +249,8 @@ public std::unary_function<TInput, TResult>
 //  - Inside the _dislex() we need to compare k-mers. We use the
 //    GappedSuffixQgramLess_ functors for that.
 //  - The external algorithm saves a part of the sequence into a tuple and
-//    then uses _dislexTupleComp to compare them
+//    then uses _dislexTupleComp/Multi to compare them. These have overloads
+//    for bitpacked tuples.
 
 
 // --------------------------------------------------------------------------
@@ -295,27 +296,9 @@ public std::unary_function<TInput, TResult>
                 if (*saIt > *sbIt) return 1;
             }
 
-            // if both suffixes are not yet empty, the they are equal
-            if (saIt < saEnd && sbIt < sbEnd)
-                return 0;
-
-            // if both suffixes are empty, the underlying suffix length decides
-            if (!(saIt < saEnd) && !(sbIt < sbEnd))
-            {
-                if (a > b) return -1;
-                if (a < b) return 1;
-
-                // Does not occur
-                SEQAN_ASSERT_EQ(true, false);
-                return 0;
-            }
-
-            // only one suffix is empty
             if (!(saIt < saEnd)) return -1;
             if (!(saIt < sbEnd)) return 1;
 
-            // Does not occur
-            SEQAN_ASSERT_EQ(true, false);
             return 0;
         }
     };
@@ -412,6 +395,8 @@ inline void _dislex(
     typedef ModifiedString<typename Suffix<TText const
     >::Type, ModCyclicShape<TCyclicShape> >      TModText;
 
+    if (length(partiallyOrderedSA) < 1) return; // otherwise *sa will fail
+
     // dislex position calculator
     _dislexTransform<TSize> dislex(cyclic.span, length(origText));
 
@@ -435,7 +420,7 @@ inline void _dislex(
         if(comp(txtPos, *sa))
             ++rank;
 
-        //std::cout << tup1 << "  ...   " << *sa << " -> " << comp(txtPos, *sa) << std::endl;
+        //std::cout << txtPos << "  ...   " << *sa << " -> " << comp(txtPos, *sa) << std::endl;
         SEQAN_ASSERT_GEQ(0, comp(txtPos,*sa));
     }
     lexText[dislex(txtPos)] = rank;
@@ -460,12 +445,13 @@ inline void _dislex(
     >::Type, ModCyclicShape<TCyclicShape> >              TModText;
     typedef typename Iterator<TSA const, Standard>::Type    TSAIter;
 
-
     // position calculator
     typedef StringSet<TText, TTextSpec> const               TStringSet;
     typedef typename StringSetLimits<TStringSet>::Type      TStringSetLimits;   // expected: String<unsigned>
     typedef Pair<typename Size<TText>::Type>                TSetPosition;       // expected: Pair<unsigned>
 
+    if (length(partiallyOrderedSA) < 1) return; // otherwise *sa will fail
+    
     TStringSetLimits xxx = stringSetLimits(origText);
     _dislexTransformMulti<TSetPosition, TStringSetLimits>
     dislex(cyclic.span, xxx);
@@ -579,34 +565,20 @@ inline void createGappedSuffixArray(
     // insert positions into SA
     _initializeSA(SA, s);
 
-    //std::cout << "SA: ";
-    //for(unsigned i=0; i< length(SA); ++i) std::cout << SA[i] << ", ";
-    //std::cout << std::endl;
-
+    //if (length(SA) < 1) return;
 
     std::cout << "   |     init: " << sysTime() - teim << "s" << std::endl; teim = sysTime();
 
     // sort newSA according to the Shape
     inplaceRadixSort(SA, s, weight(shape)+1, shape, ModCyclicShape<TCyclicShape>());
 
-    //std::cout << "SA: ";
-    //for(unsigned i=0; i< length(SA); ++i) std::cout << SA[i] << ", ";
-    //std::cout << std::endl;
-
-
     std::cout << "   | radix[" << (int)weight(shape) << "]: " << sysTime() - teim << "s" << std::endl; teim = sysTime();
-
 
     // disLexTransformation
     TLexText lexText;
     _dislex(lexText, SA, s, shape);
 
-    //std::cout << "LexText: ";
-    //for(unsigned i=0; i< length(SA); ++i) std::cout << lexText[i] << ", ";
-    //std::cout << std::endl;
-
     std::cout << "   |   dislex: " << sysTime() - teim << "s" << std::endl; teim = sysTime();
-
 
     // Build Index using Skew7
     Index<TLexText, IndexSa<> > normalIndex(lexText);
