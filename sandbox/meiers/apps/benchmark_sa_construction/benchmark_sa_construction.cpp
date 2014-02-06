@@ -216,9 +216,6 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
     CharString string    = "String";
     CharString stringset = "StrSet";
 
-    String<Pair<typename Size<TString>::Type> > correctSA1;
-    String<typename Size<TString>::Type> correctSA2;
-
     {   //- Ungapped Indices ----------------------------------------------------------------
         {
             typedef Index<StringSet<TString, TSpec> const, IndexSa<> > TIndex;
@@ -254,24 +251,6 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
             typedef Index<TString, IndexSa<Gapped<ModCyclicShape<TShape> > > > TIndex;
             TIndex index(concat(set));
             externalBenchmark(index, DislexExternal<TShape, Skew3>(), shape, dislex3, string);
-        }
-        {
-            String<Pair<typename Size<StringSet<TString, TSpec> >::Type, typename Size<TString>::Type> > SA;
-            typedef String<typename Size<StringSet<TString,TSpec> >::Type> TLexText;
-            TLexText lexText;
-
-            resize(SA, lengthSum(set));
-            _initializeSA(SA, set);
-
-            inplaceRadixSort(SA, set, WEIGHT<TShape>::VALUE +1, TShape(), ModCyclicShape<TShape>());
-
-            // disLexTransformation
-            _dislex(lexText, SA, set, TShape());
-            clear(SA);
-
-            typedef Index<TLexText const, IndexSa<> > TIndex;
-            TIndex index(lexText);
-            externalBenchmark(index, Skew7(), shape, skewLex, stringset);
         }
         {
             typedef String<typename Size<TString>::Type> TLexText;
@@ -311,24 +290,6 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
             externalBenchmark(index, DislexExternal<TShape, Skew3>(), shape111, dislex3, string);
         }
         {
-            String<Pair<typename Size<StringSet<TString, TSpec> >::Type, typename Size<TString>::Type> > SA;
-            typedef String<typename Size<StringSet<TString,TSpec> >::Type> TLexText;
-            TLexText lexText;
-
-            resize(SA, lengthSum(set));
-            _initializeSA(SA, set);
-
-            inplaceRadixSort(SA, set, WEIGHT<TShape>::VALUE +1, TShape(), ModCyclicShape<TShape>());
-
-            // disLexTransformation
-            _dislex(lexText, SA, set, TShape());
-            clear(SA);
-
-            typedef Index<TLexText const, IndexSa<> > TIndex;
-            TIndex index(lexText);
-            externalBenchmark(index, Skew7(), shape, skewLex, stringset);
-        }
-        {
             typedef String<typename Size<TString>::Type> TLexText;
             TLexText SA, lexText;
 
@@ -344,7 +305,7 @@ void callBenchmarksExternal(StringSet<TString, TSpec> const & set) {
 
             typedef Index<TLexText const, IndexSa<> > TIndex;
             TIndex index(lexText);
-            externalBenchmark(index, Skew7(), shape, skewLex, string);
+            externalBenchmark(index, Skew7(), shape111, skewLex, string);
         }
     }
 }
