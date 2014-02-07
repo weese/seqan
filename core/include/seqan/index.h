@@ -96,6 +96,9 @@
 #include <seqan/index/index_sa_qsort.h>
 #include <seqan/index/index_sa_bwtwalk.h>
 
+#include <seqan/index/radix_inplace.h> // after index_sa_qsort
+#include <seqan/index/index_sa_radixSort.h>
+
 #include <seqan/index/pump_extender3.h>
 #include <seqan/index/pipe_merger3.h>
 #include <seqan/index/index_skew3.h>
@@ -123,6 +126,7 @@
 // ==========================================================================
 
 #include <seqan/index/index_shims.h>
+#include <seqan/index/find_index_core.h>
 
 // ----------------------------------------------------------------------------
 // Virtual string trees.
@@ -223,5 +227,16 @@
 #include <seqan/index/find2_index.h>
 #include <seqan/index/find_index_multiple.h>
 #include <seqan/index/find2_functors.h>
+
+
+// ==========================================================================
+// Gapped index (meiers)
+// ==========================================================================
+
+#include <seqan/modifier/cyclic_shape.h>
+#include <seqan/index/index_gapped_dislex.h>
+#include <seqan/index/index_gapped_dislex_external.h>
+#include <seqan/index/index_gapped_sa.h>
+
 
 #endif //#ifndef SEQAN_HEADER_...

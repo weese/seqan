@@ -718,6 +718,25 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
     struct Infix< Index<TText, TSpec> const >:
 		public Infix<TText> {};
 
+    
+// ----------------------------------------------------------------------------
+// Metafunction Suffix                                                for Index
+// ----------------------------------------------------------------------------
+
+// general Index
+template <typename TText, typename TSpec>
+struct Suffix<Index<TText, TSpec> >
+{
+    typedef typename Suffix<TText>::Type Type;
+};
+
+// general Index; const variant
+template <typename TText, typename TSpec>
+struct Suffix<Index<TText, TSpec> const>
+{
+    typedef typename Suffix<TText const>::Type Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 // default table type
 
@@ -1308,22 +1327,61 @@ I	ISSISSIPPI*/
 		return value(value(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
 	}
 
-//////////////////////////////////////////////////////////////////////////////
-// infix
+// ----------------------------------------------------------------------------
+// Function infix()                                                   for Index
+// ----------------------------------------------------------------------------
 
-	template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
-	inline typename Infix<TText>::Type
-	infix(Index<TText, TSpec> &index, TPosBegin pos_begin, TPosEnd pos_end)
-	{
-		return infix(indexText(index), pos_begin, pos_end);
-	}
+template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Index<TText, TSpec> >::Type
+infix(Index<TText, TSpec> &index, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return infix(indexText(index), pos_begin, pos_end);
+}
 
-	template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
-	inline typename Infix<TText>::Type
-	infix(Index<TText, TSpec> const &index, TPosBegin pos_begin, TPosEnd pos_end)
-	{
-		return infix(indexText(index), pos_begin, pos_end);
-	}
+template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Index<TText, TSpec> const>::Type
+infix(Index<TText, TSpec> const &index, TPosBegin pos_begin, TPosEnd pos_end)
+{
+    return infix(indexText(index), pos_begin, pos_end);
+}
+
+// ----------------------------------------------------------------------------
+// Function infixWithLength()                                         for Index
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Index<TText, TSpec> >::Type
+infixWithLength(Index<TText, TSpec> &index, TPosBegin pos_begin, TSize length)
+{
+    return infixWithLength(index, pos_begin, length);
+}
+
+template <typename TText, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Index<TText, TSpec> const>::Type
+infixWithLength(Index<TText, TSpec> const &index, TPosBegin pos_begin, TSize length)
+{
+    return infixWithLength(indexText(index), pos_begin, length);
+}
+
+// ----------------------------------------------------------------------------
+// Function suffix()                                                  for Index
+// ----------------------------------------------------------------------------
+
+// general Index
+template <typename TText, typename TSpec, typename TPosBegin>
+inline typename Suffix<TText>::Type
+suffix(Index<TText, TSpec> & t, TPosBegin pos_begin)
+{
+    return suffix(indexText(t), pos_begin);
+}
+
+// general Index: const variant
+template <typename TText, typename TSpec, typename TPosBegin>
+inline typename Suffix<TText>::Type
+suffix(Index<TText, TSpec> const &t, TPosBegin pos_begin)
+{
+    return suffix(indexText(t), pos_begin);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /**

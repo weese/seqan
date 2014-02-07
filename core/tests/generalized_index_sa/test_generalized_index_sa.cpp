@@ -1,5 +1,5 @@
 // ==========================================================================
-//                 SeqAn - The Library for Sequence Analysis
+//                            generalized_index_sa
 // ==========================================================================
 // Copyright (c) 2006-2013, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -29,53 +29,28 @@
 // DAMAGE.
 //
 // ==========================================================================
-
-#ifndef SEQAN_HEADER_PIPE_H
-#define SEQAN_HEADER_PIPE_H
-
-//____________________________________________________________________________
-// prerequisites
+// Author: Sascha Meiers <meiers@inf.fu-berlin.de>
+// ==========================================================================
 
 #include <seqan/basic.h>
-#include <seqan/parallel.h>
 #include <seqan/file.h>
 
-#include <cstdio>
-#include <cassert>
-#include <functional>
-#include <iterator>
-#include <climits>
-#include <vector>
-#include <queue>
+#include "test_generalized_index_sa.h"
 
-//____________________________________________________________________________
-// pipes
 
-#define SEQAN_NAMESPACE_PIPELINING pipe
+SEQAN_BEGIN_TESTSUITE(test_generalized_index_sa)
+{
+    // Call tests.
+	//SEQAN_CALL_TEST(test_generalized_index_sa_CURRENT_WORK);
+	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_withoutmod);
+	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modcyclicshape);
+	SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modreverse);
+    SEQAN_CALL_TEST(test_generalized_index_sa_qsort_modview);
 
-#include <seqan/pipe/pipe_base.h>
-#include <seqan/pipe/pipe_iterator.h>
-#include <seqan/pipe/pipe_caster.h>
-#include <seqan/pipe/pipe_counter.h>
-#include <seqan/pipe/pipe_echoer.h>
-#include <seqan/pipe/pipe_edit_environment.h>
-#include <seqan/pipe/pipe_filter.h>
-#include <seqan/pipe/pipe_joiner.h>
-#include <seqan/pipe/pipe_namer.h>
-#include <seqan/pipe/pipe_sampler.h>
-#include <seqan/pipe/pipe_shifter.h>
-#include <seqan/pipe/pipe_source.h>
-#include <seqan/pipe/pipe_tupler.h>
-#include <seqan/pipe/pipe_gapped_tupler.h>
+	SEQAN_CALL_TEST(test_generalized_index_sa_find_modreverse);
+	SEQAN_CALL_TEST(test_generalized_index_sa_find_modcyclicshape);
 
-//____________________________________________________________________________
-// pools
+	SEQAN_CALL_TEST(test_generalized_index_sa_stree_modcyclicshape);
 
-#include <seqan/pipe/pool_base.h>
-#include <seqan/pipe/pool_mapper.h>
-
-#include <seqan/misc/priority_type_base.h>
-#include <seqan/misc/priority_type_heap.h>
-#include <seqan/pipe/pool_sorter.h>
-
-#endif //#ifndef SEQAN_HEADER_...
+}
+SEQAN_END_TESTSUITE

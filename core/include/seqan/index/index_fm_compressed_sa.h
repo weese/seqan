@@ -576,11 +576,14 @@ value(CompressedSA<TText, TSpec, TConfig> const & compressedSA, TPos pos)
     TIndicators const & indicators = getFibre(compressedSA.sparseString, FibreIndicators());
     TValues const & values = getFibre(compressedSA.sparseString, FibreValues());
 
-    TPos counter = 0;
-    for (; !getValue(indicators, pos); ++counter)
-        pos = getFibre(compressedSA, FibreLF())(pos);
+    TPos p, counter = 0;
+    for (p = pos; !getValue(indicators, p); ++counter)
+    {
+        p = getFibre(compressedSA, FibreLF())(p);
+        SEQAN_ASSERT_NEQ(p, pos);
+    }
 
-    return posAdd(getValue(values, getRank(indicators, pos) - 1), counter);
+    return posAdd(getValue(values, getRank(indicators, p) - 1), counter);
 }
 
 // ----------------------------------------------------------------------------

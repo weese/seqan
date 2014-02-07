@@ -29,53 +29,50 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Sascha Meiers <meiers@inf.fu-berlin.de>
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_PIPE_H
-#define SEQAN_HEADER_PIPE_H
-
-//____________________________________________________________________________
-// prerequisites
+#ifndef SEQAN_CORE_TESTS_MODIFIER_CYCLIC_SHAPE_TEST_CYCLIC_SHAPE_H_
+#define SEQAN_CORE_TESTS_MODIFIER_CYCLIC_SHAPE_TEST_CYCLIC_SHAPE_H_
 
 #include <seqan/basic.h>
-#include <seqan/parallel.h>
 #include <seqan/file.h>
+#include <seqan/sequence.h>
+#include <seqan/modifier.h>
 
-#include <cstdio>
-#include <cassert>
-#include <functional>
-#include <iterator>
-#include <climits>
-#include <vector>
-#include <queue>
+using namespace seqan;
 
-//____________________________________________________________________________
-// pipes
 
-#define SEQAN_NAMESPACE_PIPELINING pipe
+SEQAN_DEFINE_TEST(test_modifier_cyclic_shape_cyclic_shape)
+{
+    CyclicShape<GenericShape> shape;
+    CharString tmp;
 
-#include <seqan/pipe/pipe_base.h>
-#include <seqan/pipe/pipe_iterator.h>
-#include <seqan/pipe/pipe_caster.h>
-#include <seqan/pipe/pipe_counter.h>
-#include <seqan/pipe/pipe_echoer.h>
-#include <seqan/pipe/pipe_edit_environment.h>
-#include <seqan/pipe/pipe_filter.h>
-#include <seqan/pipe/pipe_joiner.h>
-#include <seqan/pipe/pipe_namer.h>
-#include <seqan/pipe/pipe_sampler.h>
-#include <seqan/pipe/pipe_shifter.h>
-#include <seqan/pipe/pipe_source.h>
-#include <seqan/pipe/pipe_tupler.h>
-#include <seqan/pipe/pipe_gapped_tupler.h>
+    cyclicShapeToString(tmp, shape);
+    SEQAN_ASSERT_EQ(tmp, "1");
+    SEQAN_ASSERT_EQ(weight(shape), 1u);
+    SEQAN_ASSERT_EQ(shape.span, 1u);
 
-//____________________________________________________________________________
-// pools
+    unsigned DIFF[] = {1, 1, 1, 4, 1, 5};
+    typedef CyclicShape<FixedShape<1, GappedShape<HardwiredShape<1, 1, 1, 4, 1> >, 3> > TShape;
 
-#include <seqan/pipe/pool_base.h>
-#include <seqan/pipe/pool_mapper.h>
+    TShape s;
+    cyclicShapeToString(tmp, s);
+    SEQAN_ASSERT_EQ(tmp, "0111100011000");
+    SEQAN_ASSERT_EQ(weight(s), 6u);
+    SEQAN_ASSERT_EQ(static_cast<unsigned>(s.span), 13u);
+    for (unsigned i = 0; i < 6; ++i)
+        SEQAN_ASSERT_EQ(static_cast<unsigned>(s.diffs[i]), DIFF[i]);
 
-#include <seqan/misc/priority_type_base.h>
-#include <seqan/misc/priority_type_heap.h>
-#include <seqan/pipe/pool_sorter.h>
+    stringToCyclicShape(shape, tmp);
+    SEQAN_ASSERT_EQ(tmp, "0111100011000");
+    SEQAN_ASSERT_EQ(weight(shape), 6u);
+    SEQAN_ASSERT_EQ(shape.span, 13u);
+    for (unsigned i = 0; i < 6; ++i)
+        SEQAN_ASSERT_EQ(static_cast<unsigned>(shape.diffs[i]), DIFF[i]);
 
-#endif //#ifndef SEQAN_HEADER_...
+
+}
+
+
+#endif  // SEQAN_CORE_TESTS_MODIFIER_CYCLIC_SHAPE_TEST_MODIFIER_CYCLIC_SHAPE_H_

@@ -29,53 +29,32 @@
 // DAMAGE.
 //
 // ==========================================================================
-
-#ifndef SEQAN_HEADER_PIPE_H
-#define SEQAN_HEADER_PIPE_H
-
-//____________________________________________________________________________
-// prerequisites
+// Author: Sascha Meiers <meiers@inf.fu-berlin.de>
+// ==========================================================================
 
 #include <seqan/basic.h>
-#include <seqan/parallel.h>
-#include <seqan/file.h>
+#include "test_modifier_cyclic_shape.h"
+#include "test_cyclic_shape.h"
 
-#include <cstdio>
-#include <cassert>
-#include <functional>
-#include <iterator>
-#include <climits>
-#include <vector>
-#include <queue>
+SEQAN_BEGIN_TESTSUITE(test_modifier_cyclic_shape)
+{
+    // Test Cyclic Shape class
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_cyclic_shape);
 
-//____________________________________________________________________________
-// pipes
+    // Tests for Iteration.
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_iterator_generic_alloc_charstring);
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_iterator_generic_mod_charstring);
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_iterator_generic_infix_charstring);
 
-#define SEQAN_NAMESPACE_PIPELINING pipe
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_iterator_fixed_alloc_charstring);
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_iterator_fixed_mod_charstring);
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_iterator_fixed_infix_charstring);
 
-#include <seqan/pipe/pipe_base.h>
-#include <seqan/pipe/pipe_iterator.h>
-#include <seqan/pipe/pipe_caster.h>
-#include <seqan/pipe/pipe_counter.h>
-#include <seqan/pipe/pipe_echoer.h>
-#include <seqan/pipe/pipe_edit_environment.h>
-#include <seqan/pipe/pipe_filter.h>
-#include <seqan/pipe/pipe_joiner.h>
-#include <seqan/pipe/pipe_namer.h>
-#include <seqan/pipe/pipe_sampler.h>
-#include <seqan/pipe/pipe_shifter.h>
-#include <seqan/pipe/pipe_source.h>
-#include <seqan/pipe/pipe_tupler.h>
-#include <seqan/pipe/pipe_gapped_tupler.h>
 
-//____________________________________________________________________________
-// pools
+    // Tests for other functionanlity of modifiers
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_modified_string_construct);
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_modified_string_functions);
+    SEQAN_CALL_TEST(test_modifier_cyclic_shape_modified_iterator);
 
-#include <seqan/pipe/pool_base.h>
-#include <seqan/pipe/pool_mapper.h>
-
-#include <seqan/misc/priority_type_base.h>
-#include <seqan/misc/priority_type_heap.h>
-#include <seqan/pipe/pool_sorter.h>
-
-#endif //#ifndef SEQAN_HEADER_...
+}
+SEQAN_END_TESTSUITE
