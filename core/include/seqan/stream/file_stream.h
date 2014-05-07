@@ -1303,3 +1303,172 @@ close(FileStream<TValue, TDirection, TSpec> & stream)
 } // namespace seqan
 
 #endif  // #ifndef SEQAN_FILE_FILE_STREAM_H_
+
+/*
+
+//struct PagePos
+//{
+//    __int64     posOut;     // outbound begin position (e.g. in the file)
+//    __int64     posIn;      // inbound begin position (seen by the user)
+//    int         sizeOut;    // outbound page size (-1 = not known yet)
+//    int         sizeIn;     // inbound page size (-1 = not known yet)
+//}
+
+struct PageRange
+{
+    __uint64    begin;      // start offset in the sequential stream
+    int         length;     // length (-1 = not known yet)
+    
+    bool operator< (PagePos const &other) const
+    {
+        return begin < other.begin;
+    }
+}
+
+
+struct Page
+{
+    Page        *prev, *next;   // previous and next FilePage in an ordered stream
+    Page        *out;           // next page in outbound direction
+    PageRange   range;
+}
+
+
+PageTable<VariableSize>
+{
+    typedef std::map<__uint64, Page> TTable;
+
+    TTable table;
+    
+    Page* operator (__uint64 pos) const
+    {
+        TTable::const_iterator it = table.upper_bound(pos);
+        if (it == table.cbegin())
+            return NULL;
+        
+        Page &page = (--it)->second;
+        SEQAN_ASSERT_LEQ(page.range.begin, pos);
+
+        return (pos < page.range.begin + (unsigned)page.range.length)? &page : NULL;
+    }
+
+    void insert(Page &page) { table.insert(page.range.begin, &page); }
+    void erase(Page &page)  { table.erase(page.range.begin); }
+};
+
+PageTable<FixedSize>
+{
+    size_t pageSize;
+    std::vector<Page*> table;
+    
+    PageTable (size_t pageSize):
+        pageSize(pageSize) 
+    {}
+    
+    Page* operator (__uint64 pos) const
+    {
+        size_t pageNo = pos / pageSize;
+        return (table.size() < pageNo)? table[pageNo] : NULL;
+    }
+    
+    void insert(Page &page)
+    {
+        size_t pageNo = page.range.begin / pageSize;
+        if (table.size() <= pageNo)
+            table.resize(pageNo + 1, NULL);
+        table[pageNo] = &page;
+    }
+
+    void erase(Page &page)
+    {
+        size_t pageNo = page.range.begin / pageSize;
+        table[page.range.begin / pageSize] = NULL;
+
+        while (!table.empty() && back(table) == NULL)
+            table.pop_back();
+    }
+};
+
+
+Pager<TPager, File>
+{
+    PageTable<VariableSize> table;
+
+    Page & getPage (__int64 position)
+    {
+
+    }
+    
+
+
+};
+
+
+
+
+
+
+Pager<TPager, BGZF>
+{
+    TPager outPager;
+    PageTable<FixedSize> table;
+
+    const unsigned MAX_BLOCK_SIZE = 64 * 1024;
+    const unsigned BLOCK_HEADER_LENGTH = 18;
+    const unsigned BLOCK_FOOTER_LENGTH = 8;
+    const unsigned ZLIB_BLOCK_OVERHEAD = 5; // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
+
+    // Reduce the maximal input size, such that the compressed data 
+    // always fits in one block even for level Z_NO_COMPRESSION.
+
+    Pager()
+        table(MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD)
+    {}
+
+    Page & getPage (__int64 position)
+    {
+
+    }
+    
+    static void 
+    inflate(Page &decompressed, Page const &compressed)
+    {
+        resize(decompressed, getUncompressedSize(compressed));
+        _bgzfDecompress(decompressed.begin, compressed.begin);
+    }
+
+    static void 
+    deflate(Page &uncompressed, Page const &compressed)
+    {
+
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stream<Pager, Input>
+{
+    Page buf;
+
+    underflow()
+    {
+        PagePos pos = getFilePos(buf);
+
+    }
+
+}
+
+
+
+*/
+
