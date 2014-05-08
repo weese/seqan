@@ -1331,14 +1331,29 @@ struct Page
     Page        *prev, *next;   // previous and next FilePage in an ordered stream
     Page        *out;           // next page in outbound direction
     PageRange   range;
+    
+    Page(PageRange const &range):
+        prev(NULL),
+        next(NULL),
+        out(NULL),
+        range(range)
+    {}
 }
 
+template <typename TPosition>
+bool posInPage(TPosition pos, Page *page)
+{
+    if (page == NULL)
+        return false;
+    return page->range.begin <= pos && pos < page->range.begin + (unsigned)page->range.length;
+}
 
 PageTable<VariableSize>
 {
     typedef std::map<__uint64, Page> TTable;
 
-    TTable table;
+    TTable          table;
+    ReadWriteLock   lock;
     
     Page* operator (__uint64 pos) const
     {
@@ -1358,9 +1373,10 @@ PageTable<VariableSize>
 
 PageTable<FixedSize>
 {
-    size_t pageSize;
-    std::vector<Page*> table;
-    
+    size_t              pageSize;
+    std::vector<Page*>  table;
+    ReadWriteLock       lock;
+
     PageTable (size_t pageSize):
         pageSize(pageSize) 
     {}
@@ -1369,6 +1385,12 @@ PageTable<FixedSize>
     {
         size_t pageNo = pos / pageSize;
         return (table.size() < pageNo)? table[pageNo] : NULL;
+    }
+    
+    PageRange rangeForPos(__uint64 pos)
+    {
+        PageRange range = { pos - pos % pageSize, pageSize };
+        return range;
     }
     
     void insert(Page &page)
@@ -1398,21 +1420,20 @@ Pager<TPager, File>
     {
 
     }
-    
-
 
 };
 
 
 
+template <typename TAlgTag>
+struct DefaultPageSize;
 
 
+struct BGZF {};
 
-Pager<TPager, BGZF>
+template <>
+struct DefaultPageSize<BGZF>
 {
-    TPager outPager;
-    PageTable<FixedSize> table;
-
     const unsigned MAX_BLOCK_SIZE = 64 * 1024;
     const unsigned BLOCK_HEADER_LENGTH = 18;
     const unsigned BLOCK_FOOTER_LENGTH = 8;
@@ -1421,32 +1442,74 @@ Pager<TPager, BGZF>
     // Reduce the maximal input size, such that the compressed data 
     // always fits in one block even for level Z_NO_COMPRESSION.
 
+    const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
+};
+
+void compress(Page &compressed, Page const &text, BGZF)
+{
+
+}
+
+void decompress(Page &text, Page const &compressed, BGZF)
+{
+    resize(text, getUncompressedSize(compressed));
+    _bgzfDecompress(text.begin, compressed.begin);
+}
+
+
+template <typename TAlgTag>
+Pager<TPager, Compress<TAlgTag> >
+{
+    TPager outPager;
+    PageTable<FixedSize> table;
+
+    Pager():
+        table(DefaultPageSize<TAlgTag>::VALUE)
+    {}
+
+    Page & getPage (__int64 position)
+    {
+        Page *page;
+        { 
+            ScopedReadLock(table.lock);
+            page = table[position];
+        }
+        {
+            // Does the page exist yet?
+
+            if (!posInPage(position, page))
+            {
+                ScopedWriteLock(table.lock);
+                page = new Page(table.rangeForPos(position));
+                table.insertPage(page);
+                prevPage = prevPage(position);
+            }
+        }
+    }
+    
+    void putPage(Page &page)
+    {
+        auto handle = std::async(std::launch::async,
+                              parallel_sum<RAIter>, mid, end);
+        compress
+    }
+};
+
+
+template <typename TAlgTag>
+Pager<TPager, Decompress<TAlgTag> >
+{
+    TPager outPager;
+    PageTable<VariableSize> table;
+
     Pager()
-        table(MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD)
     {}
 
     Page & getPage (__int64 position)
     {
 
     }
-    
-    static void 
-    inflate(Page &decompressed, Page const &compressed)
-    {
-        resize(decompressed, getUncompressedSize(compressed));
-        _bgzfDecompress(decompressed.begin, compressed.begin);
-    }
-
-    static void 
-    deflate(Page &uncompressed, Page const &compressed)
-    {
-
-    }
 };
-
-
-
-
 
 
 
