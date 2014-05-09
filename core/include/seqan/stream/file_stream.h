@@ -1306,6 +1306,41 @@ close(FileStream<TValue, TDirection, TSpec> & stream)
 
 /*
 
+
+struct ScopedReadLock
+{
+    ReadWriteLock &lock;
+
+    ScopedReadLock(ReadWriteLock &lock):
+        lock(lock)
+    {
+        lockReading(lock);
+    }
+
+    ~ScopedReadLock()
+    {
+        unlockReading(lock);
+    }
+};
+
+struct ScopedWriteLock
+{
+    ReadWriteLock &lock;
+
+    ScopedWriteLock(ReadWriteLock &lock):
+        lock(lock)
+    {
+        lockWriting(lock);
+    }
+
+    ~ScopedWriteLock()
+    {
+        unlockWriting(lock);
+    }
+};
+
+
+
 //struct PagePos
 //{
 //    __int64     posOut;     // outbound begin position (e.g. in the file)
@@ -1326,12 +1361,14 @@ struct PageRange
 }
 
 
-struct Page
+template <TValue>
+struct Page<TValue>
 {
-    Page        *prev, *next;   // previous and next FilePage in an ordered stream
-    Page        *out;           // next page in outbound direction
-    PageRange   range;
-    
+    Page            *prev, *next;   // previous and next FilePage in an ordered stream
+    Page            *out;           // next page in outbound direction
+    PageRange       range;
+    Buffer<TValue>  data;
+
     Page(PageRange const &range):
         prev(NULL),
         next(NULL),
@@ -1445,7 +1482,7 @@ struct DefaultPageSize<BGZF>
     const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
 };
 
-void compress(Page &compressed, Page const &text, BGZF)
+void compress(Pager &targetPager, __uint64 targetPos, Page const &text, BGZF)
 {
 
 }
@@ -1472,23 +1509,32 @@ Pager<TPager, Compress<TAlgTag> >
         Page *page;
         { 
             ScopedReadLock(table.lock);
+
             page = table[position];
+            if (posInPage(position, page))                      // does the page exist yet?
+                return page;
         }
         {
-            // Does the page exist yet?
+            ScopedWriteLock(table.lock);
 
-            if (!posInPage(position, page))
-            {
-                ScopedWriteLock(table.lock);
-                page = new Page(table.rangeForPos(position));
-                table.insertPage(page);
-                prevPage = prevPage(position);
-            }
+            page = table[position];
+            if (posInPage(position, page))                      // does the page exist yet?
+                return page;
+
+            page = new Page(table.rangeForPos(position));       // create new page
+            reserve(page.data, table.pageSize);                 // allocate required memory
+            table.insertPage(page);                             // insert page
+            prevPage = prevPage(position);
         }
+        return page;
     }
     
-    void putPage(Page &page)
+    void putPage (Page &page)
     {
+    
+        outPager.getPage();
+        
+
         auto handle = std::async(std::launch::async,
                               parallel_sum<RAIter>, mid, end);
         compress
