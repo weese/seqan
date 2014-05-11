@@ -1460,8 +1460,8 @@ void decompress(Page &text, Page const &compressed, BGZF)
 template <typename TAlgTag>
 Pager<TPager, Compress<TAlgTag> >
 {
-    TPager outPager;
-    PageTable<FixedSize> table;
+    TPager outPager;                // outbound pager
+    PageTable<FixedSize> table;     // our page table
 
     Pager():
         table(DefaultPageSize<TAlgTag>::VALUE)
@@ -1489,6 +1489,13 @@ Pager<TPager, Compress<TAlgTag> >
     
     void putPage(Page &page)
     {
+        // wait for previous page to be compressed to get
+        // our start position
+        __int64 outPosition = 0;                // write position in outbound pager
+        if (page.range.begin != 0)
+            getPageRange(page.range.begin - 1); // wait for previous page to be compressed to get
+    
+
         auto handle = std::async(std::launch::async,
                               parallel_sum<RAIter>, mid, end);
         compress
