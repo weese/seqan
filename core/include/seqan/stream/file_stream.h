@@ -1306,6 +1306,41 @@ close(FileStream<TValue, TDirection, TSpec> & stream)
 
 /*
 
+
+struct ScopedReadLock
+{
+    ReadWriteLock &lock;
+
+    ScopedReadLock(ReadWriteLock &lock):
+        lock(lock)
+    {
+        lockReading(lock);
+    }
+
+    ~ScopedReadLock()
+    {
+        unlockReading(lock);
+    }
+};
+
+struct ScopedWriteLock
+{
+    ReadWriteLock &lock;
+
+    ScopedWriteLock(ReadWriteLock &lock):
+        lock(lock)
+    {
+        lockWriting(lock);
+    }
+
+    ~ScopedWriteLock()
+    {
+        unlockWriting(lock);
+    }
+};
+
+
+
 //struct PagePos
 //{
 //    __int64     posOut;     // outbound begin position (e.g. in the file)
@@ -1325,13 +1360,45 @@ struct PageRange
     }
 }
 
-
-struct Page
+template <>
+Position<PageRange>
 {
-    Page        *prev, *next;   // previous and next FilePage in an ordered stream
-    Page        *out;           // next page in outbound direction
-    PageRange   range;
-    
+    typedef __uint64 Type;
+};
+
+template <>
+Size<PageRange>
+{
+    typedef int Type;
+};
+
+inline Size<PageRange>::Type
+length(PageRange const &range)
+{
+    return range.begin;
+}
+
+inline Position<PageRange>::Type 
+beginPosition(PageRange const &range)
+{
+    return range.begin;
+}
+
+inline Position<PageRange>::Type 
+endPosition(PageRange const &range)
+{
+    return range.begin + range.length;
+}
+
+
+template <TValue>
+struct Page<TValue>
+{
+    Page            *prev, *next;   // previous and next FilePage in an ordered stream
+    Page            *out;           // next page in outbound direction
+    PageRange       range;
+    Buffer<TValue>  data;
+
     Page(PageRange const &range):
         prev(NULL),
         next(NULL),
@@ -1428,14 +1495,30 @@ Pager<TPager, File>
 template <typename TAlgTag>
 struct DefaultPageSize;
 
-
+struct GZ {};
 struct BGZF {};
+struct BZ2 {};
+
+struct CompressionContext<GZ>
+{
+    z_stream strm;
+};
+
+struct CompressionContext<BGZF>:
+    CompressionContext<GZ>
+{
+    static const char header[] = {
+        MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
+        4, 0, 0, 0, 0, 0, -1, 6, 0, 'B', 'C', 2, 0, 0, 0
+    };
+    static const unsigned BLOCK_HEADER_LENGTH = sizeof(header); // == 18
+    unsigned char headerPos;
+};
 
 template <>
 struct DefaultPageSize<BGZF>
 {
     const unsigned MAX_BLOCK_SIZE = 64 * 1024;
-    const unsigned BLOCK_HEADER_LENGTH = 18;
     const unsigned BLOCK_FOOTER_LENGTH = 8;
     const unsigned ZLIB_BLOCK_OVERHEAD = 5; // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
 
@@ -1445,12 +1528,87 @@ struct DefaultPageSize<BGZF>
     const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
 };
 
-void compress(Page &compressed, Page const &text, BGZF)
+compressInit(CompressionContext<GZ> &ctx)
 {
-
+    ctx.strm.zalloc = 0;
+    ctx.strm.zfree = 0;
+    int status = deflateInit2(&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+                              GZIP_WINDOW_BITS, Z_DEFAULT_MEM_LEVEL, Z_DEFAULT_STRATEGY);
+    throw IOException("GZ deflateInit2() failed.");
 }
 
-void decompress(Page &text, Page const &compressed, BGZF)
+compressInit(CompressionContext<BGZF> &ctx)
+{
+    compressInit(static_cast<CompressionContext<GZ> >(ctx));
+    ctx.
+}
+
+template <typename TTarget, typename TSourceIterator>
+inline typename Size<TTarget>::Type
+compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx)
+{
+    typedef typename Size<TTarget>::Type            TSize;
+    typedef typename Chunk<TTarget>::Type           TTargetChunk;
+    typedef typename Chunk<TSourceIterator>::Type   TSourceChunk;
+    typedef typename Value<TSourceChunk>::Type      TSourceValue;
+
+    TTargetChunk tChunk;
+    TSourceChunk sChunk;
+
+    if (ctx.headerPos < sizeof(ctx.header))
+    {
+        size_t headerLeft = sizeof(ctx.header) - ctx.headerPos;
+        reserveChunk(target, headerLeft);
+
+        tChunk = getChunk(target, Output());
+        size_t size = std::min(headerLeft, length(tChunk));
+        SEQAN_ASSERT_GT(size, 0u);
+
+        std::copy(tChunk.begin, sChunk.begin, size);
+
+        advanceChunk(target, size);
+        ctx.headerPos += size;
+        return size;
+    }
+    else
+    {
+        sChunk = getChunk(source, Input());
+        tChunk = getChunk(target, Output());
+
+        ctx.strm.next_in = static_cast<Bytef *>(sChunk.begin);
+        ctx.strm.next_out = static_cast<Bytef *>(tChunk.begin);
+        ctx.strm.avail_in = length(sChunk);
+        ctx.strm.avail_out = length(tChunk);
+
+        SEQAN_ASSERT_GT(ctx.strm.avail_out, 0u);
+
+        int status = deflate(&zs, Z_NO_FLUSH);
+        if (status != Z_OK)
+            throw IOException("BGZF deflateInit2() failed.");
+
+        source += length(sChunk) - ctx.strm.avail_in;
+        size_t size = length(tChunk) - ctx.strm.avail_out;
+        advanceChunk(target, size);
+        return size;
+    }
+
+//    status = deflate(&zs, Z_FINISH);
+//    bool rawDataTooBig = (status != Z_STREAM_END);
+//
+//    status = deflateEnd(&zs);
+//    if (status != Z_OK)
+//        throw IOException("BGZF deflateEnd() failed.");
+//
+//    if (!rawDataTooBig)
+//    {
+//        resize(page.raw, zs.total_out + BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
+//        break;
+//    }
+}
+
+template <typename TIterator>
+inline typename Size<Range<TIterator> >::Type
+decompress(Range<TIterator> target, Range<TIterator> source, CompressionContext<BGZF>)
 {
     resize(text, getUncompressedSize(compressed));
     _bgzfDecompress(text.begin, compressed.begin);
@@ -1472,33 +1630,48 @@ Pager<TPager, Compress<TAlgTag> >
         Page *page;
         { 
             ScopedReadLock(table.lock);
+
             page = table[position];
+            if (posInPage(position, page))                      // does the page exist yet?
+                return page;
         }
         {
-            // Does the page exist yet?
+            ScopedWriteLock(table.lock);
 
-            if (!posInPage(position, page))
-            {
-                ScopedWriteLock(table.lock);
-                page = new Page(table.rangeForPos(position));
-                table.insertPage(page);
-                prevPage = prevPage(position);
-            }
+            page = table[position];
+            if (posInPage(position, page))                      // does the page exist yet?
+                return page;
+
+            page = new Page(table.rangeForPos(position));       // create new page
+            reserve(page.data, table.pageSize);                 // allocate required memory
+            table.insertPage(page);                             // insert page
+            prevPage = prevPage(position);
         }
+        return page;
     }
     
-    void putPage(Page &page)
+    void putPage (Page &page)
     {
-        // wait for previous page to be compressed to get
-        // our start position
-        __int64 outPosition = 0;                // write position in outbound pager
+        __int64 outPosition = 0;                                // compute start position in outbound pager
         if (page.range.begin != 0)
-            getPageRange(page.range.begin - 1); // wait for previous page to be compressed to get
-    
+        {
+            PageRange range = getPageRange(beginPosition(page.range) - 1);
+            outPosition = endPosition(range);                   // wait for end position of the previous page
+        }
+        
+        TCompressionContext ctx;
+        initCompressionContext(ctx);
 
-        auto handle = std::async(std::launch::async,
-                              parallel_sum<RAIter>, mid, end);
-        compress
+        Size<Page>::Type leftToCompress = length(page);
+        while (leftToCompress != 0)
+        {
+            compress(toRange(
+            Page &outPage = outPager.getPage(outPosition);
+
+            auto handle = std::async(std::launch::async,
+                                  parallel_sum<RAIter>, mid, end);
+            compress
+        }
     }
 };
 
