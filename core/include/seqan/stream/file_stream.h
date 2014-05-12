@@ -1615,6 +1615,47 @@ decompress(Range<TIterator> target, Range<TIterator> source, CompressionContext<
 }
 
 
+
+// writes a sequence of pages linked by keys ... -> prevKey -> key -> ...
+template <typename TAlgTag, typename TKey>
+Pager<TTarget, Concatter<TKey> >
+{
+    typedef std::map<TKey, std::pair<TPage*, TKey> > TPageMap;
+
+    TTarget     &target;
+    TKey        lastWrittenKey;
+    TPageMap    pageMap;
+
+    Pager(TTarget &target):
+        target(target),
+        lastWrittenKey(TKey())
+    {}
+
+    Pager(TTarget &target, TKey firstKey):
+        target(target),
+        lastWrittenKey(firstKey)
+    {}
+
+    TPage & getPage ()
+    {
+        return new Page();
+    }
+
+    void insertPage (TPage &page, TKey key, TKey prevKey)
+    {
+        pageMap.insert(std::make_pair(prevKey, std::make_pair(&page, key)));
+
+        typename TPageMap::iterator it;
+        while ((it = pageMap.find(lastWrittenKey)) != pageMap.end())
+        {
+            TPage &writePage = it->second.first;
+            writeN(target, writePage.buffer.begin, length(writePage.buffer));
+            lastWrittenKey = it->second.second;
+            pageMap.erase(it);
+        }
+    }
+};
+
 template <typename TAlgTag>
 Pager<TPager, Compress<TAlgTag> >
 {
