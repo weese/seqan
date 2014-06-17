@@ -29,62 +29,83 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
-// ==========================================================================
-// Umbrella header for the parallel module.
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_PARALLEL_H_
-#define SEQAN_PARALLEL_H_
+#ifndef SEQAN_STREAM_CONCATTER_STREAM_H_
+#define SEQAN_STREAM_CONCATTER_STREAM_H_
+
+namespace seqan {
 
 // ============================================================================
-// Prerequisites
+// Forwards
 // ============================================================================
 
-#include <seqan/platform.h>
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
-
-// ----------------------------------------------------------------------------
-// STL
-// ----------------------------------------------------------------------------
-// Use MCSTL which is part of the GCC since version 4.3
-
-#if defined(_OPENMP) && defined(PLATFORM_GCC) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 3
-#include <parallel/algorithm>
-#include <parallel/numeric>
-#else
-#include <algorithm>
-#include <numeric>
-#endif // PLATFORM_GCC
-
-#ifdef SEQAN_CXX11_STANDARD
-#include <atomic>
-#include <thread>
-#endif // SEQAN_CXX11_STANDARD
-
 // ============================================================================
-// Module Headers
+// Classes
 // ============================================================================
 
-// Misc.
-#include <seqan/parallel/parallel_tags.h>
-#include <seqan/parallel/parallel_macros.h>
+// writes a sequence of pages linked by keys ... -> prevKey -> key -> ...
+template <typename TAlgTag, typename TKey>
+Pager<TTarget, Concatter<TKey> >
+{
+    typedef std::map<TKey, std::pair<TPage*, TKey> >    TPageMap;
+    rtpedef ConcurrentResourcePool<TValue, TSpec>       TPagePool;
 
-// Atomic operations.
-#include <seqan/parallel/parallel_atomic_primitives.h>
-#include <seqan/parallel/parallel_atomic_misc.h>
-#include <seqan/parallel/parallel_lock.h>
+    TTarget         &target;
+    TKey            waitForKey;
+    TPageMap        pageMap;
+    TPagePool       pagePool;
+    ReadWriteLock   lock;
 
-// Splitting.
-#include <seqan/parallel/parallel_splitting.h>
+    Pager(TTarget &target):
+        target(target),
+        waitForKey(TKey())
+    {}
 
-// Parallel variants of basic algorithms
-#include <seqan/parallel/parallel_algorithms.h>
+    Pager(TTarget &target, TKey firstKey):
+        target(target),
+        waitForKey(firstKey)
+    {}
 
-// Thread-safe / lock-free container operations.
-#include <seqan/parallel/parallel_sequence.h>
-#include <seqan/parallel/parallel_queue.h>
-#include <seqan/parallel/parallel_resource_pool.h>
+    TPage getPage ()
+    {
+        TPage tmp;
+        tryAquireSwap(tmp, pagePool);
+        return tmp;
+    }
 
-#endif  // SEQAN_PARALLEL_H_
+    void insertPage (TPage &page, TKey key, TKey nextKey)
+    {
+        if (key == waitForKey)
+        {
+            writeN(target, page.buffer.begin, length(page.buffer));
+            waitForKey = nextKey;
+            ReleaseSwap(pagePool, page);
+        }
+        else
+        {
+            ScopedWriteLock writeLock(lock);
+            pageMap.insert(std::make_pair(key, std::make_pair(&page, nextKey)));
+
+            typename TPageMap::iterator it;
+            while ((it = pageMap.find(waitForKey)) != pageMap.end())
+            {
+                TPage &writePage = it->second.first;
+                // currently this write is synchronous
+                writeN(target, writePage.buffer.begin, length(writePage.buffer));
+                ReleaseSwap(pagePool, writePage);
+
+                waitForKey = it->second.second;
+                pageMap.erase(it);
+            }
+        }
+    }
+};
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+#endif  // SEQAN_STREAM_CONCATTER_STREAM_H_
+

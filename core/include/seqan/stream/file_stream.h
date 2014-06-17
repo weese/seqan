@@ -1307,40 +1307,6 @@ close(FileStream<TValue, TDirection, TSpec> & stream)
 /*
 
 
-struct ScopedReadLock
-{
-    ReadWriteLock &lock;
-
-    ScopedReadLock(ReadWriteLock &lock):
-        lock(lock)
-    {
-        lockReading(lock);
-    }
-
-    ~ScopedReadLock()
-    {
-        unlockReading(lock);
-    }
-};
-
-struct ScopedWriteLock
-{
-    ReadWriteLock &lock;
-
-    ScopedWriteLock(ReadWriteLock &lock):
-        lock(lock)
-    {
-        lockWriting(lock);
-    }
-
-    ~ScopedWriteLock()
-    {
-        unlockWriting(lock);
-    }
-};
-
-
-
 //struct PagePos
 //{
 //    __int64     posOut;     // outbound begin position (e.g. in the file)
