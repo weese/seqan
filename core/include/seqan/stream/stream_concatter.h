@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2013, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2014, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,8 @@
 // Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_STREAM_CONCATTER_STREAM_H_
-#define SEQAN_STREAM_CONCATTER_STREAM_H_
+#ifndef SEQAN_STREAM_STREAM_CONCATTER_H_
+#define SEQAN_STREAM_STREAM_CONCATTER_H_
 
 namespace seqan {
 
@@ -107,5 +107,5 @@ Pager<TTarget, Concatter<TKey> >
 // Functions
 // ============================================================================
 
-#endif  // SEQAN_STREAM_CONCATTER_STREAM_H_
+#endif  // SEQAN_STREAM_STREAM_CONCATTER_H_
 
