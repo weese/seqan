@@ -41,9 +41,18 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+template <typename TOutPager, typename TSpec>
+struct Pager;
+
 // ============================================================================
 // Classes
 // ============================================================================
+
+template <typename TAlgTag>
+struct Compress;
+
+template <typename TAlgTag>
+struct CompressionContext {};
 
 template <typename TAlgTag>
 struct DefaultPageSize;
@@ -52,20 +61,24 @@ struct GZ {};
 struct BGZF {};
 struct BZ2 {};
 
+template <>
 struct CompressionContext<GZ>
 {
     z_stream strm;
 };
 
+template <>
 struct CompressionContext<BGZF>:
     CompressionContext<GZ>
 {
-    static const char header[] = {
-        MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
-        4, 0, 0, 0, 0, 0, -1, 6, 0, 'B', 'C', 2, 0, 0, 0
-    };
-    static const unsigned BLOCK_HEADER_LENGTH = sizeof(header); // == 18
+    enum { BLOCK_HEADER_LENGTH = 18 };
+    static const char header[BLOCK_HEADER_LENGTH];
     unsigned char headerPos;
+};
+
+const char CompressionContext<BGZF>::header[18] = {
+    MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
+    4, 0, 0, 0, 0, 0, -1, 6, 0, 'B', 'C', 2, 0, 0, 0
 };
 
 template <>
@@ -77,16 +90,16 @@ struct DefaultPageSize<BGZF>
 
     // Reduce the maximal input size, such that the compressed data 
     // always fits in one block even for level Z_NO_COMPRESSION.
-
+    enum { BLOCK_HEADER_LENGTH = CompressionContext<BGZF>::BLOCK_HEADER_LENGTH };
     const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
 };
 
 
 
-template <typename TAlgTag>
-Pager<TPager, Compress<TAlgTag> >
+template <typename TOutPager, typename TAlgTag>
+Pager<TOutPager, Compress<TAlgTag> >
 {
-    TPager outPager;                // outbound pager
+    TOutPager outPager;             // outbound pager
     PageTable<FixedSize> table;     // our page table
 
     Pager():

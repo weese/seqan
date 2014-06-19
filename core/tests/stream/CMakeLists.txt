@@ -37,8 +37,12 @@ add_executable (test_stream
                 test_stream_file_stream.h
                 test_stream_virtual_stream.h)
 
+add_executable (test_pager
+                test_pager.cpp)
+
 # Add dependencies found by find_package (SeqAn).
 target_link_libraries (test_stream ${SEQAN_LIBRARIES})
+target_link_libraries (test_pager ${SEQAN_LIBRARIES})
 
 # Add CXX flags found by find_package (SeqAn).
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SEQAN_CXX_FLAGS}")
@@ -48,3 +52,4 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SEQAN_CXX_FLAGS}")
 # ----------------------------------------------------------------------------
 
 add_test (NAME test_test_stream COMMAND $<TARGET_FILE:test_stream>)
+add_test (NAME test_test_pager  COMMAND $<TARGET_FILE:test_pager>)

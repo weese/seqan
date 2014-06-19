@@ -79,7 +79,7 @@ namespace seqan {
 template <typename TValue>
 struct PoolElement
 {
-    ListElement *next;
+    PoolElement *next;
     TValue      val;
 
     PoolElement() :
@@ -94,9 +94,9 @@ class ConcurrentResourcePool
 public:
     typedef PoolElement<TValue> TPoolElement;
 
-    TPoolElement    *head;          char pad1[SEQAN_CACHE_LINE_SIZE - sizeof(PoolElement)];
-    TPoolElement    *headEmpty;     char pad2[SEQAN_CACHE_LINE_SIZE - sizeof(PoolElement)];
-    TPoolElement    *unused;        char pad3[SEQAN_CACHE_LINE_SIZE - sizeof(PoolElement)];
+    TPoolElement    *head;          char pad1[SEQAN_CACHE_LINE_SIZE - sizeof(TPoolElement)];
+    TPoolElement    *headEmpty;     char pad2[SEQAN_CACHE_LINE_SIZE - sizeof(TPoolElement)];
+    TPoolElement    *unused;        char pad3[SEQAN_CACHE_LINE_SIZE - sizeof(TPoolElement)];
 
     ~ConcurrentResourcePool()
     {
@@ -174,7 +174,7 @@ releaseSwap(ConcurrentResourcePool<TValue, TSpec> & me, TValue SEQAN_FORWARD_ARG
         elem = me.headEmpty;
         if (elem == NULL)
         {
-            elem = new PoolElement();
+            elem = new PoolElement<TValue>();
             break;
         }
 

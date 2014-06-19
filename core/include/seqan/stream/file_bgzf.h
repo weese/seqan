@@ -70,11 +70,11 @@ template <typename TValue, typename TDirection, typename TSpec>
 struct Host<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >:
     public Host<FilePageTable<TValue, TDirection, Async<> > > {};
 
-
+/*
 struct VariablePagingScheme
 {
-    typedef std::map<void *> TMap;
-    typedef String<FilePagePos> TFramePos;
+    typedef String<FilePagePos>             TFramePos;
+    typedef std::map<FilePagePos, void *>   TMap;
 
     enum { pageSize = 64 * 1024 };
 
@@ -85,8 +85,8 @@ struct VariablePagingScheme
     TFramePos framePos;
 };
 
-void * RandomPagingScheme::EMPTY = NULL;
-void * RandomPagingScheme::ON_DISK = (void *)-1;
+void * VariablePagingScheme::EMPTY = NULL;
+void * VariablePagingScheme::ON_DISK = (void *)-1;
 
 template <typename TValue, typename TDirection, typename TSpec>
 struct PagingScheme<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >
@@ -104,7 +104,7 @@ struct PagingScheme<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >
 
 template <typename TPos>
 inline FilePagePos
-_getPagePos(RandomPagingScheme & table, TPos pos)
+_getPagePos(VariablePagingScheme & table, TPos pos)
 {
     // as we don't know the actual compressed size of a BGZF page here,
     // we have to read the whole 64K page
@@ -116,10 +116,10 @@ _getPagePos(RandomPagingScheme & table, TPos pos)
 // ----------------------------------------------------------------------------
 
 inline void *
-_getFrameStart(RandomPagingScheme const &table, FilePagePos const &pos)
+_getFrameStart(VariablePagingScheme const &table, FilePagePos const &pos)
 {
-    typedef RandomPagingScheme::TMap TMap;
-    TMap::const_iterator iter = table.frameStart.find(pos.filePos);
+    typedef VariablePagingScheme::TMap TMap;
+    TMap::const_iterator iter = table.framePos.find(pos.filePos);
 
     if (SEQAN_LIKELY(iter != table.frameStart.cend()))
         return iter->second;
@@ -132,11 +132,11 @@ _getFrameStart(RandomPagingScheme const &table, FilePagePos const &pos)
 // ----------------------------------------------------------------------------
 
 inline void
-_setFrameStart(RandomPagingScheme &table, FilePagePos const &pos, void * frameStart)
+_setFrameStart(VariablePagingScheme &table, FilePagePos const &pos, void * frameStart)
 {
     table.frameStart[pos.filePos] = frameStart;
 }
-
+*/
 // ----------------------------------------------------------------------------
 // Helper Function _bgzfUnpackInt16()
 // ----------------------------------------------------------------------------
