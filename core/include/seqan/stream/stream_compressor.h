@@ -146,7 +146,6 @@ Pager<TOutPager, Compress<TAlgTag> >
         Size<Page>::Type leftToCompress = length(page);
         while (leftToCompress != 0)
         {
-            compress(toRange(
             Page &outPage = outPager.getPage(outPosition);
 
             auto handle = std::async(std::launch::async,
