@@ -33,6 +33,15 @@ namespace bgzf_stream{
 /// change this to suite your needs
 const size_t default_buffer_size = 4096;
 
+const unsigned BGZF_MAX_BLOCK_SIZE = 64 * 1024;
+const unsigned BGZF_BLOCK_HEADER_LENGTH = 18;
+const unsigned BGZF_BLOCK_FOOTER_LENGTH = 8;
+const unsigned ZLIB_BLOCK_OVERHEAD = 5; // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
+
+// Reduce the maximal input size, such that the compressed data 
+// always fits in one block even for level Z_NO_COMPRESSION.
+const unsigned BGZF_BLOCK_SIZE = BGZF_MAX_BLOCK_SIZE - BGZF_BLOCK_HEADER_LENGTH - BGZF_BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
+
 /// Compression strategy, see bgzf doc.
 enum EStrategy
 {
@@ -62,25 +71,81 @@ public:
 	typedef byte_type* byte_buffer_type;
 	typedef typename Tr::char_type char_type;
 	typedef typename Tr::int_type int_type;
-	typedef std::vector<byte_type, byte_allocator_type > byte_vector_type;
-	typedef std::vector<char_type, char_allocator_type > char_vector_type;
+
+    struct BgzfThreadContext
+    {
+        typedef std::vector<byte_type, byte_allocator_type> byte_vector_type;
+        typedef std::vector<char_type, char_allocator_type> char_vector_type;
+
+        byte_vector_type outputBuffer;
+        char_vector_type buffer;
+        long crc;
+        Thread<BgzfCompressor> compress;
+        z_stream zipStream;
+
+        BgzfThreadContext():
+            outputBuffer(BGZF_MAX_BLOCK_SIZE, 0),
+            buffer(BGZF_BLOCK_SIZE, 0),
+            crc(0)
+        {}
+    };
+
+    bgzfThreadContext threadCtx[];
+    bgzfThreadContext *ctx;
 
     /** Construct a zip stream
      * More info on the following parameters can be found in the bgzf documentation.
      */
-    basic_bgzf_streambuf(
-		ostream_reference ostream_,
-		size_t level_,
-		EStrategy strategy_,
-		size_t window_size_,
-		size_t memory_level_,
-		size_t buffer_size_
-		);
+    basic_bgzf_streambuf(ostream_reference ostream_,
+                         size_t level_,
+                         EStrategy strategy_,
+                         size_t window_size_,
+                         size_t memory_level_,
+                         size_t threads) :
+		m_ostream(ostream_)
+    {
+        threadCtx = new BgzfThreadContext[threads];
+        ctx = &threadCtx[0];
+		this->setp(&(ctx->buffer[0]), &(ctx->buffer[ctx->buffer.size() - 1]));
+    }
 	
-	~basic_bgzf_streambuf();
+	~basic_bgzf_streambuf()
+    {
+		flush();
+		m_ostream.flush();
+		m_err=deflateEnd(&m_bgzf_stream);
+        delete[] threadCtx;
+    }
 
-	int sync ();
-    int_type overflow (int_type c);
+	int sync ()
+    {
+		if (this->pptr() > this->pbase())
+		{
+			int c = overflow(EOF);
+			if (c == EOF)
+				return -1;
+        }
+        return 0;
+    }
+
+    int_type overflow(int_type c)
+    {
+        int w = static_cast<int>(this->pptr() - this->pbase());
+        if (c != EOF)
+        {
+            *this->pptr() = c;
+            ++w;
+        }
+        if (bgzf_to_stream( this->pbase(), w))
+        {
+            this->setp(this->pbase(), this->epptr() - 1);
+            return c;
+        }
+        else
+        {
+            return EOF;
+        }
+    }
 
 	/** flushes the zip buffer and output buffer.
 
@@ -92,22 +157,13 @@ public:
 	ostream_reference get_ostream() const	{	return m_ostream;};
 	/// returns the latest bgzf error status
 	int get_zerr() const					{	return m_err;};
-	/// returns the crc of the input data compressed so far.
-	long get_crc() const					{	return m_crc;};
-	/// returns the size (bytes) of the input data compressed so far.
-	long get_in_size() const				{	return m_bgzf_stream.total_in;};
-	/// returns the size (bytes) of the compressed data so far.
-	long get_out_size() const				{	return m_bgzf_stream.total_out;};
 private:
 	bool bgzf_to_stream( char_type*, std::streamsize);
 	size_t fill_input_buffer();
 
 	ostream_reference m_ostream;
-	z_stream m_bgzf_stream;
     int m_err;
-	byte_vector_type m_output_buffer;
-	char_vector_type m_buffer; 
-	long m_crc;
+
 };
 
 /** \brief A stream decorator that takes compressed input and unzips it to a istream.

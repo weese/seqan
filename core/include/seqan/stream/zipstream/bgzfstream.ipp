@@ -35,119 +35,9 @@ namespace detail{
 	const int gz_orig_name  =  0x08; /* bit 3 set: original file name present */
 	const int gz_comment    =  0x10; /* bit 4 set: file comment present */
 	const int gz_reserved   =  0xE0; /* bits 5..7: reserved */	
+
 }
 
-	template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	basic_bgzf_streambuf<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::basic_bgzf_streambuf(
-		ostream_reference ostream_,
-		size_t level_,
-		EStrategy strategy_,
-		size_t window_size_,
-		size_t memory_level_,
-		size_t buffer_size_
-	)
-	: 
-		m_ostream(ostream_),
-		m_output_buffer(buffer_size_,0),
-		m_buffer(buffer_size_,0),
-		m_crc(0)
-	{
-		m_bgzf_stream.zalloc=(alloc_func)0;
-		m_bgzf_stream.zfree=(free_func)0;
-
-		m_bgzf_stream.next_in=NULL;
-		m_bgzf_stream.avail_in=0;
-		m_bgzf_stream.avail_out=0;
-		m_bgzf_stream.next_out=NULL;
-
-		m_err=deflateInit2(
-			&m_bgzf_stream, 
-			std::min( 9, static_cast<int>(level_)),
-			Z_DEFLATED,
-			- static_cast<int>(window_size_), // <-- changed
-			std::min( 9, static_cast<int>(memory_level_) ),
-			static_cast<int>(strategy_)
-			);
-			
-		this->setp( &(m_buffer[0]), &(m_buffer[m_buffer.size()-1]));
-	}
-
-	template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	basic_bgzf_streambuf<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::~basic_bgzf_streambuf()
-	{
-		flush();
-		m_ostream.flush();
-		m_err=deflateEnd(&m_bgzf_stream);
-	}
-
-	template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	int basic_bgzf_streambuf<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::sync ()
-	{ 
-		if ( this->pptr() && this->pptr() > this->pbase())
-		{
-			int c = overflow( EOF);
-
-			if ( c == EOF)
-				return -1;
-        }
-
-        return 0;
-	}
-
-	template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	typename basic_bgzf_streambuf<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::int_type 
-		basic_bgzf_streambuf<
-			Elem,Tr,ElemA,ByteT,ByteAT
-			>::overflow (
-			typename basic_bgzf_streambuf<
-				Elem,Tr,ElemA,ByteT,ByteAT
-				>::int_type c
-			)
-	{ 
-        int w = static_cast<int>(this->pptr() - this->pbase());
-        if (c != EOF) {
-             *this->pptr() = c;
-             ++w;
-         }
-         if ( bgzf_to_stream( this->pbase(), w)) {
-             this->setp( this->pbase(), this->epptr() - 1);
-             return c;
-         } else
-             return EOF;
-	}
-	
 	template<
 		typename Elem, 
 		typename Tr,
@@ -161,33 +51,55 @@ namespace detail{
 		typename basic_bgzf_streambuf<
 			Elem,Tr,ElemA,ByteT,ByteAT
 			>::char_type* buffer_, 
-			std::streamsize buffer_size_
+			std::streamsize &buffer_size_
 		)
 	{	
 		std::streamsize written_byte_size=0, total_written_byte_size = 0;
+        z_stream &zipStream = ctx->zipStream;
 
-		m_bgzf_stream.next_in=(byte_buffer_type)buffer_;
-		m_bgzf_stream.avail_in=static_cast<uInt>(buffer_size_*sizeof(char_type));
-		m_bgzf_stream.avail_out=static_cast<uInt>(m_output_buffer.size());
-		m_bgzf_stream.next_out=&(m_output_buffer[0]);
+//
+		zipStream.zalloc=(alloc_func)0;
+		zipStream.zfree=(free_func)0;
+
+		zipStream.next_in=NULL;
+		zipStream.avail_in=0;
+		zipStream.avail_out=0;
+		zipStream.next_out=NULL;
+
+		m_err=deflateInit2(
+			&zipStream, 
+			std::min( 9, static_cast<int>(level_)),
+			Z_DEFLATED,
+			- static_cast<int>(window_size_), // <-- changed
+			std::min( 9, static_cast<int>(memory_level_) ),
+			static_cast<int>(strategy_)
+			);
+//
+
+
+
+		zipStream.next_in=(byte_buffer_type)buffer_;
+		zipStream.avail_in=static_cast<uInt>(buffer_size_*sizeof(char_type));
+		zipStream.avail_out=static_cast<uInt>(m_output_buffer.size());
+		zipStream.next_out=&(m_output_buffer[0]);
 		size_t remainder=0;
 
 		// updating crc
 		m_crc = crc32( 
 			m_crc, 
-			m_bgzf_stream.next_in,
-			m_bgzf_stream.avail_in
+			zipStream.next_in,
+			zipStream.avail_in
 			);		
 
 		do
 		{
-			m_err = deflate(&m_bgzf_stream, 0);
+			m_err = deflate(&zipStream, 0);
 	
 			if (m_err == Z_OK  || m_err == Z_STREAM_END)
 			{
 				written_byte_size= 
 					static_cast<std::streamsize>(m_output_buffer.size()) 
-					- m_bgzf_stream.avail_out;
+					- zipStream.avail_out;
 				total_written_byte_size+=written_byte_size;
 				// ouput buffer is full, dumping to ostream
 				m_ostream.write( 
@@ -208,13 +120,14 @@ namespace detail{
 					
 				}
 				
-				m_bgzf_stream.avail_out=
+				zipStream.avail_out=
 					static_cast<uInt>(m_output_buffer.size()-remainder);
-				m_bgzf_stream.next_out=&m_output_buffer[remainder];
+				zipStream.next_out=&m_output_buffer[remainder];
 			}
 		} 
-		while (m_bgzf_stream.avail_in != 0 && m_err == Z_OK);
-	
+		while (zipStream.avail_in != 0 && m_err == Z_OK);
+
+        buffer_size_ = total_written_byte_size;
 		return m_err == Z_OK;
 	}
 
@@ -229,49 +142,8 @@ namespace detail{
 		Elem,Tr,ElemA,ByteT,ByteAT
 		>::flush()
 	{
-		std::streamsize written_byte_size=0, total_written_byte_size=0;
-
-		size_t remainder=0;
-
-		// updating crc
-		m_crc = crc32( 
-			m_crc, 
-			m_bgzf_stream.next_in,
-			m_bgzf_stream.avail_in
-			);		
-
-		do
-		{
-			m_err = deflate(&m_bgzf_stream, Z_FINISH);
-			if (m_err == Z_OK || m_err == Z_STREAM_END)
-			{
-				written_byte_size=
-					static_cast<std::streamsize>(m_output_buffer.size()) 
-					- m_bgzf_stream.avail_out;
-				total_written_byte_size+=written_byte_size;
-				// ouput buffer is full, dumping to ostream
-				m_ostream.write( 
-					(const char_type*) &(m_output_buffer[0]), 
-					static_cast<std::streamsize>( 
-						written_byte_size/sizeof(char_type)*sizeof(byte_type) 
-						)
-					);
-			
-				// checking if some bytes were not written.
-				if ( (remainder = written_byte_size%sizeof(char_type))!=0)
-				{
-					// copy to the beginning of the stream
-					memcpy(
-						&(m_output_buffer[0]), 
-						&(m_output_buffer[written_byte_size-remainder]),
-						remainder);
-					
-				}
-				
-				m_bgzf_stream.avail_out=static_cast<uInt>(m_output_buffer.size()-remainder);
-				m_bgzf_stream.next_out=&m_output_buffer[remainder];
-			}
-		} while (m_err == Z_OK);
+        std::streamsize =
+        bool result = bgzf_to_stream();
 
 		m_ostream.flush();
 
@@ -289,14 +161,12 @@ namespace detail{
 		Elem,Tr,ElemA,ByteT,ByteAT
 		>::basic_unbgzf_streambuf(
 			istream_reference istream_,
-			size_t window_size_,
-			size_t read_buffer_size_,
-			size_t input_buffer_size_
+			size_t window_size_
 	)
 	:  
 		m_istream(istream_),
-		m_input_buffer(input_buffer_size_),
-		m_buffer(read_buffer_size_),
+		m_input_buffer(BGZF_MAX_BLOCK_SIZE),
+		m_buffer(BGZF_MAX_BLOCK_SIZE),
 		m_crc(0)
 	{
 		// setting zalloc, zfree and opaque
