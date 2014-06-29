@@ -50,6 +50,7 @@ enum EStrategy
 	DefaultStrategy = 0
 };
 
+
 /** \brief A stream decorator that takes raw input and zips it to a ostream.
 
 The class wraps up the inflate method of the bgzf library 1.1.4 http://www.gzip.org/bgzf/
@@ -79,14 +80,22 @@ public:
 
         byte_vector_type outputBuffer;
         char_vector_type buffer;
-        long crc;
+        CompressionContext<BGZF> ctx;
         Thread<BgzfCompressor> compress;
-        z_stream zipStream;
+
+        struct BgzfCompressor
+        {
+            template <typename T>
+            void run(T &)
+            {
+                compressAll(outputBuffer, buffer, ctx);
+            }
+        };
+
 
         BgzfThreadContext():
             outputBuffer(BGZF_MAX_BLOCK_SIZE, 0),
-            buffer(BGZF_BLOCK_SIZE, 0),
-            crc(0)
+            buffer(BGZF_BLOCK_SIZE / sizeof(char_type), 0)
         {}
     };
 
@@ -117,6 +126,93 @@ public:
         delete[] threadCtx;
     }
 
+
+
+
+
+
+
+
+
+
+
+		std::streamsize written_byte_size=0, total_written_byte_size = 0;
+        z_stream &zipStream = ctx->zipStream;
+
+//
+		zipStream.zalloc=(alloc_func)0;
+		zipStream.zfree=(free_func)0;
+
+		zipStream.next_in=NULL;
+		zipStream.avail_in=0;
+		zipStream.avail_out=0;
+		zipStream.next_out=NULL;
+
+		m_err=deflateInit2(
+			&zipStream, 
+			std::min( 9, static_cast<int>(level_)),
+			Z_DEFLATED,
+			- static_cast<int>(window_size_), // <-- changed
+			std::min( 9, static_cast<int>(memory_level_) ),
+			static_cast<int>(strategy_)
+			);
+//
+
+
+
+		zipStream.next_in=(byte_buffer_type)buffer_;
+		zipStream.avail_in=static_cast<uInt>(buffer_size_*sizeof(char_type));
+		zipStream.avail_out=static_cast<uInt>(m_output_buffer.size());
+		zipStream.next_out=&(m_output_buffer[0]);
+		size_t remainder=0;
+
+		// updating crc
+		m_crc = crc32( 
+			m_crc, 
+			zipStream.next_in,
+			zipStream.avail_in
+			);		
+
+		do
+		{
+			m_err = deflate(&zipStream, 0);
+	
+			if (m_err == Z_OK  || m_err == Z_STREAM_END)
+			{
+				written_byte_size= 
+					static_cast<std::streamsize>(m_output_buffer.size()) 
+					- zipStream.avail_out;
+				total_written_byte_size+=written_byte_size;
+				// ouput buffer is full, dumping to ostream
+				m_ostream.write( 
+					(const char_type*) &(m_output_buffer[0]), 
+					static_cast<std::streamsize>( 
+						written_byte_size/sizeof(char_type) 
+						)
+					);
+												
+				// checking if some bytes were not written.
+				if ( (remainder = written_byte_size%sizeof(char_type))!=0)
+				{
+					// copy to the beginning of the stream
+					memcpy(
+						&(m_output_buffer[0]), 
+						&(m_output_buffer[written_byte_size-remainder]),
+						remainder);
+					
+				}
+				
+				zipStream.avail_out=
+					static_cast<uInt>(m_output_buffer.size()-remainder);
+				zipStream.next_out=&m_output_buffer[remainder];
+			}
+		} 
+		while (zipStream.avail_in != 0 && m_err == Z_OK);
+
+        buffer_size_ = total_written_byte_size;
+		return m_err == Z_OK;
+	}
+
 	int sync ()
     {
 		if (this->pptr() > this->pbase())
@@ -136,7 +232,7 @@ public:
             *this->pptr() = c;
             ++w;
         }
-        if (bgzf_to_stream( this->pbase(), w))
+        if (bgzf_to_stream(this->pbase(), w))
         {
             this->setp(this->pbase(), this->epptr() - 1);
             return c;
@@ -158,7 +254,6 @@ public:
 	/// returns the latest bgzf error status
 	int get_zerr() const					{	return m_err;};
 private:
-	bool bgzf_to_stream( char_type*, std::streamsize);
 	size_t fill_input_buffer();
 
 	ostream_reference m_ostream;

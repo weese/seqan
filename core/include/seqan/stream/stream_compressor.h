@@ -161,8 +161,8 @@ Pager<TOutPager, Compress<TAlgTag> >
 
 compressInit(CompressionContext<GZ> &ctx)
 {
-    ctx.strm.zalloc = 0;
-    ctx.strm.zfree = 0;
+    ctx.strm.zalloc = NULL;
+    ctx.strm.zfree = NULL;
     int status = deflateInit2(&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
                               GZIP_WINDOW_BITS, Z_DEFAULT_MEM_LEVEL, Z_DEFAULT_STRATEGY);
     throw IOException("GZ deflateInit2() failed.");
@@ -208,7 +208,7 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx
 
         ctx.strm.next_in = static_cast<Bytef *>(sChunk.begin);
         ctx.strm.next_out = static_cast<Bytef *>(tChunk.begin);
-        ctx.strm.avail_in = length(sChunk);
+        ctx.strm.avail_in = length(sChunk) * sizeof(TSourceValue);
         ctx.strm.avail_out = length(tChunk);
 
         SEQAN_ASSERT_GT(ctx.strm.avail_out, 0u);
@@ -223,6 +223,7 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx
         return size;
     }
 
+
 //    status = deflate(&zs, Z_FINISH);
 //    bool rawDataTooBig = (status != Z_STREAM_END);
 //
@@ -235,6 +236,70 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx
 //        resize(page.raw, zs.total_out + BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
 //        break;
 //    }
+}
+
+template <typename TTarget, typename TSource>
+inline typename Size<TTarget>::Type
+compressAll(TTarget &target, TSource const &source, CompressionContext<BGZF> &ctx)
+{
+    typedef typename Value<TSource>::Type TSourceValue;
+
+    static const int compressionLevels[] = { Z_DEFAULT_COMPRESSION, Z_BEST_COMPRESSION, Z_BEST_SPEED, Z_NO_COMPRESSION };
+    const size_t BLOCK_HEADER_LENGTH = DefaultPageSize<BGZF>::BLOCK_HEADER_LENGTH;
+    const size_t BLOCK_FOOTER_LENGTH = DefaultPageSize<BGZF>::BLOCK_FOOTER_LENGTH;
+
+    const int GZIP_WINDOW_BITS = -15; // no zlib header
+    const int Z_DEFAULT_MEM_LEVEL = 8;
+
+    // 1. COPY HEADER
+
+    compressInit(ctx);
+
+    // allocate output buffer
+    resize(target, DefaultPageSize<BGZF>::MAX_BLOCK_SIZE, Exact());
+
+    // copy header
+    std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], begin(target, Standard()));
+
+
+    // 2. COMPRESS
+
+    ctx.strm.next_in = static_cast<Bytef const *>(static_cast<void const *>(begin(source, Standard())));
+    ctx.strm.next_out = static_cast<Bytef *>(static_cast<void const *>(begin(target, Standard())));
+    ctx.strm.next_out += BLOCK_HEADER_LENGTH;
+    ctx.strm.avail_in = length(source) * sizeof(TSourceValue);
+    ctx.strm.avail_out = capacity(target) - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
+
+    status = deflate(&zs, Z_FINISH);
+    if (status != Z_STREAM_END)
+        throw IOException("Deflation failed. Compressed BGZF data is bigger than uncompressed data.");
+
+    status = deflateEnd(&zs);
+    if (status != Z_OK)
+        throw IOException("BGZF deflateEnd() failed.");
+
+    resize(target, capacity(target) - ctx.strm.avail_out);
+
+
+    // 3. APPEND FOOTER
+
+    // Set compressed length into buffer, compute CRC and write CRC into buffer.
+    union {
+        unsigned int i32;
+        char raw[4];
+    } tmp;
+
+    tmp.i32 = crc32(0L, NULL, 0L);
+    tmp.i32 = crc32(tmp.i32, static_cast<Bytef const *>(static_cast<void const *>(begin(source, Standard()))), length(source) * sizeof(TSourceValue));
+    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + (length(target) - 8));
+
+    tmp.i32 = length(source);
+    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + (length(target) - 4));
+
+    tmp.i32 = length(target) - 1;
+    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + 16);
+
+    return length(target);
 }
 
 #endif  // SEQAN_STREAM_STREAM_COMPRESSOR_H_
