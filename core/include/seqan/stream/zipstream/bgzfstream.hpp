@@ -73,6 +73,15 @@ public:
 	typedef typename Tr::char_type char_type;
 	typedef typename Tr::int_type int_type;
 
+    struct Concatter
+    {
+        ostream_reference ostream;
+        Mutex lock;
+        unsigned waitForKey;
+    };
+
+    Concatter concatter;
+
     struct BgzfThreadContext
     {
         typedef std::vector<byte_type, byte_allocator_type> byte_vector_type;
@@ -83,12 +92,28 @@ public:
         CompressionContext<BGZF> ctx;
         Thread<BgzfCompressor> compress;
 
+        Concatter *concatter;
+        unsigned waitForKey;
+
         struct BgzfCompressor
         {
-            template <typename T>
-            void run(T &)
+            BgzfThreadContext *threadCtx;
+
+            void operator()
             {
-                compressAll(outputBuffer, buffer, ctx);
+                compressAll(threadCtx->outputBuffer, threadCtx->buffer, threadCtx->ctx);
+                while (true)
+                {
+                    ScopedLock<Mutex> scopedLock(*concatter->lock);
+                    if (concatter->waitForKey == waitForKey)
+                    {
+                        threadCtx->ostream->write(
+                            (const char_type*) &(threadCtx->outputBuffer[0]),
+                            length(threadCtx->outputBuffer));
+                        concatter->waitForKey = waitForKey + 1;
+                        break;
+                    }
+                }
             }
         };
 
@@ -111,9 +136,15 @@ public:
                          size_t window_size_,
                          size_t memory_level_,
                          size_t threads) :
-		m_ostream(ostream_)
+		ostream(&ostream_)
     {
+        concatter.waitForKey = 0;
         threadCtx = new BgzfThreadContext[threads];
+        for (unsigned i = 0; i < threads; ++i)
+        {
+            threadCtx[i].concatter = &concatter;
+            threadCtx[i].compress.worker.threadCtx = &threadCtx[i];
+        }
         ctx = &threadCtx[0];
 		this->setp(&(ctx->buffer[0]), &(ctx->buffer[ctx->buffer.size() - 1]));
     }
@@ -121,99 +152,12 @@ public:
 	~basic_bgzf_streambuf()
     {
 		flush();
-		m_ostream.flush();
+		concatter.ostream->flush();
 		m_err=deflateEnd(&m_bgzf_stream);
         delete[] threadCtx;
     }
 
-
-
-
-
-
-
-
-
-
-
-		std::streamsize written_byte_size=0, total_written_byte_size = 0;
-        z_stream &zipStream = ctx->zipStream;
-
-//
-		zipStream.zalloc=(alloc_func)0;
-		zipStream.zfree=(free_func)0;
-
-		zipStream.next_in=NULL;
-		zipStream.avail_in=0;
-		zipStream.avail_out=0;
-		zipStream.next_out=NULL;
-
-		m_err=deflateInit2(
-			&zipStream, 
-			std::min( 9, static_cast<int>(level_)),
-			Z_DEFLATED,
-			- static_cast<int>(window_size_), // <-- changed
-			std::min( 9, static_cast<int>(memory_level_) ),
-			static_cast<int>(strategy_)
-			);
-//
-
-
-
-		zipStream.next_in=(byte_buffer_type)buffer_;
-		zipStream.avail_in=static_cast<uInt>(buffer_size_*sizeof(char_type));
-		zipStream.avail_out=static_cast<uInt>(m_output_buffer.size());
-		zipStream.next_out=&(m_output_buffer[0]);
-		size_t remainder=0;
-
-		// updating crc
-		m_crc = crc32( 
-			m_crc, 
-			zipStream.next_in,
-			zipStream.avail_in
-			);		
-
-		do
-		{
-			m_err = deflate(&zipStream, 0);
-	
-			if (m_err == Z_OK  || m_err == Z_STREAM_END)
-			{
-				written_byte_size= 
-					static_cast<std::streamsize>(m_output_buffer.size()) 
-					- zipStream.avail_out;
-				total_written_byte_size+=written_byte_size;
-				// ouput buffer is full, dumping to ostream
-				m_ostream.write( 
-					(const char_type*) &(m_output_buffer[0]), 
-					static_cast<std::streamsize>( 
-						written_byte_size/sizeof(char_type) 
-						)
-					);
-												
-				// checking if some bytes were not written.
-				if ( (remainder = written_byte_size%sizeof(char_type))!=0)
-				{
-					// copy to the beginning of the stream
-					memcpy(
-						&(m_output_buffer[0]), 
-						&(m_output_buffer[written_byte_size-remainder]),
-						remainder);
-					
-				}
-				
-				zipStream.avail_out=
-					static_cast<uInt>(m_output_buffer.size()-remainder);
-				zipStream.next_out=&m_output_buffer[remainder];
-			}
-		} 
-		while (zipStream.avail_in != 0 && m_err == Z_OK);
-
-        buffer_size_ = total_written_byte_size;
-		return m_err == Z_OK;
-	}
-
-	int sync ()
+	int sync()
     {
 		if (this->pptr() > this->pbase())
 		{
@@ -224,6 +168,11 @@ public:
         return 0;
     }
 
+    bool compressBuffer()
+    {
+        run(ctx->compress);
+    }
+
     int_type overflow(int_type c)
     {
         int w = static_cast<int>(this->pptr() - this->pbase());
@@ -232,7 +181,7 @@ public:
             *this->pptr() = c;
             ++w;
         }
-        if (bgzf_to_stream(this->pbase(), w))
+        if (compressBuffer())
         {
             this->setp(this->pbase(), this->epptr() - 1);
             return c;
@@ -250,13 +199,12 @@ public:
 	*/
 	std::streamsize flush();
 	/// returns a reference to the output stream
-	ostream_reference get_ostream() const	{	return m_ostream;};
+	ostream_reference get_ostream() const	{	return *ostream;};
 	/// returns the latest bgzf error status
 	int get_zerr() const					{	return m_err;};
 private:
 	size_t fill_input_buffer();
 
-	ostream_reference m_ostream;
     int m_err;
 
 };

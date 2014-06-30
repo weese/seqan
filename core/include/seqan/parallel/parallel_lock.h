@@ -149,6 +149,37 @@ public:
 };
 
 // ----------------------------------------------------------------------------
+// Class ScopedLock
+// ----------------------------------------------------------------------------
+
+template <typename TMutex = Mutex, typename TParallel = Parallel>
+struct ScopedLock
+{
+    TMutex & mutex;
+
+    explicit
+    ScopedLock(TMutex & mutex) :
+        mutex(mutex)
+    {
+        lock(mutex);
+    }
+
+    ~ScopedLock()
+    {
+        unlock(mutex);
+    }
+
+};
+
+template <typename TLock>
+struct ScopedLock<TLock, Serial>
+{
+    explicit
+    ScopedReadLock(TLock &)
+    {}
+};
+
+// ----------------------------------------------------------------------------
 // Class ScopedReadLock
 // ----------------------------------------------------------------------------
 

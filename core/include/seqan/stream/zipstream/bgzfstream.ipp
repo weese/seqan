@@ -52,7 +52,7 @@ namespace detail{
         std::streamsize =
         bool result = bgzf_to_stream();
 
-		m_ostream.flush();
+		ostream.flush();
 
 		return total_written_byte_size;
 	}
