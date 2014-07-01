@@ -57,45 +57,45 @@ struct CompressionContext {};
 template <typename TAlgTag>
 struct DefaultPageSize;
 
-struct GZ {};
-struct BGZF {};
-struct BZ2 {};
+#if SEQAN_HAS_ZLIB
+#include <zlib.h>
 
 template <>
-struct CompressionContext<GZ>
+struct CompressionContext<GZFile>
 {
     z_stream strm;
 };
+#endif
 
 template <>
-struct CompressionContext<BGZF>:
-    CompressionContext<GZ>
+struct CompressionContext<BgzfFile>:
+    CompressionContext<GZFile>
 {
     enum { BLOCK_HEADER_LENGTH = 18 };
     static const char header[BLOCK_HEADER_LENGTH];
     unsigned char headerPos;
 };
 
-const char CompressionContext<BGZF>::header[18] = {
+const char CompressionContext<BgzfFile>::header[18] = {
     MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
     4, 0, 0, 0, 0, 0, -1, 6, 0, 'B', 'C', 2, 0, 0, 0
 };
 
 template <>
-struct DefaultPageSize<BGZF>
+struct DefaultPageSize<BgzfFile>
 {
-    const unsigned MAX_BLOCK_SIZE = 64 * 1024;
-    const unsigned BLOCK_FOOTER_LENGTH = 8;
-    const unsigned ZLIB_BLOCK_OVERHEAD = 5; // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
+    static const unsigned MAX_BLOCK_SIZE = 64 * 1024;
+    static const unsigned BLOCK_FOOTER_LENGTH = 8;
+    static const unsigned ZLIB_BLOCK_OVERHEAD = 5; // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
 
     // Reduce the maximal input size, such that the compressed data 
     // always fits in one block even for level Z_NO_COMPRESSION.
-    enum { BLOCK_HEADER_LENGTH = CompressionContext<BGZF>::BLOCK_HEADER_LENGTH };
-    const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
+    enum { BLOCK_HEADER_LENGTH = CompressionContext<BgzfFile>::BLOCK_HEADER_LENGTH };
+    static const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
 };
 
 
-
+/*
 template <typename TOutPager, typename TAlgTag>
 Pager<TOutPager, Compress<TAlgTag> >
 {
@@ -154,29 +154,35 @@ Pager<TOutPager, Compress<TAlgTag> >
         }
     }
 };
-
+*/
 // ============================================================================
 // Functions
 // ============================================================================
 
-compressInit(CompressionContext<GZ> &ctx)
+inline void
+compressInit(CompressionContext<GZFile> &ctx)
 {
+    const int GZIP_WINDOW_BITS = -15; // no zlib header
+    const int Z_DEFAULT_MEM_LEVEL = 8;
+
     ctx.strm.zalloc = NULL;
     ctx.strm.zfree = NULL;
-    int status = deflateInit2(&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+    int status = deflateInit2(&ctx.strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
                               GZIP_WINDOW_BITS, Z_DEFAULT_MEM_LEVEL, Z_DEFAULT_STRATEGY);
-    throw IOException("GZ deflateInit2() failed.");
+    if (status != Z_OK)
+        throw IOException("GZFile deflateInit2() failed.");
 }
 
-compressInit(CompressionContext<BGZF> &ctx)
+inline void
+compressInit(CompressionContext<BgzfFile> &ctx)
 {
-    compressInit(static_cast<CompressionContext<GZ> >(ctx));
+    compressInit(static_cast<CompressionContext<GZFile> &>(ctx));
     ctx.headerPos = 0;
 }
 
 template <typename TTarget, typename TSourceIterator>
 inline typename Size<TTarget>::Type
-compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx)
+compress(TTarget &target, TSourceIterator &source, CompressionContext<BgzfFile> &ctx)
 {
     typedef typename Size<TTarget>::Type            TSize;
     typedef typename Chunk<TTarget>::Type           TTargetChunk;
@@ -213,9 +219,9 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx
 
         SEQAN_ASSERT_GT(ctx.strm.avail_out, 0u);
 
-        int status = deflate(&zs, Z_NO_FLUSH);
+        int status = deflate(&ctx.strm, Z_NO_FLUSH);
         if (status != Z_OK)
-            throw IOException("BGZF deflateInit2() failed.");
+            throw IOException("BgzfFile deflateInit2() failed.");
 
         source += length(sChunk) - ctx.strm.avail_in;
         size_t size = length(tChunk) - ctx.strm.avail_out;
@@ -229,7 +235,7 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx
 //
 //    status = deflateEnd(&zs);
 //    if (status != Z_OK)
-//        throw IOException("BGZF deflateEnd() failed.");
+//        throw IOException("BgzfFile deflateEnd() failed.");
 //
 //    if (!rawDataTooBig)
 //    {
@@ -240,23 +246,19 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BGZF> &ctx
 
 template <typename TTarget, typename TSource>
 inline typename Size<TTarget>::Type
-compressAll(TTarget &target, TSource const &source, CompressionContext<BGZF> &ctx)
+compressAll(TTarget &target, TSource const &source, CompressionContext<BgzfFile> &ctx)
 {
     typedef typename Value<TSource>::Type TSourceValue;
 
-    static const int compressionLevels[] = { Z_DEFAULT_COMPRESSION, Z_BEST_COMPRESSION, Z_BEST_SPEED, Z_NO_COMPRESSION };
-    const size_t BLOCK_HEADER_LENGTH = DefaultPageSize<BGZF>::BLOCK_HEADER_LENGTH;
-    const size_t BLOCK_FOOTER_LENGTH = DefaultPageSize<BGZF>::BLOCK_FOOTER_LENGTH;
-
-    const int GZIP_WINDOW_BITS = -15; // no zlib header
-    const int Z_DEFAULT_MEM_LEVEL = 8;
+    const size_t BLOCK_HEADER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_HEADER_LENGTH;
+    const size_t BLOCK_FOOTER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_FOOTER_LENGTH;
 
     // 1. COPY HEADER
 
     compressInit(ctx);
 
     // allocate output buffer
-    resize(target, DefaultPageSize<BGZF>::MAX_BLOCK_SIZE, Exact());
+    resize(target, DefaultPageSize<BgzfFile>::MAX_BLOCK_SIZE, Exact());
 
     // copy header
     std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], begin(target, Standard()));
@@ -264,19 +266,19 @@ compressAll(TTarget &target, TSource const &source, CompressionContext<BGZF> &ct
 
     // 2. COMPRESS
 
-    ctx.strm.next_in = static_cast<Bytef const *>(static_cast<void const *>(begin(source, Standard())));
+    ctx.strm.next_in = static_cast<Bytef *>(static_cast<void *>(begin(source, Standard())));
     ctx.strm.next_out = static_cast<Bytef *>(static_cast<void const *>(begin(target, Standard())));
     ctx.strm.next_out += BLOCK_HEADER_LENGTH;
     ctx.strm.avail_in = length(source) * sizeof(TSourceValue);
     ctx.strm.avail_out = capacity(target) - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
 
-    status = deflate(&zs, Z_FINISH);
+    int status = deflate(&ctx.strm, Z_FINISH);
     if (status != Z_STREAM_END)
-        throw IOException("Deflation failed. Compressed BGZF data is bigger than uncompressed data.");
+        throw IOException("Deflation failed. Compressed BgzfFile data is bigger than uncompressed data.");
 
-    status = deflateEnd(&zs);
+    status = deflateEnd(&ctx.strm);
     if (status != Z_OK)
-        throw IOException("BGZF deflateEnd() failed.");
+        throw IOException("BgzfFile deflateEnd() failed.");
 
     resize(target, capacity(target) - ctx.strm.avail_out);
 

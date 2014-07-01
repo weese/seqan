@@ -42,32 +42,11 @@
 namespace seqan {
 
 // ============================================================================
-// Forwards
-// ============================================================================
-
-// ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
 
-struct BgzfFile_;
-typedef Tag<BgzfFile_> BgzfFile;
-
-template <typename T>
-struct MagicHeader<BgzfFile, T>
-{
-    static unsigned char const VALUE[3];
-};
-
-template <typename T>
-unsigned char const MagicHeader<BgzfFile, T>::VALUE[3] = { 0x1f, 0x8b, 0x08 };  // gzip's magic number
-
-
-template <typename TSpec = void>
-struct Bgzf {};
-
-
-template <typename TValue, typename TDirection, typename TSpec>
-struct Host<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >:
+template <typename TValue, typename TDirection>
+struct Host<FilePageTable<TValue, TDirection, BgzfFile> >:
     public Host<FilePageTable<TValue, TDirection, Async<> > > {};
 
 /*
@@ -89,7 +68,7 @@ void * VariablePagingScheme::EMPTY = NULL;
 void * VariablePagingScheme::ON_DISK = (void *)-1;
 
 template <typename TValue, typename TDirection, typename TSpec>
-struct PagingScheme<FilePageTable<TValue, TDirection, Bgzf<TSpec> > >
+struct PagingScheme<FilePageTable<TValue, TDirection, BgzfFile<TSpec> > >
 {
     typedef VariablePagingScheme Type;
 };
@@ -199,9 +178,9 @@ _bgzfCheckHeader(unsigned char const * header)
 // Function _preprocessFilePage()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TDirection, typename TSpec, typename TPageFrame, typename TBool>
+template <typename TValue, typename TDirection, typename TPageFrame, typename TBool>
 inline bool
-_preprocessFilePage(FilePageTable<TValue, TDirection, Bgzf<TSpec> > &, TPageFrame &page, TBool const &)
+_preprocessFilePage(FilePageTable<TValue, TDirection, BgzfFile> &, TPageFrame &page, TBool const &)
 {
     const unsigned MAX_BLOCK_SIZE = 64 * 1024;
     const unsigned BLOCK_HEADER_LENGTH = 18;
@@ -247,9 +226,9 @@ _preprocessFilePage(FilePageTable<TValue, TDirection, Bgzf<TSpec> > &, TPageFram
     return true;
 }
 
-template <typename TValue, typename TSpec, typename TPageFrame, typename TBool>
+template <typename TValue, typename TPageFrame, typename TBool>
 inline bool
-_preprocessFilePage(FilePageTable<TValue, Output, Bgzf<TSpec> > &, TPageFrame &page, TBool const &)
+_preprocessFilePage(FilePageTable<TValue, Output, BgzfFile> &, TPageFrame &page, TBool const &)
 {
     const unsigned MAX_BLOCK_SIZE = 64 * 1024;
     const unsigned BLOCK_HEADER_LENGTH = 18;
@@ -265,9 +244,9 @@ _preprocessFilePage(FilePageTable<TValue, Output, Bgzf<TSpec> > &, TPageFrame &p
 // Function _postprocessFilePage()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TDirection, typename TSpec, typename TPageFrame, typename TBool>
+template <typename TValue, typename TDirection, typename TPageFrame, typename TBool>
 inline bool
-_postprocessFilePage(FilePageTable<TValue, TDirection, Bgzf<TSpec> > &, TPageFrame &page, TBool const &)
+_postprocessFilePage(FilePageTable<TValue, TDirection, BgzfFile> &, TPageFrame &page, TBool const &)
 {
     static int compressionLevels[] = { Z_DEFAULT_COMPRESSION, Z_BEST_COMPRESSION, Z_BEST_SPEED, Z_NO_COMPRESSION };
 
@@ -353,9 +332,9 @@ _postprocessFilePage(FilePageTable<TValue, TDirection, Bgzf<TSpec> > &, TPageFra
     return true;
 }
 
-template <typename TValue, typename TSpec, typename TPageFrame, typename TBool>
+template <typename TValue, typename TPageFrame, typename TBool>
 inline bool
-_postprocessFilePage(FilePageTable<TValue, Input, Bgzf<TSpec> > &, TPageFrame &, TBool const &)
+_postprocessFilePage(FilePageTable<TValue, Input, BgzfFile> &, TPageFrame &, TBool const &)
 {
     // Do nothing.
     return true;

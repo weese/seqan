@@ -27,7 +27,7 @@ Author: David Weese, dave.weese@gmail.com, 2014             (extension to parall
 #include <zlib.h>
 #include "zutil.h"
 
-namespace bgzf_stream{
+namespace seqan {
 
 /// default gzip buffer size,
 /// change this to suite your needs
@@ -78,6 +78,10 @@ public:
         ostream_reference ostream;
         Mutex lock;
         unsigned waitForKey;
+
+        Concatter(ostream_reference ostream) :
+            ostream(ostream)
+        {}
     };
 
     Concatter concatter;
@@ -87,36 +91,35 @@ public:
         typedef std::vector<byte_type, byte_allocator_type> byte_vector_type;
         typedef std::vector<char_type, char_allocator_type> char_vector_type;
 
-        byte_vector_type outputBuffer;
-        char_vector_type buffer;
-        CompressionContext<BGZF> ctx;
-        Thread<BgzfCompressor> compress;
-
-        Concatter *concatter;
-        unsigned waitForKey;
-
         struct BgzfCompressor
         {
             BgzfThreadContext *threadCtx;
 
-            void operator()
+            void operator()()
             {
                 compressAll(threadCtx->outputBuffer, threadCtx->buffer, threadCtx->ctx);
                 while (true)
                 {
-                    ScopedLock<Mutex> scopedLock(*concatter->lock);
-                    if (concatter->waitForKey == waitForKey)
+                    ScopedLock<Mutex> scopedLock(threadCtx->concatter.lock);
+                    if (threadCtx->concatter.waitForKey == threadCtx->waitForKey)
                     {
                         threadCtx->ostream->write(
                             (const char_type*) &(threadCtx->outputBuffer[0]),
                             length(threadCtx->outputBuffer));
-                        concatter->waitForKey = waitForKey + 1;
+                        threadCtx->concatter.waitForKey = threadCtx->waitForKey + 1;
                         break;
                     }
                 }
             }
         };
 
+        byte_vector_type outputBuffer;
+        char_vector_type buffer;
+        CompressionContext<BgzfFile> ctx;
+        Thread<BgzfCompressor> compress;
+
+        Concatter *concatter;
+        unsigned waitForKey;
 
         BgzfThreadContext():
             outputBuffer(BGZF_MAX_BLOCK_SIZE, 0),
@@ -124,19 +127,15 @@ public:
         {}
     };
 
-    bgzfThreadContext threadCtx[];
-    bgzfThreadContext *ctx;
+    BgzfThreadContext threadCtx[];
+    BgzfThreadContext *ctx;
 
     /** Construct a zip stream
      * More info on the following parameters can be found in the bgzf documentation.
      */
     basic_bgzf_streambuf(ostream_reference ostream_,
-                         size_t level_,
-                         EStrategy strategy_,
-                         size_t window_size_,
-                         size_t memory_level_,
                          size_t threads) :
-		ostream(&ostream_)
+		concatter(ostream_)
     {
         concatter.waitForKey = 0;
         threadCtx = new BgzfThreadContext[threads];
@@ -153,7 +152,6 @@ public:
     {
 		flush();
 		concatter.ostream->flush();
-		m_err=deflateEnd(&m_bgzf_stream);
         delete[] threadCtx;
     }
 
@@ -199,9 +197,9 @@ public:
 	*/
 	std::streamsize flush();
 	/// returns a reference to the output stream
-	ostream_reference get_ostream() const	{	return *ostream;};
+	ostream_reference get_ostream() const	{ return concatter.ostream; };
 	/// returns the latest bgzf error status
-	int get_zerr() const					{	return m_err;};
+	int get_zerr() const					{ return m_err; };
 private:
 	size_t fill_input_buffer();
 
@@ -573,7 +571,7 @@ typedef basic_bgzf_istream<char> bgzf_istream;
 /// A typedef for basic_bgzf_istream<wchart>
 typedef basic_bgzf_istream<wchar_t> bgzf_wistream;
 
-} // bgzf_sream
+}  // namespace seqan
 
 #include "bgzfstream.ipp"
 
