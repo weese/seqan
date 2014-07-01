@@ -72,11 +72,11 @@ struct CompressionContext<BgzfFile>:
     CompressionContext<GZFile>
 {
     enum { BLOCK_HEADER_LENGTH = 18 };
-    static const char header[BLOCK_HEADER_LENGTH];
+    static const unsigned char header[BLOCK_HEADER_LENGTH];
     unsigned char headerPos;
 };
 
-const char CompressionContext<BgzfFile>::header[18] = {
+const unsigned char CompressionContext<BgzfFile>::header[18] = {
     MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
     4, 0, 0, 0, 0, 0, -1, 6, 0, 'B', 'C', 2, 0, 0, 0
 };
@@ -303,6 +303,8 @@ compressAll(TTarget &target, TSource const &source, CompressionContext<BgzfFile>
 
     return length(target);
 }
+
+}  // namespace seqan
 
 #endif  // SEQAN_STREAM_STREAM_COMPRESSOR_H_
 

@@ -127,7 +127,7 @@ public:
         {}
     };
 
-    BgzfThreadContext threadCtx[];
+    BgzfThreadContext *threadCtx;
     BgzfThreadContext *ctx;
 
     /** Construct a zip stream
@@ -169,6 +169,7 @@ public:
     bool compressBuffer()
     {
         run(ctx->compress);
+        return true;
     }
 
     int_type overflow(int_type c)
