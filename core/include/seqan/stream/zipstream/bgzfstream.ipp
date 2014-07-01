@@ -20,7 +20,7 @@ Author: David Weese, dave.weese@gmail.com, 2014             (extension to parall
 #ifndef BGZFSTREAM_IPP
 #define BGZFSTREAM_IPP
 
-#include "zipstream.hpp"
+#include "bgzfstream.hpp"
 #include <sstream>
 
 namespace seqan {
