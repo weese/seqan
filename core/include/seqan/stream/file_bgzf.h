@@ -45,9 +45,9 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-template <typename TValue, typename TDirection>
-struct Host<FilePageTable<TValue, TDirection, BgzfFile> >:
-    public Host<FilePageTable<TValue, TDirection, Async<> > > {};
+//template <typename TValue, typename TDirection>
+//struct Host<FilePageTable<TValue, TDirection, BgzfFile> >:
+//    public Host<FilePageTable<TValue, TDirection, Async<> > > {};
 
 /*
 struct VariablePagingScheme

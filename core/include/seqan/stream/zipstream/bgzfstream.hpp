@@ -195,7 +195,13 @@ public:
 	This method should be called at the end of the compression. Calling flush multiple times, will lower the
 	compression ratio.
 	*/
-	std::streamsize flush();
+	std::streamsize flush()
+    {
+        std::streamsize totalWrittenByteSize = compressBuffer();
+		concatter.ostream.flush();
+		return totalWrittenByteSize;
+    }
+
 	/// returns a reference to the output stream
 	ostream_reference get_ostream() const	{ return concatter.ostream; };
 	/// returns the latest bgzf error status
@@ -237,9 +243,7 @@ public:
      */
 	 basic_unbgzf_streambuf(
 		istream_reference istream_,
-		size_t window_size_,
-		size_t read_buffer_size_,
-		size_t input_buffer_size_
+		size_t window_size_
 		);
 	
 	~basic_unbgzf_streambuf();

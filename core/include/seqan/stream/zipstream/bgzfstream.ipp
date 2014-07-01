@@ -17,13 +17,13 @@ Permission is granted to anyone to use this software for any purpose, including 
 Author: Jonathan de Halleux, dehalleux@pelikhan.com, 2003   (original zlib stream)
 Author: David Weese, dave.weese@gmail.com, 2014             (extension to parallel block-wise compression in bgzf format)
 */
-#ifndef ZIPSTREAM_IPP
-#define ZIPSTREAM_IPP
+#ifndef BGZFSTREAM_IPP
+#define BGZFSTREAM_IPP
 
 #include "zipstream.hpp"
 #include <sstream>
 
-namespace bgzf_stream{
+namespace seqan {
 
 namespace detail{
 	const int gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
@@ -37,25 +37,6 @@ namespace detail{
 	const int gz_reserved   =  0xE0; /* bits 5..7: reserved */	
 
 }
-
-	template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	std::streamsize basic_bgzf_streambuf<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::flush()
-	{
-        std::streamsize =
-        bool result = bgzf_to_stream();
-
-		ostream.flush();
-
-		return total_written_byte_size;
-	}
 
 	template<
 		typename Elem, 
@@ -246,7 +227,7 @@ namespace detail{
         typename ByteT,
         typename ByteAT
     >
-    int _checkGZHeader(bgzf_stream::basic_unbgzf_streambuf<Elem, Tr, ElemA, ByteT, ByteAT> *buf)
+    int _checkGZHeader(basic_unbgzf_streambuf<Elem, Tr, ElemA, ByteT, ByteAT> *buf)
     {
         int method; /* method byte */
         int flags;  /* flags byte */
@@ -262,7 +243,7 @@ namespace detail{
          for (len = 0; len < 2; len++) 
          {
             c = (int)istream.get();
-            if (c != bgzf_stream::detail::gz_magic[len])
+            if (c != detail::gz_magic[len])
             {
                 if (len != 0) 
                     istream.unget();
@@ -280,7 +261,7 @@ namespace detail{
         m_is_gzip = true;
         method = (int)istream.get();
         flags = (int)istream.get();
-        if (method != Z_DEFLATED || (flags & bgzf_stream::detail::gz_reserved) != 0)
+        if (method != Z_DEFLATED || (flags & detail::gz_reserved) != 0)
         {
             err = Z_DATA_ERROR;
             return err;
@@ -290,7 +271,7 @@ namespace detail{
         for (len = 0; len < 6; len++) 
             istream.get();
 
-        if ((flags & bgzf_stream::detail::gz_extra_field) != 0)
+        if ((flags & detail::gz_extra_field) != 0)
         { 
             /* skip the extra field */
             len  =  (uInt)istream.get();
@@ -298,17 +279,17 @@ namespace detail{
             /* len is garbage if EOF but the loop below will quit anyway */
             while (len-- != 0 && istream.get() != EOF) ;
         }
-        if ((flags & bgzf_stream::detail::gz_orig_name) != 0)
+        if ((flags & detail::gz_orig_name) != 0)
         { 
             /* skip the original file name */
             while ((c = istream.get()) != 0 && c != EOF) ;
         }
-        if ((flags & bgzf_stream::detail::gz_comment) != 0)
+        if ((flags & detail::gz_comment) != 0)
         {   
             /* skip the .gz file comment */
             while ((c = istream.get()) != 0 && c != EOF) ;
         }
-        if ((flags & bgzf_stream::detail::gz_head_crc) != 0)
+        if ((flags & detail::gz_head_crc) != 0)
         {  /* skip the header crc */
             for (len = 0; len < 2; len++) 
                 istream.get();
@@ -390,7 +371,7 @@ namespace detail{
         typename ByteT,
         typename ByteAT
     >
-    void _addGZHeader(bgzf_stream::basic_bgzf_streambuf<Elem, Tr, ElemA, ByteT, ByteAT> *buf)
+    void _addGZHeader(basic_bgzf_streambuf<Elem, Tr, ElemA, ByteT, ByteAT> *buf)
     {
 	    typename Tr::char_type zero=0;
 	    
@@ -425,7 +406,7 @@ namespace detail{
         typename ByteT,
         typename ByteAT
     >
-    void _addGZFooter(bgzf_stream::basic_bgzf_streambuf<Elem, Tr, ElemA, ByteT, ByteAT> *buf)
+    void _addGZFooter(basic_bgzf_streambuf<Elem, Tr, ElemA, ByteT, ByteAT> *buf)
 	{
 		_putBinaryLong( buf->get_ostream(), buf->get_crc() );
 		_putBinaryLong( buf->get_ostream(), buf->get_in_size() );
@@ -445,6 +426,6 @@ namespace detail{
         _addGZFooter(this->rdbuf());
 	}
 
-} // bgzf_sream
+}  // namespace seqan
 
 #endif
