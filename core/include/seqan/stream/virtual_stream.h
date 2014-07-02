@@ -61,6 +61,7 @@ namespace seqan {
 typedef
 #if SEQAN_HAS_ZLIB
     TagList<GZFile,
+    TagList<BgzfFile,
 #endif
 #if SEQAN_HAS_BZIP2
     TagList<BZ2File,
@@ -70,6 +71,7 @@ typedef
     >
 #endif
 #if SEQAN_HAS_ZLIB
+    >
     >
 #endif
     CompressedFileTypes;  // if TagSelector is set to -1, the file format is auto-detected
@@ -98,6 +100,18 @@ template <typename TValue>
 struct VirtualStreamSwitch_<TValue, Output, GZFile>
 {
     typedef zlib_stream::basic_zip_ostream<TValue> Type;
+};
+
+template <typename TValue>
+struct VirtualStreamSwitch_<TValue, Input, BgzfFile>
+{
+    typedef basic_bgzf_istream<TValue> Type;
+};
+
+template <typename TValue>
+struct VirtualStreamSwitch_<TValue, Output, BgzfFile>
+{
+    typedef basic_bgzf_ostream<TValue> Type;
 };
 
 template <typename TValue>
@@ -390,6 +404,28 @@ template<
     typename ByteAT >
 inline void
 flush(zlib_stream::basic_zip_ostream<Elem,Tr,ElemA,ByteT,ByteAT> &stream)
+{
+    stream.zflush();
+}
+
+template<
+	typename Elem, 
+	typename Tr,
+    typename ElemA,
+    typename ByteT,
+    typename ByteAT >
+inline void
+flush(basic_bgzf_istream<Elem,Tr,ElemA,ByteT,ByteAT> &)
+{}
+
+template<
+	typename Elem, 
+	typename Tr,
+    typename ElemA,
+    typename ByteT,
+    typename ByteAT >
+inline void
+flush(basic_bgzf_ostream<Elem,Tr,ElemA,ByteT,ByteAT> &stream)
 {
     stream.zflush();
 }

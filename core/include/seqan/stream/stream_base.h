@@ -193,6 +193,19 @@ template <typename TFormat, typename T = void>
 struct FileFormatExtensions;
 
 template <typename T>
+struct FileFormatExtensions<Nothing, T>
+{
+    static char const * VALUE[1];
+};
+
+template <typename T>
+char const * FileFormatExtensions<Nothing, T>::VALUE[1] =
+{
+    ""
+};              // default output extension
+
+
+template <typename T>
 struct FileFormatExtensions<GZFile, T>
 {
     static char const * VALUE[3];
@@ -207,8 +220,18 @@ char const * FileFormatExtensions<GZFile, T>::VALUE[3] =
 };
 
 
-template <typename TTag, typename T>
-struct FileFormatExtensions;
+template <typename T>
+struct FileFormatExtensions<BgzfFile, T>
+{
+    static char const * VALUE[1];
+};
+
+template <typename T>
+char const * FileFormatExtensions<BgzfFile, T>::VALUE[1] =
+{
+    ".bgzf"       // default output extension
+};
+
 
 template <typename T>
 struct FileFormatExtensions<BZ2File, T>
@@ -223,18 +246,6 @@ char const * FileFormatExtensions<BZ2File, T>::VALUE[2] =
     ".bz"
 };
 
-
-template <typename T>
-struct FileFormatExtensions<Nothing, T>
-{
-    static char const * VALUE[1];
-};
-
-template <typename T>
-char const * FileFormatExtensions<Nothing, T>::VALUE[1] =
-{
-    ""
-};              // default output extension
 
 // --------------------------------------------------------------------------
 // Metafunction Chunk

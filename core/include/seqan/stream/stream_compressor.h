@@ -250,33 +250,32 @@ compress(TTarget & target, TSourceIterator & source, CompressionContext<BgzfFile
 //    }
 }
 
-template <typename TTarget, typename TSource>
-inline typename Size<TTarget>::Type
-compressAll(TTarget & target, TSource const & source, CompressionContext<BgzfFile> & ctx)
+template <typename TDestValue, typename TDestCapacity, typename TSourceValue, typename TSourceLength>
+inline TDestCapacity
+_compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
+               TSourceValue *srcBegin, TSourceLength srcLength, CompressionContext<BgzfFile> & ctx)
 {
-    typedef typename Value<TSource>::Type TSourceValue;
-
     const size_t BLOCK_HEADER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_HEADER_LENGTH;
     const size_t BLOCK_FOOTER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_FOOTER_LENGTH;
+
+    SEQAN_ASSERT_GT(dstCapacity, BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
+    SEQAN_ASSERT_EQ(sizeof(TDestValue), 1u);
 
     // 1. COPY HEADER
 
     compressInit(ctx);
 
-    // allocate output buffer
-    resize(target, DefaultPageSize<BgzfFile>::MAX_BLOCK_SIZE, Exact());
-
     // copy header
-    std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], begin(target, Standard()));
+    std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], dstBegin);
 
 
     // 2. COMPRESS
 
-    ctx.strm.next_in = static_cast<Bytef *>(static_cast<void *>(begin(source, Standard())));
-    ctx.strm.next_out = static_cast<Bytef *>(static_cast<void const *>(begin(target, Standard())));
+    ctx.strm.next_in = (Bytef *)(srcBegin);
+    ctx.strm.next_out = (Bytef *)(dstBegin + BLOCK_HEADER_LENGTH);
     ctx.strm.next_out += BLOCK_HEADER_LENGTH;
-    ctx.strm.avail_in = length(source) * sizeof(TSourceValue);
-    ctx.strm.avail_out = capacity(target) - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
+    ctx.strm.avail_in = srcLength * sizeof(TSourceValue);
+    ctx.strm.avail_out = dstCapacity - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
 
     int status = deflate(&ctx.strm, Z_FINISH);
     if (status != Z_STREAM_END)
@@ -286,29 +285,30 @@ compressAll(TTarget & target, TSource const & source, CompressionContext<BgzfFil
     if (status != Z_OK)
         throw IOException("BgzfFile deflateEnd() failed.");
 
-    resize(target, capacity(target) - ctx.strm.avail_out);
-
 
     // 3. APPEND FOOTER
 
     // Set compressed length into buffer, compute CRC and write CRC into buffer.
     union
     {
-        unsigned int i32;
+        unsigned int crc;
+        unsigned int len;
         char raw[4];
     } tmp;
 
-    tmp.i32 = crc32(0L, NULL, 0L);
-    tmp.i32 = crc32(tmp.i32, static_cast<Bytef const *>(static_cast<void const *>(begin(source, Standard()))), length(source) * sizeof(TSourceValue));
-    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + (length(target) - 8));
+    tmp.len = dstCapacity - ctx.strm.avail_out - 1;
+    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin + 16);
 
-    tmp.i32 = length(source);
-    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + (length(target) - 4));
+    dstBegin += (tmp.len + 1) - BLOCK_FOOTER_LENGTH;
 
-    tmp.i32 = length(target) - 1;
-    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + 16);
+    tmp.crc = crc32(0L, NULL, 0L);
+    tmp.crc = crc32(tmp.crc, (Bytef *)(srcBegin), srcLength * sizeof(TSourceValue));
+    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin);
 
-    return length(target);
+    tmp.len = srcLength * sizeof(TSourceValue);
+    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin + 4);
+
+    return dstCapacity - ctx.strm.avail_out;
 }
 
 }  // namespace seqan
