@@ -78,10 +78,11 @@ public:
         ostream_reference ostream;
         Mutex lock;
         unsigned waitForKey;
+        unsigned nextKey;
 
         Concatter(ostream_reference ostream) :
             ostream(ostream),
-            lock(true)
+            lock(false)
         {}
     };
 
@@ -146,6 +147,7 @@ public:
         threads(threads)
     {
         concatter.waitForKey = 0;
+        concatter.nextKey = 0;
         threadCtx = new BgzfThreadContext[threads];
         for (unsigned i = 0; i < threads; ++i)
         {
@@ -177,6 +179,7 @@ public:
     bool compressBuffer(size_t size)
     {
         ctx->size = size;
+        ctx->waitForKey = concatter.nextKey++;
         run(ctx->compress);
 
         thread = (thread + 1) % threads;

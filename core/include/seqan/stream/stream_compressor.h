@@ -293,13 +293,14 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
     {
         unsigned int crc;
         unsigned int len;
+        unsigned short len16;
         char raw[4];
     } tmp;
 
-    tmp.len = dstCapacity - ctx.strm.avail_out - 1;
-    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin + 16);
+    tmp.len16 = dstCapacity - ctx.strm.avail_out - 1;
+    std::copy(&tmp.raw[0], &tmp.raw[2], dstBegin + 16);
 
-    dstBegin += (tmp.len + 1) - BLOCK_FOOTER_LENGTH;
+    dstBegin += (tmp.len16 + 1) - BLOCK_FOOTER_LENGTH;
 
     tmp.crc = crc32(0L, NULL, 0L);
     tmp.crc = crc32(tmp.crc, (Bytef *)(srcBegin), srcLength * sizeof(TSourceValue));
