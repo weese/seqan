@@ -20,7 +20,7 @@ Author: David Weese, dave.weese@gmail.com, 2014             (extension to parall
 #ifndef BGZFSTREAM_IPP
 #define BGZFSTREAM_IPP
 
-#include "zipstream.hpp"
+#include "bgzfstream.hpp"
 #include <sstream>
 
 namespace seqan {
@@ -47,30 +47,12 @@ namespace detail{
 	>
     basic_unbgzf_streambuf<
 		Elem,Tr,ElemA,ByteT,ByteAT
-		>::basic_unbgzf_streambuf(
-			istream_reference istream_,
-			size_t window_size_
-	)
+		>::basic_unbgzf_streambuf(istream_reference istream_)
 	:  
 		m_istream(istream_),
 		m_input_buffer(BGZF_MAX_BLOCK_SIZE),
-		m_buffer(BGZF_MAX_BLOCK_SIZE),
-		m_crc(0)
+		m_buffer(BGZF_MAX_BLOCK_SIZE)
 	{
-		// setting zalloc, zfree and opaque
-		m_bgzf_stream.zalloc=(alloc_func)0;
-		m_bgzf_stream.zfree=(free_func)0;
-
-		m_bgzf_stream.next_in=NULL;
-		m_bgzf_stream.avail_in=0;
-		m_bgzf_stream.avail_out=0;
-		m_bgzf_stream.next_out=NULL;
-	
-		m_err=inflateInit2(
-			&m_bgzf_stream,
-			-static_cast<int>(window_size_)
-		);
-		
 		this->setg( &(m_buffer[0])+4,     // beginning of putback area
 		    &(m_buffer[0])+4,     // read position
 	        &(m_buffer[0])+4);    // end position    
@@ -316,24 +298,6 @@ namespace detail{
 
 	template<
 		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	void basic_bgzf_istream<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::read_footer()
-	{		
-		if (m_is_gzip)
-		{
-			read_long( this->rdbuf()->get_istream(), m_gbgzf_crc );
-			read_long( this->rdbuf()->get_istream(), m_gbgzf_data_size );
-		}
-	}
-
-	template<
-		typename Elem, 
 		typename Tr
 	>
     void _putBinaryLong(std::basic_ostream<Elem,Tr> & out_, unsigned long x_)
@@ -385,20 +349,6 @@ namespace detail{
 			.put(static_cast<typename Tr::char_type>(OS_CODE));
     }
 
-	template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	void basic_bgzf_ostream<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::add_header()
-	{
-        _addGZHeader(this->rdbuf());
-	}
-
     template<
         typename Elem, 
         typename Tr,
@@ -410,20 +360,6 @@ namespace detail{
 	{
 		_putBinaryLong( buf->get_ostream(), buf->get_crc() );
 		_putBinaryLong( buf->get_ostream(), buf->get_in_size() );
-	}
-    
-    template<
-		typename Elem, 
-		typename Tr,
-		typename ElemA,
-		typename ByteT,
-		typename ByteAT
-	>
-	void basic_bgzf_ostream<
-		Elem,Tr,ElemA,ByteT,ByteAT
-		>::add_footer()
-	{
-        _addGZFooter(this->rdbuf());
 	}
 
 }  // namespace seqan

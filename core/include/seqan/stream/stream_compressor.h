@@ -35,6 +35,12 @@
 #ifndef SEQAN_STREAM_STREAM_COMPRESSOR_H_
 #define SEQAN_STREAM_STREAM_COMPRESSOR_H_
 
+#if SEQAN_HAS_ZLIB
+#include <zlib.h>
+#endif
+
+#include <algorithm>    // copy
+
 namespace seqan {
 
 // ============================================================================
@@ -58,8 +64,6 @@ template <typename TAlgTag>
 struct DefaultPageSize;
 
 #if SEQAN_HAS_ZLIB
-#include <zlib.h>
-
 template <>
 struct CompressionContext<GZFile>
 {
@@ -76,7 +80,8 @@ struct CompressionContext<BgzfFile>:
     unsigned char headerPos;
 };
 
-const unsigned char CompressionContext<BgzfFile>::header[18] = {
+const unsigned char CompressionContext<BgzfFile>::header[18] =
+{
     MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
     4, 0, 0, 0, 0, 0, 0xff, 6, 0, 'B', 'C', 2, 0, 0, 0
 };
@@ -86,9 +91,10 @@ struct DefaultPageSize<BgzfFile>
 {
     static const unsigned MAX_BLOCK_SIZE = 64 * 1024;
     static const unsigned BLOCK_FOOTER_LENGTH = 8;
-    static const unsigned ZLIB_BLOCK_OVERHEAD = 5; // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
+    // 5 bytes block overhead (see 3.2.4. at http://www.gzip.org/zlib/rfc-deflate.html)
+    static const unsigned ZLIB_BLOCK_OVERHEAD = 5;
 
-    // Reduce the maximal input size, such that the compressed data 
+    // Reduce the maximal input size, such that the compressed data
     // always fits in one block even for level Z_NO_COMPRESSION.
     enum { BLOCK_HEADER_LENGTH = CompressionContext<BgzfFile>::BLOCK_HEADER_LENGTH };
     static const unsigned VALUE = MAX_BLOCK_SIZE - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH - ZLIB_BLOCK_OVERHEAD;
@@ -109,7 +115,7 @@ Pager<TOutPager, Compress<TAlgTag> >
     Page & getPage (__int64 position)
     {
         Page *page;
-        { 
+        {
             ScopedReadLock(table.lock);
 
             page = table[position];
@@ -130,7 +136,7 @@ Pager<TOutPager, Compress<TAlgTag> >
         }
         return page;
     }
-    
+
     void putPage (Page &page)
     {
         __int64 outPosition = 0;                                // compute start position in outbound pager
@@ -139,7 +145,7 @@ Pager<TOutPager, Compress<TAlgTag> >
             PageRange range = getPageRange(beginPosition(page.range) - 1);
             outPosition = endPosition(range);                   // wait for end position of the previous page
         }
-        
+
         TCompressionContext ctx;
         initCompressionContext(ctx);
 
@@ -160,9 +166,9 @@ Pager<TOutPager, Compress<TAlgTag> >
 // ============================================================================
 
 inline void
-compressInit(CompressionContext<GZFile> &ctx)
+compressInit(CompressionContext<GZFile> & ctx)
 {
-    const int GZIP_WINDOW_BITS = -15; // no zlib header
+    const int GZIP_WINDOW_BITS = -15;   // no zlib header
     const int Z_DEFAULT_MEM_LEVEL = 8;
 
     ctx.strm.zalloc = NULL;
@@ -174,7 +180,7 @@ compressInit(CompressionContext<GZFile> &ctx)
 }
 
 inline void
-compressInit(CompressionContext<BgzfFile> &ctx)
+compressInit(CompressionContext<BgzfFile> & ctx)
 {
     compressInit(static_cast<CompressionContext<GZFile> &>(ctx));
     ctx.headerPos = 0;
@@ -182,7 +188,7 @@ compressInit(CompressionContext<BgzfFile> &ctx)
 
 template <typename TTarget, typename TSourceIterator>
 inline typename Size<TTarget>::Type
-compress(TTarget &target, TSourceIterator &source, CompressionContext<BgzfFile> &ctx)
+compress(TTarget & target, TSourceIterator & source, CompressionContext<BgzfFile> & ctx)
 {
     typedef typename Size<TTarget>::Type            TSize;
     typedef typename Chunk<TTarget>::Type           TTargetChunk;
@@ -244,33 +250,32 @@ compress(TTarget &target, TSourceIterator &source, CompressionContext<BgzfFile> 
 //    }
 }
 
-template <typename TTarget, typename TSource>
-inline typename Size<TTarget>::Type
-compressAll(TTarget &target, TSource const &source, CompressionContext<BgzfFile> &ctx)
+template <typename TDestValue, typename TDestCapacity, typename TSourceValue, typename TSourceLength>
+inline TDestCapacity
+_compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
+               TSourceValue *srcBegin, TSourceLength srcLength, CompressionContext<BgzfFile> & ctx)
 {
-    typedef typename Value<TSource>::Type TSourceValue;
-
     const size_t BLOCK_HEADER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_HEADER_LENGTH;
     const size_t BLOCK_FOOTER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_FOOTER_LENGTH;
+
+    SEQAN_ASSERT_GT(dstCapacity, BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
+    SEQAN_ASSERT_EQ(sizeof(TDestValue), 1u);
 
     // 1. COPY HEADER
 
     compressInit(ctx);
 
-    // allocate output buffer
-    resize(target, DefaultPageSize<BgzfFile>::MAX_BLOCK_SIZE, Exact());
-
     // copy header
-    std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], begin(target, Standard()));
+    std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], dstBegin);
 
 
     // 2. COMPRESS
 
-    ctx.strm.next_in = static_cast<Bytef *>(static_cast<void *>(begin(source, Standard())));
-    ctx.strm.next_out = static_cast<Bytef *>(static_cast<void const *>(begin(target, Standard())));
+    ctx.strm.next_in = (Bytef *)(srcBegin);
+    ctx.strm.next_out = (Bytef *)(dstBegin + BLOCK_HEADER_LENGTH);
     ctx.strm.next_out += BLOCK_HEADER_LENGTH;
-    ctx.strm.avail_in = length(source) * sizeof(TSourceValue);
-    ctx.strm.avail_out = capacity(target) - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
+    ctx.strm.avail_in = srcLength * sizeof(TSourceValue);
+    ctx.strm.avail_out = dstCapacity - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
 
     int status = deflate(&ctx.strm, Z_FINISH);
     if (status != Z_STREAM_END)
@@ -280,31 +285,33 @@ compressAll(TTarget &target, TSource const &source, CompressionContext<BgzfFile>
     if (status != Z_OK)
         throw IOException("BgzfFile deflateEnd() failed.");
 
-    resize(target, capacity(target) - ctx.strm.avail_out);
-
 
     // 3. APPEND FOOTER
 
     // Set compressed length into buffer, compute CRC and write CRC into buffer.
-    union {
-        unsigned int i32;
+    union
+    {
+        unsigned int crc;
+        unsigned int len;
+        unsigned short len16;
         char raw[4];
     } tmp;
 
-    tmp.i32 = crc32(0L, NULL, 0L);
-    tmp.i32 = crc32(tmp.i32, static_cast<Bytef const *>(static_cast<void const *>(begin(source, Standard()))), length(source) * sizeof(TSourceValue));
-    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + (length(target) - 8));
+    tmp.len16 = dstCapacity - ctx.strm.avail_out - 1;
+    std::copy(&tmp.raw[0], &tmp.raw[2], dstBegin + 16);
 
-    tmp.i32 = length(source);
-    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + (length(target) - 4));
+    dstBegin += (tmp.len16 + 1) - BLOCK_FOOTER_LENGTH;
 
-    tmp.i32 = length(target) - 1;
-    std::copy(&tmp.raw[0], &tmp.raw[4], begin(target, Standard()) + 16);
+    tmp.crc = crc32(0L, NULL, 0L);
+    tmp.crc = crc32(tmp.crc, (Bytef *)(srcBegin), srcLength * sizeof(TSourceValue));
+    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin);
 
-    return length(target);
+    tmp.len = srcLength * sizeof(TSourceValue);
+    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin + 4);
+
+    return dstCapacity - ctx.strm.avail_out;
 }
 
 }  // namespace seqan
 
 #endif  // SEQAN_STREAM_STREAM_COMPRESSOR_H_
-

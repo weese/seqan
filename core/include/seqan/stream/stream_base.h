@@ -49,7 +49,7 @@ namespace seqan {
 // --------------------------------------------------------------------------
 
 template <typename TValue, typename TDirection>
-struct BasicStream:
+struct BasicStream :
     If<
         IsSameType<TDirection, Input>,
         std::basic_istream<TValue>,
@@ -57,8 +57,8 @@ struct BasicStream:
             IsSameType<TDirection, Output>,
             std::basic_ostream<TValue>,
             std::basic_iostream<TValue>
-        >::Type
-    >
+            >::Type
+        >
 {};
 
 template <typename TDirection, typename TDummy = void>
@@ -126,11 +126,11 @@ struct MagicHeader;
 template <typename T>
 struct MagicHeader<Nothing, T>
 {
-    static unsigned char const *VALUE;
+    static unsigned char const * VALUE;
 };
 
 template <typename T>
-unsigned char const *MagicHeader<Nothing, T>::VALUE = NULL;
+unsigned char const * MagicHeader<Nothing, T>::VALUE = NULL;
 
 
 template <typename T>
@@ -172,7 +172,7 @@ struct MagicHeader<Fasta, T>
 };
 
 template <typename T>
-unsigned char const MagicHeader<Fasta, T>::VALUE[1] = { '>' }; // Fasta's first character
+unsigned char const MagicHeader<Fasta, T>::VALUE[1] = { '>' };  // Fasta's first character
 
 
 template <typename T>
@@ -193,20 +193,45 @@ template <typename TFormat, typename T = void>
 struct FileFormatExtensions;
 
 template <typename T>
+struct FileFormatExtensions<Nothing, T>
+{
+    static char const * VALUE[1];
+};
+
+template <typename T>
+char const * FileFormatExtensions<Nothing, T>::VALUE[1] =
+{
+    ""
+};              // default output extension
+
+
+template <typename T>
 struct FileFormatExtensions<GZFile, T>
 {
     static char const * VALUE[3];
 };
 
 template <typename T>
-char const * FileFormatExtensions<GZFile, T>::VALUE[3] = {
+char const * FileFormatExtensions<GZFile, T>::VALUE[3] =
+{
     ".gz",      // default output extension
     ".Z",
-    ".zip" };
+    ".zip"
+};
 
 
-template <typename TTag, typename T>
-struct FileFormatExtensions;
+template <typename T>
+struct FileFormatExtensions<BgzfFile, T>
+{
+    static char const * VALUE[1];
+};
+
+template <typename T>
+char const * FileFormatExtensions<BgzfFile, T>::VALUE[1] =
+{
+    ".bgzf"       // default output extension
+};
+
 
 template <typename T>
 struct FileFormatExtensions<BZ2File, T>
@@ -215,20 +240,12 @@ struct FileFormatExtensions<BZ2File, T>
 };
 
 template <typename T>
-char const * FileFormatExtensions<BZ2File, T>::VALUE[2] = {
-    ".bz2",      // default output extension
-    ".bz" };
-
-
-template <typename T>
-struct FileFormatExtensions<Nothing, T>
+char const * FileFormatExtensions<BZ2File, T>::VALUE[2] =
 {
-    static char const * VALUE[1];
+    ".bz2",      // default output extension
+    ".bz"
 };
 
-template <typename T>
-char const * FileFormatExtensions<Nothing, T>::VALUE[1] = {
-    "" };       // default output extension
 
 // --------------------------------------------------------------------------
 // Metafunction Chunk
@@ -254,8 +271,7 @@ SEQAN_CONCEPT(InputStreamConcept, (TStream))
     SEQAN_CONCEPT_ASSERT((SignedIntegerConcept<TPosition>));
 
     SEQAN_CONCEPT_USAGE(InputStreamConcept)
-    {
-    }
+    {}
 };
 
 // --------------------------------------------------------------------------
@@ -271,8 +287,7 @@ SEQAN_CONCEPT(OutputStreamConcept, (TStream))
     SEQAN_CONCEPT_ASSERT((SignedIntegerConcept<TPosition>));
 
     SEQAN_CONCEPT_USAGE(OutputStreamConcept)
-    {
-    }
+    {}
 };
 
 // --------------------------------------------------------------------------
@@ -280,9 +295,8 @@ SEQAN_CONCEPT(OutputStreamConcept, (TStream))
 // --------------------------------------------------------------------------
 
 SEQAN_CONCEPT_REFINE(BidirectionalStreamConcept, (TStream), (InputStreamConcept)(OutputStreamConcept))
-{
-};
+{};
 
-}  // namespace seqean
+}  // namespace seqan
 
 #endif  // #ifndef SEQAN_STREAM_STREAM_BASE_H_

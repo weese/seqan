@@ -78,9 +78,11 @@ public:
         ostream_reference ostream;
         Mutex lock;
         unsigned waitForKey;
+        unsigned nextKey;
 
         Concatter(ostream_reference ostream) :
-            ostream(ostream)
+            ostream(ostream),
+            lock(false)
         {}
     };
 
@@ -97,26 +99,29 @@ public:
 
             void operator()()
             {
-                compressAll(threadCtx->outputBuffer, threadCtx->buffer, threadCtx->ctx);
+                size_t outputLen = _compressBlock(
+                    &threadCtx->outputBuffer[0], capacity(threadCtx->outputBuffer),
+                    &threadCtx->buffer[0], threadCtx->size, threadCtx->ctx);
                 while (true)
                 {
-                    ScopedLock<Mutex> scopedLock(threadCtx->concatter.lock);
-                    if (threadCtx->concatter.waitForKey == threadCtx->waitForKey)
+                    ScopedLock<Mutex> scopedLock(threadCtx->concatter->lock);
+                    if (threadCtx->concatter->waitForKey == threadCtx->waitForKey)
                     {
-                        threadCtx->ostream->write(
+                        threadCtx->concatter->ostream.write(
                             (const char_type*) &(threadCtx->outputBuffer[0]),
-                            length(threadCtx->outputBuffer));
-                        threadCtx->concatter.waitForKey = threadCtx->waitForKey + 1;
+                            outputLen);
+                        threadCtx->concatter->waitForKey = threadCtx->waitForKey + 1;
                         break;
                     }
                 }
             }
         };
 
-        byte_vector_type outputBuffer;
-        char_vector_type buffer;
-        CompressionContext<BgzfFile> ctx;
-        Thread<BgzfCompressor> compress;
+        byte_vector_type                outputBuffer;
+        char_vector_type                buffer;
+        size_t                          size;
+        CompressionContext<BgzfFile>    ctx;
+        Thread<BgzfCompressor>          compress;
 
         Concatter *concatter;
         unsigned waitForKey;
@@ -127,31 +132,36 @@ public:
         {}
     };
 
-    BgzfThreadContext *threadCtx;
-    BgzfThreadContext *ctx;
+    BgzfThreadContext   *threadCtx;
+    BgzfThreadContext   *ctx;
+    size_t              thread;
+    size_t              threads;
 
     /** Construct a zip stream
      * More info on the following parameters can be found in the bgzf documentation.
      */
     basic_bgzf_streambuf(ostream_reference ostream_,
-                         size_t threads) :
-		concatter(ostream_)
+                         size_t threads = 4) :
+		concatter(ostream_),
+        thread(0),
+        threads(threads)
     {
         concatter.waitForKey = 0;
+        concatter.nextKey = 0;
         threadCtx = new BgzfThreadContext[threads];
         for (unsigned i = 0; i < threads; ++i)
         {
             threadCtx[i].concatter = &concatter;
             threadCtx[i].compress.worker.threadCtx = &threadCtx[i];
         }
-        ctx = &threadCtx[0];
+        ctx = &threadCtx[thread];
 		this->setp(&(ctx->buffer[0]), &(ctx->buffer[ctx->buffer.size() - 1]));
     }
 	
 	~basic_bgzf_streambuf()
     {
 		flush();
-		concatter.ostream->flush();
+		concatter.ostream.flush();
         delete[] threadCtx;
     }
 
@@ -166,10 +176,15 @@ public:
         return 0;
     }
 
-    bool compressBuffer()
+    bool compressBuffer(size_t size)
     {
+        ctx->size = size;
+        ctx->waitForKey = concatter.nextKey++;
         run(ctx->compress);
-        return true;
+
+        thread = (thread + 1) % threads;
+        ctx = &threadCtx[thread];
+        waitFor(ctx->compress);
     }
 
     int_type overflow(int_type c)
@@ -180,9 +195,9 @@ public:
             *this->pptr() = c;
             ++w;
         }
-        if (compressBuffer())
+        if (compressBuffer(w))
         {
-            this->setp(this->pbase(), this->epptr() - 1);
+            this->setp(&(ctx->buffer[0]), &(ctx->buffer[ctx->buffer.size() - 1]));
             return c;
         }
         else
@@ -198,9 +213,9 @@ public:
 	*/
 	std::streamsize flush()
     {
-        std::streamsize totalWrittenByteSize = compressBuffer();
-		concatter.ostream.flush();
-		return totalWrittenByteSize;
+//        std::streamsize totalWrittenByteSize = compressBuffer();
+//		concatter.ostream.flush();
+//		return totalWrittenByteSize;
     }
 
 	/// returns a reference to the output stream
@@ -242,10 +257,7 @@ public:
      /** Construct a unzip stream
      * More info on the following parameters can be found in the bgzf documentation.
      */
-	 basic_unbgzf_streambuf(
-		istream_reference istream_,
-		size_t window_size_
-		);
+	 basic_unbgzf_streambuf(istream_reference istream_);
 	
 	~basic_unbgzf_streambuf();
 
@@ -304,15 +316,8 @@ public:
     /** Construct a zip stream
      * More info on the following parameters can be found in the bgzf documentation.
      */
-	basic_bgzf_ostreambase( 
-		ostream_reference ostream_,
-		size_t level_,
-		EStrategy strategy_,
-		size_t window_size_,
-		size_t memory_level_,
-		size_t buffer_size_
-		)
-		: m_buf(ostream_,level_,strategy_,window_size_,memory_level_,buffer_size_)
+	basic_bgzf_ostreambase(ostream_reference ostream_)
+		: m_buf(ostream_)
 	{
 		this->init(&m_buf );
 	};
@@ -355,13 +360,8 @@ public:
         ByteAT
         > unbgzf_streambuf_type;
 
-	basic_bgzf_istreambase( 
-		istream_reference ostream_,
-		size_t window_size_,
-		size_t read_buffer_size_,
-		size_t input_buffer_size_
-		)
-		: m_buf(ostream_,window_size_, read_buffer_size_, input_buffer_size_)
+	basic_bgzf_istreambase(istream_reference ostream_)
+		: m_buf(ostream_)
 	{
 		this->init(&m_buf );
 	};
@@ -424,48 +424,15 @@ public:
 	/** Constructs a zipper ostream decorator
 	 *
 	 * \param ostream_ ostream where the compressed output is written
-	 * \param is_gbgzf_ true if gzip header and footer have to be added
-	 * \param level_ level of compression 0, bad and fast, 9, good and slower,
-	 * \param strategy_ compression strategy
-	 * \param window_size_ see bgzf doc
-	 * \param memory_level_ see bgzf doc
-	 * \param buffer_size_ the buffer size used to zip data
 
 	 When is_gbgzf_ is true, a gzip header and footer is automatically added.
 	 */
-	basic_bgzf_ostream( 
-		ostream_reference ostream_, 
-//        int open_mode = std::ios::out, 
-		bool is_gbgzf_ = true,
-		size_t level_ = Z_DEFAULT_COMPRESSION,
-		EStrategy strategy_ = DefaultStrategy,
-		size_t window_size_ = 15,
-		size_t memory_level_ = 8,
-		size_t buffer_size_ = default_buffer_size
-		)
+	basic_bgzf_ostream(ostream_reference ostream_)
 	: 
-		bgzf_ostreambase_type(
-            ostream_,
-            level_,
-            strategy_,
-            window_size_,
-            memory_level_,
-            buffer_size_
-            ), 
-		ostream_type(this->rdbuf()),
-		m_is_gzip(is_gbgzf_)
-	{
-		if (m_is_gzip)
-			add_header();
-	};
-	~basic_bgzf_ostream()
-	{
-		if (m_is_gzip)
-			add_footer();
-	}
+		bgzf_ostreambase_type(ostream_),
+		ostream_type(this->rdbuf())
+	{}
 
-	/// returns true if it is a gzip 
-	bool is_gzip() const		{	return m_is_gzip;};
 	/// flush inner buffer and zipper buffer
 	basic_bgzf_ostream<Elem,Tr>& zflush()	
 	{	
@@ -474,10 +441,6 @@ public:
 
 private:
     static void put_long(ostream_reference out_, unsigned long x_);
-
-	void add_header();
-	void add_footer();
-	bool m_is_gzip;
 };
 
 /*! \brief A zipper istream
@@ -518,21 +481,12 @@ public:
 	/** Construct a unzipper stream
 	 *
 	 * \param istream_ input buffer
-	 * \param window_size_ 
-	 * \param read_buffer_size_ 
-	 * \param input_buffer_size_ 
 	 */
-	basic_bgzf_istream( 
-		istream_reference istream_, 
-		size_t window_size_ = 15,
-		size_t read_buffer_size_ = default_buffer_size,
-		size_t input_buffer_size_ = default_buffer_size
-		)
+	basic_bgzf_istream(istream_reference istream_)
 	  : 
-		bgzf_istreambase_type(istream_,window_size_, read_buffer_size_, input_buffer_size_),
+		bgzf_istreambase_type(istream_),
 		istream_type(this->rdbuf()),
 		m_is_gzip(false),
-		m_gbgzf_crc(0),
 		m_gbgzf_data_size(0)
 	{
  	      if (this->rdbuf()->get_zerr()==Z_OK)
@@ -541,21 +495,9 @@ public:
 
 	/// returns true if it is a gzip file
 	bool is_gzip() const				{	return m_is_gzip;};
-	/// reads the gzip header
-	void read_footer();
-	/** return crc check result
-
-	When you have finished reading the compressed data, call read_footer to read the uncompressed data crc.
-	This method compares it to the crc of the uncompressed data.
-
-	\return true if crc check is succesful 
-	*/
-	bool check_crc() const				{	return this->get_crc() == m_gbgzf_crc;};
 	/// return data size check
 	bool check_data_size() const		{	return this->get_out_size() == m_gbgzf_data_size;};
 
-	/// return the crc value in the file
-	long get_gbgzf_crc() const			{	return m_gbgzf_crc;};
 	/// return the data size in the file 
 	long get_gbgzf_data_size() const		{	return m_gbgzf_data_size;};
 protected:
@@ -563,7 +505,6 @@ protected:
 
 	int check_header();
 	bool m_is_gzip;
-	unsigned long m_gbgzf_crc;
 	unsigned long m_gbgzf_data_size;
 };
 
