@@ -78,7 +78,7 @@ struct CompressionContext<BgzfFile>:
 
 const unsigned char CompressionContext<BgzfFile>::header[18] = {
     MagicHeader<BgzfFile>::VALUE[0], MagicHeader<BgzfFile>::VALUE[1], MagicHeader<BgzfFile>::VALUE[2],
-    4, 0, 0, 0, 0, 0, -1, 6, 0, 'B', 'C', 2, 0, 0, 0
+    4, 0, 0, 0, 0, 0, 0xff, 6, 0, 'B', 'C', 2, 0, 0, 0
 };
 
 template <>
