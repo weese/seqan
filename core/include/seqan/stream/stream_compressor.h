@@ -273,7 +273,6 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
 
     ctx.strm.next_in = (Bytef *)(srcBegin);
     ctx.strm.next_out = (Bytef *)(dstBegin + BLOCK_HEADER_LENGTH);
-    ctx.strm.next_out += BLOCK_HEADER_LENGTH;
     ctx.strm.avail_in = srcLength * sizeof(TSourceValue);
     ctx.strm.avail_out = dstCapacity - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
 
@@ -296,8 +295,9 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
         unsigned short len16;
         char raw[4];
     } tmp;
-
     tmp.len16 = dstCapacity - ctx.strm.avail_out - 1;
+    printf("len1:%d\n",ctx.strm.total_out);
+    printf("len2:%d\n",tmp.len16);
     std::copy(&tmp.raw[0], &tmp.raw[2], dstBegin + 16);
 
     dstBegin += (tmp.len16 + 1) - BLOCK_FOOTER_LENGTH;
