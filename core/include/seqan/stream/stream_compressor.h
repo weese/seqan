@@ -263,14 +263,12 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
 
     // 1. COPY HEADER
 
-    compressInit(ctx);
-
-    // copy header
     std::copy(&ctx.header[0], &ctx.header[BLOCK_HEADER_LENGTH], dstBegin);
 
 
     // 2. COMPRESS
 
+    compressInit(ctx);
     ctx.strm.next_in = (Bytef *)(srcBegin);
     ctx.strm.next_out = (Bytef *)(dstBegin + BLOCK_HEADER_LENGTH);
     ctx.strm.avail_in = srcLength * sizeof(TSourceValue);
@@ -296,8 +294,6 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
         char raw[4];
     } tmp;
     tmp.len16 = dstCapacity - ctx.strm.avail_out - 1;
-    printf("len1:%d\n",ctx.strm.total_out);
-    printf("len2:%d\n",tmp.len16);
     std::copy(&tmp.raw[0], &tmp.raw[2], dstBegin + 16);
 
     dstBegin += (tmp.len16 + 1) - BLOCK_FOOTER_LENGTH;
@@ -310,6 +306,109 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
     std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin + 4);
 
     return dstCapacity - ctx.strm.avail_out;
+}
+
+inline void
+decompressInit(CompressionContext<GZFile> & ctx)
+{
+    const int GZIP_WINDOW_BITS = -15;   // no zlib header
+    const int Z_DEFAULT_MEM_LEVEL = 8;
+
+    ctx.strm.zalloc = NULL;
+    ctx.strm.zfree = NULL;
+    int status = inflateInit2(&ctx.strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+                              GZIP_WINDOW_BITS, Z_DEFAULT_MEM_LEVEL, Z_DEFAULT_STRATEGY);
+    if (status != Z_OK)
+        throw IOException("GZFile inflateInit2() failed.");
+}
+
+inline void
+decompressInit(CompressionContext<BgzfFile> & ctx)
+{
+    decompressInit(static_cast<CompressionContext<GZFile> &>(ctx));
+    ctx.headerPos = 0;
+}
+
+inline bool
+_bgzfCheckHeader(unsigned char const * header)
+{
+    const char FLG_FEXTRA = 4;
+    const char BGZF_ID1 = 'B';
+    const char BGZF_ID2 = 'C';
+    const char BGZF_LEN = 2;
+    const char BGZF_XLEN = 6;  // BGZF_LEN+4
+
+    return (header[0] == MagicHeader<BgzfFile>::VALUE[0] &&
+            header[1] == MagicHeader<BgzfFile>::VALUE[1] &&
+            header[2] == MagicHeader<BgzfFile>::VALUE[2] &&
+            (header[3] & FLG_FEXTRA) != 0 &&
+            _bgzfUnpackInt16(header + 10) == BGZF_XLEN &&
+            header[12] == BGZF_ID1 &&
+            header[13] == BGZF_ID2 &&
+            _bgzfUnpackInt16(header + 14) == BGZF_LEN);
+}
+
+// ----------------------------------------------------------------------------
+// Function _preprocessFilePage()
+// ----------------------------------------------------------------------------
+
+template <typename TDestValue, typename TDestCapacity, typename TSourceValue, typename TSourceLength>
+inline TDestCapacity
+_decompressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
+                 TSourceValue *srcBegin, TSourceLength srcLength, CompressionContext<BgzfFile> & ctx)
+{
+    const unsigned MAX_BLOCK_SIZE = 64 * 1024;
+    const unsigned BLOCK_HEADER_LENGTH = 18;
+    const int GZIP_WINDOW_BITS = -15;  // no zlib header
+
+    Bytef *header = static_cast<Bytef *>(static_cast<void *>(begin(page.raw, Standard())));
+
+    SEQAN_ASSERT_GT(dstCapacity, BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
+    SEQAN_ASSERT_EQ(sizeof(TDestValue), 1u);
+
+    // 1. CHECK HEADER
+
+    if (srcLength < BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH)
+        throw IOException("BGZF block too short.");
+
+    if (!_bgzfCheckHeader(srcBegin))
+        throw IOException("Invalid BGZF block header.");
+
+
+    // 2. DECOMPRESS
+
+    decompressInit(ctx);
+
+    // Make sure there is enough space in the buffer for decompressed data.
+    resize(page.raw, _bgzfUnpackInt16(header + 16) + 1);
+    reserve(page.data, MAX_BLOCK_SIZE);
+
+    z_stream zs;
+	int status;
+    zs.zalloc = NULL;
+    zs.zfree = NULL;
+    zs.next_in = header + BLOCK_HEADER_LENGTH;
+    zs.avail_in = length(page.raw) - (BLOCK_HEADER_LENGTH - 2);
+    zs.next_out = static_cast<Bytef *>(static_cast<void *>(begin(page.data, Standard())));
+    zs.avail_out = capacity(page.data);
+
+    status = inflateInit2(&zs, GZIP_WINDOW_BITS);
+    if (status != Z_OK)
+        throw IOException("BGZF inflateInit2() failed.");
+
+    status = inflate(&zs, Z_FINISH);
+    if (status != Z_STREAM_END)
+    {
+        inflateEnd(&zs);
+        throw IOException("BGZF inflate() failed.");
+    }
+
+    status = inflateEnd(&zs);
+    if (status != Z_OK)
+        throw IOException("BGZF inflateEnd() failed.");
+
+    resize(page.data, zs.total_out);
+    return true;
 }
 
 }  // namespace seqan

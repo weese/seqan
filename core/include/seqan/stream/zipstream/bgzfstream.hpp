@@ -121,7 +121,7 @@ public:
         char_vector_type                buffer;
         size_t                          size;
         CompressionContext<BgzfFile>    ctx;
-        Thread<BgzfCompressor>          compress;
+        Thread<BgzfCompressor>          compressor;
 
         Concatter *concatter;
         unsigned waitForKey;
@@ -152,7 +152,7 @@ public:
         for (unsigned i = 0; i < threads; ++i)
         {
             threadCtx[i].concatter = &concatter;
-            threadCtx[i].compress.worker.threadCtx = &threadCtx[i];
+            threadCtx[i].compressor.worker.threadCtx = &threadCtx[i];
         }
         ctx = &threadCtx[thread];
 		this->setp(&(ctx->buffer[0]), &(ctx->buffer[ctx->buffer.size() - 1]));
@@ -161,7 +161,6 @@ public:
 	~basic_bgzf_streambuf()
     {
 		flush();
-		concatter.ostream.flush();
         delete[] threadCtx;
     }
 
@@ -180,11 +179,11 @@ public:
     {
         ctx->size = size;
         ctx->waitForKey = concatter.nextKey++;
-        run(ctx->compress);
+        run(ctx->compressor);
 
         thread = (thread + 1) % threads;
         ctx = &threadCtx[thread];
-        waitFor(ctx->compress);
+        waitFor(ctx->compressor);
     }
 
     int_type overflow(int_type c)
@@ -213,8 +212,12 @@ public:
 	*/
 	std::streamsize flush()
     {
+        // wait for running compressor threads (in the correct order)
+        for (unsigned i = 1; i <= threads; ++i)
+            waitFor(threadCtx[(thread + i) % threads].compressor);
+
 //        std::streamsize totalWrittenByteSize = compressBuffer();
-//		concatter.ostream.flush();
+		concatter.ostream.flush();
 //		return totalWrittenByteSize;
     }
 
