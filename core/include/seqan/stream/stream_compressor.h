@@ -250,6 +250,39 @@ compress(TTarget & target, TSourceIterator & source, CompressionContext<BgzfFile
 //    }
 }
 
+// ----------------------------------------------------------------------------
+// Helper Function _bgzfUnpackXX()
+// ----------------------------------------------------------------------------
+
+inline unsigned short
+_bgzfUnpack16(unsigned char const * buffer)
+{
+    return *reinterpret_cast<unsigned short const *>(buffer);
+}
+
+inline unsigned
+_bgzfUnpack32(unsigned char const * buffer)
+{
+    return *reinterpret_cast<unsigned const *>(buffer);
+}
+
+// ----------------------------------------------------------------------------
+// Helper Function _bgzfPackXX()
+// ----------------------------------------------------------------------------
+
+inline void
+_bgzfPack16(unsigned char * buffer, unsigned short value)
+{
+    *reinterpret_cast<unsigned short *>(buffer) = value;
+}
+
+inline void
+_bgzfPack32(unsigned char * buffer, unsigned value)
+{
+    *reinterpret_cast<unsigned *>(buffer) = value;
+}
+
+
 template <typename TDestValue, typename TDestCapacity, typename TSourceValue, typename TSourceLength>
 inline TDestCapacity
 _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
@@ -260,6 +293,7 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
 
     SEQAN_ASSERT_GT(dstCapacity, BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
     SEQAN_ASSERT_EQ(sizeof(TDestValue), 1u);
+    SEQAN_ASSERT_EQ(sizeof(unsigned), 4u);
 
     // 1. COPY HEADER
 
@@ -276,34 +310,26 @@ _compressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
 
     int status = deflate(&ctx.strm, Z_FINISH);
     if (status != Z_STREAM_END)
-        throw IOException("Deflation failed. Compressed BgzfFile data is bigger than uncompressed data.");
+    {
+        deflateEnd(&ctx.strm);
+        throw IOException("Deflation failed. Compressed BGZF data is too big.");
+    }
 
     status = deflateEnd(&ctx.strm);
     if (status != Z_OK)
-        throw IOException("BgzfFile deflateEnd() failed.");
+        throw IOException("BGZF deflateEnd() failed.");
 
 
     // 3. APPEND FOOTER
 
     // Set compressed length into buffer, compute CRC and write CRC into buffer.
-    union
-    {
-        unsigned int crc;
-        unsigned int len;
-        unsigned short len16;
-        char raw[4];
-    } tmp;
-    tmp.len16 = dstCapacity - ctx.strm.avail_out - 1;
-    std::copy(&tmp.raw[0], &tmp.raw[2], dstBegin + 16);
 
-    dstBegin += (tmp.len16 + 1) - BLOCK_FOOTER_LENGTH;
+    size_t len = dstCapacity - ctx.strm.avail_out;
+    _bgzfPack16(dstBegin + 16, len - 1);
 
-    tmp.crc = crc32(0L, NULL, 0L);
-    tmp.crc = crc32(tmp.crc, (Bytef *)(srcBegin), srcLength * sizeof(TSourceValue));
-    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin);
-
-    tmp.len = srcLength * sizeof(TSourceValue);
-    std::copy(&tmp.raw[0], &tmp.raw[4], dstBegin + 4);
+    dstBegin += len - BLOCK_FOOTER_LENGTH;
+    _bgzfPack32(dstBegin, crc32(crc32(0u, NULL, 0u), (Bytef *)(srcBegin), srcLength * sizeof(TSourceValue)));
+    _bgzfPack32(dstBegin + 4, srcLength * sizeof(TSourceValue));
 
     return dstCapacity - ctx.strm.avail_out;
 }
@@ -312,14 +338,12 @@ inline void
 decompressInit(CompressionContext<GZFile> & ctx)
 {
     const int GZIP_WINDOW_BITS = -15;   // no zlib header
-    const int Z_DEFAULT_MEM_LEVEL = 8;
 
     ctx.strm.zalloc = NULL;
     ctx.strm.zfree = NULL;
-    int status = inflateInit2(&ctx.strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
-                              GZIP_WINDOW_BITS, Z_DEFAULT_MEM_LEVEL, Z_DEFAULT_STRATEGY);
+    int status = inflateInit2(&ctx.strm, GZIP_WINDOW_BITS);
     if (status != Z_OK)
-        throw IOException("GZFile inflateInit2() failed.");
+        throw IOException("GZip inflateInit2() failed.");
 }
 
 inline void
@@ -342,10 +366,10 @@ _bgzfCheckHeader(unsigned char const * header)
             header[1] == MagicHeader<BgzfFile>::VALUE[1] &&
             header[2] == MagicHeader<BgzfFile>::VALUE[2] &&
             (header[3] & FLG_FEXTRA) != 0 &&
-            _bgzfUnpackInt16(header + 10) == BGZF_XLEN &&
+            _bgzfUnpack16(header + 10) == BGZF_XLEN &&
             header[12] == BGZF_ID1 &&
             header[13] == BGZF_ID2 &&
-            _bgzfUnpackInt16(header + 14) == BGZF_LEN);
+            _bgzfUnpack16(header + 14) == BGZF_LEN);
 }
 
 // ----------------------------------------------------------------------------
@@ -357,58 +381,58 @@ inline TDestCapacity
 _decompressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
                  TSourceValue *srcBegin, TSourceLength srcLength, CompressionContext<BgzfFile> & ctx)
 {
-    const unsigned MAX_BLOCK_SIZE = 64 * 1024;
-    const unsigned BLOCK_HEADER_LENGTH = 18;
-    const int GZIP_WINDOW_BITS = -15;  // no zlib header
+    const size_t BLOCK_HEADER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_HEADER_LENGTH;
+    const size_t BLOCK_FOOTER_LENGTH = DefaultPageSize<BgzfFile>::BLOCK_FOOTER_LENGTH;
 
-    Bytef *header = static_cast<Bytef *>(static_cast<void *>(begin(page.raw, Standard())));
-
-    SEQAN_ASSERT_GT(dstCapacity, BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH);
-    SEQAN_ASSERT_EQ(sizeof(TDestValue), 1u);
+    SEQAN_ASSERT_EQ(sizeof(TSourceValue), 1u);
+    SEQAN_ASSERT_EQ(sizeof(unsigned), 4u);
 
     // 1. CHECK HEADER
 
-    if (srcLength < BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH)
+    if (srcLength <= BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH)
         throw IOException("BGZF block too short.");
 
     if (!_bgzfCheckHeader(srcBegin))
         throw IOException("Invalid BGZF block header.");
 
+    size_t compressedLen = _bgzfUnpack16(srcBegin + 16) + 1u;
+    if (compressedLen != srcLength - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH)
+        throw IOException("BGZF compressed size mismatch.");
+
 
     // 2. DECOMPRESS
 
     decompressInit(ctx);
+    ctx.strm.next_in = (Bytef *)(srcBegin + BLOCK_HEADER_LENGTH);
+    ctx.strm.next_out = (Bytef *)(dstBegin);
+    ctx.strm.avail_in = srcLength - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
+    ctx.strm.avail_out = dstCapacity * sizeof(TDestValue);
 
-    // Make sure there is enough space in the buffer for decompressed data.
-    resize(page.raw, _bgzfUnpackInt16(header + 16) + 1);
-    reserve(page.data, MAX_BLOCK_SIZE);
-
-    z_stream zs;
-	int status;
-    zs.zalloc = NULL;
-    zs.zfree = NULL;
-    zs.next_in = header + BLOCK_HEADER_LENGTH;
-    zs.avail_in = length(page.raw) - (BLOCK_HEADER_LENGTH - 2);
-    zs.next_out = static_cast<Bytef *>(static_cast<void *>(begin(page.data, Standard())));
-    zs.avail_out = capacity(page.data);
-
-    status = inflateInit2(&zs, GZIP_WINDOW_BITS);
-    if (status != Z_OK)
-        throw IOException("BGZF inflateInit2() failed.");
-
-    status = inflate(&zs, Z_FINISH);
+    int status = inflate(&ctx.strm, Z_FINISH);
     if (status != Z_STREAM_END)
     {
-        inflateEnd(&zs);
-        throw IOException("BGZF inflate() failed.");
+        inflateEnd(&ctx.strm);
+        throw IOException("Inflation failed. Decompressed BGZF data is too big.");
     }
 
-    status = inflateEnd(&zs);
+    status = inflateEnd(&ctx.strm);
     if (status != Z_OK)
         throw IOException("BGZF inflateEnd() failed.");
 
-    resize(page.data, zs.total_out);
-    return true;
+
+    // 3. CHECK FOOTER
+
+    // Check compressed length in buffer, compute CRC and compare with CRC in buffer.
+
+    dstBegin += compressedLen - BLOCK_FOOTER_LENGTH;
+    unsigned crc = crc32(crc32(0u, NULL, 0u), (Bytef *)(srcBegin), dstCapacity - ctx.strm.avail_out);
+    if (_bgzfUnpack32(dstBegin) != crc)
+        throw IOException("BGZF wrong checksum.");
+
+    if (_bgzfUnpack32(dstBegin + 4) != dstCapacity - ctx.strm.avail_out)
+        throw IOException("BGZF size mismatch.");
+
+    return (dstCapacity - ctx.strm.avail_out) / sizeof(TDestValue);
 }
 
 }  // namespace seqan
