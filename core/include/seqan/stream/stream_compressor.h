@@ -396,7 +396,7 @@ _decompressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
         throw IOException("Invalid BGZF block header.");
 
     size_t compressedLen = _bgzfUnpack16(srcBegin + 16) + 1u;
-    if (compressedLen != srcLength - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH)
+    if (compressedLen != srcLength)
         throw IOException("BGZF compressed size mismatch.");
 
 
@@ -424,12 +424,13 @@ _decompressBlock(TDestValue *dstBegin,   TDestCapacity dstCapacity,
 
     // Check compressed length in buffer, compute CRC and compare with CRC in buffer.
 
-    dstBegin += compressedLen - BLOCK_FOOTER_LENGTH;
-    unsigned crc = crc32(crc32(0u, NULL, 0u), (Bytef *)(srcBegin), dstCapacity - ctx.strm.avail_out);
-    if (_bgzfUnpack32(dstBegin) != crc)
+    unsigned crc = crc32(crc32(0u, NULL, 0u), (Bytef *)(dstBegin), dstCapacity - ctx.strm.avail_out);
+
+    srcBegin += compressedLen - BLOCK_FOOTER_LENGTH;
+    if (_bgzfUnpack32(srcBegin) != crc)
         throw IOException("BGZF wrong checksum.");
 
-    if (_bgzfUnpack32(dstBegin + 4) != dstCapacity - ctx.strm.avail_out)
+    if (_bgzfUnpack32(srcBegin + 4) != dstCapacity - ctx.strm.avail_out)
         throw IOException("BGZF size mismatch.");
 
     return (dstCapacity - ctx.strm.avail_out) / sizeof(TDestValue);

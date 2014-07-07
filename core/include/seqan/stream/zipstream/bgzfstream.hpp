@@ -223,13 +223,6 @@ public:
 
 	/// returns a reference to the output stream
 	ostream_reference get_ostream() const	{ return concatter.ostream; };
-	/// returns the latest bgzf error status
-	int get_zerr() const					{ return m_err; };
-private:
-	size_t fill_input_buffer();
-
-    int m_err;
-
 };
 
 /** \brief A stream decorator that takes compressed input and unzips it to a istream.
@@ -254,43 +247,186 @@ public:
 	typedef byte_type* byte_buffer_type;
 	typedef typename Tr::char_type char_type;
 	typedef typename Tr::int_type int_type;
-	typedef std::vector<byte_type, byte_allocator_type > byte_vector_type;
-	typedef std::vector<char_type, char_allocator_type > char_vector_type;
+    typedef std::vector<char_type, char_allocator_type> char_vector_type;
 
-     /** Construct a unzip stream
-     * More info on the following parameters can be found in the bgzf documentation.
-     */
-	 basic_unbgzf_streambuf(istream_reference istream_);
-	
-	~basic_unbgzf_streambuf();
+    static const size_t MAX_PUTBACK = 4;
 
-    int_type underflow();
+    struct Serializer
+    {
+        istream_reference istream;
+        Mutex lock;
+        unsigned waitForKey;
+        unsigned nextKey;
+        bool stop;
 
+        Serializer(istream_reference istream) :
+            istream(istream),
+            lock(false),
+            stop(false)
+        {}
+    };
+
+    Serializer serializer;
+
+    struct BgzfThreadContext
+    {
+        typedef std::vector<byte_type, byte_allocator_type> byte_vector_type;
+
+        struct BgzfDecompressor
+        {
+            BgzfThreadContext *threadCtx;
+
+            void operator()()
+            {
+                size_t tailLen;
+                while (true)
+                {
+                    ScopedLock<Mutex> scopedLock(threadCtx->serializer->lock);
+
+                    if (threadCtx->serializer->stop)
+                        return;
+
+                    if (threadCtx->serializer->waitForKey == threadCtx->waitForKey)
+                    {
+                        // read header
+                        threadCtx->serializer->istream.read(
+                            (char*)&(threadCtx->inputBuffer[0]),
+                            BGZF_BLOCK_HEADER_LENGTH);
+
+                        // check header
+                        if (!threadCtx->serializer->istream.good() || !_bgzfCheckHeader(&(threadCtx->inputBuffer[0])))
+                        {
+                            threadCtx->serializer->stop = true;
+                            return;
+                        }
+
+                        // extract length of compressed data
+                        tailLen = _bgzfUnpack16(&(threadCtx->inputBuffer[16])) + 1u - BGZF_BLOCK_HEADER_LENGTH;
+
+                        // read compressed data and tail
+                        threadCtx->serializer->istream.read(
+                            (char*)&(threadCtx->inputBuffer[BGZF_BLOCK_HEADER_LENGTH]),
+                            tailLen);
+
+                        if (!threadCtx->serializer->istream.good())
+                        {
+                            threadCtx->serializer->stop = true;
+                            return;
+                        }
+
+                        threadCtx->serializer->waitForKey = threadCtx->waitForKey + 1;
+                        break;
+                    }
+                }
+
+                // decompress block
+                threadCtx->size = _decompressBlock(
+                    &threadCtx->buffer[MAX_PUTBACK], capacity(threadCtx->buffer),
+                    &threadCtx->inputBuffer[0], BGZF_BLOCK_HEADER_LENGTH + tailLen, threadCtx->ctx);
+            }
+        };
+
+        byte_vector_type                inputBuffer;
+        char_vector_type                buffer;
+        size_t                          size;
+        CompressionContext<BgzfFile>    ctx;
+        Thread<BgzfDecompressor>        decompressor;
+
+        Serializer *serializer;
+        unsigned waitForKey;
+
+        BgzfThreadContext():
+            inputBuffer(BGZF_MAX_BLOCK_SIZE, 0),
+            buffer(MAX_PUTBACK + BGZF_MAX_BLOCK_SIZE / sizeof(char_type), 0)
+        {}
+    };
+
+    BgzfThreadContext   *threadCtx;
+    BgzfThreadContext   *ctx;
+    size_t              nextThread;
+    size_t              nextRunThread;
+    size_t              threads;
+    char_vector_type    putbackBuffer;
+
+    /** Construct a unzip stream
+    * More info on the following parameters can be found in the bgzf documentation.
+    */
+    basic_unbgzf_streambuf(istream_reference istream_,
+                           size_t threads = 4) :
+		serializer(istream_),
+        nextThread(0),
+        nextRunThread(0),
+        threads(threads),
+        putbackBuffer(MAX_PUTBACK)
+    {
+        serializer.waitForKey = 0;
+        serializer.nextKey = 0;
+        threadCtx = new BgzfThreadContext[threads];
+        for (unsigned i = 0; i < threads; ++i)
+        {
+            threadCtx[i].serializer = &serializer;
+            threadCtx[i].decompressor.worker.threadCtx = &threadCtx[i];
+        }
+        ctx = &threadCtx[0];
+		this->setp(&(ctx->buffer[0]), &(ctx->buffer[ctx->buffer.size() - 1]));
+    }
+
+	~basic_unbgzf_streambuf()
+    {
+        delete[] threadCtx;
+    }
+
+    int_type underflow()
+    {
+        if (this->gptr() && this->gptr() < this->egptr())
+            return *this->gptr();
+
+        size_t putback = this->gptr() - this->eback();
+        if (putback > MAX_PUTBACK)
+            putback = MAX_PUTBACK;
+
+        // save at most MAX_PUTBACK characters from previous page to putback buffer
+        if (putback != 0)
+            std::copy(
+                this->gptr() - putback,
+                this->gptr(),
+                &putbackBuffer[0]);
+
+        ctx = &threadCtx[nextThread];
+
+        do {
+            threadCtx[nextRunThread].size = 0;
+            threadCtx[nextRunThread].waitForKey = serializer.nextKey++;
+            run(threadCtx[nextRunThread].decompressor);
+            nextRunThread = (nextRunThread + 1) % threads;
+        } while (nextRunThread != nextThread);
+
+        nextThread = (nextThread + 1) % threads;
+
+        // restore putback buffer
+        if (putback != 0)
+            std::copy(
+                &putbackBuffer[0],
+                &putbackBuffer[putback],
+                &ctx->buffer[MAX_PUTBACK - putback]);
+
+        waitFor(ctx->decompressor);
+
+        if (ctx->size == 0) // EOF
+           return EOF;
+
+        // reset buffer pointers
+        this->setg( 
+              &ctx->buffer[MAX_PUTBACK - putback],      // beginning of putback area
+              &ctx->buffer[MAX_PUTBACK],                // read position
+              &ctx->buffer[MAX_PUTBACK + ctx->size]);   // end of buffer
+
+        // return next character
+        return *this->gptr();
+    }
 
 	/// returns the compressed input istream
-	istream_reference get_istream()	{	return m_istream;};
-	/// returns the bgzf stream structure
-	z_stream& get_bgzf_stream()		{	return m_bgzf_stream;};
-	/// returns the latest bgzf error state
-	int get_zerr() const					{	return m_err;};
-	/// returns the crc of the uncompressed data so far 
-	long get_crc() const					{	return m_crc;};
-	/// returns the number of uncompressed bytes
-	long get_out_size() const				{	return m_bgzf_stream.total_out;};
-	/// returns the number of read compressed bytes
-	long get_in_size() const				{	return m_bgzf_stream.total_in;};
-private:
-	void put_back_from_bgzf_stream();
-	std::streamsize unbgzf_from_stream( char_type*, std::streamsize);
-
-	size_t fill_input_buffer();
-
-	istream_reference m_istream;
-	z_stream m_bgzf_stream;
-    int m_err;
-	byte_vector_type m_input_buffer;
-	char_vector_type m_buffer; 
-	long m_crc;
+	istream_reference get_istream()	{ return serializer.istream;};
 };
 
 /*! \brief Base class for zip ostreams
@@ -491,10 +627,7 @@ public:
 		istream_type(this->rdbuf()),
 		m_is_gzip(false),
 		m_gbgzf_data_size(0)
-	{
- 	      if (this->rdbuf()->get_zerr()==Z_OK)
-			  check_header();
-	};
+	{};
 
 	/// returns true if it is a gzip file
 	bool is_gzip() const				{	return m_is_gzip;};
