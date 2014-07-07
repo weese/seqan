@@ -79,10 +79,12 @@ public:
         Mutex lock;
         unsigned waitForKey;
         unsigned nextKey;
+        bool stop;
 
         Concatter(ostream_reference ostream) :
             ostream(ostream),
-            lock(false)
+            lock(false),
+            stop(false)
         {}
     };
 
@@ -110,6 +112,11 @@ public:
                         threadCtx->concatter->ostream.write(
                             (const char_type*) &(threadCtx->outputBuffer[0]),
                             outputLen);
+                        if (!threadCtx->concatter->ostream.good())
+                        {
+                            threadCtx->concatter->stop = false;
+                            return;
+                        }
                         threadCtx->concatter->waitForKey = threadCtx->waitForKey + 1;
                         break;
                     }
@@ -184,6 +191,7 @@ public:
         thread = (thread + 1) % threads;
         ctx = &threadCtx[thread];
         waitFor(ctx->compressor);
+        return !concatter.stop;
     }
 
     int_type overflow(int_type c)
